@@ -139,6 +139,8 @@ end
 
 -- Our config menus need to be forward declared so they can be moved between cleanly.
 local configShowEnableDisableFeatureMenu
+local configShowEnableDisableEventsMenu
+local configShowConfigTimerMenu
 local configShowMainMenu
 
 -- Configuration Menu: Enable/Disable Features
@@ -166,6 +168,64 @@ configShowEnableDisableFeatureMenu = function(e)
 	end)
 end
 
+configShowEnableDisableEventsMenu = function(e)
+	-- Was this function called as an event?
+	if (e ~= nil) then
+		if (e.button == 0) then -- Every X Minutes
+			config.saveOnTimer = not config.saveOnTimer
+		elseif (e.button == 1) then -- On Combat Start
+			config.saveOnCombatStart = not config.saveOnCombatStart
+		elseif (e.button == 2) then -- On Combat End
+			config.saveOnCombatEnd = not config.saveOnCombatEnd
+		elseif (e.button == 3) then -- On Cell Change
+			config.saveOnCellChange = not config.saveOnCellChange
+		else -- Unhandled button. Go back to the main menu.
+			configShowMainMenu()
+			return;
+		end
+	end
+
+	-- Show menu. Delay it by one frame.
+	timer.delayOneFrame(function()
+		tes3.messageBox({
+			message = "SSS Configuration Menu\nEnable/Disable Autosave Events",
+			buttons = {
+				"Every " .. config.timeBetweenAutoSaves .. " Minutes: " .. (config.saveOnTimer and "Enabled" or "Disabled"),
+				"Combat Start: " .. (config.saveOnCombatStart and "Enabled" or "Disabled"),
+				"Combat End: " .. (config.saveOnCombatEnd and "Enabled" or "Disabled"),
+				"Cell Change: " .. (config.saveOnCellChange and "Enabled" or "Disabled"),
+				"Back"
+			},
+			callback = configShowEnableDisableEventsMenu
+		})
+	end)
+end
+
+configShowConfigTimerMenu = function(e)
+	-- Was this function called as an event?
+	if (e ~= nil) then
+		if (e.button == 0) then -- -1 minute
+			if (config.timeBetweenAutoSaves > 1) then
+				config.timeBetweenAutoSaves = config.timeBetweenAutoSaves - 1
+			end
+		elseif (e.button == 2) then -- +1 minute
+			config.timeBetweenAutoSaves = config.timeBetweenAutoSaves + 1
+		else -- Unhandled button. Go back to the main menu.
+			configShowMainMenu()
+			return;
+		end
+	end
+
+	-- Show menu. Delay it by one frame.
+	timer.delayOneFrame(function()
+		tes3.messageBox({
+			message = "Time between saves: " .. config.timeBetweenAutoSaves .. "m",
+			buttons = { "-", "Back", "+" },
+			callback = configShowConfigTimerMenu
+		})
+	end)
+end
+
 -- Configuration Menu: Main Menu
 configShowMainMenu = function(e)
 	if (e ~= nil) then
@@ -173,9 +233,11 @@ configShowMainMenu = function(e)
 			configShowEnableDisableFeatureMenu()
 			return
 		elseif (e.button == 1) then -- Enable/Disable Autosave Events
-			
+			configShowEnableDisableEventsMenu()
+			return
 		elseif (e.button == 2) then -- Configure Time Between Saves
-			
+			configShowConfigTimerMenu()
+			return
 		else -- Unhandled button. Close menu.
 			return
 		end
