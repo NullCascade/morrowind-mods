@@ -21,7 +21,7 @@ local lfs = require("lfs")
 -- Default configuration values.
 local defaultConfig = {
 	timeBetweenAutoSaves = 10,
-	minimumTimeBetweenAutoSaves = 5,
+	minimumTimeBetweenAutoSaves = 1,
 	maxSaveCount = 10,
 	loadLatestSave = true,
 	saveOnTimer = true,
@@ -32,6 +32,9 @@ local defaultConfig = {
 
 -- Configuration table.
 local config = table.copy(defaultConfig)
+
+-- The last timestamp that an autosave was done on. We use this to prevent saves from happening too frequently.
+local lastAutoSaveTimestamp = 0
 
 -- Our config menus need to be forward declared so they can be moved between cleanly.
 local configShowEnableDisableFeatureMenu
@@ -136,6 +139,9 @@ loadConfig()
 -- Saves the configuration to the local file.
 local function saveConfig()
 	json.savefile("nc_sss_config", config)
+	
+	print("[nc-sss] Saved configuration:")
+	print(json.encode(config, { indent = true }))
 end
 
 -- Autosave function. Executes when autosaveTimer iterates, which should be every
@@ -229,6 +235,15 @@ local function save(e)
 		e.filename = "sss_q_" .. os.time(os.date("!*t"))
 		e.name = string.format("Quicksave (%s)", os.date("%x %X"))
 	elseif (e.filename == "autosave") then
+		-- Ensure that we aren't autosaving too often.
+		local now = os.clock()
+		if (now - lastAutoSaveTimestamp < config.minimumTimeBetweenAutoSaves * 60) then
+			print(string.format("[nc-sss] Prevented autosave, it has only been %d seconds since the last save.", now - lastAutoSaveTimestamp))
+			return false
+		end
+		lastAutoSaveTimestamp = now
+
+		-- Configure our save name/file.
 		e.filename = "sss_a_" .. os.time(os.date("!*t"))
 		e.name = string.format("Autosave (%s)", os.date("%x %X"))
 	end
