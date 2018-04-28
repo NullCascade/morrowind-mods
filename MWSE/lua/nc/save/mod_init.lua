@@ -1,6 +1,6 @@
 
 --[[
-	Mod Initialization: Sensational Save System
+	Mod Initialization: MWSE Sophisticated Save System
 	Author: NullCascade
 
 	This mod is responsible for changing how saves are done in Morrowind.
@@ -179,7 +179,7 @@ end
 -- and is about to show the main menu. The only thing we want to do here is let the
 -- log know that we're up and going.
 local function initialized(e)
-	print("[nc-sss] Initialized Super Save System v1.0.0.")
+	print("[nc-sss] Initialized MWSE Sophisticated Save System v1.0.0.")
 end
 event.register("initialized", initialized)
 
