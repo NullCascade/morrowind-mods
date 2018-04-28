@@ -233,6 +233,18 @@ local function combatStopped(e)
 end
 event.register("combatStopped", combatStopped)
 
+local function cellChanged(e)
+	-- Do we care about this save event?
+	if (not config.saveOnCellChange) then
+		return
+	end
+
+	-- If we've no reason to ignore the event, make an autosave.
+	print("[nc-sss] Creating autosave for cell change.")
+	tes3.saveGame({ file = "autosave" })
+end
+event.register("cellChanged", cellChanged)
+
 -- Load event. Called prior to the game actually being loaded. The load save name
 -- can be overridden. We will do this when loading quick saves
 local function load(e)
