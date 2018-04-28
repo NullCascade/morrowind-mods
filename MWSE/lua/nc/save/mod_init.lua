@@ -183,6 +183,56 @@ local function initialized(e)
 end
 event.register("initialized", initialized)
 
+-- Check for combat start save event. This event can be a bit tricky. We need to see
+-- if it is the player entering combat, and if it is, we want to check their inCombat
+-- flag to see if they are newly starting combat.
+local function combatStart(e)
+	-- Do we care about this save event?
+	if (not config.saveOnCombatStart) then
+		return
+	end
+
+	-- The event variables are mobile actors, not references. We only care about the
+	-- player.
+	local mobilePlayer = tes3.getMobilePlayer()
+	if (e.actor ~= mobilePlayer) then
+		return
+	end
+
+	-- If the combat is starting and the player isn't already in combat, this is a
+	-- new combat session and we can care to make a save.
+	if (e.actor.inCombat) then
+		return
+	end
+
+	-- If we've no reason to ignore the event, make an autosave.
+	print("[nc-sss] Creating autosave for combat start.")
+	tes3.saveGame({ file = "autosave" })
+end
+event.register("combatStart", combatStart)
+
+-- Check for combat stop save event. This also has some gotchas to it. The player
+-- combat stop event isn't reliable, but NPCs are mostly reliable. So we'll check to
+-- see if the player is out of combat when this event ends and cause a save.
+local function combatStopped(e)
+	-- Do we care about this save event?
+	if (not config.saveOnCombatEnd) then
+		return
+	end
+
+	-- The event variables are mobile actors, not references. We only care about
+	-- when the player is not in combat.
+	local mobilePlayer = tes3.getMobilePlayer()
+	if (mobilePlayer.inCombat) then
+		return
+	end
+
+	-- If we've no reason to ignore the event, make an autosave.
+	print("[nc-sss] Creating autosave for combat end.")
+	tes3.saveGame({ file = "autosave" })
+end
+event.register("combatStopped", combatStopped)
+
 -- Load event. Called prior to the game actually being loaded. The load save name
 -- can be overridden. We will do this when loading quick saves
 local function load(e)
