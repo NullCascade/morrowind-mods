@@ -35,8 +35,9 @@ local config = table.copy(defaultConfig)
 
 -- Our config menus need to be forward declared so they can be moved between cleanly.
 local configShowEnableDisableFeatureMenu
-local configShowEnableDisableEventsMenu
+local configShowConfigSaveCountMenu
 local configShowConfigTimerMenu
+local configShowConfigMinimumTimerMenu
 local configShowMainMenu
 
 -- Generates a save name with a keyed meaning. These meanings are:
@@ -109,40 +110,27 @@ local function clearOldSaves()
 end
 
 -- Loads the configuration file for use.
-local function loadConfig(useSaveData)
+local function loadConfig()
 	-- Clear any current config values.
 	config = {}
 
 	-- First, load the defaults.
 	table.copy(defaultConfig, config)
 
-	-- Then load any other values from the save.
-	if (useSaveData == true) then
-		local data = tes3.getPlayerRef().data
-		if (data.nc_sss ~= nil and data.nc_sss.config ~= nil) then
-			for k, v in pairs(data.nc_sss.config) do
-				config[k] = v
-			end
-		end
+	-- Then load any other values from the config file.
+	local configJson = json.loadfile("nc_sss_config")
+	if (configJson ~= nil) then
+		table.copy(configJson, config)
 	end
 
-	print("[nc-sss] Reloaded configuration.")
+	print("[nc-sss] Loaded configuration:")
+	print(json.encode(config, { indent = true }))
 end
 loadConfig()
 
--- Saves the configuration to the player's attached data.
+-- Saves the configuration to the local file.
 local function saveConfig()
-	-- Go through the config, and the default config. Save any values that do not
-	-- match to the player's data.
-	local data = tes3.getPlayerRef().data
-
-	-- Create any modified values on the save file.
-	data.nc_sss = { config = {} }
-	for k, v in pairs(config) do
-		if (v ~= defaultConfig[k]) then
-			data.nc_sss.config[k] = v
-		end
-	end
+	json.savefile("nc_sss_config", config)
 end
 
 -- Autosave function. Executes when autosaveTimer iterates, which should be every
@@ -209,9 +197,6 @@ event.register("load", load)
 -- Game has finished loading. We'll use the opportunity to reload the configuration
 -- so it is safely bound to the current save.
 local function loaded(e)
-	-- Reload configuration.
-	loadConfig()
-
 	-- (Re)create autosave timer.
 	createAutosaveTimer()
 end
@@ -243,9 +228,6 @@ local function save(e)
 		e.name = string.format("Autosave (%s)", os.date("%x %X"))
 	end
 
-	-- Update the configuration on the player.
-	saveConfig()
-
 	-- Show the save.
 	print(string.format("[nc-sss] Creating save: %s -> %s", e.name, e.filename))
 end
@@ -271,6 +253,14 @@ configShowEnableDisableFeatureMenu = function(e)
 	if (e ~= nil) then
 		if (e.button == 0) then -- Unrestricted Quick Load
 			config.loadLatestSave = not config.loadLatestSave
+		elseif (e.button == 1) then -- Every X Minutes
+			config.saveOnTimer = not config.saveOnTimer
+		elseif (e.button == 2) then -- On Combat Start
+			config.saveOnCombatStart = not config.saveOnCombatStart
+		elseif (e.button == 3) then -- On Combat End
+			config.saveOnCombatEnd = not config.saveOnCombatEnd
+		-- elseif (e.button == 4) then -- On Cell Change
+		-- 	config.saveOnCellChange = not config.saveOnCellChange
 		else -- Unhandled button. Go back to the main menu.
 			configShowMainMenu()
 			return;
@@ -283,6 +273,10 @@ configShowEnableDisableFeatureMenu = function(e)
 			message = "SSS Configuration Menu\nEnable/Disable Features",
 			buttons = {
 				"Unrestricted Quick Load: " .. (config.loadLatestSave and "Enabled" or "Disabled"),
+				"Autosave Every " .. config.timeBetweenAutoSaves .. " Minutes: " .. (config.saveOnTimer and "Enabled" or "Disabled"),
+				"Autosave on Combat Start: " .. (config.saveOnCombatStart and "Enabled" or "Disabled"),
+				"Autosave on Combat End: " .. (config.saveOnCombatEnd and "Enabled" or "Disabled"),
+				-- "Autosave on Cell Change: " .. (config.saveOnCellChange and "Enabled" or "Disabled"),
 				"Back"
 			},
 			callback = configShowEnableDisableFeatureMenu
@@ -290,17 +284,15 @@ configShowEnableDisableFeatureMenu = function(e)
 	end)
 end
 
-configShowEnableDisableEventsMenu = function(e)
+configShowConfigSaveCountMenu = function(e)
 	-- Was this function called as an event?
 	if (e ~= nil) then
-		if (e.button == 0) then -- Every X Minutes
-			config.saveOnTimer = not config.saveOnTimer
-		-- elseif (e.button == 1) then -- On Combat Start
-		-- 	config.saveOnCombatStart = not config.saveOnCombatStart
-		-- elseif (e.button == 2) then -- On Combat End
-		-- 	config.saveOnCombatEnd = not config.saveOnCombatEnd
-		-- elseif (e.button == 3) then -- On Cell Change
-		-- 	config.saveOnCellChange = not config.saveOnCellChange
+		if (e.button == 0) then -- -1 Save
+			if (config.maxSaveCount >= 0) then
+				config.maxSaveCount = config.maxSaveCount - 1
+			end
+		elseif (e.button == 2) then -- +1 minute
+			config.maxSaveCount = config.maxSaveCount + 1
 		else -- Unhandled button. Go back to the main menu.
 			configShowMainMenu()
 			return;
@@ -310,15 +302,9 @@ configShowEnableDisableEventsMenu = function(e)
 	-- Show menu. Delay it by one frame.
 	timer.delayOneFrame(function()
 		tes3.messageBox({
-			message = "SSS Configuration Menu\nEnable/Disable Autosave Events",
-			buttons = {
-				"Every " .. config.timeBetweenAutoSaves .. " Minutes: " .. (config.saveOnTimer and "Enabled" or "Disabled"),
-				-- "Combat Start: " .. (config.saveOnCombatStart and "Enabled" or "Disabled"),
-				-- "Combat End: " .. (config.saveOnCombatEnd and "Enabled" or "Disabled"),
-				-- "Cell Change: " .. (config.saveOnCellChange and "Enabled" or "Disabled"),
-				"Back"
-			},
-			callback = configShowEnableDisableEventsMenu
+			message = "Number of saves to keep: " .. config.maxSaveCount,
+			buttons = { "-", "Back", "+" },
+			callback = configShowConfigSaveCountMenu
 		})
 	end)
 end
@@ -350,19 +336,50 @@ configShowConfigTimerMenu = function(e)
 	end)
 end
 
+configShowConfigMinimumTimerMenu = function(e)
+	-- Was this function called as an event?
+	if (e ~= nil) then
+		if (e.button == 0) then -- -1 minute
+			if (config.minimumTimeBetweenAutoSaves > 1) then
+				config.minimumTimeBetweenAutoSaves = config.minimumTimeBetweenAutoSaves - 1
+				resetAutosaveTimer()
+			end
+		elseif (e.button == 2) then -- +1 minute
+			config.minimumTimeBetweenAutoSaves = config.minimumTimeBetweenAutoSaves + 1
+			resetAutosaveTimer()
+		else -- Unhandled button. Go back to the main menu.
+			configShowMainMenu()
+			return;
+		end
+	end
+
+	-- Show menu. Delay it by one frame.
+	timer.delayOneFrame(function()
+		tes3.messageBox({
+			message = "Minimum time between saves: " .. config.minimumTimeBetweenAutoSaves .. "m",
+			buttons = { "-", "Back", "+" },
+			callback = configShowConfigMinimumTimerMenu
+		})
+	end)
+end
+
 -- Configuration Menu: Main Menu
 configShowMainMenu = function(e)
 	if (e ~= nil) then
 		if (e.button == 0) then -- Enable/Disable Features
 			configShowEnableDisableFeatureMenu()
 			return
-		elseif (e.button == 1) then -- Enable/Disable Autosave Events
-			configShowEnableDisableEventsMenu()
+		elseif (e.button == 1) then -- Configure Time Between Saves
+			configShowConfigSaveCountMenu()
 			return
 		elseif (e.button == 2) then -- Configure Time Between Saves
 			configShowConfigTimerMenu()
 			return
-		else -- Unhandled button. Close menu.
+		elseif (e.button == 3) then -- Configure Time Between Saves
+			configShowConfigMinimumTimerMenu()
+			return
+		else -- Unhandled button. Close menu. Also save the configuration.
+			saveConfig()
 			return
 		end
 	end
@@ -370,11 +387,12 @@ configShowMainMenu = function(e)
 	-- Show menu. Delay it by one frame.
 	timer.delayOneFrame(function()
 		tes3.messageBox({
-			message = "SSS Configuration Menu\nVersion 1.0.0",
+			message = "SSS Configuration Menu",
 			buttons = {
-				"Enable/Disable Features",
-				"Enable/Disable Autosave Events",
-				"Configure Time Between Saves",
+				"Features & Events",
+				"Save Count",
+				"Time Between Saves",
+				"Minimum Time Between Saves",
 				"Close Menu"
 			},
 			callback = configShowMainMenu
