@@ -82,6 +82,11 @@ end
 
 -- Clear out any old saves beyond config.maxSaveCount.
 local function clearOldSaves()
+	-- If we have a value of 0, don't clear old saves.
+	if (config.maxSaveCount == 0) then
+		return;
+	end
+
 	-- Gather a list of all the managed saves.
 	local saves = {}
 	local saveTypes = {}
@@ -288,7 +293,7 @@ configShowConfigSaveCountMenu = function(e)
 	-- Was this function called as an event?
 	if (e ~= nil) then
 		if (e.button == 0) then -- -1 Save
-			if (config.maxSaveCount >= 0) then
+			if (config.maxSaveCount > 0) then
 				config.maxSaveCount = config.maxSaveCount - 1
 			end
 		elseif (e.button == 2) then -- +1 minute
@@ -302,7 +307,7 @@ configShowConfigSaveCountMenu = function(e)
 	-- Show menu. Delay it by one frame.
 	timer.delayOneFrame(function()
 		tes3.messageBox({
-			message = "Number of saves to keep: " .. config.maxSaveCount,
+			message = "Number of saves to keep: " .. (config.maxSaveCount ~= 0 and config.maxSaveCount or "All"),
 			buttons = { "-", "Back", "+" },
 			callback = configShowConfigSaveCountMenu
 		})
