@@ -5,7 +5,7 @@
 =====================================================================================
 
  INDEX:
- 
+
  -> Requirements
  -> About this Mod
  -> Installation
@@ -18,7 +18,7 @@
 =====================================================================================
  REQUIREMENTS:
 =====================================================================================
- 
+
  This is a MWSE-Lua mod, and requires a valid installation of MWSE 2.1 or later.
 
     * Morrowind, Tribunal, and Bloodmoon.
@@ -41,7 +41,7 @@
       quicksave) instead of the quicksave. This can be turned off in the config, in
       which case the latest quicksave is loaded instead.
     * Allows a hard save to be performed, creating a brand new save in a slot that
-      the doesn't count against the rotating slot system. This save will hav a nane
+      the doesn't count against the rotating slot system. This save will have a name
       that includes the timestamp of the save. To create a hard save, hold Alt and
       press the QuickSave key.
     * Autosaves are expanded to happen on other events. These events can be turned
