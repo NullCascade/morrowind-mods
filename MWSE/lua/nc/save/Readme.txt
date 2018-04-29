@@ -7,12 +7,12 @@
  INDEX:
  
  -> Requirements
- -> About this mod
+ -> About this Mod
  -> Installation
- -> Playing this plugin
+ -> Playing this Plugin
  -> Known Bugs & Issues
  -> Version History
- -> Incompatibilities & Save game warnings
+ -> Incompatibilities & Save Game Warnings
  -> Credits & Usage
 
 
