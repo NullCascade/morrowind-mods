@@ -341,8 +341,8 @@ configShowEnableDisableFeatureMenu = function(e)
 			config.saveOnCombatStart = not config.saveOnCombatStart
 		elseif (e.button == 3) then -- On Combat End
 			config.saveOnCombatEnd = not config.saveOnCombatEnd
-		-- elseif (e.button == 4) then -- On Cell Change
-		-- 	config.saveOnCellChange = not config.saveOnCellChange
+		elseif (e.button == 4) then -- On Cell Change
+			config.saveOnCellChange = not config.saveOnCellChange
 		else -- Unhandled button. Go back to the main menu.
 			configShowMainMenu()
 			return;
@@ -358,7 +358,7 @@ configShowEnableDisableFeatureMenu = function(e)
 				"Autosave Every " .. config.timeBetweenAutoSaves .. " Minutes: " .. (config.saveOnTimer and "Enabled" or "Disabled"),
 				"Autosave on Combat Start: " .. (config.saveOnCombatStart and "Enabled" or "Disabled"),
 				"Autosave on Combat End: " .. (config.saveOnCombatEnd and "Enabled" or "Disabled"),
-				-- "Autosave on Cell Change: " .. (config.saveOnCellChange and "Enabled" or "Disabled"),
+				"Autosave on Cell Change: " .. (config.saveOnCellChange and "Enabled" or "Disabled"),
 				"Back"
 			},
 			callback = configShowEnableDisableFeatureMenu
