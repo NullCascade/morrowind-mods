@@ -19,7 +19,7 @@ function this.onEquip(e)
 		return
 	end
 
-	-- Do we have more than 4 alchemy items imbibed already?
+	-- Are we waiting for a potion cooldown?
 	if (potionActive) then
 		tes3.messageBox({ message = "You must wait 5 seconds between drinking potions." })
 		return false
