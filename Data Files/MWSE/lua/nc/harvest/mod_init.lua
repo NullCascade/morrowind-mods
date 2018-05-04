@@ -15,12 +15,14 @@ function onActivate(e)
 	local target = e.target
 	local container = target.object
 	
-	-- Make sure that we're looking at an unscripted, orgnic container.
+	-- Make sure that we're looking at an unowned, unscripted, organic container.
 	if (container.objectType ~= tes3.objectType.container) then
 		return
 	elseif (container.organic ~= true) then
 		return
 	elseif (container.script ~= nil) then
+		return
+	elseif (tes3.getOwner(target) ~= nil) then
 		return
 	end
 
@@ -50,6 +52,9 @@ function onActivate(e)
 		-- Add the item to the player.
 		countHarvested = countHarvested + stack.count
 		mwscript.addItem({ reference = playerRef, item = item.id, count = stack.count })
+
+		-- Give some feedback to the user by playing the pickup sound and showing a message box.
+		tes3.playItemPickupSound({ item = item.id, pickup = true })
 		tes3.messageBox({ message = "Harvested " .. stack.count .. " " .. item.name .. (stack.count > 1 and "s" or "") })
 	end
 
