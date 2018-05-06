@@ -8,6 +8,12 @@ Provides a configurable restriction on the amount of potions the player can drin
 
 * Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45624)
 
+## Expeditious Exit
+
+Have problems crashing when exiting? Lose focus of your cursor? This might help!
+
+* Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45634)
+
 ## Happy Harvesting
 
 This mod provides a very simple, generic-case auto-harvesting for organic containers in Morrowind.
