@@ -29,12 +29,12 @@
  ABOUT THIS MOD:
 =====================================================================================
 
-	This mod provides a very simple, generic-case auto-harvesting for organic
-  containers in Morrowind. There are no graphic replacements. There are no fancy
-	effects. It behaves just like the vanilla interaction with ingredients, save for
-	that it auto-loots the inventory instead of opening the interface. It applies
-	to any organic, unscripted container in the game. This makes it compatible with
-	any graphic herbalism mod, it will just harvest anything that those mods miss.
+ This mod provides a very simple, generic-case auto-harvesting for organic
+ containers in Morrowind. There are no graphic replacements. There are no fancy
+ effects. It behaves just like the vanilla interaction with ingredients, save for
+ that it auto-loots the inventory instead of opening the interface. It applies
+ to any organic, unscripted container in the game. This makes it compatible with
+ any graphic herbalism mod, it will just harvest anything that those mods miss.
 
 =====================================================================================
  INSTALLATION:
