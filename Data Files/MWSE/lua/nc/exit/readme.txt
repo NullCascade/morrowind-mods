@@ -29,18 +29,19 @@
  ABOUT THIS MOD:
 =====================================================================================
 
-	This mod is for people who seem to have issues crashing or losing mouse control on
-	exit. By hijacking the exit buttons, this mod will force the game to exit.
+ This mod is for people who seem to have issues crashing or losing mouse control on
+ exit. By hijacking the exit buttons, this mod will force the game to exit.
 
-	Doing it this way isn't wonderful! In a perfect world we wouldn't do it this way,
-  but if it helps you, great.
+ Doing it this way isn't wonderful! In a perfect world we wouldn't do it this way,
+ but if it helps you, great.
 
 =====================================================================================
  INSTALLATION:
 =====================================================================================
 
  Extract the archive into your Morrowind installation directory. The mod should
- contain the following file:
+ contain the following files:
+    .\Data Files\MWSE\nc_exit_config.json
     .\Data Files\MWSE\lua\nc\exit\mod_init.lua
 
 =====================================================================================
@@ -49,6 +50,9 @@
 
  There is no esp file to activate. Simply install the MWSE 2.1 and this mod, and
  load up an old or new game.
+
+ If you want the original yes/no confirmation box before close, navigate to the
+ configuration file and set messageBox to true.
 
 =====================================================================================
  KNOWN ISSUES OR BUGS:
@@ -60,6 +64,10 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.1.0 [2018-05-07]:
+    * Added a config file. By setting messageBox to true, a message box will be
+      displayed prior to close, like with the vanilla exit.
 
  1.0.0 [2018-05-04]:
     * Initial release.
