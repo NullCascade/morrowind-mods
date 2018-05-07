@@ -18,7 +18,7 @@ Have problems crashing when exiting? Lose focus of your cursor? This might help!
 
 This mod provides a very simple, generic-case auto-harvesting for organic containers in Morrowind.
 
-* Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45608)
+* Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45627)
 
 ## Sophisticated Save System
 
