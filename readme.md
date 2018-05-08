@@ -8,6 +8,12 @@ Provides a configurable restriction on the amount of potions the player can drin
 
 * Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45624)
 
+## Discord Rich Presence
+
+Display information about your current game in Discord.
+
+* Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45550)
+
 ## Expeditious Exit
 
 Have problems crashing when exiting? Lose focus of your cursor? This might help!
