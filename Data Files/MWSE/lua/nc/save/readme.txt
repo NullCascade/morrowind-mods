@@ -1,7 +1,7 @@
 =====================================================================================
                               Sophisticated Save System                              
                                  Author: NullCascade                                 
-                                    Version 1.0.0                                    
+                                    Version 1.0.1                                    
 =====================================================================================
 
  INDEX:
@@ -81,6 +81,12 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.0.1 [2018-05-11]:
+    * Fixed issue where autosaves could occur during loading a saved game.
+    * Prevent issue with newer MWSE 2.1 builds that caused hard save functionality
+      to crash.
+    * Minor changes to tighten up the configuration menu.
 
  1.0.0 [2018-05-01]:
     * Initial release.
