@@ -350,20 +350,18 @@ configShowEnableDisableFeatureMenu = function(e)
 	end
 
 	-- Show menu. Delay it by one frame.
-	timer.delayOneFrame(function()
-		tes3.messageBox({
-			message = "SSS Configuration Menu\nEnable/Disable Features",
-			buttons = {
-				"Unrestricted Quick Load: " .. (config.loadLatestSave and "Enabled" or "Disabled"),
-				"Autosave Every " .. config.timeBetweenAutoSaves .. " Minutes: " .. (config.saveOnTimer and "Enabled" or "Disabled"),
-				"Autosave on Combat Start: " .. (config.saveOnCombatStart and "Enabled" or "Disabled"),
-				"Autosave on Combat End: " .. (config.saveOnCombatEnd and "Enabled" or "Disabled"),
-				"Autosave on Cell Change: " .. (config.saveOnCellChange and "Enabled" or "Disabled"),
-				"Back"
-			},
-			callback = configShowEnableDisableFeatureMenu
-		})
-	end)
+	tes3.messageBox({
+		message = "SSS Configuration Menu\nEnable/Disable Features",
+		buttons = {
+			"Unrestricted Quick Load: " .. (config.loadLatestSave and "Enabled" or "Disabled"),
+			"Autosave Every " .. config.timeBetweenAutoSaves .. " Minutes: " .. (config.saveOnTimer and "Enabled" or "Disabled"),
+			"Autosave on Combat Start: " .. (config.saveOnCombatStart and "Enabled" or "Disabled"),
+			"Autosave on Combat End: " .. (config.saveOnCombatEnd and "Enabled" or "Disabled"),
+			"Autosave on Cell Change: " .. (config.saveOnCellChange and "Enabled" or "Disabled"),
+			"Back"
+		},
+		callback = configShowEnableDisableFeatureMenu
+	})
 end
 
 configShowConfigSaveCountMenu = function(e)
@@ -382,13 +380,11 @@ configShowConfigSaveCountMenu = function(e)
 	end
 
 	-- Show menu. Delay it by one frame.
-	timer.delayOneFrame(function()
-		tes3.messageBox({
-			message = "Number of saves to keep: " .. (config.maxSaveCount ~= 0 and config.maxSaveCount or "All"),
-			buttons = { "-", "Back", "+" },
-			callback = configShowConfigSaveCountMenu
-		})
-	end)
+	tes3.messageBox({
+		message = "Number of saves to keep: " .. (config.maxSaveCount ~= 0 and config.maxSaveCount or "All"),
+		buttons = { "-", "Back", "+" },
+		callback = configShowConfigSaveCountMenu
+	})
 end
 
 configShowConfigTimerMenu = function(e)
@@ -409,13 +405,11 @@ configShowConfigTimerMenu = function(e)
 	end
 
 	-- Show menu. Delay it by one frame.
-	timer.delayOneFrame(function()
-		tes3.messageBox({
-			message = "Time between saves: " .. config.timeBetweenAutoSaves .. "m",
-			buttons = { "-", "Back", "+" },
-			callback = configShowConfigTimerMenu
-		})
-	end)
+	tes3.messageBox({
+		message = "Time between saves: " .. config.timeBetweenAutoSaves .. "m",
+		buttons = { "-", "Back", "+" },
+		callback = configShowConfigTimerMenu
+	})
 end
 
 configShowConfigMinimumTimerMenu = function(e)
@@ -436,13 +430,11 @@ configShowConfigMinimumTimerMenu = function(e)
 	end
 
 	-- Show menu. Delay it by one frame.
-	timer.delayOneFrame(function()
-		tes3.messageBox({
-			message = "Minimum time between saves: " .. config.minimumTimeBetweenAutoSaves .. "m",
-			buttons = { "-", "Back", "+" },
-			callback = configShowConfigMinimumTimerMenu
-		})
-	end)
+	tes3.messageBox({
+		message = "Minimum time between saves: " .. config.minimumTimeBetweenAutoSaves .. "m",
+		buttons = { "-", "Back", "+" },
+		callback = configShowConfigMinimumTimerMenu
+	})
 end
 
 -- Configuration Menu: Main Menu
@@ -467,17 +459,15 @@ configShowMainMenu = function(e)
 	end
 
 	-- Show menu. Delay it by one frame.
-	timer.delayOneFrame(function()
-		tes3.messageBox({
-			message = "SSS Configuration Menu",
-			buttons = {
-				"Features & Events",
-				"Save Count",
-				"Time Between Saves",
-				"Minimum Time Between Saves",
-				"Close Menu"
-			},
-			callback = configShowMainMenu
-		})
-	end)
+	tes3.messageBox({
+		message = "SSS Configuration Menu",
+		buttons = {
+			"Features & Events",
+			"Save Count",
+			"Time Between Saves",
+			"Minimum Time Between Saves",
+			"Close Menu"
+		},
+		callback = configShowMainMenu
+	})
 end
