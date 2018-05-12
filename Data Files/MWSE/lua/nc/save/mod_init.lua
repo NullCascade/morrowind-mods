@@ -149,12 +149,16 @@ end
 -- minutes between saves in the configuration.
 local autosaveTimer = nil
 local autosavePasses = 0
+local blockAutosaves = true
 local function autosave()
-	if (config.saveOnTimer) then
-		autosavePasses = autosavePasses + 1
-		if (autosavePasses >= config.timeBetweenAutoSaves) then
-			tes3.saveGame({ file = "autosave" })
-		end
+	if (not config.saveOnTimer or blockAutosaves) then
+		return
+	end
+
+	-- Another minute has passed.
+	autosavePasses = autosavePasses + 1
+	if (autosavePasses >= config.timeBetweenAutoSaves) then
+		tes3.saveGame({ file = "autosave" })
 	end
 end
 
@@ -188,7 +192,7 @@ event.register("initialized", initialized)
 -- flag to see if they are newly starting combat.
 local function combatStart(e)
 	-- Do we care about this save event?
-	if (not config.saveOnCombatStart) then
+	if (not config.saveOnCombatStart or blockAutosaves) then
 		return
 	end
 
@@ -216,7 +220,7 @@ event.register("combatStart", combatStart)
 -- see if the player is out of combat when this event ends and cause a save.
 local function combatStopped(e)
 	-- Do we care about this save event?
-	if (not config.saveOnCombatEnd) then
+	if (not config.saveOnCombatEnd or blockAutosaves) then
 		return
 	end
 
@@ -233,9 +237,10 @@ local function combatStopped(e)
 end
 event.register("combatStopped", combatStopped)
 
+-- Check for cell change event.
 local function cellChanged(e)
 	-- Do we care about this save event?
-	if (not config.saveOnCellChange) then
+	if (not config.saveOnCellChange or blockAutosaves) then
 		return
 	end
 
@@ -264,6 +269,9 @@ local function load(e)
 
 	-- Show the currently loading save.
 	print("[nc-sss] Loading save: " .. e.filename)
+
+	-- Block autosaves from happening until our load has resolved.
+	blockAutosaves = true
 end
 event.register("load", load)
 
@@ -272,6 +280,9 @@ event.register("load", load)
 local function loaded(e)
 	-- (Re)create autosave timer.
 	createAutosaveTimer()
+
+	-- Unblock autosaves from happening.
+	blockAutosaves = false
 end
 event.register("loaded", loaded)
 
