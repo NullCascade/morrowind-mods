@@ -289,8 +289,8 @@ event.register("loaded", loaded)
 -- Save event. Called prior to the game saving. Here, we'll take advantage of quick-
 -- saves and autosaves, and change the save filename/name.
 local function save(e)
-	-- Are we holding the alt key when saving?
-	if (mwse.virtualKeyPressed(18)) then
+	-- Are we holding the alt key when quicksaving?
+	if (e.filename == "quiksave" and mwse.virtualKeyPressed(18)) then
 		-- If we're also holding shift, bring up config. Otherwise do a hard save.
 		if (mwse.virtualKeyPressed(160)) then
 			configShowMainMenu()
