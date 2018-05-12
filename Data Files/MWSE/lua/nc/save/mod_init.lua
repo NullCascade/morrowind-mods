@@ -311,7 +311,7 @@ local function save(e)
 		-- Ensure that we aren't autosaving too often.
 		local now = os.clock()
 		if (now - lastAutoSaveTimestamp < config.minimumTimeBetweenAutoSaves * 60) then
-			-- print(string.format("[nc-sss] Prevented autosave, it has only been %d seconds since the last save.", now - lastAutoSaveTimestamp))
+			print(string.format("[nc-sss] Prevented autosave, it has only been %d seconds since the last save.", now - lastAutoSaveTimestamp))
 			return false
 		end
 		lastAutoSaveTimestamp = now
