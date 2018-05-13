@@ -7,23 +7,7 @@
 ]]--
 
 -- Mod configuration.
-local config = {
-	volume = {
-		min = 0.1,
-		max = 0.75,
-		soulValueScaler = 0.005,
-	},
-	pitch = {
-		min = 0.9,
-		max = 1.1,
-		soulValueScaler = 0.005,
-	},
-	environmentChecks = {
-		activate = { chance = 75 },
-		playerInventory = { timerMin = 30, timerMax = 90, chance = 50 },
-		cell = { timerMin = 1, timerMax = 60, chance = 20 },
-	},
-}
+local config = json.loadfile("nc_souls_config")
 
 -- Action string/integer mapping.
 local soundTriggerActionNames = { "activate", "playerInventory", "cell" }
@@ -44,7 +28,7 @@ local function rollSoundPlayChance(creature, action)
 	local roll = math.random(1, 100)
 	local chance = getCreatureSoundChance(creature, action)
 	if (roll > chance) then
-		print("[nc-sos] Failed sound chance: " .. roll .. " vs. " .. chance)
+		-- print("[nc-sos] Failed sound chance: " .. roll .. " vs. " .. chance)
 		return false
 	end
 
@@ -161,7 +145,7 @@ end
 local function getSoulGemListFromCell(cell)
 	-- Make sure the cell is sane.
 	if (cell == nil) then
-		print("[nc-sos] No cell given!")
+		-- print("[nc-sos] No cell given!")
 		return {}
 	end
 
@@ -208,7 +192,7 @@ local function onActivate(e)
 
 	-- Make sure that we're looking at a misc item.
 	if (isFilledSoulGem(item, itemVariables) == false) then
-		print("[nc-sos] Not a soul gem.")
+		-- print("[nc-sos] Not a soul gem.")
 		return
 	end
 
@@ -220,14 +204,16 @@ local function onActivate(e)
 	-- Play one of the creature's sounds.
 	local sound = getRandomCreatureSound(itemVariables.soul)
 	tes3.playSound({ sound = sound, volume = getSoulVolume(itemVariables.soul), pitch = getSoulPitch(itemVariables.soul) })
-	print("[nc-sos] Played sound!")
+	-- print("[nc-sos] Played sound!")
 end
 event.register("activate", onActivate)
 
 local function playRandomInventorySoul()
+	timer.start(math.random(config.environmentChecks.playerInventory.timerMin, config.environmentChecks.playerInventory.timerMax), playRandomInventorySoul)
+
 	local soulConfig = getChoiceFromSoulList(getSoulGemListFromInventory(), soundTriggerAction.inventory)
 	if (soulConfig == nil) then
-		print("[nc-sos] No soul config found.")
+		-- print("[nc-sos] No soul config found.")
 		return
 	end
 
@@ -240,14 +226,15 @@ local function playRandomInventorySoul()
 	local sound = getRandomCreatureSound(soulConfig.creature)
 	print(soulConfig.reference.id)
 	tes3.playSound({ reference = soulConfig.reference, sound = sound, volume = getSoulVolume(soulConfig.creature), pitch = getSoulPitch(soulConfig.creature) })
-	print("[nc-sos] Played sound!")
-	timer.start(math.random(config.environmentChecks.playerInventory.timerMin, config.environmentChecks.playerInventory.timerMax), playRandomInventorySoul)
+	-- print("[nc-sos] Played sound!")
 end
 
 local function playRandomCellSoul()
+	timer.start(math.random(config.environmentChecks.cell.timerMin, config.environmentChecks.cell.timerMax), playRandomCellSoul)
+
 	local soulConfig = getChoiceFromSoulList(getSoulGemListFromCell(tes3.getPlayerCell()), soundTriggerAction.inventory)
 	if (soulConfig == nil) then
-		print("[nc-sos] No soul config found.")
+		-- print("[nc-sos] No soul config found.")
 		return
 	end
 
@@ -258,10 +245,8 @@ local function playRandomCellSoul()
 	
 	-- Play one of the creature's sounds.
 	local sound = getRandomCreatureSound(soulConfig.creature)
-	print(soulConfig.reference.id .. " > " .. getSoulVolume(soulConfig.creature))
 	tes3.playSound({ reference = soulConfig.reference, sound = sound, volume = getSoulVolume(soulConfig.creature), pitch = getSoulPitch(soulConfig.creature) })
-	print("[nc-sos] Played sound!")
-	timer.start(math.random(config.environmentChecks.cell.timerMin, config.environmentChecks.cell.timerMax), playRandomCellSoul)
+	-- print("[nc-sos] Played sound!")
 end
 
 -- When we've finished loading, we want to start two timers to check for player/
