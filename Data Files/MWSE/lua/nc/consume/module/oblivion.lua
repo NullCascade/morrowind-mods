@@ -15,10 +15,26 @@ local decrementCounter = function()
 	end
 end
 
+function isPotionSelfTargeting(potion)
+	for i = 1, #potion.effects do
+		local effect = potion.effects[i]
+		if (effect.rangeType ~= effect.rangeType.self) then
+			return false
+		end
+	end
+	
+	return true
+end
+
 function this.onEquip(e)
 	-- We only care about alchemy items.
 	local potion = e.item
 	if (potion.objectType ~= tes3.objectType.alchemy) then
+		return
+	end
+
+	-- We only care if the potion is self-targetting.
+	if (isPotionSelfTargeting(potion) == false) then
 		return
 	end
 

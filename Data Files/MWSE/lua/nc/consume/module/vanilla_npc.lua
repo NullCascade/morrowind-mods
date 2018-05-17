@@ -12,6 +12,17 @@ local clearConsumptionFlag = function()
 	potionActive = false
 end
 
+function isPotionSelfTargeting(potion)
+	for i = 1, #potion.effects do
+		local effect = potion.effects[i]
+		if (effect.rangeType ~= effect.rangeType.self) then
+			return false
+		end
+	end
+	
+	return true
+end
+
 function this.onEquip(e)
 	-- We only care about alchemy items.
 	local potion = e.item
@@ -19,7 +30,12 @@ function this.onEquip(e)
 		return
 	end
 
-	-- Are we waiting for a potion cooldown?
+	-- We only care if the potion is self-targetting.
+	if (isPotionSelfTargeting(potion) == false) then
+		return
+	end
+
+	-- Do we have more than 4 alchemy items imbibed already?
 	if (potionActive) then
 		tes3.messageBox({ message = "You must wait 5 seconds between drinking potions." })
 		return false
