@@ -124,24 +124,8 @@ configMainMenu = function(e)
 
 	tes3.messageBox({
 		message = "Will this character use permadeath?",
-		buttons = { "Change Life Count", "Confirm", "Cancel" },
+		buttons = { "Change Life Count", "Yes", "No" },
 		callback = configMainMenu,
-	})
-end
-
--- First confirmation menu to see if the player wants permadeath for this character.
-configNewCharacterMenu = function(e)
-	if (e ~= nil) then
-		if (e.button == 0) then
-			configMainMenu()
-		end
-		return
-	end
-	
-	tes3.messageBox({
-		message = "Will this character use permadeath?",
-		buttons = { "Yes", "No" },
-		callback = configNewCharacterMenu,
 	})
 end
 
@@ -157,21 +141,18 @@ local function checkPermadeath()
 		tes3.messageBox({ message = message })
 		return
 	end
-	
-	tes3.messageBox({ message = "This character's story has come to an end." })
-	timer.start(3, tes3.newGame)
+
+	timer.start(1, function()
+		tes3.messageBox({
+			message = "This character's story has come to an end.",
+			buttons = { "Bummer" },
+			callback = tes3.newGame
+		})
+	end)
 end
 
--- Death event. Increment the death counter if the player has died.
-local function onDeath(e)
-	-- We only care about player deaths.
-	if (e.mobile ~= tes3.getMobilePlayer()) then
-		return
-	end
-
-	incrementDeathCount()
-end
-event.register("death", onDeath)
+-- Keep track if the player has died already this session, so we don't double up on damaged events.
+local diedThisSession = false
 
 -- Loaded event. We'll check to see if new games want permadeath, or see how many lives the player has left.
 local function onLoaded(e)
@@ -179,9 +160,26 @@ local function onLoaded(e)
 		-- Delay for 8 seconds to give Juib a moment.
 		-- TODO: Check with other alternate start mods. They won't break the mod,                            
 		-- but they might make it awkward.
-		timer.start(8, configNewCharacterMenu)
+		timer.start(8, configMainMenu)
 	elseif (getModSaveConfig().enabled == true) then
 		checkPermadeath()
 	end
+
+	diedThisSession = false
 end
 event.register("loaded", onLoaded)
+
+-- Damaged event. Increment the death counter if the player has died.
+local function onDamaged(e)
+	-- We only care about player damage.
+	if (e.mobile ~= tes3.getMobilePlayer()) then
+		return
+	end
+
+	if (diedThisSession == false and e.mobile.health.current <= 0) then
+		print("[nc-death] The player has died!")
+		incrementDeathCount()
+		diedThisSession = true
+	end
+end
+event.register("damaged", onDamaged)
