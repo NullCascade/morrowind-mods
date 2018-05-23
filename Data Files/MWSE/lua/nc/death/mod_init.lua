@@ -145,7 +145,7 @@ local function checkPermadeath()
 	timer.start(1, function()
 		tes3.messageBox({
 			message = "This character's story has come to an end.",
-			buttons = { "Bummer" },
+			buttons = { "New Game" },
 			callback = tes3.newGame
 		})
 	end)
