@@ -1,0 +1,5 @@
+{
+    "checkInterval": 60,
+    "warnThreshold": 3.75,
+    "criticalThreshold": 3.85
+}

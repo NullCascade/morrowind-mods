@@ -26,6 +26,12 @@ This mod provides a very simple, generic-case auto-harvesting for organic contai
 
 * Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45627)
 
+## Memory Monitor
+
+Another simple mod that warns the player if they are approaching the 4 GB memory limit.
+
+* Download: N/A
+
 ## Sophisticated Save System
 
 This mod changes how saves are handled by Morrowind. The goal of the mod is to provide more types of autosaves, as well as a rotating list of quicksaves/autosaves so that the player always has a save to go back to.
