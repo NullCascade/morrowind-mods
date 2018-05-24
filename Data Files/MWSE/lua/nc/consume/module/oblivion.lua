@@ -1,5 +1,7 @@
 local this = {}
 
+local shared = require("nc.consume.shared")
+
 -- Basic module description.
 this.name = "Oblivion Style"
 this.description = "Prevents more than 4 potions from being active at once."
@@ -15,26 +17,9 @@ local decrementCounter = function()
 	end
 end
 
-function isPotionSelfTargeting(potion)
-	for i = 1, #potion.effects do
-		local effect = potion.effects[i]
-		if (effect.rangeType ~= effect.rangeType.self) then
-			return false
-		end
-	end
-	
-	return true
-end
-
 function this.onEquip(e)
-	-- We only care about alchemy items.
-	local potion = e.item
-	if (potion.objectType ~= tes3.objectType.alchemy) then
-		return
-	end
-
-	-- We only care if the potion is self-targetting.
-	if (isPotionSelfTargeting(potion) == false) then
+	-- Make some basic checks (player equipping, it's a potion, etc.).
+	if (not shared.basicPotionChecks(e)) then
 		return
 	end
 
@@ -48,6 +33,7 @@ function this.onEquip(e)
 	potionCounter = potionCounter + 1
 
 	-- Find the longest duration used.
+	local potion = e.item
 	local duration = 0
 	for i = 1, #potion.effects do
 		-- Get and validate effect.
