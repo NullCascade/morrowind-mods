@@ -30,7 +30,7 @@ This mod provides a very simple, generic-case auto-harvesting for organic contai
 
 Another simple mod that warns the player if they are approaching the 4 GB memory limit.
 
-* Download: N/A
+* Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45696)
 
 ## Sophisticated Save System
 
