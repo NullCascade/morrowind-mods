@@ -75,6 +75,12 @@
  VERSION HISTORY
 =====================================================================================
 
+ 1.1.0
+    * Ensured that the mod will only affect the player, with changes to MWSE 2.1.
+    * The mod will not affect targeted potions anymore.
+    * Added interop module so that other mods can suppress this one for a single
+      consumption. This will get better when there is event prioritization.
+
  1.0.0 [2018-05-04]:
     * Initial release.
 
