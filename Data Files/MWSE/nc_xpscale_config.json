@@ -1,0 +1,67 @@
+{
+    "scale": 0.5,
+    "skillSpecific": {
+        "use": true,
+        "values": {
+            "acrobatics": 1.0,
+            "alchemy": 1.0,
+            "alteration": 1.0,
+            "armorer": 1.0,
+            "athletics": 1.0,
+            "axe": 1.0,
+            "block": 1.0,
+            "bluntWeapon": 1.0,
+            "conjuration": 1.0,
+            "destruction": 1.0,
+            "enchant": 1.0,
+            "handToHand": 1.0,
+            "heavyArmor": 1.0,
+            "illusion": 1.0,
+            "lightArmor": 1.0,
+            "longBlade": 1.0,
+            "marksman": 1.0,
+            "mediumArmor": 1.0,
+            "mercantile": 1.0,
+            "mysticism": 1.0,
+            "restoration": 1.0,
+            "security": 1.0,
+            "shortBlade": 1.0,
+            "sneak": 1.0,
+            "spear": 1.0,
+            "speechcraft": 1.0,
+            "unarmored": 1.0
+        }
+    },
+    "levelSpecific": {
+        "use": true,
+        "values": {
+            "0": 1.0,
+            "10": 0.9,
+            "20": 0.8,
+            "30": 0.7,
+            "40": 0.6,
+            "50": 0.5,
+            "60": 0.4,
+            "70": 0.3,
+            "80": 0.2,
+            "90": 0.1,
+            "100": 0.01
+        }
+    },
+    "skillLevelSpecific": {
+        "use": true,
+        "values": {
+            "0": 1.0,
+            "10": 0.9,
+            "20": 0.8,
+            "30": 0.7,
+            "40": 0.6,
+            "50": 0.5,
+            "60": 0.4,
+            "70": 0.3,
+            "80": 0.2,
+            "90": 0.1,
+            "100": 0.01
+        }
+    }
+}
