@@ -1,6 +1,6 @@
 
 --[[
-	Mod Initialization: Proportioned Progression
+	Mod Initialization: Proportional Progression
 	Author: NullCascade
 
 	This module allows configuring the rate at which skills level.

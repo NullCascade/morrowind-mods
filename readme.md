@@ -32,6 +32,12 @@ Another simple mod that warns the player if they are approaching the 4 GB memory
 
 * Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45696)
 
+## Proportional Progression
+
+This mod allows you to configure the rate at which skills level in a way that is more detailed than the simple game settings.
+
+* Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45697)
+
 ## Sophisticated Save System
 
 This mod changes how saves are handled by Morrowind. The goal of the mod is to provide more types of autosaves, as well as a rotating list of quicksaves/autosaves so that the player always has a save to go back to.
