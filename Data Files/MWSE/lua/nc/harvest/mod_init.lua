@@ -11,7 +11,7 @@
 	any graphic herbalism mod, it will just harvest anything that those mods miss.
 ]]--
 
-function onActivate(e)
+local function onActivate(e)
 	local target = e.target
 	local container = target.object
 	
