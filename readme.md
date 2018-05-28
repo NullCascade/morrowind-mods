@@ -14,6 +14,12 @@ Display information about your current game in Discord.
 
 * Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45550)
 
+## Dynamic Difficulty
+
+Changes the difficulty slider as the player levels up or moves through the world.
+
+* Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45710)
+
 ## Expeditious Exit
 
 Have problems crashing when exiting? Lose focus of your cursor? This might help!
