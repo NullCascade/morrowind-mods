@@ -8,6 +8,12 @@ Provides a configurable restriction on the amount of potions the player can drin
 
 * Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45624)
 
+## Diligent Defenders
+
+This module makes it so that when the player or the player's companions are attacked, any companions will launch into action in defense.
+
+* Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45717)
+
 ## Discord Rich Presence
 
 Display information about your current game in Discord.
@@ -19,6 +25,12 @@ Display information about your current game in Discord.
 Changes the difficulty slider as the player levels up or moves through the world.
 
 * Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45710)
+
+## Easy Escort
+
+Ensures that your followers get warped to you if they get too far away. Compatible with any follower from any mod, without any special script attached to that NPC.
+
+* Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45712)
 
 ## Expeditious Exit
 
