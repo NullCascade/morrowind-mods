@@ -9,6 +9,7 @@
 ]]--
 
 local config = json.loadfile("nc_escort_config")
+local interop = require("nc.escort.interop")
 
 local function inBlackList(actor)
 	local reference = actor.reference
@@ -21,6 +22,11 @@ local function inBlackList(actor)
 
 	-- Is it not in our blacklist?
 	if (table.find(config.blackList, id) ~= nil) then
+		return true
+	end
+
+	-- What about our interop blacklist?
+	if (interop.blacklistContains(id)) then
 		return true
 	end
 
