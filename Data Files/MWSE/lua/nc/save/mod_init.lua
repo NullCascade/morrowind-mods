@@ -151,7 +151,7 @@ local autosaveTimer = nil
 local autosavePasses = 0
 local blockAutosaves = true
 local function autosave()
-	if (not config.saveOnTimer or blockAutosaves) then
+	if (not config.saveOnTimer or blockAutosaves or tes3.getGlobal("CharGenState") ~= -1) then
 		return
 	end
 
@@ -192,7 +192,7 @@ event.register("initialized", initialized)
 -- flag to see if they are newly starting combat.
 local function combatStart(e)
 	-- Do we care about this save event?
-	if (not config.saveOnCombatStart or blockAutosaves) then
+	if (not config.saveOnCombatStart or blockAutosaves or tes3.getGlobal("CharGenState") ~= -1) then
 		return
 	end
 
@@ -220,7 +220,7 @@ event.register("combatStart", combatStart)
 -- see if the player is out of combat when this event ends and cause a save.
 local function combatStopped(e)
 	-- Do we care about this save event?
-	if (not config.saveOnCombatEnd or blockAutosaves) then
+	if (not config.saveOnCombatEnd or blockAutosaves or tes3.getGlobal("CharGenState") ~= -1) then
 		return
 	end
 
@@ -240,7 +240,7 @@ event.register("combatStopped", combatStopped)
 -- Check for cell change event.
 local function cellChanged(e)
 	-- Do we care about this save event?
-	if (not config.saveOnCellChange or blockAutosaves) then
+	if (not config.saveOnCellChange or blockAutosaves or tes3.getGlobal("CharGenState") ~= -1) then
 		return
 	end
 

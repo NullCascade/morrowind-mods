@@ -1,7 +1,7 @@
 =====================================================================================
                               Sophisticated Save System                              
                                  Author: NullCascade                                 
-                                    Version 1.0.1                                    
+                                    Version 1.0.2                                    
 =====================================================================================
 
  INDEX:
@@ -81,6 +81,9 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.0.2 [2018-06-04]:
+    * Fixed issue where saves would be created during character generation.
 
  1.0.1 [2018-05-11]:
     * Fixed issue where autosaves could occur during loading a saved game.
