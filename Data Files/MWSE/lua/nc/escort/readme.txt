@@ -1,7 +1,7 @@
 =====================================================================================
                                      Easy Escort                                     
                                  Author: NullCascade                                 
-                                    Version 1.1.0                                    
+                                    Version 1.1.1                                    
 =====================================================================================
 
  INDEX:
@@ -72,6 +72,10 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.1.1 [2018-06-04]:
+    * Blacklisted the chargen boat guide from following you up onto the ship.
+    * Fixed issue where dead companions would still follow the player.
 
  1.1.0 [2018-05-30]:
     * Added interop module so that other mods can, from lua, dynamically add/remove/
