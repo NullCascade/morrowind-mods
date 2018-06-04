@@ -34,6 +34,25 @@ local function inBlackList(actor)
 	return false
 end
 
+local function validCompanionCheck(actor)
+	-- The player shouldn't count as his own companion.
+	if (actor == tes3.getMobilePlayer()) then
+		return false
+	end
+
+	-- Respect the blacklist.
+	if (inBlackList(actor)) then
+		return false
+	end
+
+	-- Make sure we don't teleport dead actors.
+	if (actor.health.current <= 0) then
+		return false
+	end
+
+	return true
+end
+
 local function forceFollowFriendlyActors(e)
 	local playerMobile = tes3.getMobilePlayer()
 	local currentCell = tes3.getPlayerCell()
@@ -46,7 +65,7 @@ local function forceFollowFriendlyActors(e)
 	}
 
 	for actor in tes3.iterate(playerMobile.friendlyActors) do
-		if (actor ~= playerMobile and not inBlackList(actor)) then
+		if (validCompanionCheck(actor)) then
 			local reference = actor.reference
 			if (reference.cell ~= currentCell or reference.position:distance(playerMobile.position) > config.followDistance) then
 				positionParams.reference = reference

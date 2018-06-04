@@ -1,0 +1,7 @@
+{
+    "pollRate": 5,
+    "followDistance": 2000,
+    "blackList": [
+        "chargen boat guard 2"
+    ]
+}
