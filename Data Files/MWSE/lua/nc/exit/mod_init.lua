@@ -71,11 +71,12 @@ event.register("uiCreated", rebindExitButton, { filter = "MenuOptions" })
 local modConfig = {}
 
 -- Callback for our button that binds to config.showMenuOnExit
-local function modConfigToggleConfirm(button)
+local function modConfigToggleConfirm(e)
 	-- Update our config.
 	config.showMenuOnExit = not config.showMenuOnExit
 
 	-- Update button text to the new value.
+	local button = e.source
 	button.text = config.showMenuOnExit and tes3.getGMST(68).value or tes3.getGMST(69).value
 	button.visible = false
 	button.visible = true
