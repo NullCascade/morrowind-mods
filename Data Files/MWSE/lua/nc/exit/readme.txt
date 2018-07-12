@@ -65,7 +65,7 @@
  VERSION HISTORY
 =====================================================================================
 
- 1.2.0 [2018-07-10]:
+ 1.2.0 [2018-07-12]:
     * Added support for the MWSE Mod Config Menu to modify the config file.
 
  1.1.0 [2018-05-07]:

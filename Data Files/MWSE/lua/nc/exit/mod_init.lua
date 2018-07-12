@@ -31,8 +31,8 @@ local function onExitButtonClicked(e)
 	if (config.showMenuOnExit) then
 		-- Respect languages or whatever by reading the text from GMSTs.
 		tes3.messageBox({
-			message = tes3.getGMST(612).value,
-			buttons = { tes3.getGMST(68).value, tes3.getGMST(69).value },
+			message = tes3.getGMST(tes3.gmst.sMessage2).value,
+			buttons = { tes3.getGMST(tes3.gmst.sYes).value, tes3.getGMST(tes3.gmst.sNo).value },
 			callback = checkConfirmedCloseCallback
 		})
 	else
@@ -77,7 +77,7 @@ local function modConfigToggleConfirm(e)
 
 	-- Update button text to the new value.
 	local button = e.source
-	button.text = config.showMenuOnExit and tes3.getGMST(68).value or tes3.getGMST(69).value
+	button.text = config.showMenuOnExit and tes3.getGMST(tes3.gmst.sYes).value or tes3.getGMST(tes3.gmst.sNo).value
 	button.visible = false
 	button.visible = true
 end
@@ -103,7 +103,7 @@ function modConfig.onCreate(container)
 		label.layoutOriginFractionX = 0.0
 
 		-- Button that toggles the config value.
-		local button = horizontalBlock:createButton({ text = (config.showMenuOnExit and tes3.getGMST(68).value or tes3.getGMST(69).value) })
+		local button = horizontalBlock:createButton({ text = (config.showMenuOnExit and tes3.getGMST(tes3.gmst.sYes).value or tes3.getGMST(tes3.gmst.sNo).value) })
 		button.layoutOriginFractionX = 1.0
 		button.paddingTop = 3
 		button:register("mouseClick", modConfigToggleConfirm)
