@@ -1,7 +1,7 @@
 =====================================================================================
                                Controlled  Consumption                               
                                  Author: NullCascade                                 
-                                    Version 1.0.0                                    
+                                    Version 1.2.0                                    
 =====================================================================================
 
  INDEX:
@@ -74,6 +74,12 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.2.0
+    * Added support for MWSE's Mod Config Menu.
+    * Fixed issue where saving and reloading would bypass restrictions.
+    * Added visual representation next to the sneak indicator, showing if a potion
+      can be consumed.
 
  1.1.0
     * Ensured that the mod will only affect the player, with changes to MWSE 2.1.

@@ -2,64 +2,132 @@ local this = {}
 
 local shared = require("nc.consume.shared")
 
--- Basic module description.
+-- Name to identify this module.
 this.name = "Oblivion Style"
-this.description = "Prevents more than 4 potions from being active at once."
+this.consumeVersion = 1.2
 
--- Counter of currently consumed alchemy items.
-local potionCounter = 0
+-- Callback for when the config is created.
+function this.onConfigCreate(container)
+	-- Required for text to initially wrap.
+	container:getTopLevelParent():updateLayout()
 
--- Decrease potion count by one.
-local decrementCounter = function()
-	potionCounter = potionCounter - 1
-	if (potionCounter < 0) then
-		potionCounter = 0
+	-- No real config. Just a description.
+	local description = container:createLabel({ text = "This module replicates the alchemy restrictions in Oblivion. The player may have 4 active potions at any one time." })
+	description.layoutWidthFraction = 1.0
+	description.wrapText = true
+end
+
+-- How many timers we can sustain before potion drinking is blocked.
+local potionLimit = 4
+
+-- A list of current cooldown timers.
+local cooldownTimers = {}
+
+-- When the timer completes, we hide the frame alchemy icon and clear our list.
+local function onTimerComplete(e)
+	-- Remove the timer from our active list.
+	mwse.log("=========== %d", #cooldownTimers)
+	table.removevalue(cooldownTimers, e.timer)
+	mwse.log("=========== %d", #cooldownTimers)
+
+	-- If we aren't maxed on potions, hide the block icon.
+	if (#cooldownTimers < potionLimit and shared.alchemyFrame) then
+		shared.alchemyFrame.visible = false
 	end
 end
 
+-- Our main logic for seeing if a potion can be consumed or not.
 function this.onEquip(e)
-	-- Make some basic checks (player equipping, it's a potion, etc.).
+	-- Make some basic checks (player equipping, it's a potion, etc).
 	if (not shared.basicPotionChecks(e)) then
 		return
 	end
 
-	-- Do we have more than 4 alchemy items imbibed already?
-	if (potionCounter >= 4) then
-		tes3.messageBox({ message = "Only 4 potions can be imbibed at a time." })
+	-- Do we already have a potion active?
+	if (#cooldownTimers >= potionLimit) then
+		tes3.messageBox("You may not have more than %d potions active at once.", #cooldownTimers)
 		return false
 	end
 
-	-- Increase the potion counter.
-	potionCounter = potionCounter + 1
-
-	-- Find the longest duration used.
-	local potion = e.item
-	local duration = 0
-	for i = 1, #potion.effects do
-		-- Get and validate effect.
-		local effect = potion.effects[i]
-		if (effect.id < 0) then
-			break
-		end
-
-		-- Check to see if this was a longer lasting effect.
-		if (effect.duration > duration) then
-			duration = effect.duration
-		end
+	-- Start our 5-second cooldown and show the alchemy blocked frame.
+	table.insert(cooldownTimers, timer.start({ type = timer.simulate, duration = shared.getLongestPotionDuration(e.item), callback = onTimerComplete }))
+	
+	-- If we are maxed on potions, show the block icon.
+	if (#cooldownTimers >= potionLimit and shared.alchemyFrame) then
+		shared.alchemyFrame.visible = true
 	end
-
-	-- 0-length potions count as 1 second.
-	if (duration <= 0) then
-		duration = 1
-	end
-
-	-- When the potion would expire, reduce the counter again.
-	timer.start(duration, decrementCounter)
 end
 
--- Called when the module has been selected and loaded by mod_init.
-function this.onInitialized()
+-- Set any remaining time so that it persists through saves.
+function this.onSave(e)
+	local data = shared.getPersistentData()
+	
+	-- Get the time left in each timer and store it in an array.
+	local timeLeftArray = {}
+	for i = 1, #cooldownTimers do
+		table.insert(timeLeftArray, cooldownTimers[i].timeLeft)
+	end
+	data.nc.consume.oblivionTimers = timeLeftArray
+end
+
+-- Loaded event. Resume any consumption restrictions.
+function this.onLoaded(e)
+	local data = shared.getPersistentData()
+
+	-- Ensure our timer list is empty.
+	cooldownTimers = {}
+
+	local timers = data.nc.consume.oblivionTimers
+	if (timers) then
+		-- We drank recently. Start timer with the remaining time left.
+		for i = 1, #timers do
+			table.insert(cooldownTimers, timer.start({ type = timer.simulate, duration = timers[i], callback = onTimerComplete }))
+		end
+
+		-- Also show the blocked icon.
+		if (#timers >= potionLimit and shared.alchemyFrame) then
+			shared.alchemyFrame.visible = true
+		end
+	else
+		-- Make sure the icon is hidden if we're loading a save where we didn't just drink a potion.
+		if (shared.alchemyFrame) then
+			shared.alchemyFrame.visible = false
+		end
+	end
+end
+
+-- Callback for when this module is set as the active one.
+function this.onSetActive()
+	-- Delete any save data.
+	local data = shared.getPersistentData()
+	if (data) then
+		data.nc.consume.oblivionTimers = nil
+	end
+
+	-- Also unset any data in our module.
+	cooldownTimers = {}
+
+	-- Setup the events we care about.
 	event.register("equip", this.onEquip)
+	event.register("save", this.onSave)
+	event.register("loaded", this.onLoaded)
+end
+
+-- Callback for when this module is turned off.
+function this.onSetInactive()
+	-- Delete any save data.
+	local data = shared.getPersistentData()
+	if (data) then
+		data.nc.consume.oblivionTimers = nil
+	end
+
+	-- Also unset any data in our module.
+	cooldownTimers = {}
+	
+	-- Remove the events we cared about.
+	event.unregister("equip", this.onEquip)
+	event.unregister("save", this.onSave)
+	event.unregister("loaded", this.onLoaded)
 end
 
 return this

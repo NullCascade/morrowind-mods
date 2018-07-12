@@ -2,18 +2,32 @@ local this = {}
 
 local shared = require("nc.consume.shared")
 
--- Basic module description.
+-- Name to identify this module.
 this.name = "Vanilla NPC Style"
-this.description = "Allows 1 potion to be consumed every 5 seconds."
 
--- Counter of currently consumed alchemy items.
-local potionActive = false
+-- Callback for when the config is created.
+function this.onConfigCreate(container)
+	-- Required for text to initially wrap.
+	container:getTopLevelParent():updateLayout()
 
--- Decrease potion count by one.
-local clearConsumptionFlag = function()
-	potionActive = false
+	-- No real config. Just a description.
+	local description = container:createLabel({ text = "This module follows the same rules as vanilla NPCs follow. Only one potion can be consumed at a time, and five seconds must pass before another one can be consumed." })
+	description.layoutWidthFraction = 1.0
+	description.wrapText = true
 end
 
+-- We use a simple timer to keep track of consumption state.
+local consumeCooldownTimer = nil
+
+-- When the timer completes, we hide the frame alchemy icon and unset the variable.
+local function onTimerComplete()
+	consumeCooldownTimer = nil
+	if (shared.alchemyFrame) then
+		shared.alchemyFrame.visible = false
+	end
+end
+
+-- Our main logic for seeing if a potion can be consumed or not.
 function this.onEquip(e)
 	-- Make some basic checks (player equipping, it's a potion, etc).
 	if (not shared.basicPotionChecks(e)) then
@@ -21,21 +35,85 @@ function this.onEquip(e)
 	end
 
 	-- Do we already have a potion active?
-	if (potionActive) then
-		tes3.messageBox({ message = "You must wait 5 seconds between drinking potions." })
+	if (consumeCooldownTimer and consumeCooldownTimer.state == timer.active) then
+		tes3.messageBox("You must wait another %d seconds before drinking another potion.", consumeCooldownTimer.timeLeft)
 		return false
 	end
 
-	-- Increase the potion counter.
-	potionActive = true
-
-	-- After 5 seconds, reset the flag.
-	timer.start(5, clearConsumptionFlag)
+	-- Start our 5-second cooldown and show the alchemy blocked frame.
+	consumeCooldownTimer = timer.start({ type = timer.simulate, duration = 5, callback = onTimerComplete })
+	if (shared.alchemyFrame) then
+		shared.alchemyFrame.visible = true
+	end
 end
 
--- Called when the module has been selected and loaded by mod_init.
-function this.onInitialized()
+-- Set any remaining time so that it persists through saves.
+function this.onSave(e)
+	local data = shared.getPersistentData()
+	if (consumeCooldownTimer and consumeCooldownTimer.state == timer.active) then
+		data.nc.consume.npcTimeLeft = consumeCooldownTimer.timeLeft
+	else
+		data.nc.consume.npcTimeLeft = nil
+	end
+end
+
+-- Loaded event. Resume any consumption restrictions.
+function this.onLoaded(e)
+	local data = shared.getPersistentData()
+
+	local timeLeft = data.nc.consume.npcTimeLeft
+	if (timeLeft) then
+		-- We drank recently. Start a timer with the remaining time left and show the icon.
+		consumeCooldownTimer = timer.start({ type = timer.simulate, duration = timeLeft, callback = onTimerComplete })
+		if (shared.alchemyFrame) then
+			shared.alchemyFrame.visible = true
+		end
+	else
+		-- Make sure the icon is hidden if we're loading a save where we didn't just drink a potion.
+		if (shared.alchemyFrame) then
+			shared.alchemyFrame.visible = false
+		end
+	end
+end
+
+-- Callback for when this module is set as the active one.
+function this.onSetActive()
+	-- Delete any save data.
+	local data = shared.getPersistentData()
+	if (data) then
+		data.nc.consume.npcTimeLeft = nil
+	end
+
+	-- Also unset any data in our module.
+	if (consumeCooldownTimer) then
+		consumeCooldownTimer:cancel()
+	end
+	consumeCooldownTimer = nil
+
+	-- Setup the events we care about.
 	event.register("equip", this.onEquip)
+	event.register("save", this.onSave)
+	event.register("loaded", this.onLoaded)
+end
+
+-- Callback for when this module is turned off.
+function this.onSetInactive()
+	-- Delete any save data.
+	local data = shared.getPersistentData()
+	if (data) then
+		data.nc.consume.npcTimeLeft = nil
+	end
+	
+	-- Also unset any data in our module.
+	if (consumeCooldownTimer) then
+		consumeCooldownTimer:cancel()
+	end
+	consumeCooldownTimer = nil
+	
+	-- Remove the events we cared about.
+	event.unregister("equip", this.onEquip)
+	event.unregister("save", this.onSave)
+	event.unregister("loaded", this.onLoaded)
 end
 
 return this
