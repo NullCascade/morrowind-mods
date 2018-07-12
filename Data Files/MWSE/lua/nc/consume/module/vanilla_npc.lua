@@ -20,6 +20,9 @@ end
 -- We use a simple timer to keep track of consumption state.
 local consumeCooldownTimer = nil
 
+-- Cooldown time.
+local cooldownTime = 5
+
 -- When the timer completes, we hide the frame alchemy icon and unset the variable.
 local function onTimerComplete()
 	consumeCooldownTimer = nil
@@ -37,12 +40,12 @@ function this.onEquip(e)
 
 	-- Do we already have a potion active?
 	if (consumeCooldownTimer and consumeCooldownTimer.state == timer.active) then
-		tes3.messageBox("You must wait another %d seconds before drinking another potion.", consumeCooldownTimer.timeLeft)
+		tes3.messageBox("You must wait another %d seconds before drinking another potion.", consumeCooldownTimer.timeLeft * 3600 / tes3.getGlobal("timescale"))
 		return false
 	end
 
 	-- Start our 5-second cooldown and show the alchemy blocked frame. Use game time so that resting affects it.
-	local duration = 5 * (1/3600) * tes3.getGlobal("timescale")
+	local duration = cooldownTime * (1/3600) * tes3.getGlobal("timescale")
 	consumeCooldownTimer = timer.start({ type = timer.game, duration = duration, callback = onTimerComplete })
 	if (shared.alchemyFrame) then
 		shared.alchemyFrame.visible = true
