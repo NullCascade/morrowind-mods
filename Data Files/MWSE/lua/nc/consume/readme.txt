@@ -80,6 +80,8 @@
     * Fixed issue where saving and reloading would bypass restrictions.
     * Added visual representation next to the sneak indicator, showing if a potion
       can be consumed.
+    * Made it so that resting or otherwise advancing game time also advanced the
+      cooldown time.
 
  1.1.0
     * Ensured that the mod will only affect the player, with changes to MWSE 2.1.
