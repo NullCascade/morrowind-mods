@@ -4,6 +4,7 @@ local shared = require("nc.consume.shared")
 
 -- Name to identify this module.
 this.name = "Vanilla NPC Style"
+this.consumeVersion = 1.2
 
 -- Callback for when the config is created.
 function this.onConfigCreate(container)
@@ -40,8 +41,9 @@ function this.onEquip(e)
 		return false
 	end
 
-	-- Start our 5-second cooldown and show the alchemy blocked frame.
-	consumeCooldownTimer = timer.start({ type = timer.simulate, duration = 5, callback = onTimerComplete })
+	-- Start our 5-second cooldown and show the alchemy blocked frame. Use game time so that resting affects it.
+	local duration = 5 * (1/3600) * tes3.getGlobal("timescale")
+	consumeCooldownTimer = timer.start({ type = timer.game, duration = duration, callback = onTimerComplete })
 	if (shared.alchemyFrame) then
 		shared.alchemyFrame.visible = true
 	end
@@ -64,7 +66,7 @@ function this.onLoaded(e)
 	local timeLeft = data.nc.consume.npcTimeLeft
 	if (timeLeft) then
 		-- We drank recently. Start a timer with the remaining time left and show the icon.
-		consumeCooldownTimer = timer.start({ type = timer.simulate, duration = timeLeft, callback = onTimerComplete })
+		consumeCooldownTimer = timer.start({ type = timer.game, duration = timeLeft, callback = onTimerComplete })
 		if (shared.alchemyFrame) then
 			shared.alchemyFrame.visible = true
 		end

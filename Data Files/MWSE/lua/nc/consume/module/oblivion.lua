@@ -26,9 +26,7 @@ local cooldownTimers = {}
 -- When the timer completes, we hide the frame alchemy icon and clear our list.
 local function onTimerComplete(e)
 	-- Remove the timer from our active list.
-	mwse.log("=========== %d", #cooldownTimers)
 	table.removevalue(cooldownTimers, e.timer)
-	mwse.log("=========== %d", #cooldownTimers)
 
 	-- If we aren't maxed on potions, hide the block icon.
 	if (#cooldownTimers < potionLimit and shared.alchemyFrame) then
@@ -49,8 +47,9 @@ function this.onEquip(e)
 		return false
 	end
 
-	-- Start our 5-second cooldown and show the alchemy blocked frame.
-	table.insert(cooldownTimers, timer.start({ type = timer.simulate, duration = shared.getLongestPotionDuration(e.item), callback = onTimerComplete }))
+	-- Start our cooldown based on the longest effect duration. Use game time so that resting affects it.
+	local duration = shared.getLongestPotionDuration(e.item) * (1/3600) * tes3.getGlobal("timescale")
+	table.insert(cooldownTimers, timer.start({ type = timer.game, duration = duration, callback = onTimerComplete }))
 	
 	-- If we are maxed on potions, show the block icon.
 	if (#cooldownTimers >= potionLimit and shared.alchemyFrame) then
@@ -81,7 +80,7 @@ function this.onLoaded(e)
 	if (timers) then
 		-- We drank recently. Start timer with the remaining time left.
 		for i = 1, #timers do
-			table.insert(cooldownTimers, timer.start({ type = timer.simulate, duration = timers[i], callback = onTimerComplete }))
+			table.insert(cooldownTimers, timer.start({ type = timer.game, duration = timers[i], callback = onTimerComplete }))
 		end
 
 		-- Also show the blocked icon.

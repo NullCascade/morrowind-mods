@@ -13,6 +13,11 @@
 		* Oblivion: Only 4 potions can be active at any one time.
 ]]--
 
+if (mwse.buildDate == nil or mwse.buildDate < 20180712) then
+	mwse.log("[nc-consume] Build date of %s does not meet minimum build date of 20180712.", mwse.buildDate)
+	return
+end
+
 -- We need the Lua FileSystem to look for modules.
 local lfs = require("lfs")
 
@@ -116,6 +121,12 @@ end
 
 -- Load the desired configuration module.
 local function onInitialized(mod)
+	if (mwse.buildDate == nil or mwse.buildDate < 20180712) then
+		modConfig.hidden = true
+		tes3.messageBox("Controlled Consumption requires a newer version of MWSE. Please run MWSE-Update.exe.", mwse.buildDate)
+		return
+	end
+
 	-- Look through our module folder and load any modules.
 	for file in lfs.dir(moduleDir) do
 		local path = string.format("%s/%s", moduleDir, file)
