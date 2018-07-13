@@ -1,7 +1,7 @@
 =====================================================================================
                                Controlled  Consumption                               
                                  Author: NullCascade                                 
-                                    Version 1.2.0                                    
+                                    Version 1.2.1                                    
 =====================================================================================
 
  INDEX:
@@ -49,10 +49,9 @@
 
  Extract the archive into your Morrowind installation directory. The mod should
  contain the following files:
-    .\Data Files\MWSE\nc_consume_config.json
-    .\Data Files\MWSE\lua\nc\save\mod_init.lua
-    .\Data Files\MWSE\lua\nc\save\module\vanilla_npc.lua
-    .\Data Files\MWSE\lua\nc\save\module\oblivion.lua
+    .\Data Files\MWSE\lua\nc\consume\mod_init.lua
+    .\Data Files\MWSE\lua\nc\consume\module\vanilla_npc.lua
+    .\Data Files\MWSE\lua\nc\consume\module\oblivion.lua
 
   The nc_consume_config.json file can be used to configure the mod. Change the 
   module entry in the json file to "vanilla_npc" or "oblivion" to use that module.
@@ -74,6 +73,9 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.2.1
+    * Fixed mistake in readme file.
 
  1.2.0
     * Added support for MWSE's Mod Config Menu.
