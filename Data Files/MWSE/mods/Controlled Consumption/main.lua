@@ -19,7 +19,6 @@ if (mwse.buildDate == nil or mwse.buildDate < 20180725) then
 	return
 end
 
--- We need the Lua FileSystem to look for modules and old versions.
 local lfs = require("lfs")
 
 -- Ensure we don't have an old version installed.
@@ -52,7 +51,7 @@ local moduleNames = {}
 local moduleDir = "Data Files/MWSE/mods/Controlled Consumption/module"
 
 -- File name for our config.
-local configName = "nc_consume_config"
+local configName = "Controlled Consumption"
 
 -- Load the current config.
 local config = mwse.loadConfig(configName) or {}
