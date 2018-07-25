@@ -24,8 +24,12 @@ local lfs = require("lfs")
 
 -- Ensure we don't have an old version installed.
 if (lfs.attributes("Data Files/MWSE/lua/nc/consume/mod_init.lua")) then
-	if (lfs.rmdir("Data Files/MWSE/lua/nc/consume/")) then
+	if (lfs.rmdir("Data Files/MWSE/lua/nc/consume/", true)) then
 		mwse.log("[nc-consume] Old install found and deleted.")
+
+		-- Additional, probably not necessarily cleanup. It will only delete these if they are empty.
+		lfs.rmdir("Data Files/MWSE/lua/nc")
+		lfs.rmdir("Data Files/MWSE/lua")
 	else
 		mwse.log("[nc-consume] Old install found but could not be deleted. Please remove the folder 'Data Files/MWSE/lua/nc/consume' and restart Morrowind.")
 		return
