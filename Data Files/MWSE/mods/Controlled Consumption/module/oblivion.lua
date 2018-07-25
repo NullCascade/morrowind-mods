@@ -1,6 +1,6 @@
 local this = {}
 
-local shared = require("nc.consume.shared")
+local shared = require("Controlled Consumption.shared")
 
 -- Name to identify this module.
 this.name = "Oblivion Style"

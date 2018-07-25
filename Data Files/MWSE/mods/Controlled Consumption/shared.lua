@@ -1,4 +1,4 @@
-local interop = require("nc.consume.interop")
+local interop = require("Controlled Consumption.interop")
 
 local this = {}
 

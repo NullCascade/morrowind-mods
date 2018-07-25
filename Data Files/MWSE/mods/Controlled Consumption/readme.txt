@@ -1,7 +1,7 @@
 =====================================================================================
                                Controlled  Consumption                               
                                  Author: NullCascade                                 
-                                    Version 1.2.1                                    
+                                    Version 1.3.0                                    
 =====================================================================================
 
  INDEX:
@@ -49,12 +49,12 @@
 
  Extract the archive into your Morrowind installation directory. The mod should
  contain the following files:
-    .\Data Files\MWSE\lua\nc\consume\mod_init.lua
-    .\Data Files\MWSE\lua\nc\consume\module\vanilla_npc.lua
-    .\Data Files\MWSE\lua\nc\consume\module\oblivion.lua
+    .\Data Files\MWSE\mods\Controlled Consumption\main.lua
+    .\Data Files\MWSE\mods\Controlled Consumption\module\disabled.lua
+    .\Data Files\MWSE\mods\Controlled Consumption\module\oblivion.lua
+    .\Data Files\MWSE\mods\Controlled Consumption\module\vanilla_npc.lua
 
-  The nc_consume_config.json file can be used to configure the mod. Change the 
-  module entry in the json file to "vanilla_npc" or "oblivion" to use that module.
+  The in-game Mod Config menucan be used to configure the mod.
 
 =====================================================================================
  PLAYING THIS PLUGIN:
@@ -73,6 +73,12 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.3.0
+    * Updated to new MWSE folder structure. Legacy interop support temporarily
+      available.
+    * Added new module "Disabled" which simply can be used to temporarily disable
+      the mod in-game.
 
  1.2.1
     * Fixed mistake in readme file.

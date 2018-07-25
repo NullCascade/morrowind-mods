@@ -13,16 +13,27 @@
 		* Oblivion: Only 4 potions can be active at any one time.
 ]]--
 
-if (mwse.buildDate == nil or mwse.buildDate < 20180712) then
-	mwse.log("[nc-consume] Build date of %s does not meet minimum build date of 20180712.", mwse.buildDate)
+-- Ensure we have the features we need.
+if (mwse.buildDate == nil or mwse.buildDate < 20180724) then
+	mwse.log("[nc-consume] Build date of %s does not meet minimum build date of 20180724.", mwse.buildDate)
 	return
 end
 
--- We need the Lua FileSystem to look for modules.
+-- We need the Lua FileSystem to look for modules and old versions.
 local lfs = require("lfs")
 
+-- Ensure we don't have an old version installed.
+if (lfs.attributes("Data Files/MWSE/lua/nc/consume/mod_init.lua")) then
+	if (lfs.rmdir("Data Files/MWSE/lua/nc/consume/")) then
+		mwse.log("[nc-consume] Old install found and deleted.")
+	else
+		mwse.log("[nc-consume] Old install found but could not be deleted. Please remove the folder 'Data Files/MWSE/lua/nc/consume' and restart Morrowind.")
+		return
+	end
+end
+
 -- Bring in our shared function/data module.
-local shared = require("nc.consume.shared")
+local shared = require("Controlled Consumption.shared")
 
 -- Reference to the currently active module.
 local currentModule = nil
@@ -34,13 +45,13 @@ local modules = {}
 local moduleNames = {}
 
 -- The path that modules are stored in.
-local moduleDir = "Data Files/MWSE/lua/nc/consume/module"
+local moduleDir = "Data Files/MWSE/mods/Controlled Consumption/module"
 
 -- File name for our config.
 local configName = "nc_consume_config"
 
 -- Load the current config.
-local config = json.loadfile(configName) or {}
+local config = mwse.loadConfig(configName) or {}
 
 -- Minimum version support for modules, in case of breaking changes in modules.
 local minimumModuleVersion = 1.2
@@ -53,7 +64,7 @@ local modConfig = {}
 
 -- Helper function to save the config file.
 local function saveConfig()
-	json.savefile(configName, config)
+	mwse.saveConfig(configName, config)
 end
 
 -- Loads a module from disk, does version checking, and sets up the state.
@@ -139,7 +150,7 @@ local function onInitialized(mod)
 	-- Try to use the selected module.
 	local module = config.currentModule
 	if ((module == nil or modules[module] == nil) and #moduleNames > 0) then
-		module = moduleNames[1]
+		module = modules["Vanilla NPC Style"] and "Vanilla NPC Style" or moduleNames[1]
 	end
 	setModule(module)
 end
@@ -243,7 +254,7 @@ function modConfig.onClose(container)
 		moduleEvent(config, moduleConfigPane)
 	end
 
-	json.savefile(configName, config)
+	saveConfig()
 end
 
 -- When the mod config menu is ready to start accepting registrations, register this mod.
