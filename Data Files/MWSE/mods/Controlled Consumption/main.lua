@@ -14,8 +14,8 @@
 ]]--
 
 -- Ensure we have the features we need.
-if (mwse.buildDate == nil or mwse.buildDate < 20180724) then
-	mwse.log("[nc-consume] Build date of %s does not meet minimum build date of 20180724.", mwse.buildDate)
+if (mwse.buildDate == nil or mwse.buildDate < 20180725) then
+	mwse.log("[nc-consume] Build date of %s does not meet minimum build date of 20180725.", mwse.buildDate)
 	return
 end
 
