@@ -8,6 +8,28 @@
 
 ]]--
 
+-- Ensure we have the features we need.
+if (mwse.buildDate == nil or mwse.buildDate < 20180726) then
+	mwse.log("[Dynamic Difficulty] Build date of %s does not meet minimum build date of 20180726.", mwse.buildDate)
+	return
+end
+
+local lfs = require("lfs")
+
+-- Ensure we don't have an old version installed.
+if (lfs.attributes("Data Files/MWSE/lua/nc/difficulty/mod_init.lua")) then
+	if (lfs.rmdir("Data Files/MWSE/lua/nc/difficulty/", true)) then
+		mwse.log("[Dynamic Difficulty] Old install found and deleted.")
+
+		-- Additional, probably not necessarily cleanup. It will only delete these if they are empty.
+		lfs.rmdir("Data Files/MWSE/lua/nc")
+		lfs.rmdir("Data Files/MWSE/lua")
+	else
+		mwse.log("[Dynamic Difficulty] Old install found but could not be deleted. Please remove the folder 'Data Files/MWSE/lua/nc/difficulty' and restart Morrowind.")
+		return
+	end
+end
+
 -- Loud our config file.
 local config = mwse.loadConfig("Dynamic Difficulty")
 if (config == nil) then
