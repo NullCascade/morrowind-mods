@@ -1,7 +1,7 @@
 =====================================================================================
                                   Happy  Harvesting                                  
                                  Author: NullCascade                                 
-                                    Version 1.0.1                                    
+                                    Version 1.1.0                                    
 =====================================================================================
 
  INDEX:
@@ -42,7 +42,7 @@
 
  Extract the archive into your Morrowind installation directory. The mod consists of
  a single file, which should end up located at:
-    <Morrowind Install Directory>\Data Files\MWSE\lua\nc\harvest\mod_init.lua
+    .\Data Files\MWSE\mods\Happy Harvesting\main.lua
 
 =====================================================================================
  PLAYING THIS PLUGIN:
@@ -63,6 +63,10 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.1.0 [2018-07-26]:
+    * Added ability to blacklist certain container IDs.
+    * Added Mod Config Menu support to allow for easy blacklisting.
 
  1.0.1 [2018-05-26]:
     * Fix function scope to prevent potential issues with other mods.
@@ -88,7 +92,7 @@
  Special thanks to Greatness7 for his help in progressing MWSE 2.1 and to DarkElfGuy
  for inspiring people to create and release mods for the yearly modathon.
 
- Copyright 2018 Michael Wallar
+ Copyright 2018 NullCascade
 
  Permission is hereby granted, free of charge, to any person obtaining a copy of
  this software and associated documentation files (the "Software"), to deal in the

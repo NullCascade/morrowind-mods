@@ -11,11 +11,44 @@
 	any graphic herbalism mod, it will just harvest anything that those mods miss.
 ]]--
 
+-- Ensure we have the features we need.
+if (mwse.buildDate == nil or mwse.buildDate < 20180724) then
+	mwse.log("[Happy Harvesting] Build date of %s does not meet minimum build date of 20180724.", mwse.buildDate)
+	return
+end
+
+local lfs = require("lfs")
+
+-- Ensure we don't have an old version installed.
+if (lfs.attributes("Data Files/MWSE/lua/nc/harvest/mod_init.lua")) then
+	if (lfs.rmdir("Data Files/MWSE/lua/nc/harvest/", true)) then
+		mwse.log("[Happy Harvesting] Old install found and deleted.")
+
+		-- Additional, probably not necessarily cleanup. It will only delete these if they are empty.
+		lfs.rmdir("Data Files/MWSE/lua/nc")
+		lfs.rmdir("Data Files/MWSE/lua")
+	else
+		mwse.log("[Happy Harvesting] Old install found but could not be deleted. Please remove the folder 'Data Files/MWSE/lua/nc/harvest' and restart Morrowind.")
+		return
+	end
+end
+
+local config = mwse.loadConfig("Happy Harvesting")
+if (config == nil) then
+	config = {
+		blacklist = {}
+	}
+end
+
 local function onActivate(e)
 	local target = e.target
 	local container = target.object
+	local baseObject = container
+	if (container.isInstance) then
+		baseObject = container.baseObject
+	end
 	
-	-- Make sure that we're looking at an unowned, unscripted, organic container.
+	-- Make sure that we're looking at an unowned, unscripted, organic container. Also check the blacklist.
 	if (container.objectType ~= tes3.objectType.container) then
 		return
 	elseif (container.organic ~= true) then
@@ -23,6 +56,8 @@ local function onActivate(e)
 	elseif (container.script ~= nil) then
 		return
 	elseif (tes3.getOwner(target) ~= nil) then
+		return
+	elseif (table.find(config.blacklist, baseObject.id) ~= nil) then
 		return
 	end
 
@@ -72,3 +107,14 @@ local function onActivate(e)
 	return false
 end
 event.register("activate", onActivate)
+
+-- 
+-- Set up Mod Config Menu support.
+-- 
+
+local modConfig = require("Happy Harvesting.mcm")
+modConfig.config = config
+local function registerModConfig()
+	mwse.registerModConfig("Happy Harvesting", modConfig)
+end
+event.register("modConfigReady", registerModConfig)
