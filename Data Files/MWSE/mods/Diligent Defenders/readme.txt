@@ -1,7 +1,7 @@
 =====================================================================================
                                  Diligent  Defenders
                                  Author: NullCascade                                 
-                                    Version 1.0.0                                    
+                                    Version 1.1.0                                    
 =====================================================================================
 
  INDEX:
@@ -38,14 +38,11 @@
 
  Extract the archive into your Morrowind installation directory. The mod should
  contain the following files:
-    .\Data Files\MWSE\lua\nc\defenders\mod_init.lua
-    .\Data Files\MWSE\nc_defenders_config.json
+    .\Data Files\MWSE\config\Diligent Defenders.json
+    .\Data Files\MWSE\mods\Diligent Defenders\main.lua
+    .\Data Files\MWSE\mods\Diligent Defenders\mcm.lua
 
- To configure the mod, edit the above-named json file. The config entries function
- as described below:
-
- blacklist: An array of object IDs that the system will ignore, in case there's
- custom AIs/scripts that conflict.
+ To configure the mod, edit the above json file or use the in-game Mod Config Menu.
 
 =====================================================================================
  PLAYING THIS PLUGIN:
@@ -65,6 +62,9 @@
  VERSION HISTORY
 =====================================================================================
 
+ 1.1.0 [2018-07-25]:
+    * Added Mod Config Menu support for managing the blacklist.
+
  1.0.0 [2018-05-28]:
     * Initial release.
 
@@ -83,7 +83,7 @@
  Special thanks to Greatness7 for his help in progressing MWSE 2.1 and to DarkElfGuy
  for inspiring people to create and release mods for the yearly modathon.
 
- Copyright 2018 Michael Wallar
+ Copyright 2018 NullCascade
 
  Permission is hereby granted, free of charge, to any person obtaining a copy of
  this software and associated documentation files (the "Software"), to deal in the
