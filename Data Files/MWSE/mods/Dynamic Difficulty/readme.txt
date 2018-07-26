@@ -1,7 +1,7 @@
 =====================================================================================
                                  Dynamic  Difficulty                                 
                                  Author: NullCascade                                 
-                                    Version 1.0.0                                    
+                                    Version 1.1.0                                    
 =====================================================================================
 
  INDEX:
@@ -39,25 +39,10 @@
 
  Extract the archive into your Morrowind installation directory. The mod should
  contain the following files:
-    .\Data Files\MWSE\lua\nc\difficulty\mod_init.lua
-    .\Data Files\MWSE\nc_difficulty_config.json
+    .\Data Files\MWSE\config\Dynamic Difficulty.json
+    .\Data Files\MWSE\mods\Dynamic Difficulty\main.lua
 
- To configure the mod, edit the above-named json file. The config entries function
- as described below:
-
- capDifficulty: If true, difficulty will be capped from -100 to 100. Otherwise the
- mod will allow you to define difficulties not normally allowed by the game. Note
- that this hasn't been extensively tested, and it is suggested that it remains true.
-
- baseDifficulty: The base difficulty to use for calculations.
-
- increasePerLevel: This value is multiplied by [player's level - 1] and used to
- modify the difficulty.
-
- regionModifiers: This list of regions is used to configure specific regions of the
- world to be easier/more difficult. For example, if a value of 20 is used for the
- "West Gash Region" key, then your difficulty will be increased by 20 when in that
- region.
+ To configure the mod, use the in-game mod configuration menu.
 
 =====================================================================================
  PLAYING THIS PLUGIN:
@@ -77,6 +62,9 @@
  VERSION HISTORY
 =====================================================================================
 
+ 1.1.0 [2018-07-26]:
+    * Added Mod Config Menu support.
+
  1.0.0 [2018-05-28]:
     * Initial release.
 
@@ -95,7 +83,7 @@
  Special thanks to Greatness7 for his help in progressing MWSE 2.1 and to DarkElfGuy
  for inspiring people to create and release mods for the yearly modathon.
 
- Copyright 2018 Michael Wallar
+ Copyright 2018 NullCascade
 
  Permission is hereby granted, free of charge, to any person obtaining a copy of
  this software and associated documentation files (the "Software"), to deal in the

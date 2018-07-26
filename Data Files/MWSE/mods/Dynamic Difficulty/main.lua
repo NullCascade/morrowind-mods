@@ -9,7 +9,15 @@
 ]]--
 
 -- Loud our config file.
-local config = json.loadfile("nc_difficulty_config")
+local config = mwse.loadConfig("Dynamic Difficulty")
+if (config == nil) then
+	config = {
+		capDifficulty = true,
+		baseDifficulty = 0,
+		increasePerLevel = 2,
+		regionModifiers = {},
+	}
+end
 
 -- Function for how we're determining difficulty.
 local function recalculateDifficulty()
@@ -17,7 +25,7 @@ local function recalculateDifficulty()
 	local difficulty = config.baseDifficulty or 0
 
 	-- Scale with player level.
-	local playerLevel = tes3.getPlayerRef().object.level
+	local playerLevel = tes3.player.object.level
 	difficulty = difficulty + config.increasePerLevel * (playerLevel - 1)
 
 	-- Add any region modifiers.
@@ -40,11 +48,19 @@ local function recalculateDifficulty()
 	tes3.getWorldController().difficulty = difficulty / 100
 end
 
+-- Hook up the interop module to allow other mods to recalculate difficulty.
+local interop = require("Dynamic Difficulty.interop")
+interop.recalculate = recalculateDifficulty
+
 -- The events that we want to recalculate difficulty on.
-if (config ~= nil) then
-	event.register("loaded", recalculateDifficulty)
-	event.register("levelUp", recalculateDifficulty)
-	event.register("cellChanged", recalculateDifficulty)
-else
-	mwse.log("[nc-difficulty] Error: Could not load config file! Is the mod installed correctly?")
+event.register("loaded", recalculateDifficulty)
+event.register("levelUp", recalculateDifficulty)
+event.register("cellChanged", recalculateDifficulty)
+
+-- Setup MCM.
+local modConfig = require("Dynamic Difficulty.mcm")
+modConfig.config = config
+local function registerModConfig()
+	mwse.registerModConfig("Dynamic Difficulty", modConfig)
 end
+event.register("modConfigReady", registerModConfig)
