@@ -151,7 +151,7 @@ end
 -- Since we are taking control of the mod config system, we will manually handle saves. This is
 -- called when the save button is clicked while configuring this mod.
 function this.onClose(container)
-	mwse.saveConfig("Diligent Defenders", config)
+	mwse.saveConfig("Diligent Defenders", this.config)
 end
 
 return this

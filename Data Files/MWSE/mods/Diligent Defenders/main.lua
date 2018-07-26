@@ -37,8 +37,8 @@ end
 
 -- Package to send to the mod config.
 local modConfig = require("Diligent Defenders.mcm")
+modConfig.config = config
 local function registerModConfig()
-	modConfig.config = config
 	mwse.registerModConfig("Diligent Defenders", modConfig)
 end
 event.register("modConfigReady", registerModConfig)
