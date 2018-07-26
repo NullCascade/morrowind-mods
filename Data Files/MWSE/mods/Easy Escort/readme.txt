@@ -1,7 +1,7 @@
 =====================================================================================
                                      Easy Escort                                     
                                  Author: NullCascade                                 
-                                    Version 1.1.1                                    
+                                    Version 1.2.0                                    
 =====================================================================================
 
  INDEX:
@@ -40,20 +40,10 @@
 
  Extract the archive into your Morrowind installation directory. The mod should
  contain the following files:
-    .\Data Files\MWSE\lua\nc\escort\mod_init.lua
-    .\Data Files\MWSE\nc_escort_config.json
+    .\Data Files\MWSE\config\Easy Escort.json
+    .\Data Files\MWSE\mods\Easy Escort\main.lua
 
- To configure the mod, edit the above-named json file. The config entries function
- as described below:
-
- pollRate: The number of seconds between checks. Default of 5. This means that every
- five seconds player followers will have their position and cell checked.
-
- followDistance: The maximum distance a follower can get before they'll be warped.
-
- blackList: The object IDs of the creatures/NPCs to exclude from this script. If a
- companion has their own scripts that conflict with this, you can add their ID to
- this array and they will be ignored.
+ To configure the mod, use the in-game configuration menu.
 
 =====================================================================================
  PLAYING THIS PLUGIN:
@@ -72,6 +62,9 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.2.0 [2018-07-26]:
+    * Added mod config menu support.
 
  1.1.1 [2018-06-04]:
     * Blacklisted the chargen boat guide from following you up onto the ship.
