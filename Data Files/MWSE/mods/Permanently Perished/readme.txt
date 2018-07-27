@@ -1,7 +1,7 @@
 =====================================================================================
                                 Permanently  Perished                                
                                  Author: NullCascade                                 
-                                    Version 1.0.0                                    
+                                    Version 1.0.1                                    
 =====================================================================================
 
  INDEX:
@@ -43,7 +43,7 @@
 
  Extract the archive into your Morrowind installation directory. The mod should
  contain the following file:
-    .\Data Files\MWSE\lua\nc\death\mod_init.lua
+    .\Data Files\MWSE\mods\Permanently Perished\main.lua
 
 =====================================================================================
  PLAYING THIS PLUGIN:
@@ -62,6 +62,9 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.0.1 [2018-07-26]:
+    * Minor refactor for new MWSE folder structure.
 
  1.0.0 [2018-05-04]:
     * Initial release.
