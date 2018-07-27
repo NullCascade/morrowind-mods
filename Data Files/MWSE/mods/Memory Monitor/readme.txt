@@ -1,7 +1,7 @@
 =====================================================================================
                                    Memory  Monitor                                   
                                  Author: NullCascade                                 
-                                    Version 1.0.0                                    
+                                    Version 1.1.0                                    
 =====================================================================================
 
  INDEX:
@@ -38,8 +38,8 @@
 
  Extract the archive into your Morrowind installation directory. The mod consists of
  two files, which should end up located at:
-    <Morrowind Install Directory>\Data Files\MWSE\lua\nc\memmon\mod_init.lua
-    <Morrowind Install Directory>\Data Files\MWSE\nc_memmon_config.json
+    .\Data Files\MWSE\config\Memory Monitor.json
+    .\Data Files\MWSE\mods\Memory Monitor\mod_init.lua
 
 =====================================================================================
  PLAYING THIS PLUGIN:
@@ -48,7 +48,7 @@
  There is no esp file to activate. Simply install the MWSE 2.1 and this mod, and
  load up an old or new game.
 
- The memory thresholds for warnings can be configured in the nc_memmon_config file.
+ The memory thresholds for warnings can be configured in Memory Monitor.json.
 
 =====================================================================================
  KNOWN ISSUES OR BUGS:
@@ -60,6 +60,9 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.0.1 [2018-07-26]:
+    * Minor refactor for new MWSE folder structure.
 
  1.0.0 [2018-05-24]:
     * Initial release.
