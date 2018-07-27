@@ -10,7 +10,29 @@
 	way, but if it helps you, great.
 ]]--
 
-local config = json.loadfile("nc_exit_config")
+-- Ensure we have the features we need.
+if (mwse.buildDate == nil or mwse.buildDate < 20180726) then
+	mwse.log("[Expeditious Exit] Build date of %s does not meet minimum build date of 20180726.", mwse.buildDate)
+	return
+end
+
+local lfs = require("lfs")
+
+-- Ensure we don't have an old version installed.
+if (lfs.attributes("Data Files/MWSE/lua/nc/exit/mod_init.lua")) then
+	if (lfs.rmdir("Data Files/MWSE/lua/nc/exit/", true)) then
+		mwse.log("[Expeditious Exit] Old install found and deleted.")
+
+		-- Additional, probably not necessarily cleanup. It will only delete these if they are empty.
+		lfs.rmdir("Data Files/MWSE/lua/nc")
+		lfs.rmdir("Data Files/MWSE/lua")
+	else
+		mwse.log("[Expeditious Exit] Old install found but could not be deleted. Please remove the folder 'Data Files/MWSE/lua/nc/exit' and restart Morrowind.")
+		return
+	end
+end
+
+local config = mwse.loadConfig("Expeditious Exit")
 if (not config) then
 	config = {
 		showMenuOnExit = true
@@ -20,7 +42,7 @@ end
 -- Callback used when confirming exit
 local function checkConfirmedCloseCallback(e)
 	if (e.button == 0) then
-		mwse.log("[nc-exit] Forcing exit after confirmation!")
+		mwse.log("[Expeditious Exit] Forcing exit after confirmation!")
 		os.exit()
 	end
 end
@@ -36,7 +58,7 @@ local function onExitButtonClicked(e)
 			callback = checkConfirmedCloseCallback
 		})
 	else
-		mwse.log("[nc-exit] Forcing exit!")
+		mwse.log("[Expeditious Exit] Forcing exit!")
 		os.exit()
 	end
 end
@@ -44,7 +66,7 @@ end
 -- Load the config to see if we care about message boxes.
 local function onInitialized()
 	-- Show initialization event in the log.
-	mwse.log("[nc-exit] Mod initialized with configuration:")
+	mwse.log("[Expeditious Exit] Mod initialized with configuration:")
 	mwse.log(json.encode(config, { indent = true }))
 end
 event.register("initialized", onInitialized)
@@ -54,7 +76,7 @@ local function rebindExitButton(e)
 	-- Try to find the options menu exit button.
 	local exitButton = e.element:findChild(tes3ui.registerID("MenuOptions_Exit_container"))
 	if (exitButton == nil) then
-		mwse.log("[nc-exit] Couldn't find exit button UI element!")
+		mwse.log("[Expeditious Exit] Couldn't find exit button UI element!")
 		return
 	end
 	
@@ -113,9 +135,9 @@ end
 -- Since we are taking control of the mod config system, we will manually handle saves. This is
 -- called when the save button is clicked while configuring this mod.
 function modConfig.onClose(container)
-	mwse.log("[nc-exit] Saving mod configuration:")
+	mwse.log("[Expeditious Exit] Saving mod configuration:")
 	mwse.log(json.encode(config, { indent = true }))
-	json.savefile("nc_exit_config", config, { indent = true })
+	mwse.saveConfig("Expeditious Exit", config, { indent = true })
 end
 
 -- When the mod config menu is ready to start accepting registrations, register this mod.
