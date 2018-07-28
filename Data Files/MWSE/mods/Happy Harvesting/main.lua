@@ -12,8 +12,8 @@
 ]]--
 
 -- Ensure we have the features we need.
-if (mwse.buildDate == nil or mwse.buildDate < 20180724) then
-	mwse.log("[Happy Harvesting] Build date of %s does not meet minimum build date of 20180724.", mwse.buildDate)
+if (mwse.buildDate == nil or mwse.buildDate < 20180728) then
+	mwse.log("[Happy Harvesting] Build date of %s does not meet minimum build date of 20180728.", mwse.buildDate)
 	return
 end
 
@@ -65,10 +65,7 @@ local function onActivate(e)
 	-- Instead it is the base object. When the item is first activated it clones the
 	-- container to an instance. We want to force this to happen so we don't edit
 	-- the base record. This also makes sure that our leveled items are resolved.
-	if (container.isInstance == false) then
-		container:clone(target)
-
-		-- Refresh the handle on our reference's object, since it has now changed.
+	if (target:clone()) then
 		container = target.object
 	end
 
