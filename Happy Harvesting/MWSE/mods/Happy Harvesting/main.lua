@@ -74,7 +74,6 @@ local function onActivate(e)
 
 	-- At this point we know we want this container.
 	local countHarvested = 0
-	local playerRef = tes3.getPlayerRef()
 	local inventory = container.inventory
 	for stack in tes3.iterate(inventory.iterator) do
 		-- Store the item for later removal.
@@ -83,7 +82,7 @@ local function onActivate(e)
 
 		-- Add the item to the player.
 		countHarvested = countHarvested + stack.count
-		mwscript.addItem({ reference = playerRef, item = item.id, count = stack.count })
+		mwscript.addItem({ reference = tes3.player, item = item.id, count = stack.count })
 
 		-- Give some feedback to the user by playing the pickup sound and showing a message box.
 		tes3.playItemPickupSound({ item = item.id, pickup = true })
