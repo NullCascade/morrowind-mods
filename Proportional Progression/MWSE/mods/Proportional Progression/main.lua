@@ -47,7 +47,7 @@ local function loadConfig()
 	end
 
 	-- Print the loaded config to the log.
-	print("[nc-xpscale] Loaded config:")
+	print("[Proportional Progression] Loaded config:")
 	print(json.encode(config, {indent = true}))
 end
 loadConfig()

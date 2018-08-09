@@ -15,7 +15,7 @@
 
 -- Ensure we have the features we need.
 if (mwse.buildDate == nil or mwse.buildDate < 20180725) then
-	mwse.log("[nc-consume] Build date of %s does not meet minimum build date of 20180725.", mwse.buildDate)
+	mwse.log("[Controlled Consumption] Build date of %s does not meet minimum build date of 20180725.", mwse.buildDate)
 	return
 end
 
@@ -24,13 +24,13 @@ local lfs = require("lfs")
 -- Ensure we don't have an old version installed.
 if (lfs.attributes("Data Files/MWSE/lua/nc/consume/mod_init.lua")) then
 	if (lfs.rmdir("Data Files/MWSE/lua/nc/consume/", true)) then
-		mwse.log("[nc-consume] Old install found and deleted.")
+		mwse.log("[Controlled Consumption] Old install found and deleted.")
 
 		-- Additional, probably not necessarily cleanup. It will only delete these if they are empty.
 		lfs.rmdir("Data Files/MWSE/lua/nc")
 		lfs.rmdir("Data Files/MWSE/lua")
 	else
-		mwse.log("[nc-consume] Old install found but could not be deleted. Please remove the folder 'Data Files/MWSE/lua/nc/consume' and restart Morrowind.")
+		mwse.log("[Controlled Consumption] Old install found but could not be deleted. Please remove the folder 'Data Files/MWSE/lua/nc/consume' and restart Morrowind.")
 		return
 	end
 end
@@ -78,12 +78,12 @@ local function loadModule(file)
 	-- Ensure that the minimum version requirements are met.
 	local version = module.consumeVersion or 1.1
 	if (version == nil or version < minimumModuleVersion) then
-		mwse.log("[nc-consume] Module '%s' bypassed. Version %.1f does not meet minimum version %.1f", module.name, version, minimumModuleVersion)
+		mwse.log("[Controlled Consumption] Module '%s' bypassed. Version %.1f does not meet minimum version %.1f", module.name, version, minimumModuleVersion)
 		return
 	end
 
 	-- Report success, insert into module lists.
-	mwse.log("[nc-consume] Found module: %s", module.name)
+	mwse.log("[Controlled Consumption] Found module: %s", module.name)
 	table.insert(moduleNames, module.name)
 	modules[module.name] = module
 end
@@ -107,7 +107,7 @@ local function setModule(name)
 	currentModule = modules[name]
 	if (currentModule == nil) then
 		modConfig.hidden = true
-		error("[nc-consume] Could not determine active module!")
+		error("[Controlled Consumption] Could not determine active module!")
 	end
 	config.currentModule = currentModule.name
 
@@ -130,7 +130,7 @@ local function setModule(name)
 		end
 	end
 
-	mwse.log("[nc-consume] Set module: %s", name)
+	mwse.log("[Controlled Consumption] Set module: %s", name)
 end
 
 -- Load the desired configuration module.
