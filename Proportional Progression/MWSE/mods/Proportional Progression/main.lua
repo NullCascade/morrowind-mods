@@ -12,7 +12,7 @@ local config = nil
 -- Loads config into the above variable. We change some names in this process, and massage skill names into numbers.
 local function loadConfig()
 	-- Raw config file data. We'll want to manipulate it.
-	local rawConfig = json.loadfile("nc_xpscale_config")
+	local rawConfig = mwse.loadConfig("Proportional Progression")
 
 	config = {}
 
