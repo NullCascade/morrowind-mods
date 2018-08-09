@@ -7,7 +7,7 @@
 ]]--
 
 -- Mod configuration.
-local config = json.loadfile("nc_souls_config")
+local config = mwse.loadConfig("Sounds of Souls")
 
 -- Action string/integer mapping.
 local soundTriggerActionNames = { "activate", "playerInventory", "cell" }
