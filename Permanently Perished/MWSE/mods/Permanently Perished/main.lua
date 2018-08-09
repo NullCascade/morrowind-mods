@@ -1,10 +1,7 @@
 
 --[[
-	Mod Initialization: Dead is Dead
+	Mod Initialization: Permanently Perished
 	Author: NullCascade
-
-
-
 ]]--
 
 -- Ensure we have the features we need.
@@ -30,7 +27,7 @@ if (lfs.attributes("Data Files/MWSE/lua/nc/death/mod_init.lua")) then
 end
 
 -- The name of the config file to use in the MWSE directory.
-local configFilename = "nc_death_data"
+local configFilename = "Permanently Perished"
 
 -- Get the mod-specific config saved to the player's save game.
 local function getModSaveConfig()
@@ -47,7 +44,7 @@ end
 
 -- Get the config file contents, or default structure.
 local function getModSavelessConfig()
-	local config = json.loadfile(configFilename)
+	local config = mwse.loadConfig(configFilename)
 	if (config == nil) then
 		config = { characters = {} }
 	end
@@ -60,9 +57,9 @@ local function getCharacterId()
 	local config = getModSaveConfig()
 	if (config.id == nil) then
 		config.id = os.time(os.date("!*t"))
-		print("[nc-death] Generating new character ID: " .. config.id)
+		print("[Permanently Perished] Generating new character ID: " .. config.id)
 	else
-		print("[nc-death] Recognized character: " .. config.id)
+		print("[Permanently Perished] Recognized character: " .. config.id)
 	end
 	return tostring(config.id)
 end
@@ -75,7 +72,7 @@ local function addCharacterToSavelessConfig(lives)
 		lives = lives,
 		deaths = 0,
 	}
-	json.savefile(configFilename, config)
+	mwse.saveConfig(configFilename, config)
 end
 
 -- Increments the death counter for the current character.
@@ -86,7 +83,7 @@ local function incrementDeathCount()
 	local deaths = config.characters[id].deaths + 1
 	config.characters[id].deaths = deaths
 
-	json.savefile(configFilename, config)
+	mwse.saveConfig(configFilename, config)
 	return deaths, config.characters[id].lives
 end
 
@@ -139,7 +136,7 @@ configMainMenu = function(e)
 			config.enabled = true
 			addCharacterToSavelessConfig(configLifeCount)
 			tes3.messageBox({ message = "Permadeath enabled. Good luck!" })
-			print("[nc-death] Permadeath enabled.")
+			print("[Permanently Perished] Permadeath enabled.")
 		end
 		return
 	end
@@ -199,7 +196,7 @@ local function onDamaged(e)
 	end
 
 	if (diedThisSession == false and e.mobile.health.current <= 0) then
-		print("[nc-death] The player has died!")
+		print("[Permanently Perished] The player has died!")
 		incrementDeathCount()
 		diedThisSession = true
 	end
