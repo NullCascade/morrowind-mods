@@ -106,15 +106,7 @@ local function forceFollowFriendlyActors(e)
 		end
 	end
 end
-
--- Use timers based on the poll rate.
-local function onLoaded(e)
-	timer.delayOneFrame(function()
-		timer.start(config.pollRate, forceFollowFriendlyActors, 0)
-		event.register("cellChanged", forceFollowFriendlyActors)
-	end)
-end
-event.register("loaded", onLoaded)
+event.register("cellChanged", function(e) timer.delayOneFrame(forceFollowFriendlyActors) end)
 
 -- 
 -- Initialize interop library to support modifying the blacklist.
