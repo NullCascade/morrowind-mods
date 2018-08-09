@@ -50,6 +50,12 @@ Another simple mod that warns the player if they are approaching the 4 GB memory
 
 * Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45696)
 
+## Permanently Perished
+
+A simple permadeath mod. When you create a new character, you will be allowed to choose the number of lives the character has (defaults to 1). When the character dies, saves for that character won't be playable.
+
+* Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45672)
+
 ## Proportional Progression
 
 This mod allows you to configure the rate at which skills level in a way that is more detailed than the simple game settings.
@@ -61,3 +67,9 @@ This mod allows you to configure the rate at which skills level in a way that is
 This mod changes how saves are handled by Morrowind. The goal of the mod is to provide more types of autosaves, as well as a rotating list of quicksaves/autosaves so that the player always has a save to go back to.
 
 * Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45608)
+
+## Sounds of Souls
+
+Ever think that it's a bit creepy that there are souls trapped just there, on your desk? Would it be even creepier if the souls spoke from beyond the grave? This mod makes them do just that!
+
+* Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45657)
