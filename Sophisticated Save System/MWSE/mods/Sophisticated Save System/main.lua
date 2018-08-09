@@ -110,9 +110,9 @@ local function clearOldSaves()
 		local timestamp = saves[i]
 		local fileName = getSaveName(saveTypes[timestamp], timestamp)
 		if (os.remove("saves/" .. fileName .. ".ess")) then
-			print("[nc-sss] Deleting old save: " .. fileName)
+			print("[Sophisticated Save System] Deleting old save: " .. fileName)
 		else
-			print("[nc-sss] Warning! Failed to delete old save: " .. fileName)
+			print("[Sophisticated Save System] Warning! Failed to delete old save: " .. fileName)
 		end
 	end
 end
@@ -126,21 +126,21 @@ local function loadConfig()
 	table.copy(defaultConfig, config)
 
 	-- Then load any other values from the config file.
-	local configJson = json.loadfile("nc_sss_config")
+	local configJson = mwse.loadConfig("Sophisticated Save System")
 	if (configJson ~= nil) then
 		table.copy(configJson, config)
 	end
 
-	print("[nc-sss] Loaded configuration:")
+	print("[Sophisticated Save System] Loaded configuration:")
 	print(json.encode(config, { indent = true }))
 end
 loadConfig()
 
 -- Saves the configuration to the local file.
 local function saveConfig()
-	json.savefile("nc_sss_config", config)
+	mwse.loadConfig("Sophisticated Save System", config)
 	
-	print("[nc-sss] Saved configuration:")
+	print("[Sophisticated Save System] Saved configuration:")
 	print(json.encode(config, { indent = true }))
 end
 
@@ -183,7 +183,7 @@ end
 -- and is about to show the main menu. The only thing we want to do here is let the
 -- log know that we're up and going.
 local function initialized(e)
-	print("[nc-sss] Initialized MWSE Sophisticated Save System v1.0.0.")
+	print("[Sophisticated Save System] Initialized MWSE Sophisticated Save System v1.0.0.")
 end
 event.register("initialized", initialized)
 
@@ -210,7 +210,7 @@ local function combatStart(e)
 	end
 
 	-- If we've no reason to ignore the event, make an autosave.
-	print("[nc-sss] Creating autosave for combat start.")
+	print("[Sophisticated Save System] Creating autosave for combat start.")
 	tes3.saveGame({ file = "autosave" })
 end
 event.register("combatStart", combatStart)
@@ -232,7 +232,7 @@ local function combatStopped(e)
 	end
 
 	-- If we've no reason to ignore the event, make an autosave.
-	print("[nc-sss] Creating autosave for combat end.")
+	print("[Sophisticated Save System] Creating autosave for combat end.")
 	tes3.saveGame({ file = "autosave" })
 end
 event.register("combatStopped", combatStopped)
@@ -245,7 +245,7 @@ local function cellChanged(e)
 	end
 
 	-- If we've no reason to ignore the event, make an autosave.
-	print("[nc-sss] Creating autosave for cell change.")
+	print("[Sophisticated Save System] Creating autosave for cell change.")
 	tes3.saveGame({ file = "autosave" })
 end
 event.register("cellChanged", cellChanged)
@@ -268,7 +268,7 @@ local function load(e)
 	end
 
 	-- Show the currently loading save.
-	print("[nc-sss] Loading save: " .. e.filename)
+	print("[Sophisticated Save System] Loading save: " .. e.filename)
 
 	-- Block autosaves from happening until our load has resolved.
 	blockAutosaves = true
@@ -311,7 +311,7 @@ local function save(e)
 		-- Ensure that we aren't autosaving too often.
 		local now = os.clock()
 		if (now - lastAutoSaveTimestamp < config.minimumTimeBetweenAutoSaves * 60) then
-			print(string.format("[nc-sss] Prevented autosave, it has only been %d seconds since the last save.", now - lastAutoSaveTimestamp))
+			print(string.format("[Sophisticated Save System] Prevented autosave, it has only been %d seconds since the last save.", now - lastAutoSaveTimestamp))
 			return false
 		end
 		lastAutoSaveTimestamp = now
@@ -322,7 +322,7 @@ local function save(e)
 	end
 
 	-- Show the save.
-	print(string.format("[nc-sss] Creating save: %s -> %s", e.name, e.filename))
+	print(string.format("[Sophisticated Save System] Creating save: %s -> %s", e.name, e.filename))
 end
 event.register("save", save)
 
@@ -330,7 +330,7 @@ event.register("save", save)
 -- opportunity to clear out any old saves that we don't need to care about anymore.
 local function saved(e)
 	-- Show the save information.
-	print(string.format("[nc-sss] Created save: %s -> %s", e.name, e.filename))
+	print(string.format("[Sophisticated Save System] Created save: %s -> %s", e.name, e.filename))
 
 	-- Reset the autosave timer.
 	resetAutosaveTimer()
