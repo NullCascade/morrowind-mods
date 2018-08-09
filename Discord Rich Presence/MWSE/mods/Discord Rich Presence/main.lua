@@ -13,7 +13,29 @@
 
 --]]
 
-local discordRPC = require("nc.discord.discordRPC")
+-- Ensure we have the features we need.
+if (mwse.buildDate == nil or mwse.buildDate < 20180725) then
+	mwse.log("[Discord Rich Presence] Build date of %s does not meet minimum build date of 20180725.", mwse.buildDate)
+	return
+end
+
+local lfs = require("lfs")
+
+-- Ensure we don't have an old version installed.
+if (lfs.attributes("Data Files/MWSE/lua/nc/discord/mod_init.lua")) then
+	if (lfs.rmdir("Data Files/MWSE/lua/nc/discord/", true)) then
+		mwse.log("[Discord Rich Presence] Old install found and deleted.")
+
+		-- Additional, probably not necessarily cleanup. It will only delete these if they are empty.
+		lfs.rmdir("Data Files/MWSE/lua/nc")
+		lfs.rmdir("Data Files/MWSE/lua")
+	else
+		mwse.log("[Discord Rich Presence] Old install found but could not be deleted. Please remove the folder 'Data Files/MWSE/lua/nc/discord' and restart Morrowind.")
+		return
+	end
+end
+
+local discordRPC = require("Discord Rich Presence.discordRPC")
 
 -- Table where we store data that is going to get sent to Discord.
 local presenceData = {
@@ -24,14 +46,13 @@ local presenceData = {
 
 -- This function updates the presenceData table with new information.
 local function updateGameData()
-	local playerRef = tes3.getPlayerRef()
-	if (playerRef == nil) then
+	if (tes3.player == nil) then
 		return
 	end
 
 	-- Set the details to the player's name/class/level.
-	local player = playerRef.object
-	presenceData.details = string.format( "%s (%s, %s %d)", player.name, player.race.name, player.class.name, player.level )
+	local playerObject = tes3.player.object
+	presenceData.details = string.format( "%s (%s, %s %d)", playerObject.name, playerObject.race.name, playerObject.class.name, playerObject.level )
 
 	-- Set the state to the player cell.
 	local playerCell = tes3.getPlayerCell()
@@ -70,7 +91,7 @@ event.register("loaded", onLoaded)
 
 -- Discord callback for when it is ready.
 function discordRPC.ready()
-	print("[discord_rpc]: Discord ready.")
+	print("[Discord Rich Presence]: Discord ready.")
 
 	-- When Discord first reports that it is ready, update presence. We very likely
 	-- won't have interesting data at this point.
@@ -82,10 +103,10 @@ end
 
 -- Discord callback for when we are disconnected.
 function discordRPC.disconnected(errorCode, message)
-    print(string.format("[discord_rpc]: Discord disconnected (%d: %s)", errorCode, message))
+    print(string.format("[Discord Rich Presence]: Discord disconnected (%d: %s)", errorCode, message))
 end
 
 -- Discord callback for any errors.
 function discordRPC.errored(errorCode, message)
-    print(string.format("[discord_rpc]: Discord error (%d: %s)", errorCode, message))
+    print(string.format("[Discord Rich Presence]: Discord error (%d: %s)", errorCode, message))
 end

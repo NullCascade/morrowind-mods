@@ -1,7 +1,7 @@
 =====================================================================================
                          Discord Rich Presence for Morrowind
                                  Author: NullCascade                                 
-                                    Version 1.1.0                                    
+                                    Version 1.2.0                                    
 =====================================================================================
 
  INDEX:
@@ -40,7 +40,9 @@
 
  Extract the archive into your Morrowind installation directory. The mod should
  contain the following files:
-    .\Data Files\MWSE\lua\nc\discord\mod_init.lua
+    .\Data Files\MWSE\mods\Discord Rich Presence\discord-rpc.dll
+    .\Data Files\MWSE\mods\Discord Rich Presence\discordRPC.lua
+    .\Data Files\MWSE\mods\Discord Rich Presence\main.lua
 
 =====================================================================================
  PLAYING THIS PLUGIN:
@@ -59,6 +61,10 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.2.0 [2018-08-09]:
+    * Again updated for latest MWSE folder structure.
+    * Updated to Discord Rich Presence v3.3.0.
 
  1.1.0 [2018-05-07]:
     * Fixed for MWSE 2.1's new structure.
@@ -82,7 +88,7 @@
  Special thanks to Greatness7 for his help in progressing MWSE 2.1 and to DarkElfGuy
  for inspiring people to create and release mods for the yearly modathon.
 
- Copyright 2018 Michael Wallar
+ Copyright 2018 NullCascade
 
  Permission is hereby granted, free of charge, to any person obtaining a copy of
  this software and associated documentation files (the "Software"), to deal in the
