@@ -34,7 +34,7 @@ local defaultConfig = {
 local config = table.copy(defaultConfig)
 
 -- The last timestamp that an autosave was done on. We use this to prevent saves from happening too frequently.
-local lastAutoSaveTimestamp = 0
+local lastAutoSaveTimestamp = os.clock()
 
 -- Our config menus need to be forward declared so they can be moved between cleanly.
 local configShowEnableDisableFeatureMenu
@@ -110,9 +110,9 @@ local function clearOldSaves()
 		local timestamp = saves[i]
 		local fileName = getSaveName(saveTypes[timestamp], timestamp)
 		if (os.remove("saves/" .. fileName .. ".ess")) then
-			print("[Sophisticated Save System] Deleting old save: " .. fileName)
+			mwse.log("[Sophisticated Save System] Deleting old save: " .. fileName)
 		else
-			print("[Sophisticated Save System] Warning! Failed to delete old save: " .. fileName)
+			mwse.log("[Sophisticated Save System] Warning! Failed to delete old save: " .. fileName)
 		end
 	end
 end
@@ -131,17 +131,17 @@ local function loadConfig()
 		table.copy(configJson, config)
 	end
 
-	print("[Sophisticated Save System] Loaded configuration:")
-	print(json.encode(config, { indent = true }))
+	mwse.log("[Sophisticated Save System] Loaded configuration:")
+	mwse.log(json.encode(config, { indent = true }))
 end
 loadConfig()
 
 -- Saves the configuration to the local file.
 local function saveConfig()
-	mwse.loadConfig("Sophisticated Save System", config)
+	mwse.saveConfig("Sophisticated Save System", config)
 	
-	print("[Sophisticated Save System] Saved configuration:")
-	print(json.encode(config, { indent = true }))
+	mwse.log("[Sophisticated Save System] Saved configuration:")
+	mwse.log(json.encode(config, { indent = true }))
 end
 
 -- Autosave function. Executes when autosaveTimer iterates, which should be every
@@ -167,6 +167,8 @@ end
 local function createAutosaveTimer()
 	autosavePasses = 0
 	autosaveTimer = timer.start(60, autosave, 0)
+
+	lastAutoSaveTimestamp = os.clock()
 end
 createAutosaveTimer()
 
@@ -177,13 +179,15 @@ local function resetAutosaveTimer()
 	autosavePasses = 0
 	timer.t = config.timeBetweenAutoSaves
 	timer.reset(autosaveTimer)
+
+	lastAutoSaveTimestamp = os.clock()
 end
 
 -- Initialization event. This happens after the game has finished loading game data,
 -- and is about to show the main menu. The only thing we want to do here is let the
 -- log know that we're up and going.
 local function initialized(e)
-	print("[Sophisticated Save System] Initialized MWSE Sophisticated Save System v1.0.0.")
+	mwse.log("[Sophisticated Save System] Initialized MWSE Sophisticated Save System v1.0.0.")
 end
 event.register("initialized", initialized)
 
@@ -210,7 +214,6 @@ local function combatStart(e)
 	end
 
 	-- If we've no reason to ignore the event, make an autosave.
-	print("[Sophisticated Save System] Creating autosave for combat start.")
 	tes3.saveGame({ file = "autosave" })
 end
 event.register("combatStart", combatStart)
@@ -232,7 +235,6 @@ local function combatStopped(e)
 	end
 
 	-- If we've no reason to ignore the event, make an autosave.
-	print("[Sophisticated Save System] Creating autosave for combat end.")
 	tes3.saveGame({ file = "autosave" })
 end
 event.register("combatStopped", combatStopped)
@@ -245,7 +247,6 @@ local function cellChanged(e)
 	end
 
 	-- If we've no reason to ignore the event, make an autosave.
-	print("[Sophisticated Save System] Creating autosave for cell change.")
 	tes3.saveGame({ file = "autosave" })
 end
 event.register("cellChanged", cellChanged)
@@ -268,7 +269,7 @@ local function load(e)
 	end
 
 	-- Show the currently loading save.
-	print("[Sophisticated Save System] Loading save: " .. e.filename)
+	mwse.log("[Sophisticated Save System] Loading save: " .. e.filename)
 
 	-- Block autosaves from happening until our load has resolved.
 	blockAutosaves = true
@@ -311,7 +312,6 @@ local function save(e)
 		-- Ensure that we aren't autosaving too often.
 		local now = os.clock()
 		if (now - lastAutoSaveTimestamp < config.minimumTimeBetweenAutoSaves * 60) then
-			print(string.format("[Sophisticated Save System] Prevented autosave, it has only been %d seconds since the last save.", now - lastAutoSaveTimestamp))
 			return false
 		end
 		lastAutoSaveTimestamp = now
@@ -322,7 +322,7 @@ local function save(e)
 	end
 
 	-- Show the save.
-	print(string.format("[Sophisticated Save System] Creating save: %s -> %s", e.name, e.filename))
+	mwse.log(string.format("[Sophisticated Save System] Creating save: %s -> %s", e.name, e.filename))
 end
 event.register("save", save)
 
@@ -330,7 +330,7 @@ event.register("save", save)
 -- opportunity to clear out any old saves that we don't need to care about anymore.
 local function saved(e)
 	-- Show the save information.
-	print(string.format("[Sophisticated Save System] Created save: %s -> %s", e.name, e.filename))
+	mwse.log(string.format("[Sophisticated Save System] Created save: %s -> %s", e.name, e.filename))
 
 	-- Reset the autosave timer.
 	resetAutosaveTimer()
@@ -340,145 +340,11 @@ local function saved(e)
 end
 event.register("saved", saved)
 
--- Configuration Menu: Enable/Disable Features
-configShowEnableDisableFeatureMenu = function(e)
-	-- Was this function called as an event?
-	if (e ~= nil) then
-		if (e.button == 0) then -- Unrestricted Quick Load
-			config.loadLatestSave = not config.loadLatestSave
-		elseif (e.button == 1) then -- Every X Minutes
-			config.saveOnTimer = not config.saveOnTimer
-		elseif (e.button == 2) then -- On Combat Start
-			config.saveOnCombatStart = not config.saveOnCombatStart
-		elseif (e.button == 3) then -- On Combat End
-			config.saveOnCombatEnd = not config.saveOnCombatEnd
-		elseif (e.button == 4) then -- On Cell Change
-			config.saveOnCellChange = not config.saveOnCellChange
-		else -- Unhandled button. Go back to the main menu.
-			configShowMainMenu()
-			return;
-		end
-	end
-
-	-- Show menu. Delay it by one frame.
-	tes3.messageBox({
-		message = "SSS Configuration Menu\nEnable/Disable Features",
-		buttons = {
-			"Unrestricted Quick Load: " .. (config.loadLatestSave and "Enabled" or "Disabled"),
-			"Autosave Every " .. config.timeBetweenAutoSaves .. " Minutes: " .. (config.saveOnTimer and "Enabled" or "Disabled"),
-			"Autosave on Combat Start: " .. (config.saveOnCombatStart and "Enabled" or "Disabled"),
-			"Autosave on Combat End: " .. (config.saveOnCombatEnd and "Enabled" or "Disabled"),
-			"Autosave on Cell Change: " .. (config.saveOnCellChange and "Enabled" or "Disabled"),
-			"Back"
-		},
-		callback = configShowEnableDisableFeatureMenu
-	})
+-- Setup MCM.
+local modConfig = require("Sophisticated Save System.mcm")
+modConfig.config = config
+modConfig.resetAutosaveTimer = resetAutosaveTimer
+local function registerModConfig()
+	mwse.registerModConfig("Sophisticated Save System", modConfig)
 end
-
-configShowConfigSaveCountMenu = function(e)
-	-- Was this function called as an event?
-	if (e ~= nil) then
-		if (e.button == 0) then -- -1 Save
-			if (config.maxSaveCount > 0) then
-				config.maxSaveCount = config.maxSaveCount - 1
-			end
-		elseif (e.button == 2) then -- +1 minute
-			config.maxSaveCount = config.maxSaveCount + 1
-		else -- Unhandled button. Go back to the main menu.
-			configShowMainMenu()
-			return;
-		end
-	end
-
-	-- Show menu. Delay it by one frame.
-	tes3.messageBox({
-		message = "Number of saves to keep: " .. (config.maxSaveCount ~= 0 and config.maxSaveCount or "All"),
-		buttons = { "-", "Back", "+" },
-		callback = configShowConfigSaveCountMenu
-	})
-end
-
-configShowConfigTimerMenu = function(e)
-	-- Was this function called as an event?
-	if (e ~= nil) then
-		if (e.button == 0) then -- -1 minute
-			if (config.timeBetweenAutoSaves > 1) then
-				config.timeBetweenAutoSaves = config.timeBetweenAutoSaves - 1
-				resetAutosaveTimer()
-			end
-		elseif (e.button == 2) then -- +1 minute
-			config.timeBetweenAutoSaves = config.timeBetweenAutoSaves + 1
-			resetAutosaveTimer()
-		else -- Unhandled button. Go back to the main menu.
-			configShowMainMenu()
-			return;
-		end
-	end
-
-	-- Show menu. Delay it by one frame.
-	tes3.messageBox({
-		message = "Time between saves: " .. config.timeBetweenAutoSaves .. "m",
-		buttons = { "-", "Back", "+" },
-		callback = configShowConfigTimerMenu
-	})
-end
-
-configShowConfigMinimumTimerMenu = function(e)
-	-- Was this function called as an event?
-	if (e ~= nil) then
-		if (e.button == 0) then -- -1 minute
-			if (config.minimumTimeBetweenAutoSaves > 1) then
-				config.minimumTimeBetweenAutoSaves = config.minimumTimeBetweenAutoSaves - 1
-				resetAutosaveTimer()
-			end
-		elseif (e.button == 2) then -- +1 minute
-			config.minimumTimeBetweenAutoSaves = config.minimumTimeBetweenAutoSaves + 1
-			resetAutosaveTimer()
-		else -- Unhandled button. Go back to the main menu.
-			configShowMainMenu()
-			return;
-		end
-	end
-
-	-- Show menu. Delay it by one frame.
-	tes3.messageBox({
-		message = "Minimum time between saves: " .. config.minimumTimeBetweenAutoSaves .. "m",
-		buttons = { "-", "Back", "+" },
-		callback = configShowConfigMinimumTimerMenu
-	})
-end
-
--- Configuration Menu: Main Menu
-configShowMainMenu = function(e)
-	if (e ~= nil) then
-		if (e.button == 0) then -- Enable/Disable Features
-			configShowEnableDisableFeatureMenu()
-			return
-		elseif (e.button == 1) then -- Configure Time Between Saves
-			configShowConfigSaveCountMenu()
-			return
-		elseif (e.button == 2) then -- Configure Time Between Saves
-			configShowConfigTimerMenu()
-			return
-		elseif (e.button == 3) then -- Configure Time Between Saves
-			configShowConfigMinimumTimerMenu()
-			return
-		else -- Unhandled button. Close menu. Also save the configuration.
-			saveConfig()
-			return
-		end
-	end
-
-	-- Show menu. Delay it by one frame.
-	tes3.messageBox({
-		message = "SSS Configuration Menu",
-		buttons = {
-			"Features & Events",
-			"Save Count",
-			"Time Between Saves",
-			"Minimum Time Between Saves",
-			"Close Menu"
-		},
-		callback = configShowMainMenu
-	})
-end
+event.register("modConfigReady", registerModConfig)

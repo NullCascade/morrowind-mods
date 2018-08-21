@@ -82,6 +82,10 @@
  VERSION HISTORY
 =====================================================================================
 
+ 1.1.0 [2018-08-20]:
+    * Fixed issue where saves would be created right after loading a game.
+    * Moved configuration to the Mod Config Menu.
+
  1.0.2 [2018-06-04]:
     * Fixed issue where saves would be created during character generation.
 
