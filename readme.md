@@ -38,6 +38,12 @@ Have problems crashing when exiting? Lose focus of your cursor? This might help!
 
 * Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45634)
 
+## Get Lost
+
+Is removing all automatic mapping from the game a good idea? Probably not. But this mod does just that.
+
+* Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45981)
+
 ## Happy Harvesting
 
 This mod provides a very simple, generic-case auto-harvesting for organic containers in Morrowind.
