@@ -1,0 +1,12 @@
+local crafting = require("Crafting.module")
+
+crafting.registerRecipe({ handler = "armor", skill = tes3.skill.armorer, result = "glass_boots", requires = { { item = "ingred_raw_glass_01", count = 5 } } })
+crafting.registerRecipe({ handler = "armor", skill = tes3.skill.armorer, result = "glass_bracer_left", requires = { { item = "ingred_raw_glass_01", count = 2 } } })
+crafting.registerRecipe({ handler = "armor", skill = tes3.skill.armorer, result = "glass_bracer_right", requires = { { item = "ingred_raw_glass_01", count = 2 } } })
+crafting.registerRecipe({ handler = "armor", skill = tes3.skill.armorer, result = "glass_cuirass", requires = { { item = "ingred_raw_glass_01", count = 10 } } })
+crafting.registerRecipe({ handler = "armor", skill = tes3.skill.armorer, result = "glass_greaves", requires = { { item = "ingred_raw_glass_01", count = 7 } } })
+crafting.registerRecipe({ handler = "armor", skill = tes3.skill.armorer, result = "glass_helm", requires = { { item = "ingred_raw_glass_01", count = 4 } } })
+crafting.registerRecipe({ handler = "armor", skill = tes3.skill.armorer, result = "glass_pauldron_left", requires = { { item = "ingred_raw_glass_01", count = 4 } } })
+crafting.registerRecipe({ handler = "armor", skill = tes3.skill.armorer, result = "glass_pauldron_right", requires = { { item = "ingred_raw_glass_01", count = 4 } } })
+crafting.registerRecipe({ handler = "armor", skill = tes3.skill.armorer, result = "glass_shield", requires = { { item = "ingred_raw_glass_01", count = 8 } } })
+crafting.registerRecipe({ handler = "armor", skill = tes3.skill.armorer, result = "glass_towershield", requires = { { item = "ingred_raw_glass_01", count = 13 } } })
