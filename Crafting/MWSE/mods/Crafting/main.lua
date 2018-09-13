@@ -20,6 +20,6 @@ end
 event.register("initialized", onInitialized)
 
 local function onKeyU(e)
-	crafting.showCraftingMenu("armor")
+	crafting.showCraftingMenu({ handler = "armor" })
 end
 event.register("keyDown", onKeyU, { filter = 22 })

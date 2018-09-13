@@ -125,11 +125,16 @@ local function onClickCraftingRow(e)
 	crafting.closeCraftingMenu()
 end
 
-crafting.showCraftingMenu = function(handler)
+crafting.showCraftingMenu = function(params)
+	local handler = params.handler
+
 	-- Do nothing if the window is already open.
 	if (tes3ui.findMenu(UIID_CraftingMenu) ~= nil) then
 		return
 	end
+
+	crafting.filterOnlyCraftable = params.showOnlyCraftable or false
+	crafting.filterName = params.filter
 
 	currentHandler = handler
 
@@ -207,7 +212,16 @@ crafting.showCraftingMenu = function(handler)
 	filterInput.borderTop = 0
 	filterInput.borderBottom = 0
 	filterInput.borderAllSides = 0
-	filterInput.widthProportional = 1.0
+	filterInput.widget.lengthLimit = 31
+	filterInput:register("keyEnter", function()
+		local text = filterInput.text
+		if (text == "") then
+			crafting.filterName = nil
+		else
+			crafting.filterName = filterInput.text
+		end
+		crafting.filterCraftingMenu()
+	end)
 
 	local toggleCraftableButton = bottomBlock:createButton({ text = "All" })
 	toggleCraftableButton.absolutePosAlignX = 1.0
@@ -227,6 +241,8 @@ crafting.showCraftingMenu = function(handler)
 	closeButton.absolutePosAlignX = 1.0
 	closeButton.absolutePosAlignY = 0.5
 	closeButton:register("mouseClick", crafting.closeCraftingMenu)
+
+	crafting.filterCraftingMenu()
 
 	menu:updateLayout()
 	tes3ui.enterMenuMode(UIID_CraftingMenu)
@@ -251,6 +267,7 @@ crafting.filterCraftingMenu = function()
 	end
 
 	local filterCraftable = crafting.filterOnlyCraftable
+	local filterName = crafting.filterName and string.lower(crafting.filterName)
 
 	local craftingMenuList = craftingMenu:findChild(UIID_CraftingMenu_List):findChild(tes3ui.registerID("PartScrollPane_pane"))
 	for i = 1, #craftingMenuList.children do
@@ -258,6 +275,14 @@ crafting.filterCraftingMenu = function()
 
 		if (filterCraftable and not block:getPropertyBool("CraftingMenu:MeetsRequirements")) then
 			block.visible = false
+		elseif (filterName) then
+			local packageIndex = block:getPropertyInt("CraftingMenu:Index")
+			local package = recipes[currentHandler][packageIndex]
+			if (string.find(string.lower(package.result.item.name), filterName)) then
+				block.visible = true
+			else
+				block.visible = false
+			end
 		else
 			block.visible = true
 		end
