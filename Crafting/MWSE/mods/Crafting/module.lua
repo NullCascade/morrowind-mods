@@ -1,3 +1,5 @@
+local skillsModule = include("OtherSkills.skillModule")
+
 local crafting = {}
 
 local recipes = {}
@@ -12,10 +14,10 @@ local function parseStack(stack)
 	if (type(stack) == "string") then
 		id = stack
 	elseif (type(stack) == "table") then
-		id = stack.item
+		id = stack.id
 		count = stack.count
 	else
-		error("Invalid stack type of '%s'.", type(stack))
+		error(string.format("Invalid stack type of '%s'.", type(stack)))
 	end
 
 	-- Ensure that we were actually able to get the id.
@@ -26,7 +28,7 @@ local function parseStack(stack)
 	-- Try to get the base object for the crafting.
 	local item = tes3.getObject(id)
 	if (item == nil) then
-		error("Invalid stack. Could not resolve id: '%s'.", id)
+		error(string.format("Invalid stack. Could not resolve id: '%s'.", id))
 	end
 
 	-- Don't define a count of 1
@@ -34,42 +36,143 @@ local function parseStack(stack)
 		count = nil
 	end
 
-	return {item = item, count = count}
+	return { item = item, count = count }
+end
+
+local function packageMeetsRequirements(package)
+	-- Item requirements.
+	for _, stack in pairs(package.itemReqs) do
+		local itemCount = mwscript.getItemCount({ reference = tes3.player, item = stack.item })
+		if (itemCount < (stack.count or 1)) then
+			return false
+		end
+	end
+
+	-- Data requirements.
+	if (package.dataReqs) then
+		for _, req in pairs(package.dataReqs) do
+			local value = tes3.player.data[req.id]
+			if (type(value) ~= "number" or value < req.value) then
+				return false
+			end
+		end
+	end
+
+	-- Global variable requirements.
+	if (package.globalReqs) then
+		for _, req in pairs(package.globalReqs) do
+			if (req.global.value < req.value) then
+				return false
+			end
+		end
+	end
+
+	return true
+end
+
+crafting.registerHandler = function(params)
+	recipes[params.id] = {}
 end
 
 crafting.registerRecipe = function(params)
-	-- Get the handler.
-	local handler = params.handler
-	if (type(handler) ~= "string") then
-		error("Invalid recipe package. No handler defined.")
-	end
-
-	-- Create the handler if it doesn't exist.
-	if (recipes[handler] == nil) then
-		recipes[handler] = {}
-	end
-
 	-- The result can be a simple string, or a table with id/count. Figure it out.
 	local resultStack = parseStack(params.result)
 
-	-- Go through and resolve dependencies.
-	local requires = {}
-	for _, stack in pairs(params.requires) do
+	-- Go through and resolve item dependencies.
+	local itemReqs = {}
+	for _, stack in pairs(params.itemReqs) do
 		local reqStack = parseStack(stack)
 		reqStack.consume = stack.consume or true
-		table.insert(requires, reqStack)
+		table.insert(itemReqs, reqStack)
 	end
 
-	-- Start in on our package.
-	local package = {handler = handler, result = resultStack, requires = requires}
+	-- Go through skill requirements.
+	local skillReqs
+	if (params.skillReqs) then
+		skillReqs = {}
+		for _, req in pairs(params.skillReqs) do
+			if (type(req.skill) == "number") then
+				local skill = tes3.getSkill(req.skill)
+				if (skill) then
+					table.insert(skillReqs, { skill = skill, value = req.value })
+				else
+					error(string.format("Invalid skill id: %s", req.skill))
+				end
+			elseif (skillsModule and type(req.skill) == "string") then
+				table.insert(skillReqs, { skill = req.skill, value = req.value })
+			end
+		end
+	end
 
-	-- Hook up events.
+	-- Player data requirements.
+	local dataReqs = params.dataReqs
+	if (dataReqs and #dataReqs == 0) then
+		dataReqs = nil
+	end
+	
+	-- Resolve global requirements.
+	local globalReqs
+	if (params.globalReqs) then
+		globalReqs = {}
+		for _, req in pairs(params.globalReqs) do
+			local global = tes3.findGlobal(req.id)
+			if (global) then
+				table.insert(globalReqs, { global = global, value = req.value, text = req.text })
+			else
+				error(string.format("Invalid global id: %s", req.id))
+			end
+		end
+
+		if (#globalReqs == 0) then
+			globalReqs = nil
+		end
+	end
+	
+	-- TODO: Need a tes3.getJournal or the like.
+	-- Resolve journal requirements.
+	-- local journalReqs = {}
+	-- for _, req in pairs(params.journalReqs) do
+	-- 	local info = tes3.getDial(req.id)
+	-- 	if (info) then
+	-- 		table.insert(journalReqs, { info = info, value = req.value })
+	-- 	else
+	-- 		error(string.format("Invalid journal id: %s", req.id))
+	-- 	end
+	-- end
+
+	-- Start in on our package.
+	local package = { result = resultStack, itemReqs = itemReqs, skillReqs = skillReqs, dataReqs = dataReqs, globalReqs = globalReqs, journalReqs = journalReqs }
+
+	-- Get the override sounds.
+	if (params.successSound) then
+		package.successSound = tes3.getSound(params.successSound)
+	end
+	if (params.failureSound) then
+		package.failureSound = tes3.getSound(params.failureSound)
+	end
+
+	-- Hook up events and other properties.
 	package.onShowList = params.onShowList
 	package.onCraftSuccess = params.onCraftSuccess
 	package.onCraftFailure = params.onCraftFailure
 	package.onCraftAttempt = params.onCraftAttempt
 
-	table.insert(recipes[handler], package)
+	-- Add the package to a handler, or all handlers if a table is provided.
+	if (type(params.handler) == "string") then
+		if (recipes[params.handler]) then
+			table.insert(recipes[params.handler], package)
+		else
+			error("No handler found for package.")
+		end
+	elseif (type(params.handler) == "table") then
+		for _, handler in pairs(params.handler) do
+			if (recipes[handler]) then
+				table.insert(recipes[handler], package)
+			else
+				mwse.log("Warning: Handler with key '%s' could not be found for package.", handler)
+			end
+		end
+	end
 end
 
 local currentHandler = nil
@@ -96,22 +199,53 @@ local function showCraftingTooltip(e)
 
 	tooltipBlock:createLabel({ text = "Items:" })
 
-	for _, stack in pairs(package.requires) do
-		local requiredItemBlock = tooltipBlock:createBlock({})
-		requiredItemBlock.flowDirection = "left_to_right"
-		requiredItemBlock.autoWidth = true
-		requiredItemBlock.autoHeight = true
-		requiredItemBlock.borderBottom = 2
+	for _, stack in pairs(package.itemReqs) do
+		local requirementBlock = tooltipBlock:createBlock({})
+		requirementBlock.flowDirection = "left_to_right"
+		requirementBlock.autoWidth = true
+		requirementBlock.autoHeight = true
+		requirementBlock.borderBottom = 2
 
-		local requiredIcon = requiredItemBlock:createImage({ path = string.format("icons/%s", stack.item.icon) })
-		requiredIcon.borderLeft = 6
+		local icon = requirementBlock:createImage({ path = string.format("icons/%s", stack.item.icon) })
+		icon.borderLeft = 6
 
 		local itemCount = mwscript.getItemCount({ reference = tes3.player, item = stack.item })
-		local requiredLabel = requiredItemBlock:createLabel({ text = string.format("%s (%d of %d)", stack.item.name, itemCount, stack.count) })
-		requiredLabel.absolutePosAlignY = 0.5
+		local label = requirementBlock:createLabel({ text = string.format("%s (%d of %d)", stack.item.name, itemCount, stack.count) })
+		label.absolutePosAlignY = 0.5
 
 		if (itemCount < (stack.count or 1)) then
-			requiredLabel.color = tes3ui.getPalette("disabled_color")
+			label.color = tes3ui.getPalette("disabled_color")
+		end
+	end
+
+	-- Data requirements.
+	if (package.dataReqs) then
+		for _, req in pairs(package.dataReqs) do
+			local text = req.text
+			if (text) then
+				local label = tooltipBlock:createLabel({ text = text })
+				label.borderLeft = 6
+
+				local value = tes3.player.data[req.id]
+				if (type(value) ~= "number" or value < req.value) then
+					label.color = tes3ui.getPalette("disabled_color")
+				end
+			end
+		end
+	end
+
+	-- Global variable requirements.
+	if (package.globalReqs) then
+		for _, req in pairs(package.globalReqs) do
+			local text = req.text
+			if (text) then
+				local label = tooltipBlock:createLabel({ text = text })
+				label.borderLeft = 6
+
+				if (req.global.value < req.value) then
+					label.color = tes3ui.getPalette("disabled_color")
+				end
+			end
 		end
 	end
 end
@@ -169,20 +303,17 @@ crafting.showCraftingMenu = function(params)
 		local image = mainBlock:createImage({ path = string.format("icons/%s", item.icon) })
 		image.consumeMouseEvents = false
 
-		local label = mainBlock:createLabel({ text = item.name })
+		local labelText = item.name
+		if ((result.count or 1) > 1) then
+			labelText = string.format("%s (%d)", item.name, result.count)
+		end
+
+		local label = mainBlock:createLabel({ text = labelText })
 		label.absolutePosAlignY = 0.5
 		label.borderLeft = 6
 		label.consumeMouseEvents = false
 		
-		local meetsRequirements = true
-		for _, stack in pairs(package.requires) do
-			local itemCount = mwscript.getItemCount({ reference = tes3.player, item = stack.item })
-			if (itemCount < (stack.count or 1)) then
-				meetsRequirements = false
-				break
-			end
-		end
-
+		local meetsRequirements = packageMeetsRequirements(package)
 		mainBlock:setPropertyBool("CraftingMenu:MeetsRequirements", meetsRequirements)
 		if (not meetsRequirements) then
 			label.color = tes3ui.getPalette("disabled_color")
