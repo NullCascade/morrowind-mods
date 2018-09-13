@@ -194,15 +194,15 @@ crafting.showCraftingMenu = function(handler)
 	filterLabel.absolutePosAlignY = 0.5
 	filterLabel.borderRight = 2
 	
-    local filterInputBorder = bottomBlock:createThinBorder{}
-    filterInputBorder.width = 175
-    filterInputBorder.height = 24
-    filterInputBorder.childAlignX = 0.5
-    filterInputBorder.childAlignY = 0.5
+	local filterInputBorder = bottomBlock:createThinBorder{}
+	filterInputBorder.width = 175
+	filterInputBorder.height = 24
+	filterInputBorder.childAlignX = 0.5
+	filterInputBorder.childAlignY = 0.5
 	filterInputBorder.absolutePosAlignY = 0.5
 
 	local filterInput = filterInputBorder:createTextInput({ id = UIID_CraftingMenu_Input })
-    filterInput.borderLeft = 5
+	filterInput.borderLeft = 5
 	filterInput.borderRight = 5
 	filterInput.borderTop = 0
 	filterInput.borderBottom = 0
