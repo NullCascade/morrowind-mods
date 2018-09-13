@@ -33,14 +33,14 @@ if (false) then
 			{ id = tes3.skill.armorer, value = 20 }, -- Minimum skill values to even try to craft.
 		},
 		dataReqs = {
-			{ id = "key", value = 3 }, -- tes3.player.data[key] >= value
+			-- { id = "key", value = 3, text = "Must have killed a golden saint." }, -- tes3.player.data[key] >= value
 		},
 		globalReqs = {
 			{ id = "GameHour", value = 12, text = "Only valid between midnight and noon." }, -- tes3.getGlobal("key") >= value
 		},
-		journalReqs = {
-			{ id = "key", value = 3 }, -- tes3.getJournalIndex("key") >= value
-		},
+		-- journalReqs = {
+		-- 	{ id = "key", value = 3 }, -- tes3.getJournalIndex("key") >= value
+		-- },
 	
 		-- Other configuration.
 		successSound = "", -- Overrides the handler's sound used when successfully crafting an item.

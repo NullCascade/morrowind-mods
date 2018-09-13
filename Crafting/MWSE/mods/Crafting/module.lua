@@ -48,6 +48,23 @@ local function packageMeetsRequirements(package)
 		end
 	end
 
+	-- Skill requirements.
+	if (package.skillReqs) then
+		for _, req in pairs(package.skillReqs) do
+			if (type(req.skill) == "userdata") then
+				if (tes3.mobilePlayer.skills[req.skill.id + 1].base < req.value) then
+					return false
+				end
+			elseif (skillsModule and type(req.skill) == "string") then
+				if (skillsModule.getSkill(req.skill).value < req.value) then
+					return false
+				end
+			else
+				return false
+			end
+		end
+	end
+
 	-- Data requirements.
 	if (package.dataReqs) then
 		for _, req in pairs(package.dataReqs) do
@@ -91,15 +108,15 @@ crafting.registerRecipe = function(params)
 	if (params.skillReqs) then
 		skillReqs = {}
 		for _, req in pairs(params.skillReqs) do
-			if (type(req.skill) == "number") then
-				local skill = tes3.getSkill(req.skill)
+			if (type(req.id) == "number") then
+				local skill = tes3.getSkill(req.id)
 				if (skill) then
 					table.insert(skillReqs, { skill = skill, value = req.value })
 				else
-					error(string.format("Invalid skill id: %s", req.skill))
+					error(string.format("Invalid skill id: %s", req.id))
 				end
-			elseif (skillsModule and type(req.skill) == "string") then
-				table.insert(skillReqs, { skill = req.skill, value = req.value })
+			elseif (skillsModule and type(req.id) == "string") then
+				table.insert(skillReqs, { skill = req.id, value = req.value })
 			end
 		end
 	end
@@ -115,11 +132,15 @@ crafting.registerRecipe = function(params)
 	if (params.globalReqs) then
 		globalReqs = {}
 		for _, req in pairs(params.globalReqs) do
-			local global = tes3.findGlobal(req.id)
-			if (global) then
-				table.insert(globalReqs, { global = global, value = req.value, text = req.text })
+			if (req.text) then
+				local global = tes3.findGlobal(req.id)
+				if (global) then
+					table.insert(globalReqs, { global = global, value = req.value, text = req.text })
+				else
+					error(string.format("Invalid global id: %s", req.id))
+				end
 			else
-				error(string.format("Invalid global id: %s", req.id))
+				error(string.format("Invalid global variable requirement of '%s'. Must provide tooltip text.", req.id))
 			end
 		end
 
@@ -197,8 +218,9 @@ local function showCraftingTooltip(e)
 
 	local skillLabel = tooltipBlock:createLabel({ text = "Skill: Armorer" })
 
-	tooltipBlock:createLabel({ text = "Items:" })
 
+	-- Item requirements.
+	tooltipBlock:createLabel({ text = "Requirements:" })
 	for _, stack in pairs(package.itemReqs) do
 		local requirementBlock = tooltipBlock:createBlock({})
 		requirementBlock.flowDirection = "left_to_right"
@@ -215,6 +237,31 @@ local function showCraftingTooltip(e)
 
 		if (itemCount < (stack.count or 1)) then
 			label.color = tes3ui.getPalette("disabled_color")
+		end
+	end
+
+	-- Skill requirements.
+	if (package.skillReqs) then
+		for _, req in pairs(package.skillReqs) do
+			if (type(req.skill) == "userdata") then
+				local label = tooltipBlock:createLabel({ text = string.format("%s of %d or higher.", req.skill.name, req.value) })
+				label.borderLeft = 6
+
+				if (tes3.mobilePlayer.skills[req.skill.id + 1].base < req.value) then
+					label.color = tes3ui.getPalette("disabled_color")
+				end
+			elseif (skillsModule and type(req.skill) == "string") then
+				local skill = skillsModule.getSkill(req.skill)
+
+				local label = tooltipBlock:createLabel({ text = string.format("%s of %d or higher.", req.skill.name, req.value) })
+				label.borderLeft = 6
+
+				if (skillsModule.getSkill(skill).value < req.value) then
+					label.color = tes3ui.getPalette("disabled_color")
+				end
+			else
+				error("Unhandled case!")
+			end
 		end
 	end
 
