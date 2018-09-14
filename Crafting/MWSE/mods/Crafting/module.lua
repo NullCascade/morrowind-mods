@@ -220,6 +220,11 @@ crafting.registerRecipe = function(params)
 			end
 		end
 	end
+	
+	-- If we already initialized the list, we need to go and resort.
+	if (crafting.wasInitialized) then
+		crafting.sortRecipes()
+	end
 end
 
 local currentHandler = nil
@@ -540,6 +545,19 @@ crafting.filterCraftingMenu = function()
 	end
 end
 
+local function recipeSorter(a, b)
+	return (a.result.item.name < b.result.item.name)
+end
+
+crafting.sortRecipes = function()
+	-- Sort each recipe list by name.
+	for key, list in pairs(recipes) do
+		table.sort(list, recipeSorter)
+	end
+end
+
+crafting.wasInitialized = false
+
 crafting.preInitialized = function()
 	-- Register any IDs we care about.
 	UIID_CraftingMenu = tes3ui.registerID("CraftingMenu")
@@ -547,15 +565,10 @@ crafting.preInitialized = function()
 	UIID_CraftingMenu_List = tes3ui.registerID("CraftingMenu::List")
 end
 
-local function recipeSorter(a, b)
-	return (a.result.item.name < b.result.item.name)
-end
-
 crafting.postInitialized = function()
-	-- Sort each recipe list by name.
-	for key, list in pairs(recipes) do
-		table.sort(list, recipeSorter)
-	end
+	crafting.sortRecipes()
+
+	crafting.wasInitialized = true
 end
 
 return crafting
