@@ -69,7 +69,7 @@ local function packageMeetsRequirements(package)
 	if (package.dataReqs) then
 		for _, req in pairs(package.dataReqs) do
 			local value = tes3.player.data[req.id]
-			if (type(value) ~= "number" or value < req.value) then
+			if (value < req.min or value > req.max) then
 				return false
 			end
 		end
@@ -78,7 +78,17 @@ local function packageMeetsRequirements(package)
 	-- Global variable requirements.
 	if (package.globalReqs) then
 		for _, req in pairs(package.globalReqs) do
-			if (req.global.value < req.value) then
+			local value = req.global.value
+			if (value < req.min or value > req.max) then
+				return false
+			end
+		end
+	end
+
+	-- Custom requirements.
+	if (package.customReqs) then
+		for _, req in pairs(package.customReqs) do
+			if (not req.callback(package)) then
 				return false
 			end
 		end
@@ -135,7 +145,7 @@ crafting.registerRecipe = function(params)
 			if (req.text) then
 				local global = tes3.findGlobal(req.id)
 				if (global) then
-					table.insert(globalReqs, { global = global, value = req.value, text = req.text })
+					table.insert(globalReqs, { global = global, min = req.min, max = req.max, text = req.text })
 				else
 					error(string.format("Invalid global id: %s", req.id))
 				end
@@ -153,16 +163,17 @@ crafting.registerRecipe = function(params)
 	-- Resolve journal requirements.
 	-- local journalReqs = {}
 	-- for _, req in pairs(params.journalReqs) do
-	-- 	local info = tes3.getDial(req.id)
-	-- 	if (info) then
-	-- 		table.insert(journalReqs, { info = info, value = req.value })
-	-- 	else
-	-- 		error(string.format("Invalid journal id: %s", req.id))
-	-- 	end
+	-- 	
 	-- end
 
+	-- Custom requirements.
+	local customReqs = params.customReqs
+	if (customReqs and #customReqs == 0) then
+		customReqs = nil
+	end
+
 	-- Start in on our package.
-	local package = { result = resultStack, description = params.description, itemReqs = itemReqs, skillReqs = skillReqs, dataReqs = dataReqs, globalReqs = globalReqs, journalReqs = journalReqs }
+	local package = { result = resultStack, description = params.description, itemReqs = itemReqs, skillReqs = skillReqs, dataReqs = dataReqs, globalReqs = globalReqs, journalReqs = journalReqs, customReqs = customReqs }
 
 	-- Get the override sounds.
 	if (params.successSound) then
@@ -298,7 +309,7 @@ local function showCraftingTooltip(e)
 				label.borderLeft = 12
 
 				local value = tes3.player.data[req.id]
-				if (type(value) ~= "number" or value < req.value) then
+				if (value < req.min or value > req.max) then
 					label.color = tes3ui.getPalette("disabled_color")
 				end
 
@@ -315,12 +326,27 @@ local function showCraftingTooltip(e)
 				local label = otherReqsBlock:createLabel({ text = string.format("- %s", text) })
 				label.borderLeft = 12
 
-				if (req.global.value < req.value) then
+				local value = req.global.value
+				if (value < req.min or value > req.max) then
 					label.color = tes3ui.getPalette("disabled_color")
 				end
 				
 				hasOtherReqs = true
 			end
+		end
+	end
+
+	-- Custom requirements.
+	if (package.customReqs) then
+		for _, req in pairs(package.customReqs) do
+			local label = otherReqsBlock:createLabel({ text = string.format("- %s", req.text) })
+			label.borderLeft = 12
+
+			if (req.callback(package) == false) then
+				label.color = tes3ui.getPalette("disabled_color")
+			end
+			
+			hasOtherReqs = true
 		end
 	end
 
