@@ -162,7 +162,7 @@ crafting.registerRecipe = function(params)
 	-- end
 
 	-- Start in on our package.
-	local package = { result = resultStack, itemReqs = itemReqs, skillReqs = skillReqs, dataReqs = dataReqs, globalReqs = globalReqs, journalReqs = journalReqs }
+	local package = { result = resultStack, description = params.description, itemReqs = itemReqs, skillReqs = skillReqs, dataReqs = dataReqs, globalReqs = globalReqs, journalReqs = journalReqs }
 
 	-- Get the override sounds.
 	if (params.successSound) then
@@ -204,7 +204,12 @@ local function showCraftingTooltip(e)
 
 	local tooltip = tes3ui.createTooltipMenu()
 
-	local nameLabel = tooltip:createLabel({ text = package.result.item.name })
+	local nameText = package.result.item.name
+	if ((package.result.count or 1) > 1) then
+		nameText = string.format("%s (%d)", nameText, package.result.count)
+	end
+
+	local nameLabel = tooltip:createLabel({ text = nameText })
 	nameLabel.color = tes3ui.getPalette("header_color")
 	nameLabel.borderTop = 2
 
@@ -212,21 +217,29 @@ local function showCraftingTooltip(e)
 	tooltipBlock.flowDirection = "top_to_bottom"
 	tooltipBlock.autoWidth = true
 	tooltipBlock.autoHeight = true
+	tooltipBlock.maxWidth = 400
 	tooltipBlock.borderLeft = 4
 	tooltipBlock.borderRight = 4
 	tooltipBlock.borderTop = 6
+	tooltipBlock.borderBottom = 2
+
+	if (package.description) then
+		local descriptionLabel = tooltipBlock:createLabel({ text = package.description })
+		descriptionLabel.color = tes3ui.getPalette("header_color")
+		descriptionLabel.wrapText = true
+		descriptionLabel.borderBottom = 6
+	end
 
 	local skillLabel = tooltipBlock:createLabel({ text = "Skill: Armorer" })
 
-
 	-- Item requirements.
-	tooltipBlock:createLabel({ text = "Requirements:" })
+	local itemReqLabel = tooltipBlock:createLabel({ text = "Components:" })
+	itemReqLabel.borderTop = 6
 	for _, stack in pairs(package.itemReqs) do
 		local requirementBlock = tooltipBlock:createBlock({})
 		requirementBlock.flowDirection = "left_to_right"
 		requirementBlock.autoWidth = true
 		requirementBlock.autoHeight = true
-		requirementBlock.borderBottom = 2
 
 		local icon = requirementBlock:createImage({ path = string.format("icons/%s", stack.item.icon) })
 		icon.borderLeft = 6
@@ -240,12 +253,21 @@ local function showCraftingTooltip(e)
 		end
 	end
 
+	local otherReqsBlock = tooltipBlock:createBlock({})
+	otherReqsBlock.flowDirection = "top_to_bottom"
+	otherReqsBlock.autoWidth = true
+	otherReqsBlock.autoHeight = true
+	local hasOtherReqs = false
+
+	local otherReqsLabel = otherReqsBlock:createLabel({ text = "Requirements:" })
+	otherReqsLabel.borderTop = 4
+
 	-- Skill requirements.
 	if (package.skillReqs) then
 		for _, req in pairs(package.skillReqs) do
 			if (type(req.skill) == "userdata") then
-				local label = tooltipBlock:createLabel({ text = string.format("%s of %d or higher.", req.skill.name, req.value) })
-				label.borderLeft = 6
+				local label = otherReqsBlock:createLabel({ text = string.format("- %s of %d or higher.", req.skill.name, req.value) })
+				label.borderLeft = 12
 
 				if (tes3.mobilePlayer.skills[req.skill.id + 1].base < req.value) then
 					label.color = tes3ui.getPalette("disabled_color")
@@ -253,8 +275,8 @@ local function showCraftingTooltip(e)
 			elseif (skillsModule and type(req.skill) == "string") then
 				local skill = skillsModule.getSkill(req.skill)
 
-				local label = tooltipBlock:createLabel({ text = string.format("%s of %d or higher.", req.skill.name, req.value) })
-				label.borderLeft = 6
+				local label = otherReqsBlock:createLabel({ text = string.format("- %s of %d or higher.", req.skill.name, req.value) })
+				label.borderLeft = 12
 
 				if (skillsModule.getSkill(skill).value < req.value) then
 					label.color = tes3ui.getPalette("disabled_color")
@@ -262,6 +284,8 @@ local function showCraftingTooltip(e)
 			else
 				error("Unhandled case!")
 			end
+
+			hasOtherReqs = true
 		end
 	end
 
@@ -270,13 +294,15 @@ local function showCraftingTooltip(e)
 		for _, req in pairs(package.dataReqs) do
 			local text = req.text
 			if (text) then
-				local label = tooltipBlock:createLabel({ text = text })
-				label.borderLeft = 6
+				local label = otherReqsBlock:createLabel({ text = string.format("- %s", text) })
+				label.borderLeft = 12
 
 				local value = tes3.player.data[req.id]
 				if (type(value) ~= "number" or value < req.value) then
 					label.color = tes3ui.getPalette("disabled_color")
 				end
+
+				hasOtherReqs = true
 			end
 		end
 	end
@@ -286,14 +312,20 @@ local function showCraftingTooltip(e)
 		for _, req in pairs(package.globalReqs) do
 			local text = req.text
 			if (text) then
-				local label = tooltipBlock:createLabel({ text = text })
-				label.borderLeft = 6
+				local label = otherReqsBlock:createLabel({ text = string.format("- %s", text) })
+				label.borderLeft = 12
 
 				if (req.global.value < req.value) then
 					label.color = tes3ui.getPalette("disabled_color")
 				end
+				
+				hasOtherReqs = true
 			end
 		end
+	end
+
+	if (not hasOtherReqs) then
+		otherReqsBlock.visible = false
 	end
 end
 

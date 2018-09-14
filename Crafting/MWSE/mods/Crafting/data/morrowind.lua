@@ -18,6 +18,9 @@ if (false) then
 	crafting.registerRecipe({
 		-- Categorization.
 		handler = "armor", -- Provide a table to register to multiple handlers.
+
+		-- Optional description.
+		description = "These light and elegant weapons of Elven manufacture feature extravagant use of rare metals and cutting edges made from rare crystalline materials. Duellists and assassins appreciate the delicate balance and sinister sharpness of glass weapons.",
 	
 		-- The skill that will get leveled.
 		skill = tes3.skill.armorer, -- Provide a string to use Merlord's Skill Module.
@@ -36,7 +39,7 @@ if (false) then
 			-- { id = "key", value = 3, text = "Must have killed a golden saint." }, -- tes3.player.data[key] >= value
 		},
 		globalReqs = {
-			{ id = "GameHour", value = 12, text = "Only valid between midnight and noon." }, -- tes3.getGlobal("key") >= value
+			{ id = "GameHour", value = 12, text = "Only valid between noon and midnight." }, -- tes3.getGlobal("key") >= value
 		},
 		-- journalReqs = {
 		-- 	{ id = "key", value = 3 }, -- tes3.getJournalIndex("key") >= value
