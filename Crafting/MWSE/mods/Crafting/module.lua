@@ -105,6 +105,21 @@ crafting.registerRecipe = function(params)
 	-- The result can be a simple string, or a table with id/count. Figure it out.
 	local resultStack = parseStack(params.result)
 
+	local skill
+	if (type(params.skill) == "number") then
+		skill = tes3.getSkill(params.skill)
+		if (skill == nil) then
+			error(string.format("Invalid skill id: %s", params.skill))
+		end
+	elseif (skillsModule and type(params.skill) == "string") then
+		skill = skillsModule.getSkill(params.skill)
+		if (skill == nil) then
+			error(string.format("Invalid custom skill id: %s", params.skill))
+		end
+	else
+		error(string.format("Could not determine type of skill '%s'. Broken skill definition, or Skills Module may not be installed."))
+	end
+
 	-- Go through and resolve item dependencies.
 	local itemReqs = {}
 	for _, stack in pairs(params.itemReqs) do
@@ -173,7 +188,7 @@ crafting.registerRecipe = function(params)
 	end
 
 	-- Start in on our package.
-	local package = { result = resultStack, description = params.description, itemReqs = itemReqs, skillReqs = skillReqs, dataReqs = dataReqs, globalReqs = globalReqs, journalReqs = journalReqs, customReqs = customReqs }
+	local package = { result = resultStack, description = params.description, skill = skill, itemReqs = itemReqs, skillReqs = skillReqs, dataReqs = dataReqs, globalReqs = globalReqs, journalReqs = journalReqs, customReqs = customReqs }
 
 	-- Get the override sounds.
 	if (params.successSound) then
@@ -241,7 +256,7 @@ local function showCraftingTooltip(e)
 		descriptionLabel.borderBottom = 6
 	end
 
-	local skillLabel = tooltipBlock:createLabel({ text = "Skill: Armorer" })
+	local skillLabel = tooltipBlock:createLabel({ text = string.format("Skill: %s", package.skill.name) })
 
 	-- Item requirements.
 	local itemReqLabel = tooltipBlock:createLabel({ text = "Components:" })

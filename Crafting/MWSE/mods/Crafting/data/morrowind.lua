@@ -13,7 +13,7 @@ crafting.registerRecipe({ handler = "armor", skill = tes3.skill.armorer, result 
 crafting.registerRecipe({ handler = "armor", skill = tes3.skill.armorer, result = "glass_shield", itemReqs = { { id = "ingred_raw_glass_01", count = 8 } } })
 crafting.registerRecipe({ handler = "armor", skill = tes3.skill.armorer, result = "glass_towershield", itemReqs = { { id = "ingred_raw_glass_01", count = 13 } } })
 
-if (false) then
+if (true) then
 	-- Example recipe.
 	crafting.registerRecipe({
 		-- Categorization.
@@ -23,7 +23,7 @@ if (false) then
 		description = "These light and elegant weapons of Elven manufacture feature extravagant use of rare metals and cutting edges made from rare crystalline materials. Duellists and assassins appreciate the delicate balance and sinister sharpness of glass weapons.",
 	
 		-- The skill that will get leveled.
-		skill = tes3.skill.armorer, -- Provide a string to use Merlord's Skill Module.
+		skill = tes3.skill.illusion, -- Provide a string to use Merlord's Skill Module.
 	
 		-- What gets crafted.
 		result = { id = "glass throwing knife", count = 10 }, -- Provide just a string to assume count = 1
@@ -47,7 +47,7 @@ if (false) then
 		customReqs = {
 			{
 				text = "Must be in an exterior.",
-				callback = function()
+				callback = function(package)
 					return (tes3.getPlayerCell().isInterior == false)
 				end
 			},
