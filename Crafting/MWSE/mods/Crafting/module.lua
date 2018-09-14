@@ -39,6 +39,39 @@ local function parseStack(stack)
 	return { item = item, count = count }
 end
 
+local function getSkill(param)
+	local skill
+	if (type(param) == "number") then
+		skill = tes3.getSkill(param)
+		if (skill == nil) then
+			error(string.format("Invalid skill id: %s", param))
+		end
+		return skill
+	elseif (skillsModule and type(param) == "string") then
+		skill = skillsModule.getSkill(param)
+		if (skill == nil) then
+			error(string.format("Invalid custom skill id: %s", param))
+		end
+		return skill
+	end
+	
+	error(string.format("Could not determine type of skill '%s'. Broken skill definition, or Skills Module may not be installed."))
+end
+
+local function getSkillStatistic(param)
+	if (type(param) == "number") then
+		return tes3.mobilePlayer.skills[param + 1]
+	elseif (skillsModule and type(param) == "string") then
+		local skill = skillsModule.getSkill(param)
+		if (skill == nil) then
+			error(string.format("Invalid custom skill id: %s", param))
+		end
+		return skill
+	end
+	
+	error(string.format("Could not determine type of skill '%s'. Broken skill definition, or Skills Module may not be installed."))
+end
+
 local function packageMeetsRequirements(package)
 	-- Item requirements.
 	for _, stack in pairs(package.itemReqs) do
@@ -51,15 +84,7 @@ local function packageMeetsRequirements(package)
 	-- Skill requirements.
 	if (package.skillReqs) then
 		for _, req in pairs(package.skillReqs) do
-			if (type(req.skill) == "userdata") then
-				if (tes3.mobilePlayer.skills[req.skill.id + 1].base < req.value) then
-					return false
-				end
-			elseif (skillsModule and type(req.skill) == "string") then
-				if (skillsModule.getSkill(req.skill).value < req.value) then
-					return false
-				end
-			else
+			if (getSkillStatistic(req.skill).base < req.value) then
 				return false
 			end
 		end
@@ -105,21 +130,6 @@ crafting.registerRecipe = function(params)
 	-- The result can be a simple string, or a table with id/count. Figure it out.
 	local resultStack = parseStack(params.result)
 
-	local skill
-	if (type(params.skill) == "number") then
-		skill = tes3.getSkill(params.skill)
-		if (skill == nil) then
-			error(string.format("Invalid skill id: %s", params.skill))
-		end
-	elseif (skillsModule and type(params.skill) == "string") then
-		skill = skillsModule.getSkill(params.skill)
-		if (skill == nil) then
-			error(string.format("Invalid custom skill id: %s", params.skill))
-		end
-	else
-		error(string.format("Could not determine type of skill '%s'. Broken skill definition, or Skills Module may not be installed."))
-	end
-
 	-- Go through and resolve item dependencies.
 	local itemReqs = {}
 	for _, stack in pairs(params.itemReqs) do
@@ -133,16 +143,11 @@ crafting.registerRecipe = function(params)
 	if (params.skillReqs) then
 		skillReqs = {}
 		for _, req in pairs(params.skillReqs) do
-			if (type(req.id) == "number") then
-				local skill = tes3.getSkill(req.id)
-				if (skill) then
-					table.insert(skillReqs, { skill = skill, value = req.value })
-				else
-					error(string.format("Invalid skill id: %s", req.id))
-				end
-			elseif (skillsModule and type(req.id) == "string") then
-				table.insert(skillReqs, { skill = req.id, value = req.value })
-			end
+			table.insert(skillReqs, { skill = req.id, value = req.value })
+		end
+
+		if (#skillReqs == 0) then
+			skillReqs = nil
 		end
 	end
 
@@ -188,7 +193,7 @@ crafting.registerRecipe = function(params)
 	end
 
 	-- Start in on our package.
-	local package = { result = resultStack, description = params.description, skill = skill, itemReqs = itemReqs, skillReqs = skillReqs, dataReqs = dataReqs, globalReqs = globalReqs, journalReqs = journalReqs, customReqs = customReqs }
+	local package = { result = resultStack, description = params.description, skill = params.skill, itemReqs = itemReqs, skillReqs = skillReqs, dataReqs = dataReqs, globalReqs = globalReqs, journalReqs = journalReqs, customReqs = customReqs }
 
 	-- Get the override sounds.
 	if (params.successSound) then
@@ -261,7 +266,8 @@ local function showCraftingTooltip(e)
 		descriptionLabel.borderBottom = 6
 	end
 
-	local skillLabel = tooltipBlock:createLabel({ text = string.format("Skill: %s", package.skill.name) })
+	local governingSkill = getSkill(package.skill)
+	local skillLabel = tooltipBlock:createLabel({ text = string.format("Skill: %s", governingSkill.name) })
 
 	-- Item requirements.
 	local itemReqLabel = tooltipBlock:createLabel({ text = "Components:" })
@@ -296,24 +302,14 @@ local function showCraftingTooltip(e)
 	-- Skill requirements.
 	if (package.skillReqs) then
 		for _, req in pairs(package.skillReqs) do
-			if (type(req.skill) == "userdata") then
-				local label = otherReqsBlock:createLabel({ text = string.format("- %s of %d or higher.", req.skill.name, req.value) })
-				label.borderLeft = 12
+			local skill = getSkill(req.skill)
+			local skillStat = getSkillStatistic(req.skill)
 
-				if (tes3.mobilePlayer.skills[req.skill.id + 1].base < req.value) then
-					label.color = tes3ui.getPalette("disabled_color")
-				end
-			elseif (skillsModule and type(req.skill) == "string") then
-				local skill = skillsModule.getSkill(req.skill)
+			local label = otherReqsBlock:createLabel({ text = string.format("- %s of %d or higher.", skill.name, req.value) })
+			label.borderLeft = 12
 
-				local label = otherReqsBlock:createLabel({ text = string.format("- %s of %d or higher.", req.skill.name, req.value) })
-				label.borderLeft = 12
-
-				if (skillsModule.getSkill(skill).value < req.value) then
-					label.color = tes3ui.getPalette("disabled_color")
-				end
-			else
-				error("Unhandled case!")
+			if (skillStat.base < req.value) then
+				label.color = tes3ui.getPalette("disabled_color")
 			end
 
 			hasOtherReqs = true
