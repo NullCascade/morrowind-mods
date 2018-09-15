@@ -2,11 +2,41 @@ local skillsModule = include("OtherSkills.skillModule")
 
 local crafting = {}
 
+local handlers = {}
+
 local recipes = {}
 
 local UIID_CraftingMenu
 local UIID_CraftingMenu_Input
 local UIID_CraftingMenu_List
+local UIID_CraftingMenu_ListBlock_Label
+
+local UI_Palette_Disabled
+local UI_Palette_Header
+
+crafting.loadConfig = function()
+	crafting.config = mwse.loadConfig("Comprehensive Crafting")
+
+	-- Handle defaults.
+	crafting.config = crafting.config or {}
+	crafting.config.debugMode = crafting.config.debugMode or false
+	crafting.config.showOnlyCraftable = crafting.config.showOnlyCraftable or false
+	crafting.config.fLevelingDifficultyScalarXP = crafting.config.fLevelingDifficultyScalarXP or 0.0
+	crafting.config.fLevelingFlatXP = crafting.config.fLevelingFlatXP or 5.0
+end
+
+crafting.saveConfig = function()
+	mwse.saveConfig("Comprehensive Crafting", crafting.config)
+end
+
+crafting.loadConfig()
+
+local debugPrint = function() end
+if (crafting.config.debugMode) then
+	debugPrint = function(s, ...)
+		mwse.log(string.format("[Comprehensive Crafting] %s", s:format(...)))
+	end
+end
 
 local function parseStack(stack)
 	-- Figure out the id/count from what we're given.
@@ -55,7 +85,7 @@ local function getSkill(param)
 		return skill
 	end
 	
-	error(string.format("Could not determine type of skill '%s'. Broken skill definition, or Skills Module may not be installed."))
+	error(string.format("Could not determine type of skill '%s'. Broken skill definition, or Skills Module may not be installed.", param))
 end
 
 local function getSkillStatistic(param)
@@ -69,13 +99,14 @@ local function getSkillStatistic(param)
 		return skill
 	end
 	
-	error(string.format("Could not determine type of skill '%s'. Broken skill definition, or Skills Module may not be installed."))
+	error(string.format("Could not determine type of skill '%s'. Broken skill definition, or Skills Module may not be installed.", param))
 end
 
 local function packageMeetsRequirements(package)
 	-- Item requirements.
 	for _, stack in pairs(package.itemReqs) do
-		local itemCount = mwscript.getItemCount({ reference = tes3.player, item = stack.item })
+		-- Get the item count, checking cache.
+		local itemCount = crafting.getItemCount(stack.item)
 		if (itemCount < (stack.count or 1)) then
 			return false
 		end
@@ -123,7 +154,24 @@ local function packageMeetsRequirements(package)
 end
 
 crafting.registerHandler = function(params)
-	recipes[params.id] = {}
+	local recipeList = {}
+
+	if (handlers[params.id] ~= nil) then
+		error(string.format("Handler with id '%s' is already registered.", params.id))
+	end
+
+	local handler = { id = params.id, recipes = recipeList }
+	
+	if (params.successSound) then
+		handler.successSound = tes3.getSound(params.successSound)
+	end
+	if (params.failureSound) then
+		handler.failureSound = tes3.getSound(params.failureSound)
+	end
+
+
+	handlers[handler.id] = handler
+	recipes[handler.id] = recipeList
 end
 
 crafting.registerRecipe = function(params)
@@ -204,6 +252,7 @@ crafting.registerRecipe = function(params)
 	end
 
 	-- Hook up events and other properties.
+	package.difficulty = params.difficulty
 	package.onShowList = params.onShowList
 	package.onCraftSuccess = params.onCraftSuccess
 	package.onCraftFailure = params.onCraftFailure
@@ -246,7 +295,7 @@ local function showCraftingTooltip(e)
 	end
 
 	local nameLabel = tooltip:createLabel({ text = nameText })
-	nameLabel.color = tes3ui.getPalette("header_color")
+	nameLabel.color = UI_Palette_Header
 	nameLabel.borderTop = 2
 
 	local tooltipBlock = tooltip:createBlock({})
@@ -261,7 +310,7 @@ local function showCraftingTooltip(e)
 
 	if (package.description) then
 		local descriptionLabel = tooltipBlock:createLabel({ text = package.description })
-		descriptionLabel.color = tes3ui.getPalette("header_color")
+		descriptionLabel.color = UI_Palette_Header
 		descriptionLabel.wrapText = true
 		descriptionLabel.borderBottom = 6
 	end
@@ -281,12 +330,12 @@ local function showCraftingTooltip(e)
 		local icon = requirementBlock:createImage({ path = string.format("icons/%s", stack.item.icon) })
 		icon.borderLeft = 6
 
-		local itemCount = mwscript.getItemCount({ reference = tes3.player, item = stack.item })
+		local itemCount = crafting.getItemCount(stack.item)
 		local label = requirementBlock:createLabel({ text = string.format("%s (%d of %d)", stack.item.name, itemCount, stack.count) })
 		label.absolutePosAlignY = 0.5
 
 		if (itemCount < (stack.count or 1)) then
-			label.color = tes3ui.getPalette("disabled_color")
+			label.color = UI_Palette_Disabled
 		end
 	end
 
@@ -309,7 +358,7 @@ local function showCraftingTooltip(e)
 			label.borderLeft = 12
 
 			if (skillStat.base < req.value) then
-				label.color = tes3ui.getPalette("disabled_color")
+				label.color = UI_Palette_Disabled
 			end
 
 			hasOtherReqs = true
@@ -326,7 +375,7 @@ local function showCraftingTooltip(e)
 
 				local value = tes3.player.data[req.id]
 				if (value < req.min or value > req.max) then
-					label.color = tes3ui.getPalette("disabled_color")
+					label.color = UI_Palette_Disabled
 				end
 
 				hasOtherReqs = true
@@ -344,7 +393,7 @@ local function showCraftingTooltip(e)
 
 				local value = req.global.value
 				if (value < req.min or value > req.max) then
-					label.color = tes3ui.getPalette("disabled_color")
+					label.color = UI_Palette_Disabled
 				end
 				
 				hasOtherReqs = true
@@ -359,7 +408,7 @@ local function showCraftingTooltip(e)
 			label.borderLeft = 12
 
 			if (req.callback(package) == false) then
-				label.color = tes3ui.getPalette("disabled_color")
+				label.color = UI_Palette_Disabled
 			end
 			
 			hasOtherReqs = true
@@ -373,11 +422,86 @@ end
 
 local function onClickCraftingRow(e)
 	local packageIndex = e.source:getPropertyInt("CraftingMenu:Index")
+	local handler = handlers[currentHandler]
 	local package = recipes[currentHandler][packageIndex]
 
-	tes3.messageBox("Crafting: %s", package.result.item.name)
+	local attempt = {}
 
-	crafting.closeCraftingMenu()
+	debugPrint("Crafting: %s (%d)", package.result.item.id, package.result.count or 1)
+
+	-- Do we meet the requirements?
+	if (not packageMeetsRequirements(package)) then
+		debugPrint("Does not meet requirements!")
+		return
+	end
+
+	-- Determine the chance of crafting.
+	local governingSkill = getSkill(package.skill)
+	local attribute = governingSkill.attribute and tes3.mobilePlayer.attributes[governingSkill.attribute + 1].base or 0
+	local skill = getSkillStatistic(package.skill).base
+	local luck = tes3.mobilePlayer.luck.base
+	local fatigue = tes3.mobilePlayer.fatigue
+	attempt.chance = (attribute/10 + luck/10 + skill - (package.difficulty or 0)) * (fatigue.current / fatigue.base)
+
+	-- Determine success.
+	attempt.roll = math.random(1, 100)
+	attempt.success = attempt.chance >= attempt.roll
+
+	-- Fire off the event so that others can manipulate this.
+	if (package.onCraftAttempt) then
+		package.onCraftAttempt(package, attempt)
+	end
+
+	-- Was this blocked?
+	if (attempt.block) then
+		return
+	end
+
+	-- Train the associated skill.
+	if (attempt.success) then
+		local experience = (package.difficulty or 0) * crafting.config.fLevelingDifficultyScalarXP + crafting.config.fLevelingFlatXP
+		if (type(package.skill) == "number") then
+			tes3.mobilePlayer:exerciseSkill(package.skill, experience)
+		elseif (skillsModule and type(package.skill) == "string") then
+			skillsModule.incrementSkill(package.skill, { progress = experience })
+		end
+	else
+		-- TODO: Failure-based experience option?
+	end
+	
+	-- Add/remove the associated items.
+	if (attempt.success) then
+		crafting.itemCountsChanged = true
+		debugPrint("crafting.itemCountsChanged = true")
+
+		-- Add the item to the player's inventory.
+		mwscript.addItem({ reference = tes3.player, item = package.result.item, count = package.result.count })
+	
+		-- Remove the required items.
+		for _, req in pairs(package.itemReqs) do
+			if (package.consume ~= false) then
+				mwscript.removeItem({ reference = tes3.player, item = req.item, count = req.count })
+			end
+		end
+	else
+		-- TODO: Chance to remove required items on failure? Need some cost of failure.
+	end
+	
+	-- Play the associated sound.
+	local sound = attempt.success and (package.successSound or handler.successSound) or (package.failureSound or handler.failureSound)
+	if (sound) then
+		sound:play()
+	end
+
+	-- Invoke any success/failure callbacks.
+	if (success and package.onCraftSuccess) then
+		package.onCraftSuccess(package, attempt)
+	elseif (not success and package.onCraftFailure) then
+		package.onCraftFailure(package, attempt)
+	end
+
+	-- Update GUI.
+	crafting.filterCraftingMenu()
 end
 
 crafting.showCraftingMenu = function(params)
@@ -388,8 +512,9 @@ crafting.showCraftingMenu = function(params)
 		return
 	end
 
-	crafting.filterOnlyCraftable = params.showOnlyCraftable or false
+	crafting.config.showOnlyCraftable = params.showOnlyCraftable or false
 	crafting.filterName = params.filter
+	crafting.itemCountsChanged = true
 
 	currentHandler = handler
 
@@ -412,8 +537,7 @@ crafting.showCraftingMenu = function(params)
 		mainBlock.flowDirection = "left_to_right"
 		mainBlock.widthProportional = 1.0
 		mainBlock.autoHeight = true
-		mainBlock.borderTop = 3
-		mainBlock.borderBottom = 3
+		mainBlock.borderAllSides = 3
 		mainBlock:setPropertyInt("CraftingMenu:Index", index)
 		mainBlock:register("mouseClick", onClickCraftingRow)
 		mainBlock:register("help", showCraftingTooltip)
@@ -429,15 +553,13 @@ crafting.showCraftingMenu = function(params)
 			labelText = string.format("%s (%d)", item.name, result.count)
 		end
 
-		local label = mainBlock:createLabel({ text = labelText })
+		local label = mainBlock:createLabel({ id = UIID_CraftingMenu_ListBlock_Label, text = labelText })
 		label.absolutePosAlignY = 0.5
 		label.borderLeft = 6
 		label.consumeMouseEvents = false
-		
-		local meetsRequirements = packageMeetsRequirements(package)
-		mainBlock:setPropertyBool("CraftingMenu:MeetsRequirements", meetsRequirements)
-		if (not meetsRequirements) then
-			label.color = tes3ui.getPalette("disabled_color")
+
+		if (package.onShowList) then
+			package.onShowList(package, mainBlock)
 		end
 	end
 
@@ -480,8 +602,8 @@ crafting.showCraftingMenu = function(params)
 	toggleCraftableButton.absolutePosAlignY = 0.5
 	toggleCraftableButton.borderRight = 65
 	toggleCraftableButton:register("mouseClick", function()
-		crafting.filterOnlyCraftable = not crafting.filterOnlyCraftable
-		if (crafting.filterOnlyCraftable) then
+		crafting.config.showOnlyCraftable = not crafting.config.showOnlyCraftable
+		if (crafting.config.showOnlyCraftable) then
 			toggleCraftableButton.text = "Craftable"
 		else
 			toggleCraftableButton.text = "All"
@@ -509,8 +631,19 @@ crafting.closeCraftingMenu = function()
 	end
 end
 
-crafting.filterOnlyCraftable = false
-crafting.filterName = nil
+crafting.itemCountsChanged = false
+
+crafting.itemCountCache = {}
+
+crafting.getItemCount = function(item)
+	local itemCount = crafting.itemCountCache[item]
+	if (itemCount == nil) then
+		itemCount = mwscript.getItemCount({ reference = tes3.player, item = item })
+		debugPrint("crafting.itemCountCache[%s] = %d", item, itemCount)
+		crafting.itemCountCache[item] = itemCount
+	end
+	return itemCount
+end
 
 crafting.filterCraftingMenu = function()
 	local craftingMenu = tes3ui.findMenu(UIID_CraftingMenu)
@@ -518,27 +651,40 @@ crafting.filterCraftingMenu = function()
 		return 
 	end
 
-	local filterCraftable = crafting.filterOnlyCraftable
+	debugPrint("Filtering list.")
+
+	local filterCraftable = crafting.config.showOnlyCraftable
 	local filterName = crafting.filterName and string.lower(crafting.filterName)
+
+	if (crafting.itemCountsChanged) then
+		crafting.itemCountCache = {}
+		debugPrint("Cleared item count cache.")
+	end
 
 	local craftingMenuList = craftingMenu:findChild(UIID_CraftingMenu_List):findChild(tes3ui.registerID("PartScrollPane_pane"))
 	for i = 1, #craftingMenuList.children do
 		local block = craftingMenuList.children[i]
+		local packageIndex = block:getPropertyInt("CraftingMenu:Index")
+		local package = recipes[currentHandler][packageIndex]
 
-		if (filterCraftable and not block:getPropertyBool("CraftingMenu:MeetsRequirements")) then
+		local meetsReqs = packageMeetsRequirements(package)
+
+		local label = block:findChild(UIID_CraftingMenu_ListBlock_Label)
+		if (not meetsReqs) then
+			label.color = UI_Palette_Disabled
+		end
+
+		if (filterCraftable and not meetsReqs) then
 			block.visible = false
-		elseif (filterName) then
-			local packageIndex = block:getPropertyInt("CraftingMenu:Index")
-			local package = recipes[currentHandler][packageIndex]
-			if (string.find(string.lower(package.result.item.name), filterName)) then
-				block.visible = true
-			else
-				block.visible = false
-			end
+		elseif (filterName and not string.find(string.lower(package.result.item.name), filterName)) then
+			block.visible = false
 		else
 			block.visible = true
 		end
 	end
+
+	crafting.itemCountsChanged = false
+	craftingMenu:updateLayout()
 end
 
 local function recipeSorter(a, b)
@@ -559,6 +705,10 @@ crafting.preInitialized = function()
 	UIID_CraftingMenu = tes3ui.registerID("CraftingMenu")
 	UIID_CraftingMenu_Input = tes3ui.registerID("CraftingMenu::Input")
 	UIID_CraftingMenu_List = tes3ui.registerID("CraftingMenu::List")
+	UIID_CraftingMenu_ListBlock_Label = tes3ui.registerID("CraftingMenu::ListBlockLabel")
+	
+	UI_Palette_Disabled = tes3ui.getPalette("disabled_color")
+	UI_Palette_Header = tes3ui.getPalette("header_color")
 end
 
 crafting.postInitialized = function()

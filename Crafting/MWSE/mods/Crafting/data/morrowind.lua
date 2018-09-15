@@ -1,6 +1,10 @@
 local crafting = require("Crafting.module")
 
-crafting.registerHandler({ id = "armor" })
+crafting.registerHandler({
+	id = "armor",
+	successSound = "repair",
+	failureSound = "repair fail",
+})
 
 crafting.registerRecipe({ handler = "armor", skill = tes3.skill.armorer, result = "glass_boots", itemReqs = { { id = "ingred_raw_glass_01", count = 5 } } })
 crafting.registerRecipe({ handler = "armor", skill = tes3.skill.armorer, result = "glass_bracer_left", itemReqs = { { id = "ingred_raw_glass_01", count = 2 } } })
