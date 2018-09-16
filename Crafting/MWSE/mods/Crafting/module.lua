@@ -102,6 +102,15 @@ local function getSkillStatistic(param)
 	error(string.format("Could not determine type of skill '%s'. Broken skill definition, or Skills Module may not be installed.", param))
 end
 
+local function getCraftingChance(package)
+	local governingSkill = getSkill(package.skill)
+	local attribute = governingSkill.attribute and tes3.mobilePlayer.attributes[governingSkill.attribute + 1].base or 0
+	local skill = getSkillStatistic(package.skill).base
+	local luck = tes3.mobilePlayer.luck.base
+	local fatigue = tes3.mobilePlayer.fatigue
+	return (attribute/10 + luck/10 + skill - (package.difficulty or 0)) * (fatigue.current / fatigue.base)
+end
+
 local function packageMeetsRequirements(package)
 	-- Item requirements.
 	for _, stack in pairs(package.itemReqs) do
@@ -160,7 +169,7 @@ crafting.registerHandler = function(params)
 		error(string.format("Handler with id '%s' is already registered.", params.id))
 	end
 
-	local handler = { id = params.id, recipes = recipeList }
+	local handler = { id = params.id, title = params.title, recipes = recipeList }
 	
 	if (params.successSound) then
 		handler.successSound = tes3.getSound(params.successSound)
@@ -168,7 +177,6 @@ crafting.registerHandler = function(params)
 	if (params.failureSound) then
 		handler.failureSound = tes3.getSound(params.failureSound)
 	end
-
 
 	handlers[handler.id] = handler
 	recipes[handler.id] = recipeList
@@ -315,8 +323,35 @@ local function showCraftingTooltip(e)
 		descriptionLabel.borderBottom = 6
 	end
 
+	-- Determine difficulty text.
+	local difficultyText = "Impossible"
+	local chance = getCraftingChance(package)
+	if (chance > 100) then
+		difficultyText = "Trivial"
+	elseif (chance > 90) then
+		difficultyText = "Extremely Easy"
+	elseif (chance > 80) then
+		difficultyText = "Very Easy"
+	elseif (chance > 70) then
+		difficultyText = "Easy"
+	elseif (chance > 60) then
+		difficultyText = "Somewhat Easy"
+	elseif (chance > 50) then
+		difficultyText = "Moderate"
+	elseif (chance > 40) then
+		difficultyText = "Somewhat Hard"
+	elseif (chance > 30) then
+		difficultyText = "Hard"
+	elseif (chance > 20) then
+		difficultyText = "Very Hard"
+	elseif (chance > 10) then
+		difficultyText = "Extremely Hard"
+	elseif (chance > 0) then
+		difficultyText = "Very Hard"
+	end
+
 	local governingSkill = getSkill(package.skill)
-	local skillLabel = tooltipBlock:createLabel({ text = string.format("Skill: %s", governingSkill.name) })
+	local skillLabel = tooltipBlock:createLabel({ text = string.format("Skill: %s (%s)", governingSkill.name, difficultyText) })
 
 	-- Item requirements.
 	local itemReqLabel = tooltipBlock:createLabel({ text = "Components:" })
@@ -331,7 +366,8 @@ local function showCraftingTooltip(e)
 		icon.borderLeft = 6
 
 		local itemCount = crafting.getItemCount(stack.item)
-		local label = requirementBlock:createLabel({ text = string.format("%s (%d of %d)", stack.item.name, itemCount, stack.count) })
+		local label = requirementBlock:createLabel({ text = string.format("%s (%d of %d)", stack.item.name, itemCount, (stack.count or 1)) })
+		label.borderLeft = 4
 		label.absolutePosAlignY = 0.5
 
 		if (itemCount < (stack.count or 1)) then
@@ -436,12 +472,7 @@ local function onClickCraftingRow(e)
 	end
 
 	-- Determine the chance of crafting.
-	local governingSkill = getSkill(package.skill)
-	local attribute = governingSkill.attribute and tes3.mobilePlayer.attributes[governingSkill.attribute + 1].base or 0
-	local skill = getSkillStatistic(package.skill).base
-	local luck = tes3.mobilePlayer.luck.base
-	local fatigue = tes3.mobilePlayer.fatigue
-	attempt.chance = (attribute/10 + luck/10 + skill - (package.difficulty or 0)) * (fatigue.current / fatigue.base)
+	attempt.chance = getCraftingChance(package)
 
 	-- Determine success.
 	attempt.roll = math.random(1, 100)
@@ -484,7 +515,28 @@ local function onClickCraftingRow(e)
 			end
 		end
 	else
-		-- TODO: Chance to remove required items on failure? Need some cost of failure.
+		-- Perform individual checks on each item, and destroy it if it fails.
+		for _, req in pairs(package.itemReqs) do
+			if (package.consume ~= false) then
+				local count = 0
+
+				for i = 1, (req.count or 1) do
+					if ( attempt.chance >= math.random(1, 100) ) then
+						count = count + 1
+					end
+				end
+
+				if (count > 0) then
+					crafting.itemCountsChanged = true
+					mwscript.removeItem({ reference = tes3.player, item = req.item, count = count })
+					if (count > 1) then
+						tes3.messageBox("%d %ss were destroyed in the attempt.", count, req.item.name)
+					else
+						tes3.messageBox("%s was destroyed in the attempt.", req.item.name)
+					end
+				end
+			end
+		end
 	end
 	
 	-- Play the associated sound.
@@ -520,7 +572,7 @@ crafting.showCraftingMenu = function(params)
 
 	-- Create menu.
 	local menu = tes3ui.createMenu({id = UIID_CraftingMenu, dragFrame = true})
-	menu.text = "Crafting"
+	menu.text = handlers[handler].title or "Crafting"
 	menu.width = 400
 	menu.height = 700
 	menu.minWidth = 400

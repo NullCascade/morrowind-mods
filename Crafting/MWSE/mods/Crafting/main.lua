@@ -20,6 +20,24 @@ end
 event.register("initialized", onInitialized)
 
 local function onKeyU(e)
-	crafting.showCraftingMenu({ handler = "armor" })
+	tes3.messageBox({
+		message = "Which crafting menu?",
+		buttons = {
+			"Armor",
+			"Smelting",
+			"Weapons",
+		},
+		callback = function(e)
+			timer.delayOneFrame(function()
+				if (e.button == 0) then
+					crafting.showCraftingMenu({ handler = "armor" })
+				elseif (e.button == 1) then
+					crafting.showCraftingMenu({ handler = "smelting" })
+				elseif (e.button == 2) then
+					crafting.showCraftingMenu({ handler = "weapon" })
+				end
+			end)
+		end
+	})
 end
 event.register("keyDown", onKeyU, { filter = 22 })

@@ -1,11 +1,25 @@
 local crafting = require("Crafting.module")
 
-crafting.registerHandler({
-	id = "armor",
-	successSound = "repair",
-	failureSound = "repair fail",
-})
+-- Material IDs to be used, depending on if TR is installed or not.
+local idOreGold = tes3.getObject("tr_ing_gold") and "tr_ing_gold" or "craft_or_gold"
+local idOreIron = tes3.getObject("tr_ing_iron") and "tr_ing_iron" or "craft_or_iron"
 
+-- Crafting handlers.
+crafting.registerHandler({ id = "armor", title = "Armor Smithing", successSound = "repair", failureSound = "repair fail" })
+crafting.registerHandler({ id = "smelting", title = "Smeltery", successSound = "repair", failureSound = "repair fail" })
+crafting.registerHandler({ id = "weapon", title = "Weapon Smithing", successSound = "repair", failureSound = "repair fail" })
+
+-- Ingots and other crafting materials.
+crafting.registerRecipe({ handler = "smelting", skill = tes3.skill.armorer, difficulty = -50, result = "craft_in_corundum", itemReqs = { "craft_or_corundum" } })
+crafting.registerRecipe({ handler = "smelting", skill = tes3.skill.armorer, difficulty = -50, result = "craft_in_dwarven", itemReqs = { { id = "ingred_scrap_metal_01", count = 3 } } })
+crafting.registerRecipe({ handler = "smelting", skill = tes3.skill.armorer, difficulty = -50, result = "craft_in_ebony", itemReqs = { { id = "ingred_raw_ebony_01", count = 2 } } })
+crafting.registerRecipe({ handler = "smelting", skill = tes3.skill.armorer, difficulty = -50, result = "craft_in_gold", itemReqs = { idOreGold } })
+crafting.registerRecipe({ handler = "smelting", skill = tes3.skill.armorer, difficulty = -50, result = "craft_in_iron", itemReqs = { idOreIron } })
+crafting.registerRecipe({ handler = "smelting", skill = tes3.skill.armorer, difficulty = -50, result = "craft_in_malachite", itemReqs = { { id = "ingred_raw_glass_01", count = 3 } } })
+crafting.registerRecipe({ handler = "smelting", skill = tes3.skill.armorer, difficulty = -50, result = "craft_in_silver", itemReqs = { "craft_or_silver" } })
+crafting.registerRecipe({ handler = "smelting", skill = tes3.skill.armorer, difficulty = -50, result = "craft_in_steel", itemReqs = { "craft_or_corundum", idOreIron } })
+
+-- Light armor.
 crafting.registerRecipe({ handler = "armor", skill = tes3.skill.armorer, result = "glass_boots", itemReqs = { { id = "ingred_raw_glass_01", count = 5 } } })
 crafting.registerRecipe({ handler = "armor", skill = tes3.skill.armorer, result = "glass_bracer_left", itemReqs = { { id = "ingred_raw_glass_01", count = 2 } } })
 crafting.registerRecipe({ handler = "armor", skill = tes3.skill.armorer, result = "glass_bracer_right", itemReqs = { { id = "ingred_raw_glass_01", count = 2 } } })
