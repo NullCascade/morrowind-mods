@@ -1,8 +1,8 @@
 local crafting = require("Crafting.module")
 
 -- Material IDs to be used, depending on if TR is installed or not.
-local idOreGold = tes3.getObject("tr_ing_gold") and "tr_ing_gold" or "craft_or_gold"
-local idOreIron = tes3.getObject("tr_ing_iron") and "tr_ing_iron" or "craft_or_iron"
+local idOreGold = tes3.getObject("tr_ing_gold") and "tr_ing_gold" or "craft_in_gold"
+local idOreIron = tes3.getObject("tr_ing_iron") and "tr_ing_iron" or "craft_in_iron"
 
 -- Crafting handlers.
 crafting.registerHandler({ id = "armor", title = "Armor Smithing", successSound = "repair", failureSound = "repair fail" })

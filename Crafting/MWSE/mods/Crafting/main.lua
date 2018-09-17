@@ -4,6 +4,8 @@ local crafting = require("Crafting.module")
 local dataDir = "Data Files/MWSE/mods/Crafting/data"
 
 local function onInitialized(e)
+	local memoryBefore = collectgarbage("count")
+
 	crafting.preInitialized()
 
 	-- Look through our data folder and load any packages.
@@ -16,6 +18,8 @@ local function onInitialized(e)
 	end
 
 	crafting.postInitialized()
+
+	mwse.log("Crafting system initialized. Recipe memory impact: %.2f KB", (collectgarbage("count") - memoryBefore))
 end
 event.register("initialized", onInitialized)
 
