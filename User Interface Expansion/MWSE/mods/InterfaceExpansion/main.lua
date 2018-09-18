@@ -211,14 +211,14 @@ local function onMenuMagicActivated(e)
 
 	-- Create the individual filter icons.
 	do
-		local schoolFilterAlteration = schoolFilterBorder:createImage({ path = "icons/k/magic_alteration.tga" })
+		local schoolFilterAlteration = schoolFilterBorder:createImage({ path = "icons/ui_exp/magic_alteration.tga" })
 		schoolFilterAlteration.imageScaleX = 0.6
 		schoolFilterAlteration.imageScaleY = 0.6
 		schoolFilterAlteration:setPropertyInt("UIEXP:School", tes3.magicSchool.alteration)
 		schoolFilterAlteration:register("mouseClick", setSchoolBlacklistFilter)
 		schoolFilterAlteration:register("help", onSchoolFilterTooltip)
 
-		local schoolFilterConjuration = schoolFilterBorder:createImage({ path = "icons/k/magic_conjuration.tga" })
+		local schoolFilterConjuration = schoolFilterBorder:createImage({ path = "icons/ui_exp/magic_conjuration.tga" })
 		schoolFilterConjuration.borderLeft = 2
 		schoolFilterConjuration.imageScaleX = 0.6
 		schoolFilterConjuration.imageScaleY = 0.6
@@ -226,7 +226,7 @@ local function onMenuMagicActivated(e)
 		schoolFilterConjuration:register("mouseClick", setSchoolBlacklistFilter)
 		schoolFilterConjuration:register("help", onSchoolFilterTooltip)
 		
-		local schoolFilterDestruction = schoolFilterBorder:createImage({ path = "icons/k/magic_destruction.tga" })
+		local schoolFilterDestruction = schoolFilterBorder:createImage({ path = "icons/ui_exp/magic_destruction.tga" })
 		schoolFilterDestruction.borderLeft = 2
 		schoolFilterDestruction.imageScaleX = 0.6
 		schoolFilterDestruction.imageScaleY = 0.6
@@ -234,7 +234,7 @@ local function onMenuMagicActivated(e)
 		schoolFilterDestruction:register("mouseClick", setSchoolBlacklistFilter)
 		schoolFilterDestruction:register("help", onSchoolFilterTooltip)
 		
-		local schoolFilterIllusion = schoolFilterBorder:createImage({ path = "icons/k/magic_illusion.tga" })
+		local schoolFilterIllusion = schoolFilterBorder:createImage({ path = "icons/ui_exp/magic_illusion.tga" })
 		schoolFilterIllusion.borderLeft = 2
 		schoolFilterIllusion.imageScaleX = 0.6
 		schoolFilterIllusion.imageScaleY = 0.6
@@ -242,7 +242,7 @@ local function onMenuMagicActivated(e)
 		schoolFilterIllusion:register("mouseClick", setSchoolBlacklistFilter)
 		schoolFilterIllusion:register("help", onSchoolFilterTooltip)
 		
-		local schoolFilterMysticism = schoolFilterBorder:createImage({ path = "icons/k/magic_mysticism.tga" })
+		local schoolFilterMysticism = schoolFilterBorder:createImage({ path = "icons/ui_exp/magic_mysticism.tga" })
 		schoolFilterMysticism.borderLeft = 2
 		schoolFilterMysticism.imageScaleX = 0.6
 		schoolFilterMysticism.imageScaleY = 0.6
@@ -250,7 +250,7 @@ local function onMenuMagicActivated(e)
 		schoolFilterMysticism:register("mouseClick", setSchoolBlacklistFilter)
 		schoolFilterMysticism:register("help", onSchoolFilterTooltip)
 		
-		local schoolFilterRestoration = schoolFilterBorder:createImage({ path = "icons/k/magic_restoration.tga" })
+		local schoolFilterRestoration = schoolFilterBorder:createImage({ path = "icons/ui_exp/magic_restoration.tga" })
 		schoolFilterRestoration.borderLeft = 2
 		schoolFilterRestoration.imageScaleX = 0.6
 		schoolFilterRestoration.imageScaleY = 0.6
