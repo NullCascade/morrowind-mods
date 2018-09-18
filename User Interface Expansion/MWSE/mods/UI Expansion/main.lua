@@ -11,6 +11,8 @@ local GUI_ID_UIEXP_MagicMenu_SchoolFilters
 local GUI_Palette_Normal
 local GUI_Palette_Disabled
 
+local InputController
+
 -- Configuration table.
 local defaultConfig = {
 	showHelpText = true,
@@ -131,7 +133,7 @@ local function setSchoolBlacklistFilter(e)
 	end
 
 	-- If shift is pressed, toggle the element.
-	if (tes3.worldController.inputController:isKeyDown(42)) then
+	if (InputController:isKeyDown(42)) then
 		toggleSchoolBlacklistFilter(e)
 		return 
 	end
@@ -224,9 +226,14 @@ local function onMenuMagicActivated(e)
 	searchInput.widget.eraseOnFirstKey = true
 	searchInput.widget.lengthLimit = 31
 
-	-- Set up the 
+	-- Set up the events to control text input control.
 	searchInput.consumeMouseEvents = false
 	searchInput:register("keyPress", function(e)
+		-- Prevent alt-tabbing from creating spacing.
+		if (InputController:isKeyPressedThisFrame(15)) then
+			return
+		end
+
 		searchInput:forwardEvent(e)
 
 		spellsListSearchText = searchInput.text
@@ -236,8 +243,6 @@ local function onMenuMagicActivated(e)
 		searchSpellsList()
 	end)
 	searchInputBorder:register("mouseClick", function()
-		searchInput:forwardEvent(e)
-
 		tes3ui.acquireTextInput(searchInput)
 		searchInput.color = GUI_Palette_Normal
 	end)
@@ -342,5 +347,8 @@ local function onInitialized(e)
 	for name, id in pairs(tes3.magicSchool) do
 		spellsListSchoolWhitelist[id] = true
 	end
+
+	-- Fill in short hand variables.
+	InputController = tes3.worldController.inputController
 end
 event.register("initialized", onInitialized)
