@@ -1,0 +1,346 @@
+
+local GUI_ID_MagicMenu_spell_costs
+local GUI_ID_MagicMenu_spell_names
+local GUI_ID_MagicMenu_spell_percents
+local GUI_ID_MagicMenu_spells_list
+local GUI_ID_MenuMagic
+local GUI_ID_PartScrollPane_pane
+
+local GUI_ID_UIEXP_MagicMenu_SchoolFilters
+
+local GUI_Palette_Normal
+local GUI_Palette_Disabled
+
+-- Configuration table.
+local defaultConfig = {
+	showHelpText = true,
+}
+local config = table.copy(defaultConfig)
+
+-- Loads the configuration file for use.
+local function loadConfig()
+	-- Clear any current config values.
+	config = {}
+
+	-- First, load the defaults.
+	table.copy(defaultConfig, config)
+
+	-- Then load any other values from the config file.
+	local configJson = mwse.loadConfig("UI Expansion")
+	if (configJson ~= nil) then
+		table.copy(configJson, config)
+	end
+
+	mwse.log("[UI Expansion] Loaded configuration:")
+	mwse.log(json.encode(config, { indent = true }))
+end
+loadConfig()
+
+----------------------------------------------------------------------------------------------------
+-- Spell List: Filtering and Searching
+----------------------------------------------------------------------------------------------------
+
+local spellsListSearchText = nil
+local spellsListSchoolWhitelist = {}
+
+local function spellMatchesFilter(spell)
+	-- Filter by name.
+	if (spellsListSearchText and not string.find(string.lower(spell.name), spellsListSearchText)) then
+		return false
+	end
+
+	-- Filter by effects.
+	for i = 1, #spell.effects do
+		if (spellsListSchoolWhitelist[spell.effects[i].object.school]) then
+			return true
+		end
+	end
+
+	return false
+end
+
+local function searchSpellsList()
+	local magicMenu = tes3ui.findMenu(GUI_ID_MenuMagic)
+	local namesList = magicMenu:findChild(GUI_ID_MagicMenu_spell_names)
+	local costsList = magicMenu:findChild(GUI_ID_MagicMenu_spell_costs)
+	local percentsList = magicMenu:findChild(GUI_ID_MagicMenu_spell_percents)
+
+	-- Get a list of all children for future manipulation.
+	-- These tables are created newly each time .children is accessed.
+	local namesChildren = namesList.children
+	local costsChildren = costsList.children
+	local percentsChildren = percentsList.children
+
+	-- 
+	for index = 1, #namesChildren do
+		local element = namesChildren[index]
+
+		local filter = spellMatchesFilter(element:getPropertyObject("MagicMenu_Spell"))
+		if (filter ~= element.visible) then
+			element.visible = filter
+			costsChildren[index].visible = filter
+			percentsChildren[index].visible = filter
+		end
+	end
+end
+
+local function toggleSchoolBlacklistFilter(e)
+	local icon = e.source
+	local school = icon:getPropertyInt("UIEXP:School")
+
+	if (spellsListSchoolWhitelist[school]) then
+		icon.alpha = 0.5
+		spellsListSchoolWhitelist[school] = false
+	else
+		icon.alpha = 1.0
+		spellsListSchoolWhitelist[school] = true
+	end
+	icon:updateLayout()
+
+	searchSpellsList()
+end
+
+local function setSchoolBlacklistFilter(e)
+	local icon = e.source
+	local school = icon:getPropertyInt("UIEXP:School")
+	
+	-- If this is the only element activated, show all schools.
+	local shownCount = 0
+	local shownSchool = nil
+	for school, state in pairs(spellsListSchoolWhitelist) do
+		if (state) then
+			shownSchool = school
+			shownCount = shownCount + 1
+		end
+	end
+	if (shownCount == 1 and shownSchool == school) then
+		for school, state in pairs(spellsListSchoolWhitelist) do
+			spellsListSchoolWhitelist[school] = true
+		end
+		
+		local magicMenu = tes3ui.findMenu(GUI_ID_MenuMagic)
+		local filtersBlock = magicMenu:findChild(GUI_ID_UIEXP_MagicMenu_SchoolFilters)
+		local filtersChildren = filtersBlock.children
+		for _, element in pairs(filtersChildren) do
+			element.alpha = 1.0
+			element:updateLayout()
+		end
+
+		searchSpellsList()
+		return
+	end
+
+	-- If shift is pressed, toggle the element.
+	if (tes3.worldController.inputController:isKeyDown(42)) then
+		toggleSchoolBlacklistFilter(e)
+		return 
+	end
+
+	local magicMenu = tes3ui.findMenu(GUI_ID_MenuMagic)
+
+	local filtersBlock = magicMenu:findChild(GUI_ID_UIEXP_MagicMenu_SchoolFilters)
+	local filtersChildren = filtersBlock.children
+	for _, element in pairs(filtersChildren) do
+		element.alpha = 0.5
+		element:updateLayout()
+	end
+
+	icon.alpha = 1.0
+	icon:updateLayout()
+
+	for name, id in pairs(tes3.magicSchool) do
+		spellsListSchoolWhitelist[id] = false
+	end
+	
+	spellsListSchoolWhitelist[school] = true
+
+	searchSpellsList()
+end
+
+local function onSchoolFilterTooltip(e)
+	local icon = e.source
+	local tooltip = tes3ui.createTooltipMenu()
+
+	local tooltipBlock = tooltip:createBlock({})
+	tooltipBlock.flowDirection = "top_to_bottom"
+	tooltipBlock.autoHeight = true
+	tooltipBlock.autoWidth = true
+	
+	local schoolId = icon:getPropertyInt("UIEXP:School")
+	local skillId = tes3.magicSchoolSkill[schoolId]
+
+	tooltipBlock:createLabel({ text = string.format("Filter by %s", tes3.getSkill(skillId).name) })
+
+	if (config.showHelpText) then
+		local helpText
+		
+		helpText = tooltipBlock:createLabel({ text = "Click to filter by school." })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 6
+
+		helpText = tooltipBlock:createLabel({ text = "Click again to remove filter." })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 6
+
+		helpText = tooltipBlock:createLabel({ text = "Shift+Click to add to/remove from filter." })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 6
+
+		helpText = tooltipBlock:createLabel({ text = "Help text can be disabled in the Mod Config Menu." })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 6
+	end
+end
+
+local function onMenuMagicActivated(e)
+	local spellsList = e.element:findChild(GUI_ID_MagicMenu_spells_list)
+	local spellsListContents = spellsList:findChild(GUI_ID_PartScrollPane_pane)
+
+	-- Make the parent block order from top to bottom.
+	local spellsListParent = spellsList.parent
+	spellsListParent.flowDirection = "top_to_bottom"
+
+	-- Create the filter block where our search bar and filter icons will live.
+	local filterBlock = spellsListParent:createBlock({ id = "UIEXP:MagicMenu:FilterBlock" })
+	filterBlock.flowDirection = "left_to_right"
+	filterBlock.widthProportional = 1.0
+	filterBlock.autoHeight = true
+	filterBlock.paddingLeft = 4
+	filterBlock.paddingRight = 4
+	
+	local searchInputBorder = filterBlock:createThinBorder({})
+	searchInputBorder.autoWidth = true
+	searchInputBorder.autoHeight = true
+	searchInputBorder.widthProportional = 1.0
+	
+	-- Create the search input itself.
+	local searchInput = searchInputBorder:createTextInput({ id = "UIEXP:MagicMenu:SearchInput" })
+	searchInput.color = GUI_Palette_Disabled
+	searchInput.text = "Search by name..."
+	searchInput.borderLeft = 5
+	searchInput.borderRight = 5
+	searchInput.borderTop = 2
+	searchInput.borderBottom = 4
+	searchInput.widget.eraseOnFirstKey = true
+	searchInput.widget.lengthLimit = 31
+
+	-- Set up the 
+	searchInput.consumeMouseEvents = false
+	searchInput:register("keyPress", function(e)
+		searchInput:forwardEvent(e)
+
+		spellsListSearchText = searchInput.text
+		if (spellsListSearchText == "") then
+			spellsListSearchText = nil
+		end
+		searchSpellsList()
+	end)
+	searchInputBorder:register("mouseClick", function()
+		searchInput:forwardEvent(e)
+
+		tes3ui.acquireTextInput(searchInput)
+		searchInput.color = GUI_Palette_Normal
+	end)
+	
+	-- Create magic school filter border.
+	local schoolFilterBorder = filterBlock:createThinBorder({ id = GUI_ID_UIEXP_MagicMenu_SchoolFilters })
+	schoolFilterBorder.autoWidth = true
+	schoolFilterBorder.autoHeight = true
+	schoolFilterBorder.borderLeft = 4
+	schoolFilterBorder.paddingTop = 2
+	schoolFilterBorder.paddingBottom = 3
+	schoolFilterBorder.paddingLeft = 2
+	schoolFilterBorder.paddingRight = 3
+
+	-- Create the individual filter icons.
+	do
+		local schoolFilterAlteration = schoolFilterBorder:createImage({ path = "icons/ui_exp/magic_alteration.tga" })
+		schoolFilterAlteration.imageScaleX = 0.6
+		schoolFilterAlteration.imageScaleY = 0.6
+		schoolFilterAlteration:setPropertyInt("UIEXP:School", tes3.magicSchool.alteration)
+		schoolFilterAlteration:register("mouseClick", setSchoolBlacklistFilter)
+		schoolFilterAlteration:register("help", onSchoolFilterTooltip)
+
+		local schoolFilterConjuration = schoolFilterBorder:createImage({ path = "icons/ui_exp/magic_conjuration.tga" })
+		schoolFilterConjuration.borderLeft = 2
+		schoolFilterConjuration.imageScaleX = 0.6
+		schoolFilterConjuration.imageScaleY = 0.6
+		schoolFilterConjuration:setPropertyInt("UIEXP:School", tes3.magicSchool.conjuration)
+		schoolFilterConjuration:register("mouseClick", setSchoolBlacklistFilter)
+		schoolFilterConjuration:register("help", onSchoolFilterTooltip)
+		
+		local schoolFilterDestruction = schoolFilterBorder:createImage({ path = "icons/ui_exp/magic_destruction.tga" })
+		schoolFilterDestruction.borderLeft = 2
+		schoolFilterDestruction.imageScaleX = 0.6
+		schoolFilterDestruction.imageScaleY = 0.6
+		schoolFilterDestruction:setPropertyInt("UIEXP:School", tes3.magicSchool.destruction)
+		schoolFilterDestruction:register("mouseClick", setSchoolBlacklistFilter)
+		schoolFilterDestruction:register("help", onSchoolFilterTooltip)
+		
+		local schoolFilterIllusion = schoolFilterBorder:createImage({ path = "icons/ui_exp/magic_illusion.tga" })
+		schoolFilterIllusion.borderLeft = 2
+		schoolFilterIllusion.imageScaleX = 0.6
+		schoolFilterIllusion.imageScaleY = 0.6
+		schoolFilterIllusion:setPropertyInt("UIEXP:School", tes3.magicSchool.illusion)
+		schoolFilterIllusion:register("mouseClick", setSchoolBlacklistFilter)
+		schoolFilterIllusion:register("help", onSchoolFilterTooltip)
+		
+		local schoolFilterMysticism = schoolFilterBorder:createImage({ path = "icons/ui_exp/magic_mysticism.tga" })
+		schoolFilterMysticism.borderLeft = 2
+		schoolFilterMysticism.imageScaleX = 0.6
+		schoolFilterMysticism.imageScaleY = 0.6
+		schoolFilterMysticism:setPropertyInt("UIEXP:School", tes3.magicSchool.mysticism)
+		schoolFilterMysticism:register("mouseClick", setSchoolBlacklistFilter)
+		schoolFilterMysticism:register("help", onSchoolFilterTooltip)
+		
+		local schoolFilterRestoration = schoolFilterBorder:createImage({ path = "icons/ui_exp/magic_restoration.tga" })
+		schoolFilterRestoration.borderLeft = 2
+		schoolFilterRestoration.imageScaleX = 0.6
+		schoolFilterRestoration.imageScaleY = 0.6
+		schoolFilterRestoration:setPropertyInt("UIEXP:School", tes3.magicSchool.restoration)
+		schoolFilterRestoration:register("mouseClick", setSchoolBlacklistFilter)
+		schoolFilterRestoration:register("help", onSchoolFilterTooltip)
+	end
+
+	-- Move the filter options to the top of the block.
+	spellsListParent:reorderChildren(0, -1, 1)
+
+	-- Default to spell searching.
+	tes3ui.acquireTextInput(searchInput)
+end
+event.register("uiActivated", onMenuMagicActivated, { filter = "MenuMagic" } )
+
+
+----------------------------------------------------------------------------------------------------
+-- Initialization: Data collection, MCM, and UI ID registration.
+----------------------------------------------------------------------------------------------------
+
+local modConfig = require("UI Expansion.mcm")
+modConfig.config = config
+local function registerModConfig()
+	mwse.registerModConfig("UI Expansion", modConfig)
+end
+event.register("modConfigReady", registerModConfig)
+
+local function onInitialized(e)
+	-- Pre-register extant GUI IDs.
+	GUI_ID_MagicMenu_spell_costs = tes3ui.registerID("MagicMenu_spell_costs")
+	GUI_ID_MagicMenu_spell_names = tes3ui.registerID("MagicMenu_spell_names")
+	GUI_ID_MagicMenu_spell_percents = tes3ui.registerID("MagicMenu_spell_percents")
+	GUI_ID_MagicMenu_spells_list = tes3ui.registerID("MagicMenu_spells_list")
+	GUI_ID_MenuMagic = tes3ui.registerID("MenuMagic")
+	GUI_ID_PartScrollPane_pane = tes3ui.registerID("PartScrollPane_pane")
+
+	-- Pre-register new GUI IDs.
+	GUI_ID_UIEXP_MagicMenu_SchoolFilters = tes3ui.registerID("UIEXP_MagicMenu_SchoolFilters")
+
+	-- Pre-register pallets.
+	GUI_Palette_Normal = tes3ui.getPalette("normal_color")
+	GUI_Palette_Disabled = tes3ui.getPalette("disabled_color")
+
+	-- Fill the school filter whitelist.
+	for name, id in pairs(tes3.magicSchool) do
+		spellsListSchoolWhitelist[id] = true
+	end
+end
+event.register("initialized", onInitialized)
