@@ -1,11 +1,16 @@
 
+local GUI_ID_HelpMenu
 local GUI_ID_MagicMenu_spell_costs
 local GUI_ID_MagicMenu_spell_names
 local GUI_ID_MagicMenu_spell_percents
 local GUI_ID_MagicMenu_spells_list
+local GUI_ID_MenuInventory
+local GUI_ID_MenuInventory_button_layout
 local GUI_ID_MenuMagic
+local GUI_ID_MenuStat_scroll_pane
 local GUI_ID_PartScrollPane_pane
 
+local GUI_ID_UIEXP_InventoryMenu_Filters
 local GUI_ID_UIEXP_MagicMenu_SchoolFilters
 
 local GUI_Palette_Normal
@@ -14,6 +19,8 @@ local GUI_Palette_Positive
 local GUI_Palette_Negative
 
 local InputController
+
+local common = require("UI Expansion.common")
 
 -- Configuration table.
 local defaultConfig = {
@@ -41,6 +48,425 @@ end
 loadConfig()
 
 ----------------------------------------------------------------------------------------------------
+-- Inventory: Searching, sorting, and filtering.
+----------------------------------------------------------------------------------------------------
+
+local inventorySearchText = nil
+
+local inventoryFilter = {
+	["all"] = 0,
+	["weapon"] = 1,
+	["apparel"] = 2,
+	["consumable"] = 3,
+	["ingredient"] = 4,
+	["tools"] = 5,
+	["other"] = 6,
+}
+
+local inventoryActiveFilters = { [inventoryFilter.all] = true }
+
+local inventoryFilterCallbacks = {}
+
+function inventoryFilterCallbacks.all(e)
+	return true
+end
+
+function inventoryFilterCallbacks.weapon(e)
+	local objectType = e.item.objectType
+	return (objectType == tes3.objectType.weapon or objectType == tes3.objectType.ammunition)
+end
+
+function inventoryFilterCallbacks.apparel(e)
+	local objectType = e.item.objectType
+	return (objectType == tes3.objectType.armor or objectType == tes3.objectType.clothing)
+end
+
+function inventoryFilterCallbacks.consumable(e)
+	local objectType = e.item.objectType
+	return (objectType == tes3.objectType.alchemy)
+end
+
+function inventoryFilterCallbacks.ingredient(e)
+	local objectType = e.item.objectType
+	return (objectType == tes3.objectType.ingredient)
+end
+
+function inventoryFilterCallbacks.tools(e)
+	local objectType = e.item.objectType
+	return (
+		objectType == tes3.objectType.apparatus or 
+		objectType == tes3.objectType.probe or 
+		objectType == tes3.objectType.lockpick or 
+		objectType == tes3.objectType.repairItem
+	)
+end
+
+function inventoryFilterCallbacks.other(e)
+	local objectType = e.item.objectType
+	return (
+		objectType == tes3.objectType.book or
+		objectType == tes3.objectType.light or
+		objectType == tes3.objectType.miscItem
+	)
+end
+
+local function updateInventoryFilterIcons()
+	local magicMenu = tes3ui.findMenu(GUI_ID_MenuInventory)
+	local filtersBlock = magicMenu:findChild(GUI_ID_UIEXP_InventoryMenu_Filters)
+	local filtersChildren = filtersBlock.children
+	local doAll = inventoryActiveFilters[inventoryFilter.all]
+	for _, element in pairs(filtersChildren) do
+		if (doAll) then
+			element.alpha = 1.0
+		else
+			local id = element:getPropertyInt("UIEXP:Category")
+			if (inventoryActiveFilters[id]) then
+				element.alpha = 1.0
+			else
+				element.alpha = 0.5
+			end
+		end
+		element:updateLayout()
+	end
+end
+
+local function onInventoryFilterClick(e)
+	local icon = e.source
+	local id = icon:getPropertyInt("UIEXP:Category")
+	local key = table.find(inventoryFilter, id)
+
+	-- If this is the only filter active, reset to show all.
+	local activeFilterCount = 0
+	local activeFilter = nil
+	for key, id in pairs(inventoryFilter) do
+		if (inventoryActiveFilters[id]) then
+			activeFilter = id
+			activeFilterCount = activeFilterCount + 1
+		end
+	end
+	if (activeFilterCount == 1 and activeFilter == id) then
+		inventoryActiveFilters = { [inventoryFilter.all] = true }
+		updateInventoryFilterIcons()
+		tes3ui.updateInventoryTiles()
+		return
+	end
+
+	-- If shift is pressed, toggle the element.
+	if (InputController:isKeyDown(42)) then
+		inventoryActiveFilters[id] = not inventoryActiveFilters[id]
+		if (#inventoryActiveFilters >= #inventoryFilter - 1) then
+			inventoryActiveFilters = { [inventoryFilter.all] = true }
+		end
+	else
+		inventoryActiveFilters = { [id] = true }
+		inventoryActiveFilters[inventoryFilter.all] = nil
+	end
+
+	updateInventoryFilterIcons()
+	tes3ui.updateInventoryTiles()
+end
+
+local inventoryTooltipCallbacks = {}
+
+function inventoryTooltipCallbacks.weapon(e)
+	local tooltip = tes3ui.createTooltipMenu()
+
+	local tooltipBlock = tooltip:createBlock({})
+	tooltipBlock.flowDirection = "top_to_bottom"
+	tooltipBlock.autoHeight = true
+	tooltipBlock.autoWidth = true
+
+	tooltipBlock:createLabel({ text = "Filter to weapons" })
+
+	if (config.showHelpText) then
+		local helpText
+		
+		helpText = tooltipBlock:createLabel({ text = "Click to filter to:" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 6
+
+		helpText = tooltipBlock:createLabel({ text = "- Ammunition" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 2
+		helpText.borderLeft = 6
+
+		helpText = tooltipBlock:createLabel({ text = "- Weapons" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 2
+		helpText.borderLeft = 6
+
+		helpText = tooltipBlock:createLabel({ text = "Help text can be disabled in the Mod Config Menu." })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 6
+	end
+end
+
+function inventoryTooltipCallbacks.apparel(e)
+	local tooltip = tes3ui.createTooltipMenu()
+
+	local tooltipBlock = tooltip:createBlock({})
+	tooltipBlock.flowDirection = "top_to_bottom"
+	tooltipBlock.autoHeight = true
+	tooltipBlock.autoWidth = true
+
+	tooltipBlock:createLabel({ text = "Filter to armor and clothing" })
+
+	if (config.showHelpText) then
+		local helpText
+		
+		helpText = tooltipBlock:createLabel({ text = "Click to filter to:" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 6
+
+		helpText = tooltipBlock:createLabel({ text = "- Armor" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 2
+		helpText.borderLeft = 6
+
+		helpText = tooltipBlock:createLabel({ text = "- Clothing" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 2
+		helpText.borderLeft = 6
+
+		helpText = tooltipBlock:createLabel({ text = "Help text can be disabled in the Mod Config Menu." })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 6
+	end
+end
+
+function inventoryTooltipCallbacks.consumable(e)
+	local tooltip = tes3ui.createTooltipMenu()
+
+	local tooltipBlock = tooltip:createBlock({})
+	tooltipBlock.flowDirection = "top_to_bottom"
+	tooltipBlock.autoHeight = true
+	tooltipBlock.autoWidth = true
+
+	tooltipBlock:createLabel({ text = "Filter to consumables" })
+
+	if (config.showHelpText) then
+		local helpText
+		
+		helpText = tooltipBlock:createLabel({ text = "Click to filter to:" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 6
+
+		helpText = tooltipBlock:createLabel({ text = "- Potions" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 2
+		helpText.borderLeft = 6
+
+		helpText = tooltipBlock:createLabel({ text = "- Scrolls" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 2
+		helpText.borderLeft = 6
+
+		helpText = tooltipBlock:createLabel({ text = "- On-use enchantments" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 2
+		helpText.borderLeft = 6
+
+		helpText = tooltipBlock:createLabel({ text = "Help text can be disabled in the Mod Config Menu." })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 6
+	end
+end
+
+function inventoryTooltipCallbacks.ingredient(e)
+	local tooltip = tes3ui.createTooltipMenu()
+
+	local tooltipBlock = tooltip:createBlock({})
+	tooltipBlock.flowDirection = "top_to_bottom"
+	tooltipBlock.autoHeight = true
+	tooltipBlock.autoWidth = true
+
+	tooltipBlock:createLabel({ text = "Filter to ingredients" })
+
+	if (config.showHelpText) then
+		local helpText
+		
+		helpText = tooltipBlock:createLabel({ text = "Click to filter to:" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 6
+
+		helpText = tooltipBlock:createLabel({ text = "- Ingredients" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 2
+		helpText.borderLeft = 6
+
+		helpText = tooltipBlock:createLabel({ text = "Help text can be disabled in the Mod Config Menu." })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 6
+	end
+end
+
+function inventoryTooltipCallbacks.tools(e)
+	local tooltip = tes3ui.createTooltipMenu()
+
+	local tooltipBlock = tooltip:createBlock({})
+	tooltipBlock.flowDirection = "top_to_bottom"
+	tooltipBlock.autoHeight = true
+	tooltipBlock.autoWidth = true
+
+	tooltipBlock:createLabel({ text = "Filter to tools and soulgems" })
+
+	if (config.showHelpText) then
+		local helpText
+		
+		helpText = tooltipBlock:createLabel({ text = "Click to filter to:" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 6
+
+		helpText = tooltipBlock:createLabel({ text = "- Apparatus" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 2
+		helpText.borderLeft = 6
+
+		helpText = tooltipBlock:createLabel({ text = "- Lockpicks" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 2
+		helpText.borderLeft = 6
+
+		helpText = tooltipBlock:createLabel({ text = "- Probes" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 2
+		helpText.borderLeft = 6
+
+		helpText = tooltipBlock:createLabel({ text = "- Repair Tools" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 2
+		helpText.borderLeft = 6
+
+		helpText = tooltipBlock:createLabel({ text = "- Soulgems" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 2
+		helpText.borderLeft = 6
+
+		helpText = tooltipBlock:createLabel({ text = "Help text can be disabled in the Mod Config Menu." })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 6
+	end
+end
+
+function inventoryTooltipCallbacks.other(e)
+	local tooltip = tes3ui.createTooltipMenu()
+
+	local tooltipBlock = tooltip:createBlock({})
+	tooltipBlock.flowDirection = "top_to_bottom"
+	tooltipBlock.autoHeight = true
+	tooltipBlock.autoWidth = true
+
+	tooltipBlock:createLabel({ text = "Filter to other items" })
+
+	if (config.showHelpText) then
+		local helpText
+		
+		helpText = tooltipBlock:createLabel({ text = "Click to filter to:" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 6
+
+		helpText = tooltipBlock:createLabel({ text = "- Books" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 2
+		helpText.borderLeft = 6
+
+		helpText = tooltipBlock:createLabel({ text = "- Lights" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 2
+		helpText.borderLeft = 6
+
+		helpText = tooltipBlock:createLabel({ text = "- Misc. Items" })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 2
+		helpText.borderLeft = 6
+
+		helpText = tooltipBlock:createLabel({ text = "Help text can be disabled in the Mod Config Menu." })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 6
+	end
+end
+
+local function onInventoryFilterTooltip(e)
+	local id = e.source:getPropertyInt("UIEXP:Category")
+	local key = table.find(inventoryFilter, id)
+	inventoryTooltipCallbacks[key](e)
+end
+
+local function filterInventory(e)
+	-- Search by name.
+	if (inventorySearchText and not string.find(string.lower(e.item.name), inventorySearchText)) then
+		e.filter = false
+		return
+	end
+
+	-- Otherwise go through active filters.
+	for key, id in pairs(inventoryFilter) do
+		if (not e.filter and inventoryActiveFilters[id]) then
+			if (inventoryFilterCallbacks[key](e)) then
+				e.filter = true
+				return
+			end
+		end
+	end
+
+	e.filter = false
+	return
+end
+event.register("filterInventory", filterInventory )
+
+local function OnMenuInventoryActivated(e)
+	local buttonBlock = e.element:findChild(GUI_ID_MenuInventory_button_layout)
+
+	-- Start off by nuking our slate clean.
+	buttonBlock:destroyChildren()
+
+	-- Create search bar.
+	common.createSearchBar({
+		parent = buttonBlock,
+		id = "UIEXP:InventoryMenu:SearchInput",
+		placeholderText = "Search by name...",
+		onUpdate = function(e)
+			inventorySearchText = e.source.text
+			if (inventorySearchText == "") then
+				inventorySearchText = nil
+			end
+			tes3ui.updateInventoryTiles()
+		end
+	})
+
+	-- Create icons for filtering.
+	do
+		local border = buttonBlock:createThinBorder({ id = GUI_ID_UIEXP_InventoryMenu_Filters })
+		border.autoWidth = true
+		border.autoHeight = true
+		border.borderLeft = 4
+		border.paddingTop = 2
+		border.paddingBottom = 3
+		border.paddingLeft = 2
+		border.paddingRight = 3
+
+		local function createFilterButton(e)
+			local button = border:createImage({ path = e.icon })
+			button.imageScaleX = 0.6
+			button.imageScaleY = 0.6
+			button.borderLeft = 2
+			button:setPropertyInt("UIEXP:Category", inventoryFilter[e.key])
+			button:register("mouseClick", onInventoryFilterClick)
+			button:register("help", onInventoryFilterTooltip)
+			return button
+		end
+		createFilterButton({ key = "weapon", icon = "icons/ui_exp/inventory_weapons.tga" }).borderLeft = 0
+		createFilterButton({ key = "apparel", icon = "icons/ui_exp/inventory_apparel.tga" })
+		createFilterButton({ key = "consumable", icon = "icons/ui_exp/inventory_consumables.tga" })
+		createFilterButton({ key = "ingredient", icon = "icons/ui_exp/inventory_ingredients.tga" })
+		createFilterButton({ key = "tools", icon = "icons/ui_exp/inventory_tools.tga" })
+		createFilterButton({ key = "other", icon = "icons/ui_exp/inventory_other.tga" })
+	end
+end
+event.register("uiActivated", OnMenuInventoryActivated, { filter = "MenuInventory" } )
+
+
+----------------------------------------------------------------------------------------------------
 -- Stats Menu: Display active modifiers.
 ----------------------------------------------------------------------------------------------------
 
@@ -55,7 +481,7 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect)
 	local attribute = e.source:getPropertyInt(idProperty)
 
 	-- Create a new tooltip block.
-	local tooltip = tes3ui.findHelpLayerMenu(tes3ui.registerProperty("HelpMenu"))
+	local tooltip = tes3ui.findHelpLayerMenu(GUI_ID_HelpMenu)
 	local adjustmentsBlock = tooltip:createBlock({})
 	adjustmentsBlock:createLabel({ text = "Modifiers:" })
 	adjustmentsBlock.flowDirection = "top_to_bottom"
@@ -135,7 +561,7 @@ event.register("uiActivated", onMenuStatActivated, { filter = "MenuStat" } )
 
 local function onStatsMenuRefreshed(e)
 	local idFilters = { tes3ui.registerID("MenuStat_misc_layout"), tes3ui.registerID("MenuStat_minor_layout"), tes3ui.registerID("MenuStat_major_layout") }
-	local scrollPaneChildren = e.element:findChild(tes3ui.registerID("MenuStat_scroll_pane")):findChild(GUI_ID_PartScrollPane_pane).children
+	local scrollPaneChildren = e.element:findChild(GUI_ID_MenuStat_scroll_pane):findChild(GUI_ID_PartScrollPane_pane).children
 	for _, element in pairs(scrollPaneChildren) do
 		if (table.find(idFilters, element.id)) then
 			element:register("help", onMenuStatSkillTooltip)
@@ -321,43 +747,19 @@ local function onMenuMagicActivated(e)
 	filterBlock.autoHeight = true
 	filterBlock.paddingLeft = 4
 	filterBlock.paddingRight = 4
-	
-	local searchInputBorder = filterBlock:createThinBorder({})
-	searchInputBorder.autoWidth = true
-	searchInputBorder.autoHeight = true
-	searchInputBorder.widthProportional = 1.0
-	
-	-- Create the search input itself.
-	local searchInput = searchInputBorder:createTextInput({ id = "UIEXP:MagicMenu:SearchInput" })
-	searchInput.color = GUI_Palette_Disabled
-	searchInput.text = "Search by name..."
-	searchInput.borderLeft = 5
-	searchInput.borderRight = 5
-	searchInput.borderTop = 2
-	searchInput.borderBottom = 4
-	searchInput.widget.eraseOnFirstKey = true
-	searchInput.widget.lengthLimit = 31
 
-	-- Set up the events to control text input control.
-	searchInput.consumeMouseEvents = false
-	searchInput:register("keyPress", function(e)
-		-- Prevent alt-tabbing from creating spacing.
-		if (InputController:isKeyPressedThisFrame(15)) then
-			return
+	common.createSearchBar({
+		parent = filterBlock,
+		id = "UIEXP:MagicMenu:SearchInput",
+		placeholderText = "Search by name...",
+		onUpdate = function(e)
+			spellsListSearchText = e.source.text
+			if (spellsListSearchText == "") then
+				spellsListSearchText = nil
+			end
+			searchSpellsList()
 		end
-
-		searchInput:forwardEvent(e)
-
-		spellsListSearchText = searchInput.text
-		if (spellsListSearchText == "") then
-			spellsListSearchText = nil
-		end
-		searchSpellsList()
-	end)
-	searchInputBorder:register("mouseClick", function()
-		tes3ui.acquireTextInput(searchInput)
-		searchInput.color = GUI_Palette_Normal
-	end)
+	})
 	
 	-- Create magic school filter border.
 	local schoolFilterBorder = filterBlock:createThinBorder({ id = GUI_ID_UIEXP_MagicMenu_SchoolFilters })
@@ -441,14 +843,19 @@ event.register("modConfigReady", registerModConfig)
 
 local function onInitialized(e)
 	-- Pre-register extant GUI IDs.
+	GUI_ID_HelpMenu = tes3ui.registerID("HelpMenu")
 	GUI_ID_MagicMenu_spell_costs = tes3ui.registerID("MagicMenu_spell_costs")
 	GUI_ID_MagicMenu_spell_names = tes3ui.registerID("MagicMenu_spell_names")
 	GUI_ID_MagicMenu_spell_percents = tes3ui.registerID("MagicMenu_spell_percents")
 	GUI_ID_MagicMenu_spells_list = tes3ui.registerID("MagicMenu_spells_list")
+	GUI_ID_MenuInventory = tes3ui.registerID("MenuInventory")
+	GUI_ID_MenuInventory_button_layout = tes3ui.registerID("MenuInventory_button_layout")
 	GUI_ID_MenuMagic = tes3ui.registerID("MenuMagic")
+	GUI_ID_MenuStat_scroll_pane = tes3ui.registerID("MenuStat_scroll_pane")
 	GUI_ID_PartScrollPane_pane = tes3ui.registerID("PartScrollPane_pane")
 
 	-- Pre-register new GUI IDs.
+	GUI_ID_UIEXP_InventoryMenu_Filters = tes3ui.registerID("UIEXP_InventoryMenu_Filters")
 	GUI_ID_UIEXP_MagicMenu_SchoolFilters = tes3ui.registerID("UIEXP_MagicMenu_SchoolFilters")
 
 	-- Pre-register pallets.
