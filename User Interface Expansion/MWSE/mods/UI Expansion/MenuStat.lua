@@ -1,0 +1,118 @@
+
+local GUI_ID_HelpMenu = tes3ui.registerID("HelpMenu")
+local GUI_ID_MenuStat_scroll_pane = tes3ui.registerID("MenuStat_scroll_pane")
+local GUI_ID_PartScrollPane_pane = tes3ui.registerID("PartScrollPane_pane")
+
+local GUI_Palette_Positive = tes3ui.getPalette("positive_color")
+local GUI_Palette_Negative = tes3ui.getPalette("negative_color")
+
+local common = require("UI Expansion.common")
+
+----------------------------------------------------------------------------------------------------
+-- Stats Menu: Display active modifiers.
+----------------------------------------------------------------------------------------------------
+
+local attributeModifyingEffects = { tes3.effect.drainAttribute, tes3.effect.damageAttribute, tes3.effect.fortifyAttribute }
+local skillModifyingEffects = { tes3.effect.drainSkill, tes3.effect.damageSkill, tes3.effect.fortifySkill }
+
+local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect)
+	-- Allow the tooltip to be made per usual.
+	e.source:forwardEvent(e)
+
+	-- Get the associated attribute.
+	local attribute = e.source:getPropertyInt(idProperty)
+
+	-- Create a new tooltip block.
+	local tooltip = tes3ui.findHelpLayerMenu(GUI_ID_HelpMenu)
+	local adjustmentsBlock = tooltip:createBlock({})
+	adjustmentsBlock:createLabel({ text = "Modifiers:" })
+	adjustmentsBlock.flowDirection = "top_to_bottom"
+	adjustmentsBlock.autoHeight = true
+	adjustmentsBlock.autoWidth = true
+	adjustmentsBlock.widthProportional = 1.0
+	adjustmentsBlock.borderLeft = 6
+	adjustmentsBlock.borderRight = 6
+	adjustmentsBlock.borderBottom = 6
+
+	local magicEffects = tes3.dataHandler.nonDynamicData.magicEffects
+
+	local modifierCount = 0
+	local activeEffect = tes3.mobilePlayer.activeMagicEffects
+	for i = 1, tes3.mobilePlayer.activeMagicEffectCount do
+		activeEffect = activeEffect.next
+
+		if (activeEffect.attributeId == attribute and table.find(effectFilter, activeEffect.effectId)) then
+			local block = adjustmentsBlock:createBlock({})
+			block.flowDirection = "left_to_right"
+			block.widthProportional = 1.0
+			block.autoWidth = true
+			block.autoHeight = true
+			block.borderLeft = 10
+			block.borderRight = 10
+			block.borderTop = 4
+			
+			local effect = magicEffects[activeEffect.effectId + 1]
+	
+			local icon = block:createImage({ path = string.format("icons/%s", effect.icon) })
+			icon.borderRight = 6
+	
+			local sourceLabel = block:createLabel({ text = string.format("%s:", activeEffect.instance.source.name) })
+			if (activeEffect.effectId == fortifyEffect) then
+				local magnitudeLabel = block:createLabel({ text = string.format("+%d", activeEffect.magnitudeMin) })
+				magnitudeLabel.color = GUI_Palette_Positive
+				magnitudeLabel.borderLeft = 2
+				magnitudeLabel.absolutePosAlignX = 1.0
+			else
+				local magnitudeLabel = block:createLabel({ text = string.format("-%d", activeEffect.magnitudeMin) })
+				magnitudeLabel.color = GUI_Palette_Negative
+				magnitudeLabel.borderLeft = 2
+				magnitudeLabel.absolutePosAlignX = 1.0
+			end
+
+			modifierCount = modifierCount + 1
+		end
+	end
+
+	if ( modifierCount < 1 ) then
+		adjustmentsBlock.visible = false
+	end
+end
+
+local function onMenuStatAttributeTooltip(e)
+	OnMenuStatTooltip(e, attributeModifyingEffects, "MenuStat_attribute_strength", tes3.effect.fortifyAttribute)
+end
+
+local function onMenuStatSkillTooltip(e)
+	OnMenuStatTooltip(e, skillModifyingEffects, "MenuStat_message", tes3.effect.fortifySkill)
+end
+
+local function onMenuStatActivated(e)
+	local idParts = { "agility", "endurance", "intellegence", "luck", "personality", "speed", "strength", "willpower" }
+	for _, idPart in pairs(idParts) do
+		local MenuStat_attribute_layout = e.element:findChild(tes3ui.registerID(string.format("MenuStat_attribute_layout_%s", idPart)))
+		MenuStat_attribute_layout:register("help", onMenuStatAttributeTooltip)
+
+		-- Prevent children from using their own events.
+		local children = MenuStat_attribute_layout.children
+		for _, child in pairs(children) do
+			child.consumeMouseEvents = false
+		end
+	end
+end
+event.register("uiActivated", onMenuStatActivated, { filter = "MenuStat" } )
+
+local function onStatsMenuRefreshed(e)
+	local idFilters = { tes3ui.registerID("MenuStat_misc_layout"), tes3ui.registerID("MenuStat_minor_layout"), tes3ui.registerID("MenuStat_major_layout") }
+	local scrollPaneChildren = e.element:findChild(GUI_ID_MenuStat_scroll_pane):findChild(GUI_ID_PartScrollPane_pane).children
+	for _, element in pairs(scrollPaneChildren) do
+		if (table.find(idFilters, element.id)) then
+			element:register("help", onMenuStatSkillTooltip)
+
+			local children = element.children
+			for _, child in pairs(children) do
+				child.consumeMouseEvents = false
+			end
+		end
+	end
+end
+event.register("uiRefreshed", onStatsMenuRefreshed, { filter = "MenuStat_scroll_pane" })
