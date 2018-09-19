@@ -7,7 +7,7 @@ function common.createSearchBar(params)
 	border.widthProportional = 1.0
 
 	-- Create the search input itself.
-	local input = border:createTextInput({ id = params.id })
+	local input = border:createTextInput({ id = tes3ui.registerID(params.id) })
 	input.color = tes3ui.getPalette("disabled_color")
 	input.text = params.placeholderText
 	input.borderLeft = 5
@@ -27,11 +27,11 @@ function common.createSearchBar(params)
 
 		input:forwardEvent(e)
 
+		input.color = tes3ui.getPalette("normal_color")
         params.onUpdate(e)
 	end)
 	border:register("mouseClick", function()
 		tes3ui.acquireTextInput(input)
-		input.color = tes3ui.getPalette("normal_color")
     end)
 
     return { border = border, input = input }

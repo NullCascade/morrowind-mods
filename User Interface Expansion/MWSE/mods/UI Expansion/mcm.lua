@@ -62,6 +62,21 @@ local function createBooleanConfigPackage(params)
     return { block = horizontalBlock, label = label, button = button }
 end
 
+local function changeToNextAutoSelectInput(e)
+    local text = e.source.text
+
+    if (text == "Inventory") then
+        text = "Magic"
+    elseif (text == "Magic") then
+        text = "None"
+    else
+        text = "Inventory"
+    end
+
+    e.source.text = text
+    this.config.autoSelectInput = text
+end
+
 function this.onCreate(container)
     -- Create the main pane for a uniform look.
 	local mainPane = container:createThinBorder({})
@@ -71,9 +86,30 @@ function this.onCreate(container)
     mainPane.paddingAllSides = 6
 
     -- 
-    mainPane:createLabel({ text = "UI Expansion v1.0" }).borderBottom = 6
+    local title = mainPane:createLabel({ text = "UI Expansion v1.0" })
+    title.borderBottom = 6
 
-    -- 
+    -- Allow selecting the default focus for searching.
+	do
+		-- The container is a scroll list. Create a row in that list that organizes elements horizontally.
+		local horizontalBlock = mainPane:createBlock({})
+		horizontalBlock.flowDirection = "left_to_right"
+		horizontalBlock.widthProportional = 1.0
+		horizontalBlock.height = 32
+	
+		-- The text for the config option.
+		local label = horizontalBlock:createLabel({ text = "Auto-select search bar:" })
+		label.absolutePosAlignX = 0.0
+		label.absolutePosAlignY = 0.5
+
+		-- Button that toggles the config value.
+		local button = horizontalBlock:createButton({ text = this.config.autoSelectInput })
+		button.absolutePosAlignX = 1.0
+		button.absolutePosAlignY = 0.5
+		button:register("mouseClick", changeToNextAutoSelectInput)
+	end
+
+    -- Toggle help text.
     createBooleanConfigPackage({
         parent = mainPane,
         label = "Show help tooltips where available?",
@@ -84,7 +120,9 @@ function this.onCreate(container)
     -- Credits:
     mainPane:createLabel({ text = "Credits:" }).borderTop = 6
     mainPane:createLabel({ text = "  Programming: NullCascade" })
-    mainPane:createLabel({ text = "  Colored School Icons: R-Zero" })
+    mainPane:createLabel({ text = "  Colored Magic School Icons: R-Zero" })
+    mainPane:createLabel({ text = "  Inventory Filter Icons: R-Zero" })
+    mainPane:createLabel({ text = "  Concepts and Testing: Morrowind Modding Community Discord" })
 end
 
 -- Since we are taking control of the mod config system, we will manually handle saves. This is

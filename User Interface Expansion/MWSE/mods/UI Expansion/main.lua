@@ -25,6 +25,7 @@ local common = require("UI Expansion.common")
 -- Configuration table.
 local defaultConfig = {
 	showHelpText = true,
+	autoSelectInput = "Magic",
 }
 local config = table.copy(defaultConfig)
 
@@ -415,6 +416,10 @@ end
 event.register("filterInventory", filterInventory )
 
 local function OnMenuInventoryActivated(e)
+	if (not e.newlyCreated) then
+		return
+	end
+
 	local buttonBlock = e.element:findChild(GUI_ID_MenuInventory_button_layout)
 
 	-- Start off by nuking our slate clean.
@@ -733,6 +738,10 @@ local function onSchoolFilterTooltip(e)
 end
 
 local function onMenuMagicActivated(e)
+	if (not e.newlyCreated) then
+		return
+	end
+
 	local spellsList = e.element:findChild(GUI_ID_MagicMenu_spells_list)
 	local spellsListContents = spellsList:findChild(GUI_ID_PartScrollPane_pane)
 
@@ -823,11 +832,75 @@ local function onMenuMagicActivated(e)
 
 	-- Move the filter options to the top of the block.
 	spellsListParent:reorderChildren(0, -1, 1)
-
-	-- Default to spell searching.
-	-- tes3ui.acquireTextInput(searchInput)
 end
 event.register("uiActivated", onMenuMagicActivated, { filter = "MenuMagic" } )
+
+
+----------------------------------------------------------------------------------------------------
+-- Reset filtering for all menus when entering menu mode.
+----------------------------------------------------------------------------------------------------
+
+local function onEnterMenuMode(e)
+	-- Reset inventory filters.
+	do
+		-- Filter criteria.
+		inventorySearchText = nil
+		inventoryActiveFilters = { [inventoryFilter.all] = true }
+
+		-- Reset filter text.
+		local menu = tes3ui.findMenu(GUI_ID_MenuInventory)
+		local input = menu:findChild(tes3ui.registerID("UIEXP:InventoryMenu:SearchInput"))
+		input.text = "Search by name..."
+		input.color = GUI_Palette_Disabled
+
+		-- Reset GUI elements.
+		updateInventoryFilterIcons()
+		tes3ui.updateInventoryTiles()
+	end
+
+	-- Reset spell list filters.
+	do
+		-- Filter criteria.
+		spellsListSearchText = nil
+		spellsListSchoolWhitelist = {}
+		for name, id in pairs(tes3.magicSchool) do
+			spellsListSchoolWhitelist[id] = true
+		end
+
+		-- Reset filter text.
+		local menu = tes3ui.findMenu(GUI_ID_MenuMagic)
+		local input = menu:findChild(tes3ui.registerID("UIEXP:MagicMenu:SearchInput"))
+		input.text = "Search by name..."
+		input.color = GUI_Palette_Disabled
+
+		-- Reset GUI elements.
+		local filtersBlock = menu:findChild(GUI_ID_UIEXP_MagicMenu_SchoolFilters)
+		local filtersChildren = filtersBlock.children
+		for _, element in pairs(filtersChildren) do
+			element.alpha = 1.0
+			element:updateLayout()
+		end
+		searchSpellsList()
+	end
+
+	-- Auto-select the desired input box.
+	if (config.autoSelectInput == "Inventory") then
+		local menu = tes3ui.findMenu(GUI_ID_MenuInventory)
+		local input = menu:findChild(tes3ui.registerID("UIEXP:InventoryMenu:SearchInput"))
+		tes3ui.acquireTextInput(input)
+	elseif (config.autoSelectInput == "Magic") then
+		local menu = tes3ui.findMenu(GUI_ID_MenuMagic)
+		local input = menu:findChild(tes3ui.registerID("UIEXP:MagicMenu:SearchInput"))
+		tes3ui.acquireTextInput(input)
+	else
+		tes3ui.acquireTextInput(nil)
+	end
+
+end
+event.register("menuEnter", onEnterMenuMode, { filter = "MenuInventory" })
+event.register("menuEnter", onEnterMenuMode, { filter = "MenuMagic" })
+event.register("menuEnter", onEnterMenuMode, { filter = "MenuMap" })
+event.register("menuEnter", onEnterMenuMode, { filter = "MenuStat" })
 
 
 ----------------------------------------------------------------------------------------------------
@@ -865,6 +938,7 @@ local function onInitialized(e)
 	GUI_Palette_Negative = tes3ui.getPalette("negative_color")
 
 	-- Fill the school filter whitelist.
+	spellsListSchoolWhitelist = {}
 	for name, id in pairs(tes3.magicSchool) do
 		spellsListSchoolWhitelist[id] = true
 	end
