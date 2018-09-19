@@ -84,7 +84,11 @@ end
 
 function inventoryFilterCallbacks.consumable(e)
 	local objectType = e.item.objectType
-	return (objectType == tes3.objectType.alchemy)
+	local enchantment = e.item.enchantment
+	return (
+		objectType == tes3.objectType.alchemy or
+		( enchantment and (enchantment.castType == 0 or enchantment.castType == 2) )
+	)
 end
 
 function inventoryFilterCallbacks.ingredient(e)
@@ -98,16 +102,18 @@ function inventoryFilterCallbacks.tools(e)
 		objectType == tes3.objectType.apparatus or 
 		objectType == tes3.objectType.probe or 
 		objectType == tes3.objectType.lockpick or 
-		objectType == tes3.objectType.repairItem
+		objectType == tes3.objectType.repairItem or
+		(objectType == tes3.objectType.miscItem and e.itemData and e.itemData.soul ~= nil)
 	)
 end
 
 function inventoryFilterCallbacks.other(e)
 	local objectType = e.item.objectType
+	local enchantment = e.item.enchantment
 	return (
-		objectType == tes3.objectType.book or
+		(objectType == tes3.objectType.book and (enchantment == nil or (enchantment.castType ~= 0 and enchantment.castType ~= 2))) or
 		objectType == tes3.objectType.light or
-		objectType == tes3.objectType.miscItem
+		(objectType == tes3.objectType.miscItem and (e.itemData and e.itemData.soul == nil or e.itemData == nil))
 	)
 end
 
@@ -445,9 +451,9 @@ local function OnMenuInventoryActivated(e)
 		border.autoWidth = true
 		border.autoHeight = true
 		border.borderLeft = 4
-		border.paddingTop = 2
+		border.paddingTop = 3
 		border.paddingBottom = 3
-		border.paddingLeft = 2
+		border.paddingLeft = 3
 		border.paddingRight = 3
 
 		local function createFilterButton(e)
