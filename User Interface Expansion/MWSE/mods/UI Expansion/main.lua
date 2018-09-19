@@ -160,8 +160,24 @@ local function onInventoryFilterClick(e)
 
 	-- If shift is pressed, toggle the element.
 	if (InputController:isKeyDown(42)) then
-		inventoryActiveFilters[id] = not inventoryActiveFilters[id]
-		if (#inventoryActiveFilters >= #inventoryFilter - 1) then
+		if (inventoryActiveFilters[inventoryFilter.all]) then
+			-- No filters. Flip them all on, then turn off the one that was clicked.
+			inventoryActiveFilters = {}
+			for key, id in pairs(inventoryFilter) do
+				inventoryActiveFilters[id] = true
+			end
+			inventoryActiveFilters[id] = nil
+		elseif (inventoryActiveFilters[id]) then
+			-- Some filters, disable this one.
+			inventoryActiveFilters[id] = nil
+		else
+			-- Some filters, enable this one.
+			inventoryActiveFilters[id] = true
+		end
+
+		-- We no longer use all filters at this point. But, check if we can optimize to.
+		inventoryActiveFilters[inventoryFilter.all] = nil
+		if (table.size(inventoryActiveFilters) >= table.size(inventoryFilter) - 1) then
 			inventoryActiveFilters = { [inventoryFilter.all] = true }
 		end
 	else
