@@ -15,7 +15,7 @@ local common = require("UI Expansion.common")
 local attributeModifyingEffects = { tes3.effect.drainAttribute, tes3.effect.damageAttribute, tes3.effect.fortifyAttribute }
 local skillModifyingEffects = { tes3.effect.drainSkill, tes3.effect.damageSkill, tes3.effect.fortifySkill }
 
-local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect)
+local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect, statsArray)
 	-- Allow the tooltip to be made per usual.
 	e.source:forwardEvent(e)
 
@@ -25,7 +25,6 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect)
 	-- Create a new tooltip block.
 	local tooltip = tes3ui.findHelpLayerMenu(GUI_ID_HelpMenu)
 	local adjustmentsBlock = tooltip:createBlock({})
-	adjustmentsBlock:createLabel({ text = "Modifiers:" })
 	adjustmentsBlock.flowDirection = "top_to_bottom"
 	adjustmentsBlock.autoHeight = true
 	adjustmentsBlock.autoWidth = true
@@ -34,10 +33,14 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect)
 	adjustmentsBlock.borderRight = 6
 	adjustmentsBlock.borderBottom = 6
 
-	local magicEffects = tes3.dataHandler.nonDynamicData.magicEffects
+	-- Show base value.
+	adjustmentsBlock:createLabel({ text = string.format("Base value: %d", tes3.mobilePlayer[statsArray][attribute + 1].base) }).borderBottom = 6
 
+	-- Display any modifiers.
+	adjustmentsBlock:createLabel({ text = "Modifiers:" })
 	local modifierCount = 0
 	local activeEffect = tes3.mobilePlayer.activeMagicEffects
+	local magicEffects = tes3.dataHandler.nonDynamicData.magicEffects
 	for i = 1, tes3.mobilePlayer.activeMagicEffectCount do
 		activeEffect = activeEffect.next
 
@@ -55,15 +58,16 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect)
 
 			local icon = block:createImage({ path = string.format("icons/%s", effect.icon) })
 			icon.borderRight = 6
-	
-			local sourceLabel = block:createLabel({ text = string.format("%s:", activeEffect.instance.source.name) })
+
+			local magicInstance = activeEffect.instance
+			local sourceLabel = block:createLabel({ text = (magicInstance.item or magicInstance.source).name or "Unknown" })
 			if (activeEffect.effectId == fortifyEffect) then
-				local magnitudeLabel = block:createLabel({ text = string.format("+%d", activeEffect.magnitudeMin) })
+				local magnitudeLabel = block:createLabel({ text = string.format("+%d", activeEffect.magnitude) })
 				magnitudeLabel.color = GUI_Palette_Positive
 				magnitudeLabel.borderLeft = 2
 				magnitudeLabel.absolutePosAlignX = 1.0
 			else
-				local magnitudeLabel = block:createLabel({ text = string.format("-%d", activeEffect.magnitudeMin) })
+				local magnitudeLabel = block:createLabel({ text = string.format("-%d", activeEffect.magnitude) })
 				magnitudeLabel.color = GUI_Palette_Negative
 				magnitudeLabel.borderLeft = 2
 				magnitudeLabel.absolutePosAlignX = 1.0
@@ -79,11 +83,11 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect)
 end
 
 local function onMenuStatAttributeTooltip(e)
-	OnMenuStatTooltip(e, attributeModifyingEffects, "MenuStat_attribute_strength", tes3.effect.fortifyAttribute)
+	OnMenuStatTooltip(e, attributeModifyingEffects, "MenuStat_attribute_strength", tes3.effect.fortifyAttribute, "attributes")
 end
 
 local function onMenuStatSkillTooltip(e)
-	OnMenuStatTooltip(e, skillModifyingEffects, "MenuStat_message", tes3.effect.fortifySkill)
+	OnMenuStatTooltip(e, skillModifyingEffects, "MenuStat_message", tes3.effect.fortifySkill, "skills")
 end
 
 local function onMenuStatActivated(e)
