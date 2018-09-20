@@ -140,7 +140,7 @@ function this.onCreate(container)
     -- Toggle help text.
     createBooleanConfigPackage({
         parent = mainPane,
-        label = "Auto-select first result spells when searching by name?",
+        label = "Auto-select first result when searching spell list?",
         config = this.config,
         key = "selectSpellsOnSearch",
     })
