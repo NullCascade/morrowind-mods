@@ -82,8 +82,8 @@ function inventoryFilterCallbacks.other(e)
 end
 
 local function updateInventoryFilterIcons()
-	local magicMenu = tes3ui.findMenu(GUI_ID_MenuInventory)
-	local filtersBlock = magicMenu:findChild(GUI_ID_UIEXP_InventoryMenu_IconFilters)
+	local menu = tes3ui.findMenu(GUI_ID_MenuInventory)
+	local filtersBlock = menu:findChild(GUI_ID_UIEXP_InventoryMenu_IconFilters)
 	local filtersChildren = filtersBlock.children
 	local doAll = inventoryActiveFilters[inventoryFilter.all]
 	for _, element in pairs(filtersChildren) do
