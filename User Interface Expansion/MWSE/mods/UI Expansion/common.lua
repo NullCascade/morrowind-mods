@@ -28,13 +28,13 @@ function common.createSearchBar(params)
 		input:forwardEvent(e)
 
 		input.color = tes3ui.getPalette("normal_color")
-        params.onUpdate(e)
+		params.onUpdate(e)
 	end)
 	border:register("mouseClick", function()
 		tes3ui.acquireTextInput(input)
-    end)
+	end)
 
-    return { border = border, input = input }
+	return { border = border, input = input }
 end
 
 return common

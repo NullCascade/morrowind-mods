@@ -63,9 +63,9 @@ end
 function inventoryFilterCallbacks.tools(e)
 	local objectType = e.item.objectType
 	return (
-		objectType == tes3.objectType.apparatus or 
-		objectType == tes3.objectType.probe or 
-		objectType == tes3.objectType.lockpick or 
+		objectType == tes3.objectType.apparatus or
+		objectType == tes3.objectType.probe or
+		objectType == tes3.objectType.lockpick or
 		objectType == tes3.objectType.repairItem or
 		(objectType == tes3.objectType.miscItem and e.itemData and e.itemData.soul ~= nil)
 	)
@@ -167,7 +167,7 @@ function inventoryTooltipCallbacks.weapon(e)
 
 	if (common.config.showHelpText) then
 		local helpText
-		
+
 		helpText = tooltipBlock:createLabel({ text = "Click to filter to:" })
 		helpText.color = GUI_Palette_Disabled
 		helpText.borderTop = 6
@@ -200,7 +200,7 @@ function inventoryTooltipCallbacks.apparel(e)
 
 	if (common.config.showHelpText) then
 		local helpText
-		
+
 		helpText = tooltipBlock:createLabel({ text = "Click to filter to:" })
 		helpText.color = GUI_Palette_Disabled
 		helpText.borderTop = 6
@@ -233,7 +233,7 @@ function inventoryTooltipCallbacks.consumable(e)
 
 	if (common.config.showHelpText) then
 		local helpText
-		
+
 		helpText = tooltipBlock:createLabel({ text = "Click to filter to:" })
 		helpText.color = GUI_Palette_Disabled
 		helpText.borderTop = 6
@@ -271,7 +271,7 @@ function inventoryTooltipCallbacks.ingredient(e)
 
 	if (common.config.showHelpText) then
 		local helpText
-		
+
 		helpText = tooltipBlock:createLabel({ text = "Click to filter to:" })
 		helpText.color = GUI_Palette_Disabled
 		helpText.borderTop = 6
@@ -299,7 +299,7 @@ function inventoryTooltipCallbacks.tools(e)
 
 	if (common.config.showHelpText) then
 		local helpText
-		
+
 		helpText = tooltipBlock:createLabel({ text = "Click to filter to:" })
 		helpText.color = GUI_Palette_Disabled
 		helpText.borderTop = 6
@@ -347,7 +347,7 @@ function inventoryTooltipCallbacks.other(e)
 
 	if (common.config.showHelpText) then
 		local helpText
-		
+
 		helpText = tooltipBlock:createLabel({ text = "Click to filter to:" })
 		helpText.color = GUI_Palette_Disabled
 		helpText.borderTop = 6
@@ -452,7 +452,7 @@ local function OnMenuInventoryActivated(e)
 		createFilterButton({ key = "ingredient", icon = "icons/ui_exp/inventory_ingredients.tga" })
 		createFilterButton({ key = "tools", icon = "icons/ui_exp/inventory_tools.tga" })
 		createFilterButton({ key = "other", icon = "icons/ui_exp/inventory_other.tga" })
-		
+
 		border.visible = not common.config.useInventoryTextButtons
 	end
 
@@ -491,19 +491,19 @@ end
 event.register("uiActivated", OnMenuInventoryActivated, { filter = "MenuInventory" } )
 
 local function onEnterMenuMode(e)
-    -- Filter criteria.
-    inventorySearchText = nil
-    inventoryActiveFilters = { [inventoryFilter.all] = true }
+	-- Filter criteria.
+	inventorySearchText = nil
+	inventoryActiveFilters = { [inventoryFilter.all] = true }
 
-    -- Reset filter text.
-    local menu = tes3ui.findMenu(GUI_ID_MenuInventory)
-    local input = menu:findChild(tes3ui.registerID("UIEXP:InventoryMenu:SearchInput"))
-    input.text = "Search by name..."
-    input.color = GUI_Palette_Disabled
+	-- Reset filter text.
+	local menu = tes3ui.findMenu(GUI_ID_MenuInventory)
+	local input = menu:findChild(tes3ui.registerID("UIEXP:InventoryMenu:SearchInput"))
+	input.text = "Search by name..."
+	input.color = GUI_Palette_Disabled
 
-    -- Reset GUI elements.
-    updateInventoryFilterIcons()
-    tes3ui.updateInventoryTiles()
+	-- Reset GUI elements.
+	updateInventoryFilterIcons()
+	tes3ui.updateInventoryTiles()
 end
 event.register("menuEnter", onEnterMenuMode, { filter = "MenuInventory" })
 event.register("menuEnter", onEnterMenuMode, { filter = "MenuMagic" })

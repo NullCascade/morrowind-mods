@@ -50,9 +50,9 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect)
 			block.borderLeft = 10
 			block.borderRight = 10
 			block.borderTop = 4
-			
+
 			local effect = magicEffects[activeEffect.effectId + 1]
-	
+
 			local icon = block:createImage({ path = string.format("icons/%s", effect.icon) })
 			icon.borderRight = 6
 	
