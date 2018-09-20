@@ -52,16 +52,25 @@ local function searchSpellsList()
 	local costsChildren = costsList.children
 	local percentsChildren = percentsList.children
 
+	local firstResult = nil
+
 	-- 
 	for index = 1, #namesChildren do
 		local element = namesChildren[index]
 
 		local filter = spellMatchesFilter(element:getPropertyObject("MagicMenu_Spell"))
+		if (firstResult == nil and filter) then
+			firstResult = element
+		end
 		if (filter ~= element.visible) then
 			element.visible = filter
 			costsChildren[index].visible = filter
 			percentsChildren[index].visible = filter
 		end
+	end
+
+	if (spellsListSearchText and common.config.selectSpellsOnSearch and firstResult) then
+		firstResult:triggerEvent("mouseClick")
 	end
 end
 

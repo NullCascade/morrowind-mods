@@ -136,6 +136,14 @@ function this.onCreate(container)
             end
         end
     })
+
+    -- Toggle help text.
+    createBooleanConfigPackage({
+        parent = mainPane,
+        label = "Auto-select first result spells when searching by name?",
+        config = this.config,
+        key = "selectSpellsOnSearch",
+    })
     
     -- Credits:
     mainPane:createLabel({ text = "Credits:" }).borderTop = 6

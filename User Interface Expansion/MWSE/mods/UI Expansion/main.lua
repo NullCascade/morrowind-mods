@@ -6,6 +6,7 @@ local defaultConfig = {
 	showHelpText = true,
 	autoSelectInput = "Magic",
 	useInventoryTextButtons = false,
+	selectSpellsOnSearch = true,
 }
 local config = table.copy(defaultConfig)
 
