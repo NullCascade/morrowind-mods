@@ -3,27 +3,27 @@ local this = {}
 local function createConfigSliderPackage(params)
     local horizontalBlock = params.parent:createBlock({})
     horizontalBlock.flowDirection = "left_to_right"
-    horizontalBlock.layoutWidthFraction = 1.0
+    horizontalBlock.widthProportional = 1.0
     horizontalBlock.height = 24
 
     local label = horizontalBlock:createLabel({ text = params.label })
-    label.layoutOriginFractionX = 0.0
-    label.layoutOriginFractionY = 0.5
+    label.absolutePosAlignX = 0.0
+    label.absolutePosAlignY = 0.5
 
     local config = params.config
     local key = params.key
     local value = config[key] or params.default or 0
     
     local sliderLabel = horizontalBlock:createLabel({ text = tostring(value) })
-    sliderLabel.layoutOriginFractionX = 1.0
-    sliderLabel.layoutOriginFractionY = 0.5
+    sliderLabel.absolutePosAlignX = 1.0
+    sliderLabel.absolutePosAlignY = 0.5
     sliderLabel.borderRight = 306
 
     local range = params.max - params.min
 
     local slider = horizontalBlock:createSlider({ current = value - params.min, max = range, step = params.step, jump = params.jump })
-    slider.layoutOriginFractionX = 1.0
-    slider.layoutOriginFractionY = 0.5
+    slider.absolutePosAlignX = 1.0
+    slider.absolutePosAlignY = 0.5
     slider.width = 300
     slider:register("PartScrollBar_changed", function(e)
         config[key] = slider:getPropertyInt("PartScrollBar_current") + params.min
@@ -39,16 +39,16 @@ end
 local function createBooleanConfigPackage(params)
     local horizontalBlock = params.parent:createBlock({})
     horizontalBlock.flowDirection = "left_to_right"
-    horizontalBlock.layoutWidthFraction = 1.0
-    horizontalBlock.height = 24
+    horizontalBlock.widthProportional = 1.0
+    horizontalBlock.height = 32
 
     local label = horizontalBlock:createLabel({ text = params.label })
-    label.layoutOriginFractionX = 0.0
-    label.layoutOriginFractionY = 0.5
+    label.absolutePosAlignX = 0.0
+    label.absolutePosAlignY = 0.5
 
     local button = horizontalBlock:createButton({ text = (this.config[params.key] and tes3.getGMST(tes3.gmst.sYes).value or tes3.getGMST(tes3.gmst.sNo).value) })
-    button.layoutOriginFractionX = 1.0
-    button.layoutOriginFractionY = 0.5
+    button.absolutePosAlignX = 1.0
+    button.absolutePosAlignY = 0.5
     button.paddingTop = 3
     button:register("mouseClick", function(e)
         this.config[params.key] = not this.config[params.key]
@@ -115,6 +115,26 @@ function this.onCreate(container)
         label = "Show help tooltips where available?",
         config = this.config,
         key = "showHelpText",
+    })
+
+    -- Toggle vanilla-style inventory filter buttons.
+    createBooleanConfigPackage({
+        parent = mainPane,
+        label = "Use verbose buttons instead of icons for inventory filtering?",
+        config = this.config,
+        key = "useInventoryTextButtons",
+        onUpdate = function(e)
+            local menu = tes3ui.findMenu(tes3ui.registerID("MenuInventory"))
+            local iconBlock = menu:findChild(tes3ui.registerID("UIEXP_InventoryMenu_IconFilters"))
+            local buttonBlock = menu:findChild(tes3ui.registerID("UIEXP_InventoryMenu_ButtonFilters"))
+            if (this.config.useInventoryTextButtons) then
+                iconBlock.visible = false
+                buttonBlock.visible = true
+            else
+                iconBlock.visible = true
+                buttonBlock.visible = false
+            end
+        end
     })
     
     -- Credits:

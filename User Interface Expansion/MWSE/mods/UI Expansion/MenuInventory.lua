@@ -2,8 +2,10 @@
 local GUI_ID_MenuInventory = tes3ui.registerID("MenuInventory")
 local GUI_ID_MenuInventory_button_layout = tes3ui.registerID("MenuInventory_button_layout")
 
-local GUI_ID_UIEXP_InventoryMenu_Filters = tes3ui.registerID("UIEXP_InventoryMenu_Filters")
+local GUI_ID_UIEXP_InventoryMenu_IconFilters = tes3ui.registerID("UIEXP_InventoryMenu_IconFilters")
+local GUI_ID_UIEXP_InventoryMenu_ButtonFilters = tes3ui.registerID("UIEXP_InventoryMenu_ButtonFilters")
 
+local GUI_Palette_Active = tes3ui.getPalette("active_color")
 local GUI_Palette_Disabled = tes3ui.getPalette("disabled_color")
 
 local common = require("UI Expansion.common")
@@ -81,7 +83,7 @@ end
 
 local function updateInventoryFilterIcons()
 	local magicMenu = tes3ui.findMenu(GUI_ID_MenuInventory)
-	local filtersBlock = magicMenu:findChild(GUI_ID_UIEXP_InventoryMenu_Filters)
+	local filtersBlock = magicMenu:findChild(GUI_ID_UIEXP_InventoryMenu_IconFilters)
 	local filtersChildren = filtersBlock.children
 	local doAll = inventoryActiveFilters[inventoryFilter.all]
 	for _, element in pairs(filtersChildren) do
@@ -425,7 +427,7 @@ local function OnMenuInventoryActivated(e)
 
 	-- Create icons for filtering.
 	do
-		local border = buttonBlock:createThinBorder({ id = GUI_ID_UIEXP_InventoryMenu_Filters })
+		local border = buttonBlock:createThinBorder({ id = GUI_ID_UIEXP_InventoryMenu_IconFilters })
 		border.autoWidth = true
 		border.autoHeight = true
 		border.borderLeft = 4
@@ -450,6 +452,40 @@ local function OnMenuInventoryActivated(e)
 		createFilterButton({ key = "ingredient", icon = "icons/ui_exp/inventory_ingredients.tga" })
 		createFilterButton({ key = "tools", icon = "icons/ui_exp/inventory_tools.tga" })
 		createFilterButton({ key = "other", icon = "icons/ui_exp/inventory_other.tga" })
+		
+		border.visible = not common.config.useInventoryTextButtons
+	end
+
+	-- Create buttons for filtering.
+	do
+		local buttonFilterBlock = buttonBlock:createBlock({ id = GUI_ID_UIEXP_InventoryMenu_ButtonFilters })
+		buttonFilterBlock.autoHeight = true
+		buttonFilterBlock.autoWidth = true
+		buttonFilterBlock.borderTop = 1
+
+		local function createFilterButton(e)
+			local button = buttonFilterBlock:createButton({})
+			button.text = e.text
+			button.imageScaleX = 0.6
+			button.imageScaleY = 0.6
+			button.borderLeft = 4
+			button.borderRight = 0
+			button.borderTop = 0
+			button.borderBottom = 0
+			button.borderAllSides = 0
+			button:setPropertyInt("UIEXP:Category", inventoryFilter[e.key])
+			button:register("mouseClick", onInventoryFilterClick)
+			button:register("help", onInventoryFilterTooltip)
+			return button
+		end
+		createFilterButton({ key = "weapon", text = "Weapons" })
+		createFilterButton({ key = "apparel", text = "Apparel" })
+		createFilterButton({ key = "consumable", text = "Consumables" })
+		createFilterButton({ key = "ingredient", text = "Ingredients" })
+		createFilterButton({ key = "tools", text = "Tools" })
+		createFilterButton({ key = "other", text = "Other" })
+
+		buttonFilterBlock.visible = common.config.useInventoryTextButtons
 	end
 end
 event.register("uiActivated", OnMenuInventoryActivated, { filter = "MenuInventory" } )

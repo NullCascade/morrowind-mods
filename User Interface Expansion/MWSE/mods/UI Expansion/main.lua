@@ -5,6 +5,7 @@ local common = require("UI Expansion.common")
 local defaultConfig = {
 	showHelpText = true,
 	autoSelectInput = "Magic",
+	useInventoryTextButtons = false,
 }
 local config = table.copy(defaultConfig)
 
