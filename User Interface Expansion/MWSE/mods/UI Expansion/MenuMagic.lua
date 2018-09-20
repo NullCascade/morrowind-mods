@@ -1,7 +1,4 @@
 
-local GUI_ID_MagicMenu_spell_costs = tes3ui.registerID("MagicMenu_spell_costs")
-local GUI_ID_MagicMenu_spell_names = tes3ui.registerID("MagicMenu_spell_names")
-local GUI_ID_MagicMenu_spell_percents = tes3ui.registerID("MagicMenu_spell_percents")
 local GUI_ID_MagicMenu_spells_list = tes3ui.registerID("MagicMenu_spells_list")
 local GUI_ID_MenuMagic = tes3ui.registerID("MenuMagic")
 local GUI_ID_PartScrollPane_pane = tes3ui.registerID("PartScrollPane_pane")
@@ -25,6 +22,10 @@ for name, id in pairs(tes3.magicSchool) do
 end
 
 local function spellMatchesFilter(spell)
+	if (spell == nil) then
+		return false
+	end
+
 	-- Filter by name.
 	if (spellsListSearchText and not string.find(string.lower(spell.name), spellsListSearchText)) then
 		return false
@@ -40,37 +41,91 @@ local function spellMatchesFilter(spell)
 	return false
 end
 
-local function searchSpellsList()
-	local magicMenu = tes3ui.findMenu(GUI_ID_MenuMagic)
-	local namesList = magicMenu:findChild(GUI_ID_MagicMenu_spell_names)
-	local costsList = magicMenu:findChild(GUI_ID_MagicMenu_spell_costs)
-	local percentsList = magicMenu:findChild(GUI_ID_MagicMenu_spell_percents)
+local function itemMatchesFilter(item)
+	if (item == nil) then
+		return false
+	end
 
-	-- Get a list of all children for future manipulation.
-	-- These tables are created newly each time .children is accessed.
-	local namesChildren = namesList.children
-	local costsChildren = costsList.children
-	local percentsChildren = percentsList.children
+	-- Filter by name.
+	if (spellsListSearchText and not string.find(string.lower(item.name), spellsListSearchText)) then
+		return false
+	end
 
-	local firstResult = nil
-
-	--
-	for index = 1, #namesChildren do
-		local element = namesChildren[index]
-
-		local filter = spellMatchesFilter(element:getPropertyObject("MagicMenu_Spell"))
-		if (firstResult == nil and filter) then
-			firstResult = element
-		end
-		if (filter ~= element.visible) then
-			element.visible = filter
-			costsChildren[index].visible = filter
-			percentsChildren[index].visible = filter
+	-- Filter by effects.
+	local enchantment = item.enchantment
+	for i = 1, #enchantment.effects do
+		if (spellsListSchoolWhitelist[enchantment.effects[i].object.school]) then
+			return true
 		end
 	end
 
-	if (spellsListSearchText and common.config.selectSpellsOnSearch and firstResult) then
-		firstResult:triggerEvent("mouseClick")
+	return false
+end
+
+local firstSearchResult = nil
+
+local function searchSubList(titleElement, listElement, isSpellFilter)
+	-- Gather a list of all the columns/rows so we don't have to keep creating tables later.
+	local columnElements = {}
+	for i, element in ipairs(listElement.children) do
+		table.insert(columnElements, element.children)
+	end
+
+	-- Go through and compare each element in listElement to our filter.
+	local matchCount = 0
+	for i, nameElement in ipairs(columnElements[1]) do
+		local filter = false
+		if (isSpellFilter) then
+			filter = spellMatchesFilter(nameElement:getPropertyObject("MagicMenu_Spell"))
+		else
+			filter = itemMatchesFilter(nameElement:getPropertyObject("MagicMenu_object"))
+		end
+		
+		if (filter) then
+			matchCount = matchCount + 1
+		end
+
+		-- If we don't have a first hit already, set it now.
+		if (isSpellFilter and firstSearchResult == nil and filter) then
+			firstSearchResult = nameElement
+		end
+
+		-- If the state changed, change the element visibility in all columns.
+		if (filter ~= nameElement.visible) then
+			for _, column in ipairs(columnElements) do
+				column[i].visible = filter
+			end
+		end
+	end
+
+	-- Hide associated elements if there aren't any results.
+	if (matchCount > 0) then
+		titleElement.visible = true
+		listElement.visible = true
+		return true
+	else
+		titleElement.visible = false
+		listElement.visible = false
+		return false
+	end
+end
+
+local function searchSpellsList()
+	-- Reset search result for auto-selecting.
+	firstSearchResult = nil
+
+	-- Filter all of our sub groups.
+	local elements = tes3ui.findMenu(GUI_ID_MenuMagic):findChild(GUI_ID_MagicMenu_spells_list):findChild(GUI_ID_PartScrollPane_pane).children
+	local hasMatchingPowers = searchSubList(elements[1], elements[2], true)
+	local hasMatchingSpells = searchSubList(elements[4], elements[5], true)
+	local hasMatchingItems = searchSubList(elements[7], elements[8], false)
+
+	-- Figure out dividers.
+	elements[3].visible = (hasMatchingPowers and hasMatchingSpells)
+	elements[6].visible = (hasMatchingSpells and hasMatchingItems or (not hasMatchingSpells and hasMatchingPowers and hasMatchingItems))
+
+	if (spellsListSearchText and common.config.selectSpellsOnSearch and firstSearchResult) then
+		firstSearchResult:triggerEvent("mouseClick")
 	end
 end
 
