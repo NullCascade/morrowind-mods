@@ -3,8 +3,9 @@ local GUI_ID_HelpMenu = tes3ui.registerID("HelpMenu")
 local GUI_ID_MenuStat_scroll_pane = tes3ui.registerID("MenuStat_scroll_pane")
 local GUI_ID_PartScrollPane_pane = tes3ui.registerID("PartScrollPane_pane")
 
-local GUI_Palette_Positive = tes3ui.getPalette("positive_color")
+local GUI_Palette_Disabled = tes3ui.getPalette("disabled_color")
 local GUI_Palette_Negative = tes3ui.getPalette("negative_color")
+local GUI_Palette_Positive = tes3ui.getPalette("positive_color")
 
 local common = require("UI Expansion.common")
 
@@ -33,8 +34,13 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect, sta
 	adjustmentsBlock.borderRight = 6
 	adjustmentsBlock.borderBottom = 6
 
-	-- Show base value.
-	adjustmentsBlock:createLabel({ text = string.format("Base value: %d", tes3.mobilePlayer[statsArray][attribute + 1].base) }).borderBottom = 6
+	-- Show raw/base values.
+	local rawValue = tes3.player.object[statsArray][attribute + 1]
+	local baseValue = tes3.mobilePlayer[statsArray][attribute + 1].base
+	if (rawValue ~= baseValue) then
+		adjustmentsBlock:createLabel({ text = string.format("Raw value: %d", rawValue) }).borderBottom = 6
+	end
+	adjustmentsBlock:createLabel({ text = string.format("Base value: %d", baseValue) }).borderBottom = 6
 
 	-- Display any modifiers.
 	adjustmentsBlock:createLabel({ text = "Modifiers:" })
@@ -77,6 +83,20 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect, sta
 		end
 	end
 
+	if (common.config.showHelpText) then
+		local helpText
+
+		if (rawValue ~= baseValue) then
+			helpText = adjustmentsBlock:createLabel({ text = "Raw value does not involve any effects." })
+			helpText.color = GUI_Palette_Disabled
+			helpText.borderTop = 6
+		end
+
+		helpText = adjustmentsBlock:createLabel({ text = "Base value takes into account abilities, and affects faction requirements." })
+		helpText.color = GUI_Palette_Disabled
+		helpText.borderTop = 6
+	end
+
 	if ( modifierCount < 1 ) then
 		adjustmentsBlock.visible = false
 	end
@@ -105,8 +125,9 @@ local function onMenuStatActivated(e)
 end
 event.register("uiActivated", onMenuStatActivated, { filter = "MenuStat" } )
 
+local idFilters = { tes3ui.registerID("MenuStat_misc_layout"), tes3ui.registerID("MenuStat_minor_layout"), tes3ui.registerID("MenuStat_major_layout") }
+
 local function onStatsMenuRefreshed(e)
-	local idFilters = { tes3ui.registerID("MenuStat_misc_layout"), tes3ui.registerID("MenuStat_minor_layout"), tes3ui.registerID("MenuStat_major_layout") }
 	local scrollPaneChildren = e.element:findChild(GUI_ID_MenuStat_scroll_pane):findChild(GUI_ID_PartScrollPane_pane).children
 	for _, element in pairs(scrollPaneChildren) do
 		if (table.find(idFilters, element.id)) then
