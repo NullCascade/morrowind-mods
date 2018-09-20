@@ -149,7 +149,7 @@ function this.onCreate(container)
 	mainPane:createLabel({ text = "Credits:" }).borderTop = 6
 	mainPane:createLabel({ text = "  Programming: NullCascade" })
 	mainPane:createLabel({ text = "  Colored Magic School Icons: R-Zero" })
-	mainPane:createLabel({ text = "  Inventory Filter Icons: R-Zero" })
+	mainPane:createLabel({ text = "  Inventory Filter Icons: Remiros" })
 	mainPane:createLabel({ text = "  Concepts and Testing: Morrowind Modding Community Discord" })
 end
 
