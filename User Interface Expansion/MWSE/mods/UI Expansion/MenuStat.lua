@@ -128,7 +128,7 @@ event.register("uiActivated", onMenuStatActivated, { filter = "MenuStat" } )
 local idFilters = { tes3ui.registerID("MenuStat_misc_layout"), tes3ui.registerID("MenuStat_minor_layout"), tes3ui.registerID("MenuStat_major_layout") }
 
 local function onStatsMenuRefreshed(e)
-	local scrollPaneChildren = e.element:findChild(GUI_ID_MenuStat_scroll_pane):findChild(GUI_ID_PartScrollPane_pane).children
+	local scrollPaneChildren = e.element:findChild(GUI_ID_PartScrollPane_pane).children
 	for _, element in pairs(scrollPaneChildren) do
 		if (table.find(idFilters, element.id)) then
 			element:register("help", onMenuStatSkillTooltip)
