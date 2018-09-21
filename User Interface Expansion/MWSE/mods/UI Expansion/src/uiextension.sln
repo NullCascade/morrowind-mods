@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2026
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "uiextension", "uiextension.vcxproj", "{03C36441-D752-4314-82C1-375F29FEB88E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{03C36441-D752-4314-82C1-375F29FEB88E}.Debug|x86.ActiveCfg = Debug|Win32
+		{03C36441-D752-4314-82C1-375F29FEB88E}.Debug|x86.Build.0 = Debug|Win32
+		{03C36441-D752-4314-82C1-375F29FEB88E}.Release|x86.ActiveCfg = Release|Win32
+		{03C36441-D752-4314-82C1-375F29FEB88E}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6B0F9B92-5E09-4BC3-8FBD-AE4E1F5623FE}
+	EndGlobalSection
+EndGlobal

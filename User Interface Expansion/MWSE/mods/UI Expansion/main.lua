@@ -69,3 +69,9 @@ local function onInitialized(e)
 	dofile("Data Files/MWSE/mods/UI Expansion/MenuStat.lua")
 end
 event.register("initialized", onInitialized)
+
+-- Hook map changes.
+local extern = include("uiextension")
+if (extern) then
+	extern.hookMapOverrides()
+end
