@@ -206,15 +206,17 @@ namespace UIEXT {
 		int offsetY = (land->gridY * -1 - cellMinY) * RESOLUTION_PER_CELL;
 
 		NI::PixelRGB pixelColor;
-		for (size_t y = 0; y < 9; y++) {
-			for (size_t x = 0; x < 9; x++) {
+		for (size_t y = 0; y < RESOLUTION_PER_CELL; y++) {
+			for (size_t x = 0; x < RESOLUTION_PER_CELL; x++) {
 				size_t pixelOffset = (y + offsetY) * mapWidth + x + offsetX;
 
 				if (pixelOffset * 3 > pixelBufferSize) {
 					return;
 				}
 
-				float heightData = 16 * wnam->data[8 - y].data[x];
+				size_t mappedX = 9 * x / RESOLUTION_PER_CELL;
+				size_t mappedY = 9 * y / RESOLUTION_PER_CELL;
+				float heightData = 16 * wnam->data[8 - mappedY].data[mappedX];
 				float clippedData = heightData / 2048;
 				clippedData = max(-1.0f, min(clippedData, 1.0f));
 
