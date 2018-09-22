@@ -7,4 +7,5 @@ extern "C" {
 
 namespace UIEXT {
 	int patchWorldMap(lua_State* L);
+	int setMapZoom(lua_State* L);
 }

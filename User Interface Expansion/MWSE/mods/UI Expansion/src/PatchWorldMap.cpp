@@ -10,6 +10,9 @@
 #include <TES3Region.h>
 #include <TES3WorldController.h>
 
+#include <TES3UIElement.h>
+#include <TES3UIManager.h>
+
 #include <NISourceTexture.h>
 
 #include <MemoryUtil.h>
@@ -266,6 +269,41 @@ namespace UIEXT {
 		// Draw base cells.
 		mwse::genCallEnforced(0x4CACE7, 0x4CE800, reinterpret_cast<DWORD>(OnDrawBaseCell));
 		mwse::genCallEnforced(0x4CEBB5, 0x4CE800, reinterpret_cast<DWORD>(OnDrawBaseCell));
+
+		lua_pushboolean(L, true);
+		return 1;
+	}
+
+
+	double zoomLevel = 0.0;
+
+	int setMapZoom(lua_State* L) {
+		zoomLevel = luaL_checknumber(L, 1);
+		mwse::log::getLog() << "Setting zoom level: " << zoomLevel << std::endl;
+
+		auto menuMap = TES3::UI::findMenu(*reinterpret_cast<TES3::UI::UI_ID*>(0x7D45F2));
+		auto worldMap = menuMap->findChild(*reinterpret_cast<TES3::UI::UI_ID*>(0x7D4714));
+		if (worldMap == nullptr) {
+			lua_pushboolean(L, false);
+			return 1;
+		}
+
+		int scaledSize = 1024 * zoomLevel;
+		worldMap->width = scaledSize;
+		worldMap->height = scaledSize;
+
+		auto vertsA = reinterpret_cast<int*>(worldMap->vectorVerts_40.begin);
+		vertsA[5] = scaledSize * -1;
+		vertsA[7] = scaledSize;
+		vertsA[10] = scaledSize;
+		vertsA[11] = scaledSize * -1;
+
+		auto vertsB = reinterpret_cast<float*>(worldMap->vector_60.begin);
+		vertsB[0] = 1.0f / scaledSize;
+		vertsB[1] = -1.0f / scaledSize;
+
+		worldMap->flagVisibilityChanged = true;
+		worldMap->updateSceneGraph();
 
 		lua_pushboolean(L, true);
 		return 1;

@@ -67,6 +67,7 @@ local function onInitialized(e)
 	dofile("Data Files/MWSE/mods/UI Expansion/MenuInventory.lua")
 	dofile("Data Files/MWSE/mods/UI Expansion/MenuMagic.lua")
 	dofile("Data Files/MWSE/mods/UI Expansion/MenuStat.lua")
+	dofile("Data Files/MWSE/mods/UI Expansion/MenuMap.lua")
 end
 event.register("initialized", onInitialized)
 
