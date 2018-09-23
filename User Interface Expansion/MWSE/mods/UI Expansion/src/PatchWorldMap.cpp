@@ -290,7 +290,7 @@ namespace UIEXT {
 			return 1;
 		}
 
-		int scaledSize = 1024 * zoomLevel;
+		float scaledSize = 1024 * zoomLevel;
 		worldMap->width = scaledSize;
 		worldMap->height = scaledSize;
 
