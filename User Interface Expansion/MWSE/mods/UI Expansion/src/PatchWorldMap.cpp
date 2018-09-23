@@ -21,15 +21,15 @@
 
 #include <algorithm>
 
-#define RESOLUTION_PER_CELL 9
-
 namespace UIEXT {
 	static lua_State * luaState = nullptr;
 
-	static int cellMinX = -142;
-	static int cellMaxX = 49;
-	static int cellMinY = -59;
-	static int cellMaxY = 29;
+	static bool updateMapBounds = false;
+	static int cellResolution = 9;
+	static int cellMinX = 0;
+	static int cellMaxX = 0;
+	static int cellMinY = 0;
+	static int cellMaxY = 0;
 
 	static unsigned int mapWidth = 0;
 	static unsigned int mapHeight = 0;
@@ -45,49 +45,14 @@ namespace UIEXT {
 		return value;
 	}
 
-	// Loop through all the cells and figure out where our map bounds should be.
-	void loadCellRanges() {
-		// Figure out the cell ranges.
-		auto cellNode = mwse::tes3::getDataHandler()->nonDynamicData->cells->head;
-		while (cellNode) {
-			TES3::Cell * cell = cellNode->data;
-			if (cell->isInterior()) {
-				cellNode = cellNode->next;
-				continue;
-			}
-
-			int x = cell->getGridX();
-			if (x < cellMinX) {
-				cellMinX = x;
-			}
-			else if (x > cellMaxX) {
-				cellMaxX = x;
-			}
-
-			int y = cell->getGridY();
-			if (y < cellMinY) {
-				cellMinY = y;
-			}
-			else if (y > cellMaxY) {
-				cellMaxY = y;
-			}
-
-			cellNode = cellNode->next;
-		}
-
-		std::stringstream ss;
-		ss << "print(\"Cell X range: " << cellMinX << " -> " << cellMaxX << "; Cell Y range: " << cellMinY << " -> " << cellMaxY << "\")";
-		luaL_dostring(luaState, ss.str().c_str());
-	}
-
 	//
 	// When allocating space for our map, use the new size.
 	//
 
 	const auto TES3_NiPixelData_ctor = reinterpret_cast<void*(__thiscall *)(void*, unsigned int, unsigned int, void*, unsigned int)>(0x6D4FC0);
 	void * __fastcall OnCreateMapPixelData(void * pixelData, DWORD _UNUSUED_, unsigned int width, unsigned int height, void * format, unsigned int mipMapLevels) {
-		mapWidth = getNextHighestPowerOf2((cellMaxX - cellMinX) * RESOLUTION_PER_CELL);
-		mapHeight = getNextHighestPowerOf2((cellMaxY - cellMinY) * RESOLUTION_PER_CELL);
+		mapWidth = getNextHighestPowerOf2((cellMaxX - cellMinX) * cellResolution);
+		mapHeight = getNextHighestPowerOf2((cellMaxY - cellMinY) * cellResolution);
 		size_t largerResolution = max(mapWidth, mapHeight);
 
 		mwse::log::getLog() << "Creating map. Resolution: " << std::dec << mapWidth << ", " << mapHeight << std::endl;
@@ -100,10 +65,6 @@ namespace UIEXT {
 
 	const auto TES3_NonDynamicData_allocateMap = reinterpret_cast<void(__thiscall *)(TES3::NonDynamicData*)>(0x4C8070);
 	void __fastcall OnAllocateMapDefault(TES3::NonDynamicData * nonDynamicData) {
-#if true
-		// Figure out our map bounds.
-		loadCellRanges();
-
 		// Call overwritten function.
 		TES3_NonDynamicData_allocateMap(nonDynamicData);
 
@@ -117,7 +78,6 @@ namespace UIEXT {
 			pixels->b = 33;
 			pixels++;
 		}
-#endif
 	}
 
 	//
@@ -147,9 +107,6 @@ namespace UIEXT {
 		if (!saveFile->getChunkData(data, dataSize)) {
 			return false;
 		}
-
-		// Load our cell ranges.
-		loadCellRanges();
 
 		// If our data differs, return invalid data so we don't load the map.
 		if (data->uiextData.cellMinX != cellMinX || data->uiextData.cellMaxX != cellMaxX ||
@@ -202,20 +159,24 @@ namespace UIEXT {
 			return;
 		}
 
-		int offsetX = (land->gridX - cellMinX) * RESOLUTION_PER_CELL;
-		int offsetY = (land->gridY * -1 - cellMinY) * RESOLUTION_PER_CELL;
+		if (land->gridX < cellMinX || land->gridX > cellMaxX || land->gridY < cellMinY || land->gridY > cellMaxY) {
+			return;
+		}
+
+		int offsetX = (land->gridX - cellMinX) * cellResolution;
+		int offsetY = (land->gridY * -1 - cellMinY) * cellResolution;
 
 		NI::PixelRGB pixelColor;
-		for (size_t y = 0; y < RESOLUTION_PER_CELL; y++) {
-			for (size_t x = 0; x < RESOLUTION_PER_CELL; x++) {
+		for (size_t y = 0; y < cellResolution; y++) {
+			for (size_t x = 0; x < cellResolution; x++) {
 				size_t pixelOffset = (y + offsetY) * mapWidth + x + offsetX;
 
 				if (pixelOffset * 3 > pixelBufferSize) {
 					return;
 				}
 
-				size_t mappedX = 9 * x / RESOLUTION_PER_CELL;
-				size_t mappedY = 9 * y / RESOLUTION_PER_CELL;
+				size_t mappedX = 9 * x / cellResolution;
+				size_t mappedY = 9 * y / cellResolution;
 				float heightData = 16 * wnam->data[8 - mappedY].data[mappedX];
 				float clippedData = heightData / 2048;
 				clippedData = max(-1.0f, min(clippedData, 1.0f));
@@ -255,6 +216,34 @@ namespace UIEXT {
 
 		std::srand(std::time(nullptr));
 
+		// Load config from lua.
+		lua_settop(L, 1);
+		luaL_checktype(L, 1, LUA_TTABLE);
+
+		lua_getfield(L, 1, "autoExpand");
+		updateMapBounds = lua_toboolean(L, -1);
+		lua_pop(L, 1);
+
+		lua_getfield(L, 1, "cellResolution");
+		cellResolution = luaL_checknumber(L, -1);
+		lua_pop(L, 1);
+
+		lua_getfield(L, 1, "minX");
+		cellMinX = luaL_checknumber(L, -1);
+		lua_pop(L, 1);
+
+		lua_getfield(L, 1, "maxX");
+		cellMaxX = luaL_checknumber(L, -1);
+		lua_pop(L, 1);
+
+		lua_getfield(L, 1, "minY");
+		cellMinY = luaL_checknumber(L, -1);
+		lua_pop(L, 1);
+
+		lua_getfield(L, 1, "maxY");
+		cellMaxY = luaL_checknumber(L, -1);
+		lua_pop(L, 1);
+
 		// Default map. We need to remove some code so we can do our own thing.
 		mwse::genCallEnforced(0x4BB5A0, 0x4C8070, reinterpret_cast<DWORD>(OnAllocateMapDefault));
 		mwse::genNOPUnprotected(0x4BB5A5, 0x34);
@@ -275,7 +264,6 @@ namespace UIEXT {
 		lua_pushboolean(L, true);
 		return 1;
 	}
-
 
 	double zoomLevel = 0.0;
 

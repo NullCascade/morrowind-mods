@@ -7,6 +7,14 @@ local defaultConfig = {
 	autoSelectInput = "Magic",
 	useInventoryTextButtons = true,
 	selectSpellsOnSearch = true,
+	mapConfig = {
+		autoExpand = true,
+		cellResolution = 9,
+		minX = -142,
+		maxX = 49,
+		minY = -59,
+		maxY = 29,
+	}
 }
 local config = table.copy(defaultConfig)
 
@@ -74,5 +82,6 @@ event.register("initialized", onInitialized)
 -- Hook map changes.
 local extern = include("uiextension")
 if (extern) then
-	extern.hookMapOverrides()
+	mwse.log("Map Config: %s", json.encode(common.config.mapConfig))
+	extern.hookMapOverrides(common.config.mapConfig)
 end

@@ -7,9 +7,6 @@ if (extern == nil) then
 	return
 end
 
--- Initialze our map hooks.
-extern.hookMapOverrides()
-
 local currentZoom = 1.0
 local zoomBar = nil
 
@@ -21,6 +18,9 @@ local function onMapMenuActivated(e)
 	newBottomBlock.autoHeight = true
 	newBottomBlock.absolutePosAlignX = 1.0
 	newBottomBlock.absolutePosAlignY = 1.0
+
+	-- The world map itself. Cache it here to show/hide the zoom bar based on this element's visibility.
+	local worldMap = mapMenu:findChild(tes3ui.registerID("MenuMap_world"))
 
 	-- Create a horizontal bar that lets us zoom in/out.
 	zoomBar = newBottomBlock:createSlider({ current = 0, max = 400, step = 1, jump = 10 })
@@ -42,6 +42,7 @@ local function onMapMenuActivated(e)
 	newSwitchButton:register("mouseClick", function()
 		oldButton:triggerEvent("mouseClick")
 		newSwitchButton.text = oldButton.text
+		zoomBar.visible = worldMap.visible
 	end)
 end
 event.register("uiActivated", onMapMenuActivated, { filter = "MenuMap" })
@@ -55,7 +56,6 @@ local function onMouseWheel(e)
 		return
 	end
 
-	mwse.log("Delta: %s", e.delta)
 	zoomBar.widget.current = math.clamp(zoomBar.widget.current + 10 * e.delta/math.abs(e.delta), 0, 400)
 	zoomBar:triggerEvent("PartScrollBar_changed")
 	zoomBar:getTopLevelParent():updateLayout()
