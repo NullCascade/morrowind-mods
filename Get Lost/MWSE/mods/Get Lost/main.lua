@@ -1,12 +1,9 @@
 
--- When we enter menu mode we disable the map menu.
+-- As soon as the map menu is activated, destroy it.
 local function onMenuMapActivated(e)
-	local menuMap = tes3ui.findMenu(tes3ui.registerID("MenuMap"))
-	if (menuMap) then
-		menuMap.visible = false
-	end
+	e.element:destroy()
 end
-event.register("menuEnter", onMenuMapActivated)
+event.register("uiActivated", onMenuMapActivated, { filter = "MenuMap" })
 
 -- When the multi-menu is created, hide the minimap.
 local function onMenuMultiActivated(e)
