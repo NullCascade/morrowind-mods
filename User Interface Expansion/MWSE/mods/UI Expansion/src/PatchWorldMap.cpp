@@ -6,6 +6,7 @@
 #include <TES3DataHandler.h>
 #include <TES3GameFile.h>
 #include <TES3Land.h>
+#include <TES3MobilePlayer.h>
 #include <TES3Reference.h>
 #include <TES3Region.h>
 #include <TES3WorldController.h>
@@ -31,8 +32,12 @@ namespace UIEXT {
 	static int cellMinY = 0;
 	static int cellMaxY = 0;
 
+	static int mapResolution = 0;
+
 	static unsigned int mapWidth = 0;
 	static unsigned int mapHeight = 0;
+
+	float zoomLevel = 0.0;
 
 	unsigned long getNextHighestPowerOf2(unsigned long value) {
 		value--;
@@ -51,12 +56,12 @@ namespace UIEXT {
 
 	const auto TES3_NiPixelData_ctor = reinterpret_cast<void*(__thiscall *)(void*, unsigned int, unsigned int, void*, unsigned int)>(0x6D4FC0);
 	void * __fastcall OnCreateMapPixelData(void * pixelData, DWORD _UNUSUED_, unsigned int width, unsigned int height, void * format, unsigned int mipMapLevels) {
-		mapWidth = getNextHighestPowerOf2((cellMaxX - cellMinX) * cellResolution);
-		mapHeight = getNextHighestPowerOf2((cellMaxY - cellMinY) * cellResolution);
-		size_t largerResolution = max(mapWidth, mapHeight);
+		mapWidth = getNextHighestPowerOf2((cellMaxX - cellMinX + 1) * cellResolution);
+		mapHeight = getNextHighestPowerOf2((cellMaxY - cellMinY + 1) * cellResolution);
+		mapResolution = max(mapWidth, mapHeight);
 
 		mwse::log::getLog() << "Creating map. Resolution: " << std::dec << mapWidth << ", " << mapHeight << std::endl;
-		return TES3_NiPixelData_ctor(pixelData, largerResolution, largerResolution, format, mipMapLevels);
+		return TES3_NiPixelData_ctor(pixelData, mapResolution, mapResolution, format, mipMapLevels);
 	}
 
 	//
@@ -210,6 +215,47 @@ namespace UIEXT {
 		}
 	}
 
+	bool __cdecl OnUpdatePlayerPosition(TES3::UI::Element * mapMenu) {
+		// If we weren't given a map menu, find it.
+		if (mapMenu == nullptr) {
+			mapMenu = TES3::UI::findMenu(*reinterpret_cast<TES3::UI::UI_ID*>(0x7D45F2));
+			if (mapMenu == nullptr) {
+				return false;
+			}
+		}
+
+		// Get our local/world markers.
+		auto localMarker = mapMenu->findChild(*reinterpret_cast<TES3::UI::UI_ID*>(0x7D4642));
+		auto worldMarker = mapMenu->findChild(*reinterpret_cast<TES3::UI::UI_ID*>(0x7D4784));
+		auto worldMapPane = mapMenu->findChild(*reinterpret_cast<TES3::UI::UI_ID*>(0x7D4714));
+		if (localMarker == nullptr || worldMarker == nullptr) {
+			return false;
+		}
+
+		// Update map marker rotation.
+		auto player = mwse::tes3::getWorldController()->getMobilePlayer();
+		TES3::Matrix33 rotationMatrix;
+		rotationMatrix.toRotationY(player->reference->orientation.z * -1);
+		worldMarker->node_88->setLocalRotationMatrix(&rotationMatrix);
+		worldMarker->node_88->propagatePositionChange();
+
+		auto dataHandler = mwse::tes3::getDataHandler();
+		if (dataHandler->currentInteriorCell) {
+
+		}
+		else {
+			worldMarker->positionX = ((player->reference->position.x / 8192) - cellMinX) * cellResolution * zoomLevel;
+			worldMarker->positionY = ((player->reference->position.y / -8192) - cellMinY + 1) * cellResolution * zoomLevel * -1;
+
+			worldMarker->flagPosChanged = true;
+			worldMarker->timingUpdate();
+			mapMenu->timingUpdate();
+			mwse::log::getLog() << "Player marker position: " << worldMarker->positionX << ", " << worldMarker->positionY << ". Rotation: " << player->reference->orientation.z << std::endl;
+		}
+
+		return true;
+	}
+
 	// Initialize our patches based on a lua function, so it can be semi-easily disabled.
 	int patchWorldMap(lua_State* L) {
 		luaState = L;
@@ -261,15 +307,22 @@ namespace UIEXT {
 		mwse::genCallEnforced(0x4CACE7, 0x4CE800, reinterpret_cast<DWORD>(OnDrawBaseCell));
 		mwse::genCallEnforced(0x4CEBB5, 0x4CE800, reinterpret_cast<DWORD>(OnDrawBaseCell));
 
+		// Update from player movement.
+		mwse::genCallEnforced(0x5E9701, 0x5EC250, reinterpret_cast<DWORD>(OnUpdatePlayerPosition));
+		mwse::genCallEnforced(0x5E9733, 0x5EC250, reinterpret_cast<DWORD>(OnUpdatePlayerPosition));
+		mwse::genCallEnforced(0x5EB798, 0x5EC250, reinterpret_cast<DWORD>(OnUpdatePlayerPosition));
+		mwse::genCallEnforced(0x5EB7DD, 0x5EC250, reinterpret_cast<DWORD>(OnUpdatePlayerPosition));
+		mwse::genCallEnforced(0x5EC1FC, 0x5EC250, reinterpret_cast<DWORD>(OnUpdatePlayerPosition));
+		mwse::genCallEnforced(0x5ED712, 0x5EC250, reinterpret_cast<DWORD>(OnUpdatePlayerPosition));
+		mwse::genCallEnforced(0x5ED965, 0x5EC250, reinterpret_cast<DWORD>(OnUpdatePlayerPosition));
+		mwse::genCallEnforced(0x736C9E, 0x5EC250, reinterpret_cast<DWORD>(OnUpdatePlayerPosition));
+
 		lua_pushboolean(L, true);
 		return 1;
 	}
 
-	double zoomLevel = 0.0;
-
 	int setMapZoom(lua_State* L) {
 		zoomLevel = luaL_checknumber(L, 1);
-		mwse::log::getLog() << "Setting zoom level: " << zoomLevel << std::endl;
 
 		auto menuMap = TES3::UI::findMenu(*reinterpret_cast<TES3::UI::UI_ID*>(0x7D45F2));
 		auto worldMap = menuMap->findChild(*reinterpret_cast<TES3::UI::UI_ID*>(0x7D4714));
@@ -278,7 +331,7 @@ namespace UIEXT {
 			return 1;
 		}
 
-		float scaledSize = 1024 * zoomLevel;
+		float scaledSize = mapResolution * zoomLevel;
 		worldMap->width = scaledSize;
 		worldMap->height = scaledSize;
 
