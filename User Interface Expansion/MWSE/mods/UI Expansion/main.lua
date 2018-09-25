@@ -7,11 +7,12 @@ local defaultConfig = {
 	autoSelectInput = "Magic",
 	useInventoryTextButtons = true,
 	selectSpellsOnSearch = true,
+	autoFilterToTradable = true,
 	mapConfig = {
 		autoExpand = true,
 		cellResolution = 9,
 		minX = -142,
-		maxX = 49,
+		maxX = 70,
 		minY = -59,
 		maxY = 29,
 	}
@@ -72,10 +73,11 @@ event.register("modConfigReady", registerModConfig)
 
 -- Run our modules.
 local function onInitialized(e)
+	dofile("Data Files/MWSE/mods/UI Expansion/MenuBarter.lua")
 	dofile("Data Files/MWSE/mods/UI Expansion/MenuInventory.lua")
 	dofile("Data Files/MWSE/mods/UI Expansion/MenuMagic.lua")
-	dofile("Data Files/MWSE/mods/UI Expansion/MenuStat.lua")
 	dofile("Data Files/MWSE/mods/UI Expansion/MenuMap.lua")
+	dofile("Data Files/MWSE/mods/UI Expansion/MenuStat.lua")
 end
 event.register("initialized", onInitialized)
 

@@ -145,6 +145,14 @@ function this.onCreate(container)
 		key = "selectSpellsOnSearch",
 	})
 
+	-- Toggle help text.
+	createBooleanConfigPackage({
+		parent = mainPane,
+		label = "Filter to tradable items when opening barter window?",
+		config = this.config,
+		key = "autoFilterToTradable",
+	})
+
 	-- Credits:
 	mainPane:createLabel({ text = "Credits:" }).borderTop = 6
 	mainPane:createLabel({ text = "  Programming: NullCascade" })

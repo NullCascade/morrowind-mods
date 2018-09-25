@@ -1,10 +1,9 @@
 
 local GUI_ID_MenuBarter = tes3ui.registerID("MenuBarter")
-local GUI_ID_MenuInventory = tes3ui.registerID("MenuInventory")
-local GUI_ID_MenuInventory_button_layout = tes3ui.registerID("MenuInventory_button_layout")
+local GUI_ID_MenuBarter_bucket = tes3ui.registerID("MenuBarter_bucket")
 
-local GUI_ID_UIEXP_InventoryMenu_IconFilters = tes3ui.registerID("UIEXP_InventoryMenu_IconFilters")
-local GUI_ID_UIEXP_InventoryMenu_ButtonFilters = tes3ui.registerID("UIEXP_InventoryMenu_ButtonFilters")
+local GUI_ID_UIEXP_BarterMenu_IconFilters = tes3ui.registerID("UIEXP_BarterMenu_IconFilters")
+local GUI_ID_UIEXP_BarterMenu_ButtonFilters = tes3ui.registerID("UIEXP_BarterMenu_ButtonFilters")
 
 local GUI_Palette_Active = tes3ui.getPalette("active_color")
 local GUI_Palette_Disabled = tes3ui.getPalette("disabled_color")
@@ -27,7 +26,6 @@ local inventoryFilter = {
 	["ingredient"] = 4,
 	["tools"] = 5,
 	["other"] = 6,
-	["tradable"] = 7,
 }
 
 local inventoryActiveFilters = { [inventoryFilter.all] = true }
@@ -83,17 +81,11 @@ function inventoryFilterCallbacks.other(e)
 	)
 end
 
-local currentMerchant = nil
-
-function inventoryFilterCallbacks.tradable(e)
-	return tes3.checkMerchantTradesItem({ reference = currentMerchant, item = e.item })
-end
-
 local function updateInventoryFilterIcons()
-	local menu = tes3ui.findMenu(GUI_ID_MenuInventory)
+	local menu = tes3ui.findMenu(GUI_ID_MenuBarter)
 
 	-- Update icons.
-	local iconFiltersBlock = menu:findChild(GUI_ID_UIEXP_InventoryMenu_IconFilters)
+	local iconFiltersBlock = menu:findChild(GUI_ID_UIEXP_BarterMenu_IconFilters)
 	for _, element in pairs(iconFiltersBlock.children) do
 		if (inventoryActiveFilters[inventoryFilter.all]) then
 			element.alpha = 1.0
@@ -109,7 +101,7 @@ local function updateInventoryFilterIcons()
 	end
 	
 	-- Update buttons.
-	local buttonFiltersBlock = menu:findChild(GUI_ID_UIEXP_InventoryMenu_ButtonFilters)
+	local buttonFiltersBlock = menu:findChild(GUI_ID_UIEXP_BarterMenu_ButtonFilters)
 	for _, element in pairs(buttonFiltersBlock.children) do
 		if (inventoryActiveFilters[inventoryFilter.all]) then
 			element.widget.state = 1
@@ -141,7 +133,7 @@ local function onInventoryFilterClick(e)
 	if (activeFilterCount == 1 and activeFilter == id) then
 		inventoryActiveFilters = { [inventoryFilter.all] = true }
 		updateInventoryFilterIcons()
-		tes3ui.updateInventoryTiles()
+		tes3ui.updateBarterMenuTiles()
 		return
 	end
 
@@ -173,7 +165,7 @@ local function onInventoryFilterClick(e)
 	end
 
 	updateInventoryFilterIcons()
-	tes3ui.updateInventoryTiles()
+	tes3ui.updateBarterMenuTiles()
 end
 
 local inventoryTooltipCallbacks = {}
@@ -396,30 +388,6 @@ function inventoryTooltipCallbacks.other(e)
 	end
 end
 
-function inventoryTooltipCallbacks.tradable(e)
-	local tooltip = tes3ui.createTooltipMenu()
-
-	local tooltipBlock = tooltip:createBlock({})
-	tooltipBlock.flowDirection = "top_to_bottom"
-	tooltipBlock.autoHeight = true
-	tooltipBlock.autoWidth = true
-
-	tooltipBlock:createLabel({ text = "Filter to sellable items" })
-
-	if (common.config.showHelpText) then
-		local helpText
-
-		helpText = tooltipBlock:createLabel({ text = "Click to filter to:" })
-		helpText.color = GUI_Palette_Disabled
-		helpText.borderTop = 6
-
-		helpText = tooltipBlock:createLabel({ text = "- Items the merchant will buy." })
-		helpText.color = GUI_Palette_Disabled
-		helpText.borderTop = 2
-		helpText.borderLeft = 6
-	end
-end
-
 local function onInventoryFilterTooltip(e)
 	local id = e.source:getPropertyInt("UIEXP:Category")
 	local key = table.find(inventoryFilter, id)
@@ -446,155 +414,95 @@ local function filterInventory(e)
 	e.filter = false
 	return
 end
-event.register("filterInventory", filterInventory )
+event.register("filterBarterMenu", filterInventory )
 
-local sellableFilterButton
-local sellableFilterIconButton
+local function OnMenuBarterActivated(e)
+	if (not e.newlyCreated) then
+		return
+	end
 
-local function OnMenuInventoryActivated(e)
-	-- Create our new elements if this is a new creation.
-	if (e.newlyCreated) then
-		local buttonBlock = e.element:findChild(GUI_ID_MenuInventory_button_layout)
-	
-		-- Start off by nuking our slate clean.
-		buttonBlock:destroyChildren()
-	
-		-- Create search bar.
-		common.createSearchBar({
-			parent = buttonBlock,
-			id = "UIEXP:InventoryMenu:SearchInput",
-			placeholderText = "Search by name...",
-			onUpdate = function(e)
-				inventorySearchText = e.source.text
-				if (inventorySearchText == "") then
-					inventorySearchText = nil
-				end
-				tes3ui.updateInventoryTiles()
+	local buttonBlock = e.element:findChild(GUI_ID_MenuBarter_bucket).parent.children[1]
+
+	-- Start off by nuking our slate clean.
+	buttonBlock:destroyChildren()
+
+	-- Create search bar.
+	common.createSearchBar({
+		parent = buttonBlock,
+		id = "UIEXP:BarterMenu:SearchInput",
+		placeholderText = "Search by name...",
+		onUpdate = function(e)
+			inventorySearchText = e.source.text
+			if (inventorySearchText == "") then
+				inventorySearchText = nil
 			end
-		})
-	
-		-- Create icons for filtering.
-		do
-			local border = buttonBlock:createThinBorder({ id = GUI_ID_UIEXP_InventoryMenu_IconFilters })
-			border.autoWidth = true
-			border.autoHeight = true
-			border.borderLeft = 4
-			border.paddingTop = 3
-			border.paddingBottom = 3
-			border.paddingLeft = 3
-			border.paddingRight = 3
-	
-			local function createFilterButtonIcon(e)
-				local button = border:createImage({ id = string.format("UIEXP:InventoryMenu:FilterIcon:%s", e.key), path = e.icon })
-				button.imageScaleX = 0.6
-				button.imageScaleY = 0.6
-				button.borderLeft = 2
-				button:setPropertyInt("UIEXP:Category", inventoryFilter[e.key])
-				button:register("mouseClick", onInventoryFilterClick)
-				button:register("help", onInventoryFilterTooltip)
-				return button
-			end
-			createFilterButtonIcon({ key = "weapon", icon = "icons/ui_exp/inventory_weapons.tga" }).borderLeft = 0
-			createFilterButtonIcon({ key = "apparel", icon = "icons/ui_exp/inventory_apparel.tga" })
-			createFilterButtonIcon({ key = "consumable", icon = "icons/ui_exp/inventory_consumables.tga" })
-			createFilterButtonIcon({ key = "ingredient", icon = "icons/ui_exp/inventory_ingredients.tga" })
-			createFilterButtonIcon({ key = "tools", icon = "icons/ui_exp/inventory_tools.tga" })
-			createFilterButtonIcon({ key = "other", icon = "icons/ui_exp/inventory_other.tga" })
-			sellableFilterIconButton = createFilterButtonIcon({ key = "tradable", icon = "icons/ui_exp/inventory_tradable.tga" })
-	
-			border.visible = not common.config.useInventoryTextButtons
+			tes3ui.updateBarterMenuTiles()
 		end
-	
-		-- Create buttons for filtering.
-		do
-			local buttonFilterBlock = buttonBlock:createBlock({ id = GUI_ID_UIEXP_InventoryMenu_ButtonFilters })
-			buttonFilterBlock.autoHeight = true
-			buttonFilterBlock.autoWidth = true
-			buttonFilterBlock.borderTop = 1
-	
-			local function createFilterButton(e)
-				local button = buttonFilterBlock:createButton({ id = string.format("UIEXP:InventoryMenu:FilterButton:%s", e.key) })
-				button.text = e.text
-				button.imageScaleX = 0.6
-				button.imageScaleY = 0.6
-				button.borderLeft = 4
-				button.borderRight = 0
-				button.borderTop = 0
-				button.borderBottom = 0
-				button.borderAllSides = 0
-				button:setPropertyInt("UIEXP:Category", inventoryFilter[e.key])
-				button:register("mouseClick", onInventoryFilterClick)
-				button:register("help", onInventoryFilterTooltip)
-				return button
-			end
-			createFilterButton({ key = "weapon", text = "Weapons" })
-			createFilterButton({ key = "apparel", text = "Apparel" })
-			createFilterButton({ key = "consumable", text = "Consumables" })
-			createFilterButton({ key = "ingredient", text = "Ingredients" })
-			createFilterButton({ key = "tools", text = "Tools" })
-			createFilterButton({ key = "other", text = "Other" })
-			sellableFilterButton = createFilterButton({ key = "tradable", text = "Tradable" })
-	
-			buttonFilterBlock.visible = common.config.useInventoryTextButtons
+	})
+
+	-- Create icons for filtering.
+	do
+		local border = buttonBlock:createThinBorder({ id = GUI_ID_UIEXP_BarterMenu_IconFilters })
+		border.autoWidth = true
+		border.autoHeight = true
+		border.borderLeft = 4
+		border.paddingTop = 3
+		border.paddingBottom = 3
+		border.paddingLeft = 3
+		border.paddingRight = 3
+
+		local function createFilterButton(e)
+			local button = border:createImage({ path = e.icon })
+			button.imageScaleX = 0.6
+			button.imageScaleY = 0.6
+			button.borderLeft = 2
+			button:setPropertyInt("UIEXP:Category", inventoryFilter[e.key])
+			button:register("mouseClick", onInventoryFilterClick)
+			button:register("help", onInventoryFilterTooltip)
+			return button
 		end
+		createFilterButton({ key = "weapon", icon = "icons/ui_exp/inventory_weapons.tga" }).borderLeft = 0
+		createFilterButton({ key = "apparel", icon = "icons/ui_exp/inventory_apparel.tga" })
+		createFilterButton({ key = "consumable", icon = "icons/ui_exp/inventory_consumables.tga" })
+		createFilterButton({ key = "ingredient", icon = "icons/ui_exp/inventory_ingredients.tga" })
+		createFilterButton({ key = "tools", icon = "icons/ui_exp/inventory_tools.tga" })
+		createFilterButton({ key = "other", icon = "icons/ui_exp/inventory_other.tga" })
+
+		border.visible = not common.config.useInventoryTextButtons
+	end
+
+	-- Create buttons for filtering.
+	do
+		local buttonFilterBlock = buttonBlock:createBlock({ id = GUI_ID_UIEXP_BarterMenu_ButtonFilters })
+		buttonFilterBlock.autoHeight = true
+		buttonFilterBlock.autoWidth = true
+		buttonFilterBlock.borderTop = 1
+
+		local function createFilterButton(e)
+			local button = buttonFilterBlock:createButton({})
+			button.text = e.text
+			button.imageScaleX = 0.6
+			button.imageScaleY = 0.6
+			button.borderLeft = 4
+			button.borderRight = 0
+			button.borderTop = 0
+			button.borderBottom = 0
+			button.borderAllSides = 0
+			button:setPropertyInt("UIEXP:Category", inventoryFilter[e.key])
+			button:register("mouseClick", onInventoryFilterClick)
+			button:register("help", onInventoryFilterTooltip)
+			return button
+		end
+		createFilterButton({ key = "weapon", text = "Weapons" })
+		createFilterButton({ key = "apparel", text = "Apparel" })
+		createFilterButton({ key = "consumable", text = "Consumables" })
+		createFilterButton({ key = "ingredient", text = "Ingredients" })
+		createFilterButton({ key = "tools", text = "Tools" })
+		createFilterButton({ key = "other", text = "Other" })
+
+		buttonFilterBlock.visible = common.config.useInventoryTextButtons
 	end
 	
-	-- Are we also showing the barter menu?
-	local barterMenu = tes3ui.findMenu(GUI_ID_MenuBarter)
-	sellableFilterButton.visible = (barterMenu ~= nil)
-	sellableFilterIconButton.visible = (barterMenu ~= nil)
-	if (barterMenu) then
-		currentMerchant = tes3ui.getServiceActor()
-		if (common.config.autoFilterToTradable) then
-			common.setInventoryFilter({ filter = inventoryFilter.tradable })
-		end
-	else
-		currentMerchant = nil
-	end
+	common.setInventoryFilter({ filter = common.inventoryFilter.sellable })
 end
-event.register("uiActivated", OnMenuInventoryActivated, { filter = "MenuInventory" } )
-
-local function onEnterMenuMode(e)
-	sellableFilterButton.visible = false
-	sellableFilterIconButton.visible = false
-	common.setInventoryFilter()
-end
-event.register("menuEnter", onEnterMenuMode, { filter = "MenuInventory" })
-event.register("menuEnter", onEnterMenuMode, { filter = "MenuMagic" })
-event.register("menuEnter", onEnterMenuMode, { filter = "MenuMap" })
-event.register("menuEnter", onEnterMenuMode, { filter = "MenuStat" })
-
-----------------------------------------------------------------------------------------------------
--- Interoperability functions.
-----------------------------------------------------------------------------------------------------
-
-common.inventoryFilter = inventoryFilter
-
-function common.setInventoryFilter(e)
-	local params = e or {}
-	inventorySearchText = params.text
-	inventoryActiveFilters = params.filters or {}
-
-	if (params.filter) then
-		inventoryActiveFilters = { [params.filter] = true }
-	end
-
-	if (inventorySearchText == nil) then
-		local menu = tes3ui.findMenu(GUI_ID_MenuInventory)
-		if (menu) then
-			local input = menu:findChild(tes3ui.registerID("UIEXP:InventoryMenu:SearchInput"))
-			input.text = "Search by name..."
-			input.color = GUI_Palette_Disabled
-		end
-	end
-
-	if (table.size(inventoryActiveFilters) == 0) then
-		inventoryActiveFilters = { [inventoryFilter.all] = true }
-	elseif (#inventoryFilter > 1) then
-		inventoryActiveFilters[inventoryFilter.all] = nil
-	end
-
-	-- Reset GUI elements.
-	updateInventoryFilterIcons()
-	tes3ui.updateInventoryTiles()
-end
+event.register("uiActivated", OnMenuBarterActivated, { filter = "MenuBarter" } )
