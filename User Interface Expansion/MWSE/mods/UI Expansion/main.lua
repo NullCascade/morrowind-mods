@@ -15,7 +15,8 @@ local defaultConfig = {
 		maxX = 70,
 		minY = -59,
 		maxY = 29,
-	}
+	},
+	TEST_dialogueCheck = true,
 }
 local config = table.copy(defaultConfig)
 
@@ -74,6 +75,7 @@ event.register("modConfigReady", registerModConfig)
 -- Run our modules.
 local function onInitialized(e)
 	dofile("Data Files/MWSE/mods/UI Expansion/MenuBarter.lua")
+	dofile("Data Files/MWSE/mods/UI Expansion/MenuDialog.lua")
 	dofile("Data Files/MWSE/mods/UI Expansion/MenuInventory.lua")
 	dofile("Data Files/MWSE/mods/UI Expansion/MenuMagic.lua")
 	dofile("Data Files/MWSE/mods/UI Expansion/MenuMap.lua")

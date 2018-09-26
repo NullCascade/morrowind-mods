@@ -153,6 +153,14 @@ function this.onCreate(container)
 		key = "autoFilterToTradable",
 	})
 
+	-- Toggle help text.
+	createBooleanConfigPackage({
+		parent = mainPane,
+		label = "[TESTING] Actively color using dialogue filters?",
+		config = this.config,
+		key = "TEST_dialogueCheck",
+	})
+
 	-- Credits:
 	mainPane:createLabel({ text = "Credits:" }).borderTop = 6
 	mainPane:createLabel({ text = "  Programming: NullCascade" })
