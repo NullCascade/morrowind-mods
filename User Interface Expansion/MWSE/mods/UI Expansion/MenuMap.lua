@@ -23,7 +23,7 @@ local function onMapMenuActivated(e)
 	local worldMap = mapMenu:findChild(tes3ui.registerID("MenuMap_world"))
 
 	-- Create a horizontal bar that lets us zoom in/out.
-	zoomBar = newBottomBlock:createSlider({ current = 0, max = 400, step = 1, jump = 10 })
+	zoomBar = newBottomBlock:createSlider({ current = 0, max = 300, step = 1, jump = 10 })
 	zoomBar.absolutePosAlignY = 0.5
 	zoomBar.width = 300
 	zoomBar:register("PartScrollBar_changed", function(e)
@@ -56,7 +56,7 @@ local function onMouseWheel(e)
 		return
 	end
 
-	zoomBar.widget.current = math.clamp(zoomBar.widget.current + 10 * e.delta/math.abs(e.delta), 0, 400)
+	zoomBar.widget.current = math.clamp(zoomBar.widget.current + 10 * e.delta/math.abs(e.delta), 0, 300)
 	zoomBar:triggerEvent("PartScrollBar_changed")
 	zoomBar:getTopLevelParent():updateLayout()
 	zoomBar:updateLayout()
