@@ -59,8 +59,6 @@ namespace UIEXT {
 		mapWidth = getNextHighestPowerOf2((cellMaxX - cellMinX + 1) * cellResolution);
 		mapHeight = getNextHighestPowerOf2((cellMaxY - cellMinY + 1) * cellResolution);
 		mapResolution = max(mapWidth, mapHeight);
-
-		mwse::log::getLog() << "Creating map. Resolution: " << std::dec << mapWidth << ", " << mapHeight << std::endl;
 		return TES3_NiPixelData_ctor(pixelData, mapResolution, mapResolution, format, mipMapLevels);
 	}
 
@@ -105,11 +103,9 @@ namespace UIEXT {
 	};
 	static_assert(sizeof(MAPH) == 0x8, "MAPH failed size validation");
 
-	const auto TES3_GameFile_getChunkData = reinterpret_cast<void(__thiscall *)(TES3::NonDynamicData*)>(0x4C8070);
-
 	bool __fastcall OnLoadMAPHChunk(TES3::GameFile * saveFile, DWORD _UNUSED_, MAPH* data, unsigned int dataSize) {
 		// Actually load our data.
-		if (!saveFile->getChunkData(data, dataSize)) {
+		if (!saveFile->readChunkData(data, dataSize)) {
 			return false;
 		}
 
@@ -215,6 +211,10 @@ namespace UIEXT {
 		}
 	}
 
+	TES3::Cell * lastVisitedInteriorCell = nullptr;
+	TES3::Vector3 lastPlayerPosition;
+	float lastPlayerRotation = 0.0f;
+
 	bool __cdecl OnUpdatePlayerPosition(TES3::UI::Element * mapMenu) {
 		// If we weren't given a map menu, find it.
 		if (mapMenu == nullptr) {
@@ -234,23 +234,35 @@ namespace UIEXT {
 
 		// Update map marker rotation.
 		auto player = mwse::tes3::getWorldController()->getMobilePlayer();
-		TES3::Matrix33 rotationMatrix;
-		rotationMatrix.toRotationY(player->reference->orientation.z * -1);
-		worldMarker->node_88->setLocalRotationMatrix(&rotationMatrix);
-		worldMarker->node_88->propagatePositionChange();
+		float playerZRot = player->reference->orientation.z * -1;
+		if (lastPlayerRotation != playerZRot) {
+			TES3::Matrix33 rotationMatrix;
+			rotationMatrix.toRotationY(player->reference->orientation.z * -1);
 
-		auto dataHandler = mwse::tes3::getDataHandler();
-		if (dataHandler->currentInteriorCell) {
+			localMarker->node_88->setLocalRotationMatrix(&rotationMatrix);
+			localMarker->node_88->propagatePositionChange();
+			worldMarker->node_88->setLocalRotationMatrix(&rotationMatrix);
+			worldMarker->node_88->propagatePositionChange();
 
+			lastPlayerRotation = playerZRot;
 		}
-		else {
-			worldMarker->positionX = ((player->reference->position.x / 8192) - cellMinX) * cellResolution * zoomLevel;
-			worldMarker->positionY = ((player->reference->position.y / -8192) - cellMinY + 1) * cellResolution * zoomLevel * -1;
 
-			worldMarker->flagPosChanged = true;
-			worldMarker->timingUpdate();
-			mapMenu->timingUpdate();
-			mwse::log::getLog() << "Player marker position: " << worldMarker->positionX << ", " << worldMarker->positionY << ". Rotation: " << player->reference->orientation.z << std::endl;
+		auto playerPosition = player->reference->position;
+		if (lastPlayerPosition != playerPosition) {
+			auto dataHandler = mwse::tes3::getDataHandler();
+			if (dataHandler->currentInteriorCell) {
+				
+			}
+			else {
+				worldMarker->positionX = ((playerPosition.x / 8192) - cellMinX) * cellResolution * zoomLevel;
+				worldMarker->positionY = ((playerPosition.y / -8192) - cellMinY + 1) * cellResolution * zoomLevel * -1;
+
+				worldMarker->flagPosChanged = true;
+				worldMarker->timingUpdate();
+				mapMenu->timingUpdate();
+			}
+
+			lastPlayerPosition = playerPosition;
 		}
 
 		return true;
