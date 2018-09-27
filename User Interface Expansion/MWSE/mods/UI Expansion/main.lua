@@ -1,16 +1,17 @@
 
 local common = require("UI Expansion.common")
 
-common.version = 1.0
+common.version = 0.3
 
 -- Configuration table.
 local defaultConfig = {
-	version = 1.0,
+	version = common.version,
 	showHelpText = true,
 	autoSelectInput = "Magic",
 	useInventoryTextButtons = true,
 	selectSpellsOnSearch = true,
 	autoFilterToTradable = true,
+	takeFilteredItems = true,
 	mapConfig = {
 		autoExpand = true,
 		cellResolution = 9,
@@ -24,7 +25,7 @@ local defaultConfig = {
 		contents = true,
 		dialog = true,
 		inventory = true,
-		journal = true,
+		journal = false,
 		magic = true,
 		map = false,
 		stat = true,
@@ -43,9 +44,9 @@ local function loadConfig()
 	-- Then load any other values from the config file.
 	local configJson = mwse.loadConfig("UI Expansion")
 	if (configJson ~= nil) then
-		-- Delete any legacy config values.
-		configJson.TEST_dialogueCheck = nil
-		configJson.components = nil
+		if (configJson.version == nil or common.version > configJson.version) then
+			configJson.components = nil
+		end
 
 		-- Merge the configs.
 		table.copy(configJson, config)

@@ -86,6 +86,10 @@ function filter_functions:setFiltersExact(params)
 	self.searchText = params.text
 	self.activeFilters = params.filters or {}
 
+	if (self.searchText == "") then
+		self.searchText = nil
+	end
+
 	if (params.filter) then
 		self.activeFilters = { params.filter }
 	end
