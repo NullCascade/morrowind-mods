@@ -1,5 +1,7 @@
 local this = {}
 
+local common = require("UI Expansion.common")
+
 local function createConfigSliderPackage(params)
 	local horizontalBlock = params.parent:createBlock({})
 	horizontalBlock.flowDirection = "left_to_right"
@@ -124,16 +126,8 @@ function this.onCreate(container)
 		config = this.config,
 		key = "useInventoryTextButtons",
 		onUpdate = function(e)
-			local menu = tes3ui.findMenu(tes3ui.registerID("MenuInventory"))
-			local iconBlock = menu:findChild(tes3ui.registerID("UIEXP_InventoryMenu_IconFilters"))
-			local buttonBlock = menu:findChild(tes3ui.registerID("UIEXP_InventoryMenu_ButtonFilters"))
-			if (this.config.useInventoryTextButtons) then
-				iconBlock.visible = false
-				buttonBlock.visible = true
-			else
-				iconBlock.visible = true
-				buttonBlock.visible = false
-			end
+			common.inventoryFilter:setIconUsage(not this.config.useInventoryTextButtons)
+			common.barterFilter:setIconUsage(not this.config.useInventoryTextButtons)
 		end
 	})
 
@@ -145,7 +139,7 @@ function this.onCreate(container)
 		key = "selectSpellsOnSearch",
 	})
 
-	-- Toggle help text.
+	-- Toggle auto-filtering to tradable items when bartering.
 	createBooleanConfigPackage({
 		parent = mainPane,
 		label = "Filter to tradable items when opening barter window?",
@@ -153,17 +147,9 @@ function this.onCreate(container)
 		key = "autoFilterToTradable",
 	})
 
-	-- Toggle help text.
-	createBooleanConfigPackage({
-		parent = mainPane,
-		label = "[TESTING] Actively color using dialogue filters?",
-		config = this.config,
-		key = "TEST_dialogueCheck",
-	})
-
 	-- Credits:
 	mainPane:createLabel({ text = "Credits:" }).borderTop = 6
-	mainPane:createLabel({ text = "  Programming: NullCascade" })
+	mainPane:createLabel({ text = "  Programming: NullCascade, Hrnchamd" })
 	mainPane:createLabel({ text = "  Colored Magic School Icons: R-Zero" })
 	mainPane:createLabel({ text = "  Inventory Filter Icons: Remiros" })
 	mainPane:createLabel({ text = "  Concepts and Testing: Morrowind Modding Community Discord" })

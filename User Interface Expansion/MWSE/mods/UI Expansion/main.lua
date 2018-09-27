@@ -3,6 +3,7 @@ local common = require("UI Expansion.common")
 
 -- Configuration table.
 local defaultConfig = {
+	version = 1.0,
 	showHelpText = true,
 	autoSelectInput = "Magic",
 	useInventoryTextButtons = true,
@@ -16,7 +17,15 @@ local defaultConfig = {
 		minY = -59,
 		maxY = 29,
 	},
-	TEST_dialogueCheck = true,
+	components = {
+		barter = true,
+		dialog = true,
+		inventory = true,
+		journal = true,
+		magic = true,
+		map = false,
+		stat = true,
+	},
 }
 local config = table.copy(defaultConfig)
 
@@ -31,6 +40,10 @@ local function loadConfig()
 	-- Then load any other values from the config file.
 	local configJson = mwse.loadConfig("UI Expansion")
 	if (configJson ~= nil) then
+		-- Delete any legacy config values.
+		config.TEST_dialogueCheck = nil
+
+		-- Merge the configs.
 		table.copy(configJson, config)
 	end
 
@@ -74,18 +87,42 @@ event.register("modConfigReady", registerModConfig)
 
 -- Run our modules.
 local function onInitialized(e)
-	dofile("Data Files/MWSE/mods/UI Expansion/MenuBarter.lua")
-	dofile("Data Files/MWSE/mods/UI Expansion/MenuDialog.lua")
-	dofile("Data Files/MWSE/mods/UI Expansion/MenuInventory.lua")
-	dofile("Data Files/MWSE/mods/UI Expansion/MenuMagic.lua")
-	dofile("Data Files/MWSE/mods/UI Expansion/MenuMap.lua")
-	dofile("Data Files/MWSE/mods/UI Expansion/MenuStat.lua")
+	if (config.components.barter) then
+		dofile("Data Files/MWSE/mods/UI Expansion/MenuBarter.lua")
+	else
+		mwse.log("[UI Expansion] Skipping module: barter")
+	end
+	if (config.components.dialog) then
+		dofile("Data Files/MWSE/mods/UI Expansion/MenuDialog.lua")
+	else
+		mwse.log("[UI Expansion] Skipping module: dialog")
+	end
+	if (config.components.inventory) then
+		dofile("Data Files/MWSE/mods/UI Expansion/MenuInventory.lua")
+	else
+		mwse.log("[UI Expansion] Skipping module: inventory")
+	end
+	if (config.components.magic) then
+		dofile("Data Files/MWSE/mods/UI Expansion/MenuMagic.lua")
+	else
+		mwse.log("[UI Expansion] Skipping module: magic")
+	end
+	if (config.components.map) then
+		dofile("Data Files/MWSE/mods/UI Expansion/MenuMap.lua")
+	else
+		mwse.log("[UI Expansion] Skipping module: map")
+	end
+	if (config.components.stat) then
+		dofile("Data Files/MWSE/mods/UI Expansion/MenuStat.lua")
+	else
+		mwse.log("[UI Expansion] Skipping module: stat")
+	end
 end
 event.register("initialized", onInitialized)
 
 -- Hook map changes.
 local extern = include("uiextension")
-if (extern) then
+if (extern and config.components.map) then
 	mwse.log("Map Config: %s", json.encode(common.config.mapConfig))
 	extern.hookMapOverrides(common.config.mapConfig)
 end
