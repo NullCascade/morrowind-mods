@@ -219,7 +219,7 @@ function filter_functions:createFilterIcon(filter)
 	icon.imageScaleX = 0.6
 	icon.imageScaleY = 0.6
 	icon.borderLeft = 2
-	icon3.visible = not filter.hidden
+	icon.visible = not filter.hidden
 	icon:register("mouseClick", function() self:onClickFilter(filter) end)
 	icon:register("help", function() self:onTooltip(filter) end)
 	filter.iconElement = icon
