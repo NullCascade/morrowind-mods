@@ -12,7 +12,7 @@ function common.createSearchBar(params)
 
 	-- Create the search input itself.
 	local input = border:createTextInput({ id = tes3ui.registerID(params.id) })
-	input.color = tes3ui.getPalette("disabled_color")
+	input.color = params.placeholderTextColor or tes3ui.getPalette("disabled_color")
 	input.text = params.placeholderText
 	input.borderLeft = 5
 	input.borderRight = 5
@@ -31,7 +31,7 @@ function common.createSearchBar(params)
 
 		input:forwardEvent(e)
 
-		input.color = tes3ui.getPalette("normal_color")
+		input.color = params.textColor or tes3ui.getPalette("normal_color")
 		params.onUpdate(e)
 	end)
 	border:register("mouseClick", function()
@@ -102,11 +102,6 @@ function filter_functions:setFiltersExact(params)
 		end
 	end
 
-	if (self.searchBlock and self.searchText == nil) then
-		self.searchBlock.input.text = self.searchTextPlaceholder
-		self.searchBlock.input.color = self.searchTextPlaceholderColor
-	end
-
 	self:updateFilterIcons()
 	if (self.onFilterChanged) then
 		self.onFilterChanged()
@@ -145,12 +140,16 @@ function filter_functions:triggerFilter(params)
 	end
 
 	-- Otherwise go through active filters.
-	for key, filter in pairs(self.filters) do
-		if (filter.callback) then
-			if (table.find(self.activeFilters, key) and filter.callback(params)) then
-				return true
+	if (#self.filtersOrdered > 0) then
+		for key, filter in pairs(self.filters) do
+			if (filter.callback) then
+				if (table.find(self.activeFilters, key) and filter.callback(params)) then
+					return true
+				end
 			end
 		end
+	else
+		return true
 	end
 
 	return false
@@ -263,7 +262,9 @@ function filter_functions:createElements(parent)
 		self.searchBlock = common.createSearchBar({
 			parent = parent,
 			id = "UIEXP:FiltersearchBlock",
+			textColor = self.searchTextColor,
 			placeholderText = self.searchTextPlaceholder,
+			placeholderTextColor = self.searchTextPlaceholderColor,
 			onUpdate = function(e)
 				self:setFilterText(e.source.text)
 			end
@@ -321,6 +322,7 @@ function common.creatFilterInterface(params)
 
 	filterData.createSearchBar = params.createSearchBar
 	filterData.searchText = nil
+	filterData.searchTextColor = params.searchTextColor or tes3ui.getPalette("normal_color")
 	filterData.searchTextPlaceholder = params.searchTextPlaceholder or "Search by name..."
 	filterData.searchTextPlaceholderColor = params.searchTextPlaceholderColor or tes3ui.getPalette("disabled_color")
 

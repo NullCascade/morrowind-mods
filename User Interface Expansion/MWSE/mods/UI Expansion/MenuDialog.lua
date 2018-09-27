@@ -104,7 +104,7 @@ function this.updateTopicList(e)
 
 			local dialogue = element:getPropertyObject("PartHyperText_dialog")
 			local info = dialogue:getInfo({ actor = mobileActor })
-			if (info.firstHeardFrom) then
+			if (info == nil or info.firstHeardFrom) then
 				element.widget.state = 2
 			elseif (info.actor == actor) then
 				-- Topic has actor-unique dialogue, set new state.
