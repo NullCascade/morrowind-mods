@@ -32,5 +32,19 @@ local function onMenuBarterActivated(e)
 	-- Create the filters.
 	local buttonBlock = e.element:findChild(GUI_ID_MenuBarter_bucket).parent.children[1]
 	barterFilters:createElements(buttonBlock)
+	
+	-- Interface with the inventory filter to show the tradable tab.
+	common.inventoryFilter:setFilterHidden("tradable", false)
+	if (common.config.autoFilterToTradable) then
+		common.inventoryFilter:setFilter("tradable")
+	end
+
+	-- Hide it again when this UI goes away.
+	buttonBlock:register("destroy", function(e)
+		common.inventoryFilter:setFilterHidden("tradable", true)
+	end)
+
+	-- Focus the filter search bar.
+	barterFilters:focusSearchBar()
 end
 event.register("uiActivated", onMenuBarterActivated, { filter = "MenuBarter" } )

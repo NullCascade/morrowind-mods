@@ -98,9 +98,9 @@ function filter_functions:setFiltersExact(params)
 		end
 	end
 
-	if (self.searchInput and self.searchText == nil) then
-		self.searchInput.text = self.searchTextPlaceholder
-		self.searchInput.color = self.searchTextPlaceholderColor
+	if (self.searchBlock and self.searchText == nil) then
+		self.searchBlock.input.text = self.searchTextPlaceholder
+		self.searchBlock.input.color = self.searchTextPlaceholderColor
 	end
 
 	self:updateFilterIcons()
@@ -150,6 +150,12 @@ function filter_functions:triggerFilter(params)
 	end
 
 	return false
+end
+
+function filter_functions:focusSearchBar()
+	if (self.searchBlock) then
+		tes3ui.acquireTextInput(self.searchBlock.input)
+	end
 end
 
 function filter_functions:updateFilterIcons()
@@ -250,9 +256,9 @@ function filter_functions:createElements(parent)
 
 	-- Create our search bar if we are using one.
 	if (self.createSearchBar) then
-		self.searchInput = common.createSearchBar({
+		self.searchBlock = common.createSearchBar({
 			parent = parent,
-			id = "UIEXP:FilterSearchInput",
+			id = "UIEXP:FiltersearchBlock",
 			placeholderText = self.searchTextPlaceholder,
 			onUpdate = function(e)
 				self:setFilterText(e.source.text)

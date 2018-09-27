@@ -1,6 +1,8 @@
 
 local common = require("UI Expansion.common")
 
+common.version = 1.0
+
 -- Configuration table.
 local defaultConfig = {
 	version = 1.0,
@@ -19,6 +21,7 @@ local defaultConfig = {
 	},
 	components = {
 		barter = true,
+		contents = true,
 		dialog = true,
 		inventory = true,
 		journal = true,
@@ -41,7 +44,8 @@ local function loadConfig()
 	local configJson = mwse.loadConfig("UI Expansion")
 	if (configJson ~= nil) then
 		-- Delete any legacy config values.
-		config.TEST_dialogueCheck = nil
+		configJson.TEST_dialogueCheck = nil
+		configJson.components = nil
 
 		-- Merge the configs.
 		table.copy(configJson, config)
@@ -53,28 +57,6 @@ local function loadConfig()
 	mwse.log(json.encode(config, { indent = true }))
 end
 loadConfig()
-
-
--- Reset filtering for all menus when entering menu mode.
-local function onEnterMenuMode(e)
-	-- Auto-select the desired input box.
-	if (config.autoSelectInput == "Inventory") then
-		local menu = tes3ui.findMenu(tes3ui.registerID("MenuInventory"))
-		local input = menu:findChild(tes3ui.registerID("UIEXP:InventoryMenu:SearchInput"))
-		tes3ui.acquireTextInput(input)
-	elseif (config.autoSelectInput == "Magic") then
-		local menu = tes3ui.findMenu(tes3ui.registerID("MenuMagic"))
-		local input = menu:findChild(tes3ui.registerID("UIEXP:MagicMenu:SearchInput"))
-		tes3ui.acquireTextInput(input)
-	else
-		tes3ui.acquireTextInput(nil)
-	end
-
-end
-event.register("menuEnter", onEnterMenuMode, { filter = "MenuInventory" })
-event.register("menuEnter", onEnterMenuMode, { filter = "MenuMagic" })
-event.register("menuEnter", onEnterMenuMode, { filter = "MenuMap" })
-event.register("menuEnter", onEnterMenuMode, { filter = "MenuStat" })
 
 
 -- Set up MCM.
@@ -91,6 +73,11 @@ local function onInitialized(e)
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuBarter.lua")
 	else
 		mwse.log("[UI Expansion] Skipping module: barter")
+	end
+	if (config.components.contents) then
+		dofile("Data Files/MWSE/mods/UI Expansion/MenuContents.lua")
+	else
+		mwse.log("[UI Expansion] Skipping module: contents")
 	end
 	if (config.components.dialog) then
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuDialog.lua")

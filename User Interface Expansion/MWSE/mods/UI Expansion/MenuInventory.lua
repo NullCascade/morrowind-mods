@@ -65,12 +65,6 @@ end
 event.register("uiActivated", onMenuInventoryActivated, { filter = "MenuInventory" } )
 
 local function onMenuBarterActivated(e)
-	inventoryFilters:setFilterHidden("tradable", false)
-
-	if (common.config.autoFilterToTradable) then
-		inventoryFilters:setFilter("tradable")
-	end
-	
 	currentMerchant = tes3ui.getServiceActor()
 end
 event.register("uiActivated", onMenuBarterActivated, { filter = "MenuBarter" } )
@@ -78,6 +72,10 @@ event.register("uiActivated", onMenuBarterActivated, { filter = "MenuBarter" } )
 local function onEnterMenuMode(e)
 	inventoryFilters:setFilterHidden("tradable", true)
 	inventoryFilters:clearFilter()
+	
+	if (common.config.autoSelectInput == "Inventory") then
+		inventoryFilters:focusSearchBar()
+	end
 end
 event.register("menuEnter", onEnterMenuMode, { filter = "MenuInventory" })
 event.register("menuEnter", onEnterMenuMode, { filter = "MenuMagic" })
