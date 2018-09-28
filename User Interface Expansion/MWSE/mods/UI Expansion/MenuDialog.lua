@@ -60,9 +60,7 @@ end
 
 function this.onTopic(e)
 	-- Set clicked topic to disabled
-	if (e.source.widget.state == 1) then
-		e.source.widget.state = 2
-	end
+	e.source.widget.state = 2
 
 	local menuDialog = tes3ui.findMenu(GUI_ID_MenuDialog)
 	local textPane = menuDialog:findChild(GUI_ID_MenuDialog_scroll_pane):findChild(GUI_ID_PartScrollPane_pane)
@@ -98,8 +96,6 @@ function this.updateTopicList(e)
 
 	for _, element in pairs(topics.children) do
 		if (element.id == GUI_ID_MenuDialog_a_topic) then
-			-- Catch events from topics
-			element:register("mouseClick", this.onTopic)
 			element.widget.idleDisabled = { 0.44, 0.44, 0.44 }
 
 			local dialogue = element:getPropertyObject("PartHyperText_dialog")
@@ -114,6 +110,16 @@ function this.updateTopicList(e)
 				element.widget.state = 1
 			end
 			element:triggerEvent("mouseLeave")
+			
+			-- Catch events from topics
+			element:register("mouseClick", function(mouseClickEventData)
+				this.onTopic(mouseClickEventData)
+
+				-- Work around an issue where certain topics in the engine would not preserve their first heard actor.
+				if (info and not info.firstHeardFrom) then
+					info.firstHeardFrom = actor
+				end
+			end)
 		end
 	end
 end
