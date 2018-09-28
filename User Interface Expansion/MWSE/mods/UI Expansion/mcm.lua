@@ -145,6 +145,14 @@ function this.onCreate(container)
 		label = "Filter to tradable items when opening barter window?",
 		config = this.config,
 		key = "autoFilterToTradable",
+	}) 
+ 
+	-- Take only filtered items in contents menu.
+	createBooleanConfigPackage({
+		parent = mainPane,
+		label = "Replace Take All with Take Filtered in contents menu?",
+		config = this.config,
+		key = "takeFilteredItems",
 	})
 
 	-- Credits:

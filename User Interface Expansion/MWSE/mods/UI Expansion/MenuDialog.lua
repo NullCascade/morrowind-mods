@@ -94,9 +94,12 @@ function this.updateTopicList(e)
 	local mobileActor = menuDialog:getPropertyObject("PartHyperText_actor")
 	local actor = mobileActor.reference.object.baseObject
 
+	local paletteTopicSeen = common.config.palettes.dialogueTopicSeen
+	local paletteTopicUnique = common.config.palettes.dialogueTopicUnique
+
 	for _, element in pairs(topics.children) do
 		if (element.id == GUI_ID_MenuDialog_a_topic) then
-			element.widget.idleDisabled = { 0.44, 0.44, 0.44 }
+			element.widget.idleDisabled = paletteTopicSeen
 
 			local dialogue = element:getPropertyObject("PartHyperText_dialog")
 			local info = dialogue:getInfo({ actor = mobileActor })
@@ -105,7 +108,7 @@ function this.updateTopicList(e)
 			elseif (info.actor == actor) then
 				-- Topic has actor-unique dialogue, set new state.
 				element.widget.state = 4
-				element.widget.idleActive = { 0.80, 0.37, 0.17 }
+				element.widget.idleActive = paletteTopicUnique
 			else
 				element.widget.state = 1
 			end

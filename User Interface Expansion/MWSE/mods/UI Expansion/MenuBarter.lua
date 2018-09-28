@@ -7,7 +7,7 @@ local common = require("UI Expansion.common")
 -- Barter: Searching and filtering.
 ----------------------------------------------------------------------------------------------------
 
-local barterFilters = common.creatFilterInterface({
+local barterFilters = common.createFilterInterface({
 	createSearchBar = true,
 	createIcons = true,
 	createButtons = true,

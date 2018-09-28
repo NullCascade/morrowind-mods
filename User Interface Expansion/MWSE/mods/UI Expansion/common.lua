@@ -1,6 +1,29 @@
 local common = {}
 
 ----------------------------------------------------------------------------------------------------
+-- Generic helper functions.
+----------------------------------------------------------------------------------------------------
+
+function common.complexKeybindTest(keybind)
+	local keybindType = type(keybind)
+	local inputController = tes3.worldController.inputController
+	if (keybindType == "number") then
+		return inputController:isKeyDown(keybind)
+	elseif (keybindType == "table") then
+		for _, k in pairs(keybind) do
+			if (not common.complexKeybindTest(k)) then
+				return false
+			end
+		end
+		return true
+	elseif (keybindType == "string") then
+		return inputController:keybindTest(tes3.keybind[keybind])
+	end
+
+	return false
+end
+
+----------------------------------------------------------------------------------------------------
 -- UI Functions
 ----------------------------------------------------------------------------------------------------
 
@@ -342,9 +365,11 @@ function filter_functions:createElements(parent)
 
 		self.buttonFiltersBlock.visible = not self.useIcons
 	end
+
+	self:clearFilter()
 end
 
-function common.creatFilterInterface(params)
+function common.createFilterInterface(params)
 	local filterData = {}
 
 	filterData.createSearchBar = params.createSearchBar

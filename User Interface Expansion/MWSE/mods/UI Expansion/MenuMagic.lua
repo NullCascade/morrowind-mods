@@ -68,7 +68,7 @@ local function searchSpellsList()
 	end
 end
 
-local magicFilters = common.creatFilterInterface({
+local magicFilters = common.createFilterInterface({
 	createSearchBar = true,
 	createIcons = true,
 	createButtons = false,

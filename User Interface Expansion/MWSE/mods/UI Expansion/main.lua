@@ -11,6 +11,13 @@ local defaultConfig = {
 	useInventoryTextButtons = true,
 	selectSpellsOnSearch = true,
 	autoFilterToTradable = true,
+	takeFilteredItems = true,
+	keybindClose = { 57 },
+	keybindTakeAll = { 29, 57 },
+	palettes = {
+		dialogueTopicSeen = { 0.44, 0.44, 0.44 },
+		dialogueTopicUnique = { 0.80, 0.37, 0.17 },
+	},
 	mapConfig = {
 		autoExpand = true,
 		cellResolution = 9,

@@ -8,7 +8,7 @@ local common = require("UI Expansion.common")
 -- Inventory: Searching and filtering.
 ----------------------------------------------------------------------------------------------------
 
-local inventoryFilters = common.creatFilterInterface({
+local inventoryFilters = common.createFilterInterface({
 	createSearchBar = true,
 	createIcons = true,
 	createButtons = true,
