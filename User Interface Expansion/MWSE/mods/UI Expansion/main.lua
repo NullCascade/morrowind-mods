@@ -1,7 +1,7 @@
 
 local common = require("UI Expansion.common")
 
-common.version = 0.3
+common.version = 0.4
 
 -- Configuration table.
 local defaultConfig = {
@@ -11,7 +11,6 @@ local defaultConfig = {
 	useInventoryTextButtons = true,
 	selectSpellsOnSearch = true,
 	autoFilterToTradable = true,
-	takeFilteredItems = true,
 	mapConfig = {
 		autoExpand = true,
 		cellResolution = 9,

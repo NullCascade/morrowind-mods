@@ -25,8 +25,17 @@ function common.createSearchBar(params)
 	input.consumeMouseEvents = false
 	input:register("keyPress", function(e)
 		-- Prevent alt-tabbing from creating spacing.
-		if (tes3.worldController.inputController:isKeyPressedThisFrame(15)) then
+		local inputController = tes3.worldController.inputController
+		if (inputController:isKeyDown(15)) then
 			return
+		elseif (inputController:isKeyDown(14) and input.text == params.placeholderText) then
+			return
+		end
+
+		if (params.onPreUpdate) then
+			if (params.onPreUpdate() == false) then
+				return
+			end
 		end
 
 		input:forwardEvent(e)
@@ -94,6 +103,11 @@ function filter_functions:setFiltersExact(params)
 		self.activeFilters = { params.filter }
 	end
 
+	if (self.searchText == nil) then
+		self.searchBlock.input.text = self.searchTextPlaceholder
+		self.searchBlock.input.color = self.searchTextPlaceholderColor
+	end
+
 	if (#self.activeFilters == 0) then
 		for key, filter in pairs(self.filters) do
 			if (not filter.hidden) then
@@ -158,6 +172,15 @@ end
 function filter_functions:focusSearchBar()
 	if (self.searchBlock) then
 		tes3ui.acquireTextInput(self.searchBlock.input)
+	end
+end
+
+function filter_functions:getSearchText()
+	if (self.searchBlock) then
+		local text = self.searchBlock.input.text
+		if (text ~= "" and text ~= self.searchTextPlaceholder) then
+			return text
+		end
 	end
 end
 
@@ -259,16 +282,20 @@ function filter_functions:createElements(parent)
 
 	-- Create our search bar if we are using one.
 	if (self.createSearchBar) then
-		self.searchBlock = common.createSearchBar({
+		local searchBarParams = {
 			parent = parent,
 			id = "UIEXP:FiltersearchBlock",
 			textColor = self.searchTextColor,
 			placeholderText = self.searchTextPlaceholder,
 			placeholderTextColor = self.searchTextPlaceholderColor,
 			onUpdate = function(e)
-				self:setFilterText(e.source.text)
+				self:setFilterText(string.lower(e.source.text))
 			end
-		})
+		}
+		if (self.onSearchTextPreUpdate) then
+			searchBarParams.onPreUpdate = self.onSearchTextPreUpdate
+		end
+		self.searchBlock = common.createSearchBar(searchBarParams)
 	end
 
 	-- Create icons for filtering.
@@ -334,6 +361,7 @@ function common.creatFilterInterface(params)
 	filterData.createIcons = params.createIcons
 	filterData.createButtons = params.createButtons
 	
+	filterData.onSearchTextPreUpdate = params.onSearchTextPreUpdate
 	filterData.onFilterChanged = params.onFilterChanged
 	filterData.extraData = params.extraData
 

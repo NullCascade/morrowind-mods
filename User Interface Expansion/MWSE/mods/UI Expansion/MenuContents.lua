@@ -3,26 +3,21 @@ local GUI_ID_MenuContents = tes3ui.registerID("MenuContents")
 local GUI_ID_MenuContents_bucket = tes3ui.registerID("MenuContents_bucket")
 local GUI_ID_MenuContents_takeallbutton = tes3ui.registerID("MenuContents_takeallbutton")
 local GUI_ID_MenuContents_removebutton = tes3ui.registerID("MenuContents_removebutton")
+local GUI_ID_MenuContents_closebutton = tes3ui.registerID("MenuContents_closebutton")
 
 local common = require("UI Expansion.common")
+
+local InputController = tes3.worldController.inputController
 
 ----------------------------------------------------------------------------------------------------
 -- Contents: Searching and filtering.
 ----------------------------------------------------------------------------------------------------
 
-local function onFilterChanged(e)
-	-- Re-draw inventory tiles.
-	tes3ui.updateContentsMenuTiles()
-
-	-- Set the take all button text depending on context.
-	if (common.config.takeFilteredItems) then
-		local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
-		local takeAllButton = contentsMenu:findChild(GUI_ID_MenuContents_takeallbutton)
-		if (common.contentsFilter.searchText == nil and #common.contentsFilter.activeFilters == #common.contentsFilter.filtersOrdered) then
-			takeAllButton.text = "Take All"
-		else
-			takeAllButton.text = "Take Filtered"
-		end
+local function onSearchTextPreUpdate(e)
+	if (common.contentsFilter:getSearchText() == nil and InputController:keybindTest(tes3.keybind.activate, tes3.keyTransition.down)) then
+		common.contentsFilter:clearFilter()
+		tes3ui.leaveMenuMode()
+		return false
 	end
 end
 
@@ -31,7 +26,8 @@ local contentsFilters = common.creatFilterInterface({
 	createIcons = true,
 	createButtons = true,
 	useIcons = not common.config.useInventoryTextButtons,
-	onFilterChanged = onFilterChanged,
+	onFilterChanged = tes3ui.updateContentsMenuTiles,
+	onSearchTextPreUpdate = onSearchTextPreUpdate,
 })
 common.contentsFilter = contentsFilters
 
@@ -42,6 +38,11 @@ local function onFilterContentsMenu(e)
 	e.filter = contentsFilters:triggerFilter(e)
 end
 event.register("filterContentsMenu", onFilterContentsMenu )
+
+local function clearFilterBeforeTrigger(e)
+	contentsFilters:clearFilter()
+	e.source:forwardEvent(e)
+end
 
 local function onMenuContentsActivated(e)
 	if (not e.newlyCreated) then
@@ -59,25 +60,10 @@ local function onMenuContentsActivated(e)
 	filterBlock.paddingRight = 4
 	parentBlock:reorderChildren(0, -1, 1)
 
-	-- Clear filters between viewings.
-	contentsMenu:register("destroy", function(e)
-		contentsFilters:clearFilter()
-		e.source:forwardEvent(e)
-	end)
-
-	-- Clear filters and refresh UI before taking all.
-	contentsMenu:findChild(GUI_ID_MenuContents_takeallbutton):register("mouseClick", function(e)
-		if (not common.config.takeFilteredItems) then
-			contentsFilters:clearFilter()
-		end
-		e.source:forwardEvent(e)
-	end)
-
-	-- Clear filters and refresh UI before disposing of corpse.
-	contentsMenu:findChild(GUI_ID_MenuContents_removebutton):register("mouseClick", function(e)
-		contentsFilters:clearFilter()
-		e.source:forwardEvent(e)
-	end)
+	contentsMenu:register("destroy", clearFilterBeforeTrigger)
+	contentsMenu:findChild(GUI_ID_MenuContents_takeallbutton):register("mouseClick", clearFilterBeforeTrigger)
+	contentsMenu:findChild(GUI_ID_MenuContents_removebutton):register("mouseClick", clearFilterBeforeTrigger)
+	contentsMenu:findChild(GUI_ID_MenuContents_closebutton):register("mouseClick", clearFilterBeforeTrigger)
 
 	-- Create the filters.
 	contentsFilters:createElements(filterBlock)

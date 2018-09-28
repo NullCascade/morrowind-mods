@@ -147,14 +147,6 @@ function this.onCreate(container)
 		key = "autoFilterToTradable",
 	})
 
-	-- Take only filtered items in contents menu.
-	createBooleanConfigPackage({
-		parent = mainPane,
-		label = "Replace Take All with Take Filtered in contents menu?",
-		config = this.config,
-		key = "takeFilteredItems",
-	})
-
 	-- Credits:
 	mainPane:createLabel({ text = "Credits:" }).borderTop = 6
 	mainPane:createLabel({ text = "  Programming: NullCascade, Hrnchamd" })
