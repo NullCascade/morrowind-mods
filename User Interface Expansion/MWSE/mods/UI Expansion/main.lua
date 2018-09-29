@@ -1,7 +1,7 @@
 
 local common = require("UI Expansion.common")
 
-common.version = 0.5
+common.version = 0.6
 
 -- Configuration table.
 local defaultConfig = {
@@ -35,6 +35,7 @@ local defaultConfig = {
 		journal = false,
 		magic = true,
 		map = false,
+		options = true,
 		stat = true,
 	},
 }
@@ -111,6 +112,11 @@ local function onInitialized(e)
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuMap.lua")
 	else
 		mwse.log("[UI Expansion] Skipping module: map")
+	end
+	if (config.components.options) then
+		dofile("Data Files/MWSE/mods/UI Expansion/MenuOptions.lua")
+	else
+		mwse.log("[UI Expansion] Skipping module: options")
 	end
 	if (config.components.stat) then
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuStat.lua")
