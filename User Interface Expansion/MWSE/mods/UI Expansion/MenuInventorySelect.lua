@@ -4,7 +4,7 @@ local GUI_ID_MenuInventorySelect_prompt = tes3ui.registerID("MenuInventorySelect
 local common = require("UI Expansion.common")
 
 ----------------------------------------------------------------------------------------------------
--- Generic filter case
+-- Generic filter cases
 ----------------------------------------------------------------------------------------------------
 
 local genericFilter = common.createFilterInterface({
@@ -60,7 +60,7 @@ local function onMenuInventorySelectActivated(e)
 		return
 	end
 
-	-- 
+	-- Create a home for our filter buttons, and reposition it.
 	local inventorySelectPane = e.element:findChild(GUI_ID_MenuInventorySelect_prompt).parent
 	local filterBlock = inventorySelectPane:createBlock({ id = "UIEXP:InventorySelect:FilterBlock" })
 	filterBlock.flowDirection = "left_to_right"
@@ -69,6 +69,8 @@ local function onMenuInventorySelectActivated(e)
 	filterBlock.paddingLeft = 4
 	filterBlock.paddingRight = 4
 	inventorySelectPane:reorderChildren(1, -1, 1)
+
+	-- Don't carry the filter over between sessions.
 	filterBlock:register("destroy", function() currentFilter = nil end)
 
 	-- Change filtering options based on what menu we're specifically looking at.
