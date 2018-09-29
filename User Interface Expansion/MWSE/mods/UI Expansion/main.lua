@@ -1,7 +1,7 @@
 
 local common = require("UI Expansion.common")
 
-common.version = 0.4
+common.version = 0.5
 
 -- Configuration table.
 local defaultConfig = {
@@ -31,6 +31,7 @@ local defaultConfig = {
 		contents = true,
 		dialog = true,
 		inventory = true,
+		inventorySelect = true,
 		journal = false,
 		magic = true,
 		map = false,
@@ -95,6 +96,11 @@ local function onInitialized(e)
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuInventory.lua")
 	else
 		mwse.log("[UI Expansion] Skipping module: inventory")
+	end
+	if (config.components.inventorySelect) then
+		dofile("Data Files/MWSE/mods/UI Expansion/MenuInventorySelect.lua")
+	else
+		mwse.log("[UI Expansion] Skipping module: inventorySelect")
 	end
 	if (config.components.magic) then
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuMagic.lua")
