@@ -3,6 +3,7 @@
 local defaultConfig = {
 	enabled = true,
 	cursorStealFix = true,
+	attachmentCrashFix = true,
 }
 local config = nil
 
@@ -31,4 +32,8 @@ runtimePatch.hook()
 
 if (config.cursorStealFix) then
 	runtimePatch.hookCursorStealFix()
+end
+
+if (config.attachmentCrashFix) then
+	runtimePatch.hookAttachmentCrashFix()
 end

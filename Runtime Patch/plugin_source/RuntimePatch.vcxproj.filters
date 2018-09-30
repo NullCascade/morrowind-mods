@@ -10,6 +10,9 @@
     <ClCompile Include="PatchCursorStealFix.cpp">
       <Filter>Source Files\Patches</Filter>
     </ClCompile>
+    <ClCompile Include="PatchAttachmentCrash.cpp">
+      <Filter>Source Files\Patches</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -19,6 +22,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PatchCursorStealFix.h">
+      <Filter>Header Files\Patches</Filter>
+    </ClInclude>
+    <ClInclude Include="PatchAttachmentCrash.h">
       <Filter>Header Files\Patches</Filter>
     </ClInclude>
   </ItemGroup>
