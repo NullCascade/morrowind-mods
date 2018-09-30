@@ -32,6 +32,7 @@ namespace RunPatch {
 			ToolTipFunction(object, itemData, count);
 		}
 		__except (EXCEPTION_EXECUTE_HANDLER) {
+			mwse::tes3::ui::messagePlayer("[Runtime Patch] Intercepted crash when displaying tooltip. See logs for details.");
 			mwse::log::getLog() << "[Runtime Patch] Intercepted crash when displaying tooltip." << std::endl;
 			mwse::log::getLog() << "  Object: " << object->getObjectID() << " [" << object->objectType << "]" << std::endl;
 			mwse::log::getLog() << "  Item Data: " << (itemData ? "true" : "false") << std::endl;
@@ -52,7 +53,30 @@ namespace RunPatch {
 					}
 				}
 			}
-			mwse::tes3::ui::messagePlayer("[Runtime Patch] Intercepted crash when displaying tooltip. See logs for details.");
+		}
+	}
+
+	TES3::ItemData* __fastcall PatchCatchInvalidItemDataAttachment(TES3::Reference* reference) {
+		__try {
+			return mwse::tes3::getAttachedItemDataNode(reference);
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER) {
+			mwse::tes3::ui::messagePlayer("[Runtime Patch] Intercepted crash when fetching item data attachment. See logs for details.");
+			mwse::log::getLog() << "[Runtime Patch] Intercepted crash when attempting to get item data for reference '" << reference->getObjectID() << "'. Removing invalid attachment." << std::endl;
+
+			// Attempt to remove the attachment.
+			TES3::Attachment * attachment = reference->attachments;
+			while (attachment) {
+				if (attachment->type != TES3::AttachmentType::Variables) {
+					attachment = attachment->next;
+					continue;
+				}
+
+				reference->removeAttachment(attachment);
+				break;
+			}
+
+			return nullptr;
 		}
 	}
 
@@ -65,7 +89,7 @@ namespace RunPatch {
 			return 1;
 		}
 
-		// Patch all the things.
+		// Patch all the tooltip calls.
 		DWORD address = (DWORD)ToolTipFunction;
 		mwse::genCallEnforced(0x41CC2E, address, reinterpret_cast<DWORD>(displayToolTip));
 		mwse::genCallEnforced(0x58FF1D, address, reinterpret_cast<DWORD>(displayToolTip));
@@ -85,6 +109,9 @@ namespace RunPatch {
 		mwse::genCallEnforced(0x607CA7, address, reinterpret_cast<DWORD>(displayToolTip));
 		mwse::genCallEnforced(0x60EE6B, address, reinterpret_cast<DWORD>(displayToolTip));
 		mwse::genCallEnforced(0x61550D, address, reinterpret_cast<DWORD>(displayToolTip));
+
+		// Patch: Invalid item condition attachment.
+		mwse::genCallUnprotected(0x4E5460, reinterpret_cast<DWORD>(PatchCatchInvalidItemDataAttachment), 0x1D);
 
 		lua_pushboolean(L, true);
 		return 1;
