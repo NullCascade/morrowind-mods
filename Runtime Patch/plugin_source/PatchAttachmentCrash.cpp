@@ -25,9 +25,9 @@ namespace RunPatch {
 	}
 
 	// Help tooltip wrapper.
-	typedef void(__cdecl *DisplayToolTipSignature)(TES3::Object *, TES3::ItemData *, int);
+	typedef void(__stdcall *DisplayToolTipSignature)(TES3::Object *, TES3::ItemData *, int);
 	DisplayToolTipSignature ToolTipFunction = nullptr;
-	void __cdecl displayToolTip(TES3::Object * object, TES3::ItemData * itemData, int count) {
+	void __stdcall displayToolTip(TES3::Object * object, TES3::ItemData * itemData, int count) {
 		__try {
 			ToolTipFunction(object, itemData, count);
 		}

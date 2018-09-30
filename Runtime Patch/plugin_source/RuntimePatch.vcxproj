@@ -102,7 +102,8 @@
       <AdditionalDependencies>lua51.lib;luajit.lib;MWSE.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /y "$(TargetDir)RuntimePatch.dll" "D:\Games\Morrowind\Data Files\MWSE\lib\RuntimePatch.dll"</Command>
+      <Command>copy /y "$(TargetDir)RuntimePatch.dll" "D:\Games\Morrowind\Data Files\MWSE\lib\RuntimePatch.dll"
+copy /y "$(TargetDir)RuntimePatch.pdb" "D:\Games\Morrowind\Data Files\MWSE\lib\RuntimePatch.pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -138,7 +139,8 @@
       <AdditionalDependencies>lua51.lib;luajit.lib;MWSE.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /y "$(TargetDir)RuntimePatch.dll" "D:\Games\Morrowind\Data Files\MWSE\lib\RuntimePatch.dll"</Command>
+      <Command>copy /y "$(TargetDir)RuntimePatch.dll" "D:\Games\Morrowind\Data Files\MWSE\lib\RuntimePatch.dll"
+copy /y "$(TargetDir)RuntimePatch.pdb" "D:\Games\Morrowind\Data Files\MWSE\lib\RuntimePatch.pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
