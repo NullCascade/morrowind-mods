@@ -23,6 +23,15 @@ function common.complexKeybindTest(keybind)
 	return false
 end
 
+function common.getColor(color)
+	local colorType = type(color)
+	if (colorType == "table" and #color == 3) then
+		return color
+	elseif (colorType == "string") then
+		return tes3ui.getPalette(color)
+	end
+end
+
 ----------------------------------------------------------------------------------------------------
 -- UI Functions
 ----------------------------------------------------------------------------------------------------
@@ -65,6 +74,7 @@ function common.createSearchBar(params)
 
 		input.color = params.textColor or tes3ui.getPalette("normal_color")
 		params.onUpdate(e)
+		input:updateLayout()
 	end)
 	border:register("mouseClick", function()
 		tes3ui.acquireTextInput(input)

@@ -1,7 +1,7 @@
 
 local common = require("UI Expansion.common")
 
-common.version = 0.6
+common.version = 0.7
 
 -- Configuration table.
 local defaultConfig = {
@@ -14,10 +14,8 @@ local defaultConfig = {
 	takeFilteredItems = true,
 	keybindClose = { 57 },
 	keybindTakeAll = { 29, 57 },
-	palettes = {
-		dialogueTopicSeen = { 0.44, 0.44, 0.44 },
-		dialogueTopicUnique = { 0.80, 0.37, 0.17 },
-	},
+	dialogueTopicSeenColor = "journal_finished_quest_color",
+	dialogueTopicUniqueColor = "link_color",
 	mapConfig = {
 		autoExpand = true,
 		cellResolution = 9,

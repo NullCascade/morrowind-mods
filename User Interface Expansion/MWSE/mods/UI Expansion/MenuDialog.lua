@@ -1,4 +1,6 @@
 
+local common = require("UI Expansion.common")
+
 local GUI_ID_MenuDialog = tes3ui.registerID("MenuDialog")
 local GUI_ID_MenuDialog_a_topic = tes3ui.registerID("MenuDialog_a_topic")
 local GUI_ID_MenuDialog_divider = tes3ui.registerID("MenuDialog_divider")
@@ -10,8 +12,8 @@ local GUI_ID_PartScrollPane_pane = tes3ui.registerID("PartScrollPane_pane")
 
 local GUI_Palette_Active = tes3ui.getPalette("active_color")
 local GUI_Palette_Disabled = tes3ui.getPalette("disabled_color")
-
-local common = require("UI Expansion.common")
+local GUI_Palette_TopicSeen = common.getColor(common.config.dialogueTopicSeenColor)
+local GUI_Palette_TopicUnique = common.getColor(common.config.dialogueTopicUniqueColor)
 
 InputController = tes3.worldController.inputController
 
@@ -94,12 +96,9 @@ function this.updateTopicList(e)
 	local mobileActor = menuDialog:getPropertyObject("PartHyperText_actor")
 	local actor = mobileActor.reference.object.baseObject
 
-	local paletteTopicSeen = common.config.palettes.dialogueTopicSeen
-	local paletteTopicUnique = common.config.palettes.dialogueTopicUnique
-
 	for _, element in pairs(topics.children) do
 		if (element.id == GUI_ID_MenuDialog_a_topic) then
-			element.widget.idleDisabled = paletteTopicSeen
+			element.widget.idleDisabled = GUI_Palette_TopicSeen
 
 			local dialogue = element:getPropertyObject("PartHyperText_dialog")
 			local info = dialogue:getInfo({ actor = mobileActor })
@@ -108,7 +107,7 @@ function this.updateTopicList(e)
 			elseif (info.actor == actor) then
 				-- Topic has actor-unique dialogue, set new state.
 				element.widget.state = 4
-				element.widget.idleActive = paletteTopicUnique
+				element.widget.idleActive = GUI_Palette_TopicUnique
 			else
 				element.widget.state = 1
 			end

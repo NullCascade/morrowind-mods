@@ -157,7 +157,8 @@ function this.onCreate(container)
 
 	-- Credits:
 	mainPane:createLabel({ text = "Credits:" }).borderTop = 6
-	mainPane:createLabel({ text = "  Programming: NullCascade, Hrnchamd, Petethegoat" })
+	mainPane:createLabel({ text = "  Programming: NullCascade, Hrnchamd" })
+	mainPane:createLabel({ text = "  Additional Programming: Petethegoat, Jiopsi" })
 	mainPane:createLabel({ text = "  Colored Magic School Icons: R-Zero" })
 	mainPane:createLabel({ text = "  Inventory Filter Icons: Remiros" })
 	mainPane:createLabel({ text = "  Concepts and Testing: Morrowind Modding Community Discord" })
