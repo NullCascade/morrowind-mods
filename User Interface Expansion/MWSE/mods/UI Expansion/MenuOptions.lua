@@ -1,4 +1,11 @@
 
+local function resizeContainer(parent, id)
+	local button = parent:findChild(tes3ui.registerID("MenuOptions_Return_container"))
+	if (button) then
+		button.width = button.children[1].texture.width
+	end
+end
+
 local function onCreatedMenuOptions(e)
 	-- Only interested in menu creation, not updates
 	if (not e.newlyCreated) then
@@ -7,25 +14,13 @@ local function onCreatedMenuOptions(e)
 
 	local mainMenu = e.element
 
-	local returnButton = mainMenu:findChild(tes3ui.registerID("MenuOptions_Return_container"))
-	local newButton = mainMenu:findChild(tes3ui.registerID("MenuOptions_New_container"))
-	local saveButton = mainMenu:findChild(tes3ui.registerID("MenuOptions_Save_container"))
-	local loadButton = mainMenu:findChild(tes3ui.registerID("MenuOptions_Load_container"))
-	local optionsButton = mainMenu:findChild(tes3ui.registerID("MenuOptions_Options_container"))
-	local creditsButton = mainMenu:findChild(tes3ui.registerID("MenuOptions_Credits_container"))
-	local exitButton = mainMenu:findChild(tes3ui.registerID("MenuOptions_Exit_container"))
-
-	if not tes3.onMainMenu() then
-		returnButton.width = returnButton.children[1].texture.width
-		saveButton.width = saveButton.children[1].texture.width
-	else
-		creditsButton.width = creditsButton.children[1].texture.width
-	end
-
-	newButton.width = newButton.children[1].texture.width
-	loadButton.width = loadButton.children[1].texture.width
-	optionsButton.width = optionsButton.children[1].texture.width
-	exitButton.width = exitButton.children[1].texture.width
+	resizeContainer(mainMenu, "MenuOptions_Return_container")
+	resizeContainer(mainMenu, "MenuOptions_New_container")
+	resizeContainer(mainMenu, "MenuOptions_Save_container")
+	resizeContainer(mainMenu, "MenuOptions_Load_container")
+	resizeContainer(mainMenu, "MenuOptions_Options_container")
+	resizeContainer(mainMenu, "MenuOptions_Credits_container")
+	resizeContainer(mainMenu, "MenuOptions_Exit_container")
 
 	mainMenu.autoWidth = true
 
