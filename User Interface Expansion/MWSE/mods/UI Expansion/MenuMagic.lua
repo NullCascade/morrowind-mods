@@ -10,6 +10,8 @@ local common = require("UI Expansion.common")
 -- Spell List: Filtering and Searching
 ----------------------------------------------------------------------------------------------------
 
+local firstSearchResult = nil
+
 local function searchSubList(titleElement, listElement, isSpellFilter)
 	-- Gather a list of all the columns/rows so we don't have to keep creating tables later.
 	local columnElements = {}
@@ -53,6 +55,9 @@ local function searchSubList(titleElement, listElement, isSpellFilter)
 end
 
 local function searchSpellsList()
+	-- Clear first search result hit.
+	firstSearchResult = nil
+
 	-- Filter all of our sub groups.
 	local elements = tes3ui.findMenu(GUI_ID_MenuMagic):findChild(GUI_ID_MagicMenu_spells_list).widget.contentPane.children
 	local hasMatchingPowers = searchSubList(elements[1], elements[2], true)
@@ -63,7 +68,7 @@ local function searchSpellsList()
 	elements[3].visible = (hasMatchingPowers and hasMatchingSpells)
 	elements[6].visible = (hasMatchingSpells and hasMatchingItems or (not hasMatchingSpells and hasMatchingPowers and hasMatchingItems))
 	
-	if (spellsListSearchText and common.config.selectSpellsOnSearch and firstSearchResult) then
+	if (common.magicFilter.searchText and common.config.selectSpellsOnSearch and firstSearchResult) then
 		firstSearchResult:triggerEvent("mouseClick")
 	end
 end
