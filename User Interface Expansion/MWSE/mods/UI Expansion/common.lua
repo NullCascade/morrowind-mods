@@ -182,7 +182,7 @@ end
 
 function filter_functions:triggerFilter(params)
 	-- Search by name.
-	if (self.searchText and params.text and not string.find(string.lower(params.text), self.searchText)) then
+	if (self.searchText and params.text and not string.find(string.lower(params.text), self.searchText, 1, true)) then
 		return false
 	end
 
