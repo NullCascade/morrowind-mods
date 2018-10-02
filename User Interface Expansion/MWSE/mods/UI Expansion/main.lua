@@ -1,7 +1,7 @@
 
 local common = require("UI Expansion.common")
 
-common.version = 0.7
+common.version = 1.0
 
 -- Configuration table.
 local defaultConfig = {
