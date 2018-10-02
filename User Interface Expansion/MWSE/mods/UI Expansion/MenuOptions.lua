@@ -1,8 +1,11 @@
 
 local function resizeContainer(parent, id)
-	local button = parent:findChild(tes3ui.registerID("MenuOptions_Return_container"))
+	local button = parent:findChild(tes3ui.registerID(id))
 	if (button) then
-		button.width = button.children[1].texture.width
+		local texture = button.children[1].texture
+		if (texture) then
+			button.width = texture.width
+		end
 	end
 end
 
