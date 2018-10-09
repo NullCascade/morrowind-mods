@@ -8,7 +8,7 @@ local common = require("UI Expansion.common")
 ----------------------------------------------------------------------------------------------------
 
 local genericFilter = common.createFilterInterface({
-	createSearchBar = true,
+	createSearchBar = common.config.useSearch,
 	createIcons = true,
 	createButtons = false,
 	useIcons = true,
@@ -22,7 +22,7 @@ common.createStandardInventoryFilters(genericFilter)
 ----------------------------------------------------------------------------------------------------
 
 local genericFilterNoIcons = common.createFilterInterface({
-	createSearchBar = true,
+	createSearchBar = common.config.useSearch,
 	createIcons = false,
 	createButtons = false,
 	useIcons = false,

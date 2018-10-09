@@ -1,17 +1,19 @@
 
 local common = require("UI Expansion.common")
 
-common.version = 1.0
+common.version = 1.1
 
 -- Configuration table.
 local defaultConfig = {
 	version = common.version,
 	showHelpText = true,
 	autoSelectInput = "Magic",
+	useSearch = true,
 	useInventoryTextButtons = true,
 	selectSpellsOnSearch = true,
 	autoFilterToTradable = true,
 	takeFilteredItems = true,
+	displayWeekday = true,
 	keybindClose = { 57 },
 	keybindTakeAll = { 29, 57 },
 	dialogueTopicSeenColor = "journal_finished_quest_color",
@@ -34,6 +36,7 @@ local defaultConfig = {
 		magic = true,
 		map = false,
 		options = true,
+		rest = true,
 		stat = true,
 	},
 }
@@ -115,6 +118,11 @@ local function onInitialized(e)
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuOptions.lua")
 	else
 		mwse.log("[UI Expansion] Skipping module: options")
+	end
+	if (config.components.rest) then
+		dofile("Data Files/MWSE/mods/UI Expansion/MenuRest.lua")
+	else
+		mwse.log("[UI Expansion] Skipping module: rest")
 	end
 	if (config.components.stat) then
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuStat.lua")
