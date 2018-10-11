@@ -45,22 +45,27 @@ function common.createSearchBar(params)
 	-- Create the search input itself.
 	local input = border:createTextInput({ id = tes3ui.registerID(params.id) })
 	input.color = params.placeholderTextColor or tes3ui.getPalette("disabled_color")
-	input.text = params.placeholderText
+	input.text = params.placeholderText or ""
 	input.borderLeft = 5
 	input.borderRight = 5
 	input.borderTop = 2
 	input.borderBottom = 4
 	input.widget.eraseOnFirstKey = true
-	input.widget.lengthLimit = 31
 
 	-- Set up the events to control text input control.
 	input.consumeMouseEvents = false
+	input:register("keyEnter", function(e)
+		if (params.onSubmit) then
+			params.onSubmit(e)
+		end
+	end)
 	input:register("keyPress", function(e)
-		-- Prevent alt-tabbing from creating spacing.
 		local inputController = tes3.worldController.inputController
 		if (inputController:isKeyDown(15)) then
+			-- Prevent alt-tabbing from creating spacing.
 			return
 		elseif (inputController:isKeyDown(14) and input.text == params.placeholderText) then
+			-- Prevent backspacing into nothing.
 			return
 		end
 
@@ -73,7 +78,9 @@ function common.createSearchBar(params)
 		input:forwardEvent(e)
 
 		input.color = params.textColor or tes3ui.getPalette("normal_color")
-		params.onUpdate(e)
+		if (params.onUpdate) then
+			params.onUpdate(e)
+		end
 		input:updateLayout()
 	end)
 	border:register("mouseClick", function()

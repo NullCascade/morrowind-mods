@@ -1,7 +1,7 @@
 
 local common = require("UI Expansion.common")
 
-common.version = 1.0
+common.version = 1.1
 
 -- Configuration table.
 local defaultConfig = {
@@ -26,6 +26,7 @@ local defaultConfig = {
 	},
 	components = {
 		barter = true,
+		console = true,
 		contents = true,
 		dialog = true,
 		inventory = true,
@@ -65,6 +66,13 @@ local function loadConfig()
 end
 loadConfig()
 
+-- Make sure we have the latest MWSE version.
+if (mwse.buildDate < 20180930) then
+	event.register("loaded", function(e)
+		tes3.messageBox("UI Extensions requires the latest version of MWSE. Please run MWSE-Updater.exe.")
+	end)
+	return
+end
 
 -- Set up MCM.
 local modConfig = require("UI Expansion.mcm")
@@ -80,6 +88,11 @@ local function onInitialized(e)
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuBarter.lua")
 	else
 		mwse.log("[UI Expansion] Skipping module: barter")
+	end
+	if (config.components.console) then
+		dofile("Data Files/MWSE/mods/UI Expansion/MenuConsole.lua")
+	else
+		mwse.log("[UI Expansion] Skipping module: console")
 	end
 	if (config.components.contents) then
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuContents.lua")
