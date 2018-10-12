@@ -9,7 +9,7 @@ local common = require("UI Expansion.common")
 ----------------------------------------------------------------------------------------------------
 
 local inventoryFilters = common.createFilterInterface({
-	createSearchBar = true,
+	createSearchBar = common.config.useSearch,
 	createIcons = true,
 	createButtons = true,
 	useIcons = not common.config.useInventoryTextButtons,

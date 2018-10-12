@@ -143,7 +143,7 @@ function filter_functions:setFiltersExact(params)
 		self.activeFilters = { params.filter }
 	end
 
-	if (self.searchText == nil) then
+	if (self.createSearchBar and self.searchText == nil) then
 		self.searchBlock.input.text = self.searchTextPlaceholder
 		self.searchBlock.input.color = self.searchTextPlaceholderColor
 	end
@@ -503,14 +503,14 @@ function common.createStandardInventoryFilters(filterInterface)
 			)
 		end,
 		tooltip = {
-			text = "Filter to tools and soulgems",
+			text = "Filter to tools and filled soulgems",
 			helpText = {
 				"Click to filter to:",
 				"- Apparatus",
 				"- Lockpicks",
 				"- Probes",
 				"- Repair Tools",
-				"- Soulgems",
+				"- Filled Soulgems",
 			},
 		},
 		icon = "icons/ui_exp/inventory_tools.tga",
@@ -534,6 +534,7 @@ function common.createStandardInventoryFilters(filterInterface)
 				"Click to filter to:",
 				"- Books",
 				"- Lights",
+				"- Empty Soulgems",
 				"- Misc. Items",
 			},
 		},

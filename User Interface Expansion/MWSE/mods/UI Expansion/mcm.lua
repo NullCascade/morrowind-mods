@@ -131,6 +131,14 @@ function this.onCreate(container)
 		end
 	})
 
+	-- Toggle search bars.
+	createBooleanConfigPackage({
+		parent = mainPane,
+		label = "Use search bars?",
+		config = this.config,
+		key = "useSearch",
+	})
+
 	-- Toggle help text.
 	createBooleanConfigPackage({
 		parent = mainPane,
@@ -153,6 +161,14 @@ function this.onCreate(container)
 		label = "Replace Take All with Take Filtered in contents menu?",
 		config = this.config,
 		key = "takeFilteredItems",
+	})
+ 
+	-- Toggle displaying the weekday in the rest menu.
+	createBooleanConfigPackage({
+		parent = mainPane,
+		label = "Display weekday in rest menu?",
+		config = this.config,
+		key = "displayWeekday",
 	})
 
 	-- Credits:

@@ -74,7 +74,7 @@ local function searchSpellsList()
 end
 
 local magicFilters = common.createFilterInterface({
-	createSearchBar = true,
+	createSearchBar = common.config.useSearch,
 	createIcons = true,
 	createButtons = false,
 	useIcons = true,

@@ -42,7 +42,7 @@ local function onFilterChanged()
 end
 
 local contentsFilters = common.createFilterInterface({
-	createSearchBar = true,
+	createSearchBar = common.config.useSearch,
 	createIcons = true,
 	createButtons = true,
 	useIcons = not common.config.useInventoryTextButtons,
