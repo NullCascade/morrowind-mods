@@ -14,6 +14,7 @@ local defaultConfig = {
 	autoFilterToTradable = true,
 	takeFilteredItems = true,
 	displayWeekday = true,
+	maxWait = 168,
 	keybindClose = { 57 },
 	keybindTakeAll = { 29, 57 },
 	dialogueTopicSeenColor = "journal_finished_quest_color",
