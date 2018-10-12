@@ -74,10 +74,11 @@ local function searchSpellsList()
 end
 
 local magicFilters = common.createFilterInterface({
-	createSearchBar = common.config.useSearch,
+	createSearchBar = true,
 	createIcons = true,
 	createButtons = false,
 	useIcons = true,
+	useSearch = common.config.useSearch,
 	onFilterChanged = searchSpellsList,
 })
 common.magicFilter = magicFilters

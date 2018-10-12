@@ -9,10 +9,11 @@ local common = require("UI Expansion.common")
 ----------------------------------------------------------------------------------------------------
 
 local inventoryFilters = common.createFilterInterface({
-	createSearchBar = common.config.useSearch,
+	createSearchBar = true,
 	createIcons = true,
 	createButtons = true,
 	useIcons = not common.config.useInventoryTextButtons,
+	useSearch = common.config.useSearch,
 	onFilterChanged = tes3ui.updateInventoryTiles,
 })
 common.inventoryFilter = inventoryFilters

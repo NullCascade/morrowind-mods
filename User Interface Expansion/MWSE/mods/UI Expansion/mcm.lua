@@ -137,6 +137,14 @@ function this.onCreate(container)
 		label = "Use search bars?",
 		config = this.config,
 		key = "useSearch",
+		onUpdate = function(e)
+			common.inventoryFilter:setSearchBarUsage(this.config.useSearch)
+			common.inventoryFilter:clearFilter()
+			common.magicFilter:setSearchBarUsage(this.config.useSearch)
+			common.magicFilter:clearFilter()
+			common.barterFilter:setSearchBarUsage(this.config.useSearch)
+			common.barterFilter:clearFilter()
+		end
 	})
 
 	-- Toggle help text.

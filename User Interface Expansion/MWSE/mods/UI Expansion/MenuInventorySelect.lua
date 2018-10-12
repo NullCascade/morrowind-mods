@@ -8,10 +8,11 @@ local common = require("UI Expansion.common")
 ----------------------------------------------------------------------------------------------------
 
 local genericFilter = common.createFilterInterface({
-	createSearchBar = common.config.useSearch,
+	createSearchBar = true,
 	createIcons = true,
 	createButtons = false,
 	useIcons = true,
+	useSearch = common.config.useSearch,
 	onFilterChanged = tes3ui.updateInventorySelectTiles,
 })
 
@@ -22,10 +23,11 @@ common.createStandardInventoryFilters(genericFilter)
 ----------------------------------------------------------------------------------------------------
 
 local genericFilterNoIcons = common.createFilterInterface({
-	createSearchBar = common.config.useSearch,
+	createSearchBar = true,
 	createIcons = false,
 	createButtons = false,
 	useIcons = false,
+	useSearch = common.config.useSearch,
 	onFilterChanged = tes3ui.updateInventorySelectTiles,
 })
 
