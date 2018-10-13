@@ -64,19 +64,35 @@ local function createBooleanConfigPackage(params)
 	return { block = horizontalBlock, label = label, button = button }
 end
 
-local function changeToNextAutoSelectInput(e)
-	local text = e.source.text
+local function createTableConfigPackage(params)
+	local horizontalBlock = params.parent:createBlock({})
+	horizontalBlock.flowDirection = "left_to_right"
+	horizontalBlock.widthProportional = 1.0
+	horizontalBlock.height = 32
 
-	if (text == "Inventory") then
-		text = "Magic"
-	elseif (text == "Magic") then
-		text = "None"
-	else
-		text = "Inventory"
-	end
+	local label = horizontalBlock:createLabel({ text = params.label })
+	label.absolutePosAlignX = 0.0
+	label.absolutePosAlignY = 0.5
 
-	e.source.text = text
-	this.config.autoSelectInput = text
+	local button = horizontalBlock:createButton({ text = this.config[params.key] })
+	button.absolutePosAlignX = 1.0
+	button.absolutePosAlignY = 0.5
+	button.paddingTop = 3
+	button:register("mouseClick", function(e)
+		for k,v in pairs(params.table) do
+			if (v == this.config[params.key]) then
+				this.config[params.key] = params.table[k + 1] or params.table[1]
+				break
+			end
+		end
+		button.text = this.config[params.key]
+
+		if (params.onUpdate) then
+			params.onUpdate(e)
+		end
+	end)
+
+	return { block = horizontalBlock, label = label, button = button }
 end
 
 function this.onCreate(container)
@@ -92,24 +108,13 @@ function this.onCreate(container)
 	title.borderBottom = 6
 
 	-- Allow selecting the default focus for searching.
-	do
-		-- The container is a scroll list. Create a row in that list that organizes elements horizontally.
-		local horizontalBlock = mainPane:createBlock({})
-		horizontalBlock.flowDirection = "left_to_right"
-		horizontalBlock.widthProportional = 1.0
-		horizontalBlock.height = 32
-
-		-- The text for the config option.
-		local label = horizontalBlock:createLabel({ text = "Auto-select search bar:" })
-		label.absolutePosAlignX = 0.0
-		label.absolutePosAlignY = 0.5
-
-		-- Button that toggles the config value.
-		local button = horizontalBlock:createButton({ text = this.config.autoSelectInput })
-		button.absolutePosAlignX = 1.0
-		button.absolutePosAlignY = 0.5
-		button:register("mouseClick", changeToNextAutoSelectInput)
-	end
+	createTableConfigPackage({
+		parent = mainPane,
+		label = "Auto-select search bar:",
+		config = this.config,
+		key = "autoSelectInput",
+		table = {"Inventory", "Magic", "None"},
+	})
 
 	-- Toggle help text.
 	createBooleanConfigPackage({
@@ -128,6 +133,22 @@ function this.onCreate(container)
 		onUpdate = function(e)
 			common.inventoryFilter:setIconUsage(not this.config.useInventoryTextButtons)
 			common.barterFilter:setIconUsage(not this.config.useInventoryTextButtons)
+		end
+	})
+
+	-- Toggle search bars.
+	createBooleanConfigPackage({
+		parent = mainPane,
+		label = "Use search bars?",
+		config = this.config,
+		key = "useSearch",
+		onUpdate = function(e)
+			common.inventoryFilter:setSearchBarUsage(this.config.useSearch)
+			common.inventoryFilter:clearFilter()
+			common.magicFilter:setSearchBarUsage(this.config.useSearch)
+			common.magicFilter:clearFilter()
+			common.barterFilter:setSearchBarUsage(this.config.useSearch)
+			common.barterFilter:clearFilter()
 		end
 	})
 
@@ -153,6 +174,26 @@ function this.onCreate(container)
 		label = "Replace Take All with Take Filtered in contents menu?",
 		config = this.config,
 		key = "takeFilteredItems",
+	})
+ 
+	-- Toggle displaying the weekday in the rest menu.
+	createBooleanConfigPackage({
+		parent = mainPane,
+		label = "Display weekday in rest menu?",
+		config = this.config,
+		key = "displayWeekday",
+	})
+
+	-- Select the maximum wait time.
+	createConfigSliderPackage({
+		parent = mainPane,
+		label = "Maximum wait days:",
+		config = this.config,
+		key = "maxWait",
+		min = 1,
+		max = 14,
+		jump = 7,
+		step = 1,
 	})
 
 	-- Credits:

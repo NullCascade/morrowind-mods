@@ -13,6 +13,7 @@ local inventoryFilters = common.createFilterInterface({
 	createIcons = true,
 	createButtons = true,
 	useIcons = not common.config.useInventoryTextButtons,
+	useSearch = common.config.useSearch,
 	onFilterChanged = tes3ui.updateInventoryTiles,
 })
 common.inventoryFilter = inventoryFilters

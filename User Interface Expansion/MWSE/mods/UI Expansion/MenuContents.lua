@@ -46,6 +46,7 @@ local contentsFilters = common.createFilterInterface({
 	createIcons = true,
 	createButtons = true,
 	useIcons = not common.config.useInventoryTextButtons,
+	useSearch = common.config.useSearch,
 	onFilterChanged = onFilterChanged,
 	onSearchTextPreUpdate = onSearchTextPreUpdate,
 })

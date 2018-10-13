@@ -78,6 +78,7 @@ local magicFilters = common.createFilterInterface({
 	createIcons = true,
 	createButtons = false,
 	useIcons = true,
+	useSearch = common.config.useSearch,
 	onFilterChanged = searchSpellsList,
 })
 common.magicFilter = magicFilters

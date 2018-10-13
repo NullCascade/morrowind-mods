@@ -41,6 +41,8 @@ function common.createSearchBar(params)
 	border.autoWidth = true
 	border.autoHeight = true
 	border.widthProportional = 1.0
+	border.borderRight = 4
+	border.visible = params.useSearch
 
 	-- Create the search input itself.
 	local input = border:createTextInput({ id = tes3ui.registerID(params.id) })
@@ -51,6 +53,7 @@ function common.createSearchBar(params)
 	input.borderTop = 2
 	input.borderBottom = 4
 	input.widget.eraseOnFirstKey = true
+	input.disabled = not params.useSearch
 
 	-- Set up the events to control text input control.
 	input.consumeMouseEvents = false
@@ -118,6 +121,14 @@ function filter_functions:setFilterHidden(key, hidden)
 	end
 end
 
+function filter_functions:setSearchBarUsage(state)
+	self.useSearch = state
+	if (self.searchBlock) then
+		self.searchBlock.border.visible = state
+		self.searchBlock.input.disabled = not state
+	end
+end
+
 function filter_functions:setIconUsage(state)
 	self.useIcons = state
 	if (self.iconFiltersBlock) then
@@ -143,7 +154,7 @@ function filter_functions:setFiltersExact(params)
 		self.activeFilters = { params.filter }
 	end
 
-	if (self.searchText == nil) then
+	if (self.createSearchBar and self.searchText == nil) then
 		self.searchBlock.input.text = self.searchTextPlaceholder
 		self.searchBlock.input.color = self.searchTextPlaceholderColor
 	end
@@ -301,10 +312,8 @@ end
 function filter_functions:createFilterButton(filter)
 	local button = self.buttonFiltersBlock:createButton({ id = string.format("UIEXP:FilterButton:%s", filter.key) })
 	button.text = filter.buttonText
-	button.imageScaleX = 0.6
-	button.imageScaleY = 0.6
-	button.borderLeft = 4
-	button.borderRight = 0
+	button.borderLeft = 0
+	button.borderRight = 4
 	button.borderTop = 0
 	button.borderBottom = 0
 	button.borderAllSides = 0
@@ -328,6 +337,7 @@ function filter_functions:createElements(parent)
 			textColor = self.searchTextColor,
 			placeholderText = self.searchTextPlaceholder,
 			placeholderTextColor = self.searchTextPlaceholderColor,
+			useSearch = self.useSearch,
 			onUpdate = function(e)
 				self:setFilterText(string.lower(e.source.text))
 			end
@@ -343,7 +353,7 @@ function filter_functions:createElements(parent)
 		local block = parent:createThinBorder({})
 		block.autoWidth = true
 		block.autoHeight = true
-		block.borderLeft = 4
+		block.borderLeft = 0
 		block.paddingTop = 2
 		block.paddingBottom = 3
 		block.paddingLeft = 2
@@ -399,6 +409,7 @@ function common.createFilterInterface(params)
 	filterData.activeFilters = {}
 	filterData.filtersOrdered = {}
 
+	filterData.useSearch = params.useSearch
 	filterData.useIcons = params.useIcons
 	filterData.createIcons = params.createIcons
 	filterData.createButtons = params.createButtons
@@ -503,14 +514,14 @@ function common.createStandardInventoryFilters(filterInterface)
 			)
 		end,
 		tooltip = {
-			text = "Filter to tools and soulgems",
+			text = "Filter to tools and filled soulgems",
 			helpText = {
 				"Click to filter to:",
 				"- Apparatus",
 				"- Lockpicks",
 				"- Probes",
 				"- Repair Tools",
-				"- Soulgems",
+				"- Filled Soulgems",
 			},
 		},
 		icon = "icons/ui_exp/inventory_tools.tga",
@@ -534,6 +545,7 @@ function common.createStandardInventoryFilters(filterInterface)
 				"Click to filter to:",
 				"- Books",
 				"- Lights",
+				"- Empty Soulgems",
 				"- Misc. Items",
 			},
 		},

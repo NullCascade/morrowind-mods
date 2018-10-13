@@ -12,6 +12,7 @@ local genericFilter = common.createFilterInterface({
 	createIcons = true,
 	createButtons = false,
 	useIcons = true,
+	useSearch = common.config.useSearch,
 	onFilterChanged = tes3ui.updateInventorySelectTiles,
 })
 
@@ -26,6 +27,7 @@ local genericFilterNoIcons = common.createFilterInterface({
 	createIcons = false,
 	createButtons = false,
 	useIcons = false,
+	useSearch = common.config.useSearch,
 	onFilterChanged = tes3ui.updateInventorySelectTiles,
 })
 
