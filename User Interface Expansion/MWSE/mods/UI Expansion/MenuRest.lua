@@ -37,17 +37,22 @@ local function getKeyInput(e)
         num = 0
     end
 
-    if (digit < 168)then
+    if (digit < common.config.maxWait * 24) then
         digit = digit * 10 + num
     else
         digit = num
     end
 
-    scroll.widget.current = math.min(math.max(1, digit - 1), common.config.maxWait)
+    scroll.widget.current = math.min(math.max(0, digit - 1), common.config.maxWait * 24 - 1)
     scroll:triggerEvent("PartScrollBar_changed")
 end
 
 local function menuRestWait(e)
+    local scroll = e.element:findChild(tes3ui.registerID("MenuRestWait_scrollbar"))
+    scroll.widget.max = common.config.maxWait * 24 - 1
+    scroll.widget.jump = 4 -- More useful default value.
+    scroll:updateLayout()
+
     digit = 0
     event.register("keyDown", getKeyInput)
     event.register("menuExit", function ()
