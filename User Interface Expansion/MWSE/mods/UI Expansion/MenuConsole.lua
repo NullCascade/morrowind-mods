@@ -104,12 +104,6 @@ local function onMenuConsoleActivated(e)
 	end)
 	input:register("keyPress", function(e)
 		local inputController = tes3.worldController.inputController
-		local keyboardState = inputController.keyboardState
-		for i = 1, #keyboardState do
-			if (keyboardState[i] ~= 0) then
-				mwse.log("Key down: %d, %d", i, keyboardState[i])
-			end
-		end
 		if (inputController:isKeyDown(15)) then
 			-- Prevent alt-tabbing from creating spacing.
 			return

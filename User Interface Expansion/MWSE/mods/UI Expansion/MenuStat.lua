@@ -96,8 +96,7 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect, sta
 			helpText.borderTop = 6
 		end
 
-		helpText =
-			adjustmentsBlock:createLabel({text = "Base value takes into account abilities, and affects faction requirements."})
+		helpText = adjustmentsBlock:createLabel({text = "Base value takes into account abilities, and affects faction requirements."})
 		helpText.color = GUI_Palette_Disabled
 		helpText.borderTop = 6
 	end
