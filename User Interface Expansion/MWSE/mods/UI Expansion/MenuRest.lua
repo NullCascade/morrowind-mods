@@ -1,15 +1,5 @@
 local common = require("UI Expansion.common")
 
-local weekDays = {
-    "Sundas",
-    "Morndas",
-    "Tirdas",
-    "Middas",
-    "Turdas",
-    "Fredas",
-    "Loredas"
-}
-
 local digit
 
 local function getKeyInput(e)
@@ -63,7 +53,7 @@ local function menuRestWait(e)
         return
     end
     -- +3 offset, since the 16th of Last Seed (starting day) should be Thurdas.
-    local day = weekDays[(tes3.worldController.daysPassed.value + 3) % 7 + 1]
+    local day = common.dictionary.weekDays[(tes3.worldController.daysPassed.value + 3) % 7 + 1]
     e.element.children[2].children[1].text =  day .. ", " .. e.element.children[2].children[1].text
 end
 event.register("uiActivated", menuRestWait, { filter = "MenuRestWait"})

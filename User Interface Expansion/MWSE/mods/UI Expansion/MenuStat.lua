@@ -42,12 +42,12 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect, sta
 	local rawValue = tes3.player.object[statsArray][attribute + 1]
 	local baseValue = tes3.mobilePlayer[statsArray][attribute + 1].base
 	if (rawValue ~= baseValue) then
-		adjustmentsBlock:createLabel({text = string.format("Raw value: %d", rawValue)}).borderBottom = 6
+		adjustmentsBlock:createLabel({text = string.format(common.dictionary.statRawValue, rawValue)}).borderBottom = 6
 	end
-	adjustmentsBlock:createLabel({text = string.format("Base value: %d", baseValue)}).borderBottom = 6
+	adjustmentsBlock:createLabel({text = string.format(common.dictionary.statBaseValue, baseValue)}).borderBottom = 6
 
 	-- Display any modifiers.
-	adjustmentsBlock:createLabel({text = "Modifiers:"})
+	adjustmentsBlock:createLabel({text = common.dictionary.statModifiers})
 	local modifierCount = 0
 	local activeEffect = tes3.mobilePlayer.activeMagicEffects
 	local magicEffects = tes3.dataHandler.nonDynamicData.magicEffects
@@ -70,7 +70,7 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect, sta
 			icon.borderRight = 6
 
 			local magicInstance = activeEffect.instance
-			local sourceLabel = block:createLabel({text = (magicInstance.item or magicInstance.source).name or "Unknown"})
+			local sourceLabel = block:createLabel({text = (magicInstance.item or magicInstance.source).name or common.dictionary.unknown})
 			if (activeEffect.effectId == fortifyEffect) then
 				local magnitudeLabel = block:createLabel({text = string.format("+%d", activeEffect.magnitude)})
 				magnitudeLabel.color = GUI_Palette_Positive
@@ -91,12 +91,12 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect, sta
 		local helpText
 
 		if (rawValue ~= baseValue) then
-			helpText = adjustmentsBlock:createLabel({text = "Raw value does not involve any effects."})
+			helpText = adjustmentsBlock:createLabel({text = common.dictionary.statHelpRawValue})
 			helpText.color = GUI_Palette_Disabled
 			helpText.borderTop = 6
 		end
 
-		helpText = adjustmentsBlock:createLabel({text = "Base value takes into account abilities, and affects faction requirements."})
+		helpText = adjustmentsBlock:createLabel({text = common.dictionary.statHelpBaseValue})
 		helpText.color = GUI_Palette_Disabled
 		helpText.borderTop = 6
 	end
@@ -140,12 +140,12 @@ local function onMenuStatFactionTooltip(e)
 
 	-- Show current player reputation.
 	local reputation = faction.playerReputation
-	local reputationLabel = adjustmentsBlock:createLabel({text = string.format("Faction Reputation: %d", reputation)})
+	local reputationLabel = adjustmentsBlock:createLabel({text = string.format(common.dictionary.statFactionReputation, reputation)})
 
 	-- If the player isn't of max rank, show the next needed reputation.
 	if (faction.playerRank < 9) then
 		local nextRankRequirements = faction.ranks[faction.playerRank + 2]
-		local reputationReqLabel = adjustmentsBlock:createLabel({text = string.format("Need reputation of %d", nextRankRequirements.reputation)})
+		local reputationReqLabel = adjustmentsBlock:createLabel({text = string.format(common.dictionary.statFactionReputationRequirement, nextRankRequirements.reputation)})
 		reputationReqLabel.borderTop = 6
 	end
 end

@@ -28,14 +28,11 @@ inventoryFilters:addFilter({
 		return tes3.checkMerchantTradesItem({ reference = currentMerchant, item = e.item })
 	end,
 	tooltip = {
-		text = "Filter to sellable items",
-		helpText = {
-			"Click to filter to:",
-			"- Items the merchant will buy",
-		},
+		text = common.dictionary.filterTradableHelpDescription,
+		helpText = common.dictionary.filterTradableHelpText,
 	},
 	icon = "icons/ui_exp/inventory_tradable.tga",
-	buttonText = "Tradable",
+	buttonText = common.dictionary.filterTradableButtonName,
 	hidden = true,
 })
 

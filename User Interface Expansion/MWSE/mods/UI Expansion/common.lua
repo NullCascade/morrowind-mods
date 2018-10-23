@@ -33,6 +33,27 @@ function common.getColor(color)
 end
 
 ----------------------------------------------------------------------------------------------------
+-- Expose function to (re)load translations.
+----------------------------------------------------------------------------------------------------
+
+function common.loadTranslation()
+	-- Get the ISO language code.
+	local language = tes3.getLanguage()
+
+	-- Load the dictionaries, and start off with English.
+	local dictionaries = require("UI Expansion.translations")
+	local dictionary = dictionaries["eng"]
+	
+	-- If we aren't doing English, copy over translated entries.
+	if (language ~= "eng" and dictionaries[language]) then
+		table.copy(dictionaries[language], dictionary)
+	end
+
+	-- Set the dictionary.
+	common.dictionary = dictionary
+end
+
+----------------------------------------------------------------------------------------------------
 -- UI Functions
 ----------------------------------------------------------------------------------------------------
 
@@ -291,7 +312,7 @@ function filter_functions:onTooltip(filter)
 			helpText.borderTop = 6
 		end
 
-		local helpText = tooltipBlock:createLabel({ text = "Help text can be disabled in the Mod Config Menu." })
+		local helpText = tooltipBlock:createLabel({ text = common.dictionary.helpTextDisableTip })
 		helpText.color = disabledPalette
 		helpText.borderTop = 6
 	end
@@ -402,7 +423,7 @@ function common.createFilterInterface(params)
 	filterData.createSearchBar = params.createSearchBar
 	filterData.searchText = nil
 	filterData.searchTextColor = params.searchTextColor or tes3ui.getPalette("normal_color")
-	filterData.searchTextPlaceholder = params.searchTextPlaceholder or "Search by name..."
+	filterData.searchTextPlaceholder = params.searchTextPlaceholder or common.dictionary.searchByName
 	filterData.searchTextPlaceholderColor = params.searchTextPlaceholderColor or tes3ui.getPalette("disabled_color")
 
 	filterData.filters = {}
@@ -433,15 +454,11 @@ function common.createStandardInventoryFilters(filterInterface)
 			return (objectType == tes3.objectType.weapon or objectType == tes3.objectType.ammunition)
 		end,
 		tooltip = {
-			text = "Filter to weapons",
-			helpText = {
-				"Click to filter to:",
-				"- Ammunition",
-				"- Weapons",
-			},
+			text = common.dictionary.filterWeaponsHelpDescription,
+			helpText = common.dictionary.filterWeaponsHelpText,
 		},
 		icon = "icons/ui_exp/inventory_weapons.tga",
-		buttonText = "Weapons",
+		buttonText = common.dictionary.filterWeaponsButtonName,
 	})
 	
 	filterInterface:addFilter({
@@ -451,15 +468,11 @@ function common.createStandardInventoryFilters(filterInterface)
 			return (objectType == tes3.objectType.armor or objectType == tes3.objectType.clothing)
 		end,
 		tooltip = {
-			text = "Filter to armor and clothing",
-			helpText = {
-				"Click to filter to:",
-				"- Armor",
-				"- Clothing",
-			},
+			text = common.dictionary.filterApparelHelpDescription,
+			helpText = common.dictionary.filterApparelHelpText,
 		},
 		icon = "icons/ui_exp/inventory_apparel.tga",
-		buttonText = "Apparel",
+		buttonText = common.dictionary.filterApparelButtonName,
 	})
 	
 	filterInterface:addFilter({
@@ -473,16 +486,11 @@ function common.createStandardInventoryFilters(filterInterface)
 			)
 		end,
 		tooltip = {
-			text = "Filter to consumables",
-			helpText = {
-				"Click to filter to:",
-				"- Potions",
-				"- Scrolls",
-				"- On-use enchantments",
-			},
+			text = common.dictionary.filterConsumablesHelpDescription,
+			helpText = common.dictionary.filterConsumablesHelpText,
 		},
 		icon = "icons/ui_exp/inventory_consumables.tga",
-		buttonText = "Consumables",
+		buttonText = common.dictionary.filterConsumablesButtonName,
 	})
 	
 	filterInterface:addFilter({
@@ -491,14 +499,11 @@ function common.createStandardInventoryFilters(filterInterface)
 			return (e.item.objectType == tes3.objectType.ingredient)
 		end,
 		tooltip = {
-			text = "Filter to ingredients",
-			helpText = {
-				"Click to filter to:",
-				"- Ingredients",
-			},
+			text = common.dictionary.filterIngredientsHelpDescription,
+			helpText = common.dictionary.filterIngredientsHelpText,
 		},
 		icon = "icons/ui_exp/inventory_ingredients.tga",
-		buttonText = "Ingredients",
+		buttonText = common.dictionary.filterIngredientsButtonName,
 	})
 	
 	filterInterface:addFilter({
@@ -514,18 +519,11 @@ function common.createStandardInventoryFilters(filterInterface)
 			)
 		end,
 		tooltip = {
-			text = "Filter to tools and filled soulgems",
-			helpText = {
-				"Click to filter to:",
-				"- Apparatus",
-				"- Lockpicks",
-				"- Probes",
-				"- Repair Tools",
-				"- Filled Soulgems",
-			},
+			text = common.dictionary.filterToolsHelpDescription,
+			helpText = common.dictionary.filterToolsHelpText,
 		},
 		icon = "icons/ui_exp/inventory_tools.tga",
-		buttonText = "Tools",
+		buttonText = common.dictionary.filterToolsButtonName,
 	})
 	
 	filterInterface:addFilter({
@@ -540,17 +538,11 @@ function common.createStandardInventoryFilters(filterInterface)
 			)
 		end,
 		tooltip = {
-			text = "Filter to other items",
-			helpText = {
-				"Click to filter to:",
-				"- Books",
-				"- Lights",
-				"- Empty Soulgems",
-				"- Misc. Items",
-			},
+			text = common.dictionary.filterOtherHelpDescription,
+			helpText = common.dictionary.filterOtherHelpText,
 		},
 		icon = "icons/ui_exp/inventory_other.tga",
-		buttonText = "Other",
+		buttonText = common.dictionary.filterOtherButtonName,
 	})
 end
 

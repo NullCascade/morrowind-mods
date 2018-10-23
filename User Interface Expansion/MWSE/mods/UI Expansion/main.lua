@@ -70,10 +70,13 @@ local function loadConfig()
 end
 loadConfig()
 
+-- Load translation data.
+common.loadTranslation()
+
 -- Make sure we have the latest MWSE version.
 if (mwse.buildDate < 20180930) then
 	event.register("loaded", function(e)
-		tes3.messageBox("UI Extensions requires the latest version of MWSE. Please run MWSE-Updater.exe.")
+		tes3.messageBox(common.dictionary.updateRequired)
 	end)
 	return
 end
@@ -82,7 +85,7 @@ end
 local modConfig = require("UI Expansion.mcm")
 modConfig.config = config
 local function registerModConfig()
-	mwse.registerModConfig("UI Expansion", modConfig)
+	mwse.registerModConfig(common.dictionary.modName, modConfig)
 end
 event.register("modConfigReady", registerModConfig)
 

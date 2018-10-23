@@ -33,9 +33,9 @@ local function onFilterChanged()
 		local takeAllButton = contentsMenu:findChild(GUI_ID_MenuContents_takeallbutton)
 		local contentsFilter = common.contentsFilter
 		if (contentsFilter.searchText ~= nil or #contentsFilter.filtersOrdered ~= #contentsFilter.activeFilters) then
-			takeAllButton.text = "Take Filtered"
+			takeAllButton.text = common.dictionary.takeFiltered
 		else
-			takeAllButton.text = "Take All"
+			takeAllButton.text = common.dictionary.takeAll
 		end
 	end
 	tes3ui.updateContentsMenuTiles()

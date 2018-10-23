@@ -48,13 +48,13 @@ local function createBooleanConfigPackage(params)
 	label.absolutePosAlignX = 0.0
 	label.absolutePosAlignY = 0.5
 
-	local button = horizontalBlock:createButton({ text = (this.config[params.key] and tes3.getGMST(tes3.gmst.sYes).value or tes3.getGMST(tes3.gmst.sNo).value) })
+	local button = horizontalBlock:createButton({ text = (this.config[params.key] and common.dictionary.yes or common.dictionary.no) })
 	button.absolutePosAlignX = 1.0
 	button.absolutePosAlignY = 0.5
 	button.paddingTop = 3
 	button:register("mouseClick", function(e)
 		this.config[params.key] = not this.config[params.key]
-		button.text = this.config[params.key] and tes3.getGMST(tes3.gmst.sYes).value or tes3.getGMST(tes3.gmst.sNo).value
+		button.text = this.config[params.key] and common.dictionary.yes or common.dictionary.no
 
 		if (params.onUpdate) then
 			params.onUpdate(e)
@@ -82,10 +82,10 @@ local function createTableConfigPackage(params)
 		for k,v in pairs(params.table) do
 			if (v == this.config[params.key]) then
 				this.config[params.key] = params.table[k + 1] or params.table[1]
+				button.text = params.names[k + 1] or params.names[1]
 				break
 			end
 		end
-		button.text = this.config[params.key]
 
 		if (params.onUpdate) then
 			params.onUpdate(e)
@@ -104,22 +104,23 @@ function this.onCreate(container)
 	mainPane.paddingAllSides = 6
 
 	--
-	local title = mainPane:createLabel({ text = "UI Expansion v1.0" })
+	local title = mainPane:createLabel({ text = string.format("%s %s", common.dictionary.modName, common.dictionary.versionString) })
 	title.borderBottom = 6
 
 	-- Allow selecting the default focus for searching.
 	createTableConfigPackage({
 		parent = mainPane,
-		label = "Auto-select search bar:",
+		label = common.dictionary.configAutoSelectSearch,
 		config = this.config,
 		key = "autoSelectInput",
-		table = {"Inventory", "Magic", "None"},
+		table = { "Inventory", "Magic", "None" },
+		names = common.dictionary.configAutoSelectSearchOptions
 	})
 
 	-- Toggle help text.
 	createBooleanConfigPackage({
 		parent = mainPane,
-		label = "Show help tooltips where available?",
+		label = common.dictionary.configShowHelpTips,
 		config = this.config,
 		key = "showHelpText",
 	})
@@ -127,7 +128,7 @@ function this.onCreate(container)
 	-- Toggle vanilla-style inventory filter buttons.
 	createBooleanConfigPackage({
 		parent = mainPane,
-		label = "Use verbose buttons instead of icons for inventory filtering?",
+		label = common.dictionary.configFilterButtons,
 		config = this.config,
 		key = "useInventoryTextButtons",
 		onUpdate = function(e)
@@ -139,7 +140,7 @@ function this.onCreate(container)
 	-- Toggle search bars.
 	createBooleanConfigPackage({
 		parent = mainPane,
-		label = "Use search bars?",
+		label = common.dictionary.configUseSearchBars,
 		config = this.config,
 		key = "useSearch",
 		onUpdate = function(e)
@@ -155,7 +156,7 @@ function this.onCreate(container)
 	-- Toggle help text.
 	createBooleanConfigPackage({
 		parent = mainPane,
-		label = "Auto-select first result when searching spell list?",
+		label = common.dictionary.configAutoSelectSpells,
 		config = this.config,
 		key = "selectSpellsOnSearch",
 	})
@@ -163,7 +164,7 @@ function this.onCreate(container)
 	-- Toggle auto-filtering to tradable items when bartering.
 	createBooleanConfigPackage({
 		parent = mainPane,
-		label = "Filter to tradable items when opening barter window?",
+		label = common.dictionary.configAutoFilterToTradable,
 		config = this.config,
 		key = "autoFilterToTradable",
 	}) 
@@ -171,7 +172,7 @@ function this.onCreate(container)
 	-- Take only filtered items in contents menu.
 	createBooleanConfigPackage({
 		parent = mainPane,
-		label = "Replace Take All with Take Filtered in contents menu?",
+		label = common.dictionary.configUseTakeFiltered,
 		config = this.config,
 		key = "takeFilteredItems",
 	})
@@ -179,7 +180,7 @@ function this.onCreate(container)
 	-- Toggle displaying the weekday in the rest menu.
 	createBooleanConfigPackage({
 		parent = mainPane,
-		label = "Display weekday in rest menu?",
+		label = common.dictionary.configShowWeekDay,
 		config = this.config,
 		key = "displayWeekday",
 	})
@@ -187,7 +188,7 @@ function this.onCreate(container)
 	-- Select the maximum wait time.
 	createConfigSliderPackage({
 		parent = mainPane,
-		label = "Maximum wait days:",
+		label = common.dictionary.configMaxWaitDays,
 		config = this.config,
 		key = "maxWait",
 		min = 1,
@@ -197,9 +198,8 @@ function this.onCreate(container)
 	})
 
 	-- Credits:
-	mainPane:createLabel({ text = "Credits:" }).borderTop = 6
-	mainPane:createLabel({ text = "  Programming: NullCascade, Hrnchamd" })
-	mainPane:createLabel({ text = "  Additional Programming: Petethegoat, Jiopsi" })
+	mainPane:createLabel({ text = common.dictionary.credits }).borderTop = 6
+	mainPane:createLabel({ text = "  Programming: NullCascade, Hrnchamd, Petethegoat, Jiopsi" })
 	mainPane:createLabel({ text = "  Colored Magic School Icons: R-Zero" })
 	mainPane:createLabel({ text = "  Inventory Filter Icons: Remiros" })
 	mainPane:createLabel({ text = "  Concepts and Testing: Morrowind Modding Community Discord" })

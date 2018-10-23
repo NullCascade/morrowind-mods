@@ -96,10 +96,8 @@ magicFilters:addFilter({
 	key = "alteration",
 	callback = function(e) return getEffectsContainsSchool(e.effects, tes3.magicSchool.alteration) end,
 	tooltip = {
-		text = "Filter to alteration effects",
-		helpText = {
-			"Click to filter to spells, powers, or items that use alteration effects.",
-		},
+		text = common.dictionary.filterAlterationHelpDescription,
+		helpText = common.dictionary.filterAlterationHelpText,
 	},
 	icon = "icons/ui_exp/magic_alteration.tga",
 })
@@ -108,10 +106,8 @@ magicFilters:addFilter({
 	key = "conjuration",
 	callback = function(e) return getEffectsContainsSchool(e.effects, tes3.magicSchool.conjuration) end,
 	tooltip = {
-		text = "Filter to conjuration effects",
-		helpText = {
-			"Click to filter to spells, powers, or items that use conjuration effects.",
-		},
+		text = common.dictionary.filterConjurationHelpDescription,
+		helpText = common.dictionary.filterConjurationHelpText,
 	},
 	icon = "icons/ui_exp/magic_conjuration.tga",
 })
@@ -120,10 +116,8 @@ magicFilters:addFilter({
 	key = "destruction",
 	callback = function(e) return getEffectsContainsSchool(e.effects, tes3.magicSchool.destruction) end,
 	tooltip = {
-		text = "Filter to destruction effects",
-		helpText = {
-			"Click to filter to spells, powers, or items that use destruction effects.",
-		},
+		text = common.dictionary.filterDestructionHelpDescription,
+		helpText = common.dictionary.filterDestructionHelpText,
 	},
 	icon = "icons/ui_exp/magic_destruction.tga",
 })
@@ -132,10 +126,8 @@ magicFilters:addFilter({
 	key = "illusion",
 	callback = function(e) return getEffectsContainsSchool(e.effects, tes3.magicSchool.illusion) end,
 	tooltip = {
-		text = "Filter to illusion effects",
-		helpText = {
-			"Click to filter to spells, powers, or items that use illusion effects.",
-		},
+		text = common.dictionary.filterIllusionHelpDescription,
+		helpText = common.dictionary.filterIllusionHelpText,
 	},
 	icon = "icons/ui_exp/magic_illusion.tga",
 })
@@ -144,10 +136,8 @@ magicFilters:addFilter({
 	key = "mysticism",
 	callback = function(e) return getEffectsContainsSchool(e.effects, tes3.magicSchool.mysticism) end,
 	tooltip = {
-		text = "Filter to mysticism effects",
-		helpText = {
-			"Click to filter to spells, powers, or items that use mysticism effects.",
-		},
+		text = common.dictionary.filterMysticismHelpDescription,
+		helpText = common.dictionary.filterMysticismHelpText,
 	},
 	icon = "icons/ui_exp/magic_mysticism.tga",
 })
@@ -156,10 +146,8 @@ magicFilters:addFilter({
 	key = "restoration",
 	callback = function(e) return getEffectsContainsSchool(e.effects, tes3.magicSchool.restoration) end,
 	tooltip = {
-		text = "Filter to restoration effects",
-		helpText = {
-			"Click to filter to spells, powers, or items that use restoration effects.",
-		},
+		text = common.dictionary.filterRestorationHelpDescription,
+		helpText = common.dictionary.filterRestorationHelpText,
 	},
 	icon = "icons/ui_exp/magic_restoration.tga",
 })
