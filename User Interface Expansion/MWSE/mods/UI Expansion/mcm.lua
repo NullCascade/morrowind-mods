@@ -167,8 +167,8 @@ function this.onCreate(container)
 		label = common.dictionary.configAutoFilterToTradable,
 		config = this.config,
 		key = "autoFilterToTradable",
-	}) 
- 
+	})
+
 	-- Take only filtered items in contents menu.
 	createBooleanConfigPackage({
 		parent = mainPane,
@@ -176,7 +176,7 @@ function this.onCreate(container)
 		config = this.config,
 		key = "takeFilteredItems",
 	})
- 
+
 	-- Toggle displaying the weekday in the rest menu.
 	createBooleanConfigPackage({
 		parent = mainPane,

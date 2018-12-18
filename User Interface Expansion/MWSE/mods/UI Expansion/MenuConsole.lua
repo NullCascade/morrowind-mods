@@ -53,7 +53,6 @@ local function onSubmitCommand(e)
 end
 
 local function onMenuConsoleActivated(e)
-	mwse.log("Activated %s (%s)", e.id, e.newlyCreated)
 	if (not e.newlyCreated) then
 		tes3ui.acquireTextInput(e.element:findChild(GUI_ID_UIEXP_ConsoleInputBox))
 		return
@@ -87,6 +86,7 @@ local function onMenuConsoleActivated(e)
 	input.borderRight = 5
 	input.borderTop = 2
 	input.borderBottom = 4
+	input.widget.lengthLimit = nil
 	input.widget.eraseOnFirstKey = true
 	input:register("keyEnter", onSubmitCommand)
 
