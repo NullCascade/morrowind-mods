@@ -3,105 +3,55 @@ local common = require("UI Expansion.common")
 
 local GUI_ID_MenuDialog = tes3ui.registerID("MenuDialog")
 local GUI_ID_MenuDialog_a_topic = tes3ui.registerID("MenuDialog_a_topic")
-local GUI_ID_MenuDialog_divider = tes3ui.registerID("MenuDialog_divider")
 local GUI_ID_MenuDialog_hyper = tes3ui.registerID("MenuDialog_hyper")
 local GUI_ID_MenuDialog_scroll_pane = tes3ui.registerID("MenuDialog_scroll_pane")
 local GUI_ID_MenuDialog_topics_pane = tes3ui.registerID("MenuDialog_topics_pane")
 
 local GUI_ID_PartScrollPane_pane = tes3ui.registerID("PartScrollPane_pane")
 
-local GUI_Palette_Active = tes3ui.getPalette("active_color")
-local GUI_Palette_Disabled = tes3ui.getPalette("disabled_color")
 local GUI_Palette_TopicSeen = common.getColor(common.config.dialogueTopicSeenColor)
 local GUI_Palette_TopicUnique = common.getColor(common.config.dialogueTopicUniqueColor)
 
-InputController = tes3.worldController.inputController
-
 ----------------------------------------------------------------------------------------------------
--- Dialogue: 
+-- Dialogue:
 ----------------------------------------------------------------------------------------------------
 
-local this = {}
+-- When you click a topic, ensure that the last heard actor is remembered.
+-- Whenever you the topic list updates, go through and update the colors of each topic.
 
-local topicCount = 0
+local function updateTopicsList(e)
+	-- If the function lacks context to the dialogue menu, look it up.
+	local menuDialogue = tes3ui.findMenu(GUI_ID_MenuDialog)
 
-function this.modifyNewHypertext(textPane, lastCount)
-	local childCount = #textPane.children
-	for i = lastCount + 1, childCount, 1 do
-		local element = textPane.children[i]
-		if (element.id == GUI_ID_MenuDialog_hyper) then
-			element:register("mouseClick", this.onHyperlinkClicked)
-		end
+	-- Forward along click events to trigger dialogue as usual.
+	if (e.source) then
+		e.source:forwardEvent(e)
 	end
-end
 
-function this.onHyperlinkClicked(e)
-	local menuDialog = tes3ui.findMenu(GUI_ID_MenuDialog)
-	local topics = menuDialog:findChild(GUI_ID_MenuDialog_topics_pane):findChild(GUI_ID_PartScrollPane_pane)
-	local textPane = menuDialog:findChild(GUI_ID_MenuDialog_scroll_pane):findChild(GUI_ID_PartScrollPane_pane)
-
-	local childCountBefore = #textPane.children
-
-	-- Topic widget may be destroyed by the event
-	e.source:forwardEvent(e)
-
-	local dialogue = menuDialog:getPropertyObject("PartHyperText_dialog")
-	this.modifyNewHypertext(textPane, childCountBefore)
-
-	-- Set clicked topic to disabled
-	for _, element in pairs(textPane.children) do
-		local dialog = element:getPropertyObject("PartHyperText_dialog")
-		if (dialog == dialogue) then
-			if (element.widget.state == 1) then
-				element.widget.state = 2
-			end
-			break
-		end
-	end
-end
-
-function this.onTopic(e)
-	-- Set clicked topic to disabled
-	e.source.widget.state = 2
-
-	local menuDialog = tes3ui.findMenu(GUI_ID_MenuDialog)
-	local textPane = menuDialog:findChild(GUI_ID_MenuDialog_scroll_pane):findChild(GUI_ID_PartScrollPane_pane)
-
-	-- Topic widget may be destroyed by the event
-	local n = #textPane.children
-	e.source:forwardEvent(e)
-	this.modifyNewHypertext(textPane, n)
-end
-
-function this.updateTopicList(e)
-	local menuDialog = e.source
-	local topics = menuDialog:findChild(GUI_ID_MenuDialog_topics_pane):findChild(GUI_ID_PartScrollPane_pane)
-	local textPane = menuDialog:findChild(GUI_ID_MenuDialog_scroll_pane):findChild(GUI_ID_PartScrollPane_pane)
-
-	-- Skip update if no new topics. May rarely be wrong if topics removed == topics added.
-	local topicsChildren = topics.children
-	local currentTopicCount = #topicsChildren
-	if (topicCount == currentTopicCount) then
-		return
-	end
-	topicCount = currentTopicCount
-
-	-- Catch events from hyperlinks
+	-- Catch events from hyperlinks.
+	local textPane = menuDialogue:findChild(GUI_ID_MenuDialog_scroll_pane):findChild(GUI_ID_PartScrollPane_pane)
 	for _, element in pairs(textPane.children) do
 		if (element.id == GUI_ID_MenuDialog_hyper) then
-			element:register("mouseClick", this.onHyperlinkClicked)
+			element:register("mouseClick", updateTopicsList)
 		end
 	end
 
-	local mobileActor = menuDialog:getPropertyObject("PartHyperText_actor")
+	-- Get the actor that we're talking with.
+	local mobileActor = menuDialogue:getPropertyObject("PartHyperText_actor")
 	local actor = mobileActor.reference.object.baseObject
 
-	for _, element in pairs(topics.children) do
+	-- Go through and update all the topics.
+	local topicsPane = menuDialogue:findChild(GUI_ID_MenuDialog_topics_pane):findChild(GUI_ID_PartScrollPane_pane)
+	for _, element in pairs(topicsPane.children) do
+		-- We only care about topics in this list.
 		if (element.id == GUI_ID_MenuDialog_a_topic) then
 			element.widget.idleDisabled = GUI_Palette_TopicSeen
 
+			-- Get the info associated with this topic.
 			local dialogue = element:getPropertyObject("PartHyperText_dialog")
 			local info = dialogue:getInfo({ actor = mobileActor })
+
+			-- Update color scheme on the topic.
 			if (info == nil or info.firstHeardFrom) then
 				element.widget.state = 2
 			elseif (info.actor == actor) then
@@ -112,13 +62,12 @@ function this.updateTopicList(e)
 				element.widget.state = 1
 			end
 			element:triggerEvent("mouseLeave")
-			
-			-- Catch events from topics
-			element:register("mouseClick", function(mouseClickEventData)
-				this.onTopic(mouseClickEventData)
 
-				-- Work around an issue where certain topics in the engine would not preserve their first heard actor.
-				if (info and not info.firstHeardFrom) then
+			-- Register an event so that we update when any topic is clicked.
+			element:register("mouseClick", function(mouseClickEventData)
+				updateTopicsList(mouseClickEventData)
+
+				if (info and info.firstHeardFrom == nil) then
 					info.firstHeardFrom = actor
 				end
 			end)
@@ -126,15 +75,18 @@ function this.updateTopicList(e)
 	end
 end
 
-function this.onMenuDialogActivated(e)
+local function onDialogueMenuActivated(e)
+	-- We only care if this is the first time it was activated.
 	if (not e.newlyCreated) then
 		return
 	end
 
-	local menuDialog = e.element
-	local topics = menuDialog:findChild(GUI_ID_MenuDialog_topics_pane):findChild(GUI_ID_PartScrollPane_pane)
+	-- Set the pre-update event to update the topic list.
+	e.element:register("preUpdate", function(preUpdateEventData)
+		-- We only want this event to fire once. We'll manually track changes above to be more efficient.
+		e.element:unregister("preUpdate")
 
-	topicCount = #topics.children
-	menuDialog:register("preUpdate", this.updateTopicList)
+		updateTopicsList(preUpdateEventData)
+	end)
 end
-event.register("uiActivated", this.onMenuDialogActivated, { filter = "MenuDialog" })
+event.register("uiActivated", onDialogueMenuActivated, { filter = "MenuDialog" })
