@@ -26,6 +26,11 @@ local function updateTopicsList(e)
 	-- Forward along click events to trigger dialogue as usual.
 	if (e.source) then
 		e.source:forwardEvent(e)
+
+		-- Make sure that the first heard from field is always used.
+		if (e.info and e.actor and e.info.firstHeardFrom == nil) then
+			e.info.firstHeardFrom = e.actor
+		end
 	end
 
 	-- Catch events from hyperlinks.
@@ -65,11 +70,10 @@ local function updateTopicsList(e)
 
 			-- Register an event so that we update when any topic is clicked.
 			element:register("mouseClick", function(mouseClickEventData)
-				updateTopicsList(mouseClickEventData)
+				mouseClickEventData.info = info
+				mouseClickEventData.actor = actor
 
-				if (info and info.firstHeardFrom == nil) then
-					info.firstHeardFrom = actor
-				end
+				updateTopicsList(mouseClickEventData)
 			end)
 		end
 	end
