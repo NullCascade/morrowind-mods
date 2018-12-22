@@ -51,7 +51,7 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect, sta
 	local modifierCount = 0
 	local activeEffect = tes3.mobilePlayer.activeMagicEffects
 	local magicEffects = tes3.dataHandler.nonDynamicData.magicEffects
-	for i = 1, tes3.mobilePlayer.activeMagicEffectCount do
+	for _ = 1, tes3.mobilePlayer.activeMagicEffectCount do
 		activeEffect = activeEffect.next
 
 		if (activeEffect.attributeId == attribute and table.find(effectFilter, activeEffect.effectId)) then
@@ -70,7 +70,7 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect, sta
 			icon.borderRight = 6
 
 			local magicInstance = activeEffect.instance
-			local sourceLabel = block:createLabel({text = (magicInstance.item or magicInstance.source).name or common.dictionary.unknown})
+			block:createLabel({text = (magicInstance.item or magicInstance.source).name or common.dictionary.unknown})
 			if (activeEffect.effectId == fortifyEffect) then
 				local magnitudeLabel = block:createLabel({text = string.format("+%d", activeEffect.magnitude)})
 				magnitudeLabel.color = GUI_Palette_Positive
@@ -140,7 +140,7 @@ local function onMenuStatFactionTooltip(e)
 
 	-- Show current player reputation.
 	local reputation = faction.playerReputation
-	local reputationLabel = adjustmentsBlock:createLabel({text = string.format(common.dictionary.statFactionReputation, reputation)})
+	adjustmentsBlock:createLabel({text = string.format(common.dictionary.statFactionReputation, reputation)})
 
 	-- If the player isn't of max rank, show the next needed reputation.
 	if (faction.playerRank < 9) then
