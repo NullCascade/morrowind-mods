@@ -198,7 +198,7 @@ function this.onCreate(container)
 	})
 
 	-- Credits:
-	mainPane:createLabel({ text = common.dictionary.credits }).borderTop = 6
+	mainPane:createLabel({ text = common.dictionary.configCredits }).borderTop = 6
 	mainPane:createLabel({ text = "  Programming: NullCascade, Hrnchamd, Petethegoat, Jiopsi" })
 	mainPane:createLabel({ text = "  Colored Magic School Icons: R-Zero" })
 	mainPane:createLabel({ text = "  Inventory Filter Icons: Remiros" })
