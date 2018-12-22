@@ -175,7 +175,7 @@ function filter_functions:setFiltersExact(params)
 		self.activeFilters = { params.filter }
 	end
 
-	if (self.createSearchBar and self.searchText == nil) then
+	if (self.createSearchBar and self.searchText == nil and self.searchBlock ~= nil) then
 		self.searchBlock.input.text = self.searchTextPlaceholder
 		self.searchBlock.input.color = self.searchTextPlaceholderColor
 	end
@@ -350,24 +350,22 @@ function filter_functions:createElements(parent)
 
 	parent:destroyChildren()
 
-	-- Create our search bar if we are using one.
-	if (self.createSearchBar) then
-		local searchBarParams = {
-			parent = parent,
-			id = "UIEXP:FiltersearchBlock",
-			textColor = self.searchTextColor,
-			placeholderText = self.searchTextPlaceholder,
-			placeholderTextColor = self.searchTextPlaceholderColor,
-			useSearch = self.useSearch,
-			onUpdate = function(e)
-				self:setFilterText(string.lower(e.source.text))
-			end
-		}
-		if (self.onSearchTextPreUpdate) then
-			searchBarParams.onPreUpdate = self.onSearchTextPreUpdate
+	-- Always create searchbars, even if they're going to be hidden.
+	local searchBarParams = {
+		parent = parent,
+		id = "UIEXP:FiltersearchBlock",
+		textColor = self.searchTextColor,
+		placeholderText = self.searchTextPlaceholder,
+		placeholderTextColor = self.searchTextPlaceholderColor,
+		useSearch = self.useSearch,
+		onUpdate = function(e)
+			self:setFilterText(string.lower(e.source.text))
 		end
-		self.searchBlock = common.createSearchBar(searchBarParams)
+	}
+	if (self.onSearchTextPreUpdate) then
+		searchBarParams.onPreUpdate = self.onSearchTextPreUpdate
 	end
+	self.searchBlock = common.createSearchBar(searchBarParams)
 
 	-- Create icons for filtering.
 	if (self.createIcons) then

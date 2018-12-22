@@ -89,6 +89,8 @@ local function registerModConfig()
 end
 event.register("modConfigReady", registerModConfig)
 
+dofile("Data Files/MWSE/mods/UI Expansion/tooltip.lua")
+
 -- Run our modules.
 local function onInitialized(e)
 	if (config.components.barter) then
