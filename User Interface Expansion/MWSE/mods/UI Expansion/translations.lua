@@ -62,5 +62,11 @@ return {
 		versionString = "v1.0",
 		weekDays = { "Sundas", "Morndas", "Tirdas", "Middas", "Turdas", "Fredas", "Loredas" },
 		yes = "Yes",
+		stolenFromMerchant = "You have stolen an item of this type from this merchant!",
+		weaponSpeed = "Speed",
+		weaponReach = "Reach",
+		enchantCapacity = "Enchanting Capacity",
+		soulCapacity = "Soul Capacity",
+		lightDuration = "Duration",
 	},
 }
