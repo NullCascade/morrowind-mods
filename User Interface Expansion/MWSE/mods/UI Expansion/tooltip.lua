@@ -2,6 +2,17 @@ local this = {}
 
 local common = require("UI Expansion.common")
 
+local function tooltipBlock(tooltip, label)
+	local block = tooltip:createBlock()
+	block.minWidth = 1
+	block.maxWidth = 210
+	block.autoWidth = true
+	block.autoHeight = true
+	local label = block:createLabel{text = label}
+	label.wrapText = true
+	return {block, label}
+end
+
 local function extraTooltip(e)
 	local speed, reach, duration, enchValue, maxDuration
 
@@ -10,16 +21,11 @@ local function extraTooltip(e)
 	if merchant ~= nil and e.object.stolenList ~= nil then
 		for i, v in pairs(e.object.stolenList) do
 			if merchant.object.name == v.name then
-				local blockStolen = e.tooltip:createBlock()
-				blockStolen.minWidth = 1
-				blockStolen.maxWidth = 210
-				blockStolen.autoWidth = true
-				blockStolen.autoHeight = true
-				local labelStolen = blockStolen:createLabel{text = common.dictionary.stolenFromMerchant}
-				labelStolen.borderAllSides = 8
-				labelStolen.wrapText = true
-				labelStolen.justifyText = "center"
-				labelStolen.color = tes3ui.getPalette("negative_color")
+				local bag = {block, label}
+				bag = tooltipBlock(e.tooltip, common.dictionary.stolenFromMerchant)
+				bag.label.borderAllSides = 8
+				bag.label.justifyText = "center"
+				bag.label.color = tes3ui.getPalette("negative_color")
 				break
 			end 
 		end
@@ -44,41 +50,16 @@ local function extraTooltip(e)
 	end
 
 	if e.object.objectType == tes3.objectType.weapon then
-		local blockSpeed = e.tooltip:createBlock()
-		blockSpeed.minWidth = 1
-		blockSpeed.maxWidth = 210
-		blockSpeed.autoWidth = true
-		blockSpeed.autoHeight = true
-		local labelSpeed = blockSpeed:createLabel{text = string.format("%s: %.2f", common.dictionary.weaponSpeed, speed)}
-		labelSpeed.wrapText = true
-
-		local blockReach = e.tooltip:createBlock()
-		blockReach.minWidth = 1
-		blockReach.maxWidth = 210
-		blockReach.autoWidth = true
-		blockReach.autoHeight = true
-		local labelReach = blockReach:createLabel{text = string.format("%s: %.2f", common.dictionary.weaponReach, reach)}
-		labelReach.wrapText = true
+		tooltipBlock(e.tooltip, string.format("%s: %.2f", common.dictionary.weaponSpeed, speed))
+		tooltipBlock(e.tooltip, string.format("%s: %.2f", common.dictionary.weaponReach, reach))
 
 		if e.object.enchantment == nil then
-			local blockEnch = e.tooltip:createBlock()
-			blockEnch.minWidth = 1
-			blockEnch.maxWidth = 210
-			blockEnch.autoWidth = true
-			blockEnch.autoHeight = true
-			local labelEnch = blockEnch:createLabel{text = string.format("%s: %u", common.dictionary.enchantCapacity, enchValue)}
-			labelEnch.wrapText = true
+			tooltipBlock(e.tooltip, string.format("%s: %u", common.dictionary.enchantCapacity, enchValue))
 		end
 
 	elseif e.object.objectType == tes3.objectType.armor or e.object.objectType == tes3.objectType.clothing then
 		if e.object.enchantment == nil then
-			local blockEnch = e.tooltip:createBlock()
-			blockEnch.minWidth = 1
-			blockEnch.maxWidth = 210
-			blockEnch.autoWidth = true
-			blockEnch.autoHeight = true
-			local labelEnch = blockEnch:createLabel{text = string.format("%s: %u", common.dictionary.enchantCapacity, enchValue)}
-			labelEnch.wrapText = true
+			tooltipBlock(e.tooltip, string.format("%s: %u", common.dictionary.enchantCapacity, enchValue))
 		end
 		
 	elseif e.object.objectType == tes3.objectType.light then
@@ -93,14 +74,7 @@ local function extraTooltip(e)
 
 	elseif e.object.isSoulGem then
 		local soulValue = tes3.findGMST(tes3.gmst.fSoulGemMult).value * e.object.value
-
-		local blockSoulSize = e.tooltip:createBlock()
-		blockSoulSize.minWidth = 1
-		blockSoulSize.maxWidth = 210
-		blockSoulSize.autoWidth = true
-		blockSoulSize.autoHeight = true
-		local labelSoulSize = blockSoulSize:createLabel{text = string.format("%s: %u", common.dictionary.soulCapacity, soulValue)}
-		labelSoulSize.wrapText = true
+		tooltipBlock(e.tooltip, string.format("%s: %u", common.dictionary.soulCapacity, soulValue))
 	end
 end
 
