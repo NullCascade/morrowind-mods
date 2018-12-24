@@ -69,6 +69,6 @@ return {
 		soulCapacity = "Soul Capacity",
 		lightDuration = "Duration",
 		condition = "Condition",
-		weightClasses = {"Light", "Medium", "Heavy"},
+		weightClasses = {"Light Armor", "Medium Armor", "Heavy Armor"},
 	},
 }

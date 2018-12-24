@@ -47,7 +47,7 @@ local function extraTooltip(e)
 	-- Armor class
 	if e.object.objectType == tes3.objectType.armor then
 		local armorClass = e.tooltip:createLabel{text = common.dictionary.weightClasses[e.object.weightClass + 1]}
-		e.tooltip:reorderChildren(0, armorClass, 1) -- this returns false, doesn't work :(
+		e.tooltip:getContentElement():reorderChildren(1, -1, 1)
 	end
 
 	-- Enchantment capacity (weapons, armor, clothing)
@@ -124,6 +124,10 @@ local function extraTooltip(e)
 		label.borderLeft = 4
 
 		parent:updateLayout()
+
+		-- Update minimum width of the whole tooltip to make sure there's space for the value/weight.
+		e.tooltip:getContentElement().minWidth = 120
+		e.tooltip:updateLayout()
 	end
 
 	-- Show a tooltip for stolen goods!
@@ -140,12 +144,6 @@ local function extraTooltip(e)
 			end 
 		end
 	end
-
-	-- Update minimum width of the whole tooltip to make sure there's space for the value/weight.
-	local widthSetter = e.tooltip:createBlock()
-	widthSetter.width = 96
-	widthSetter.height = 1
-	e.tooltip:updateLayout()
 end
 
 event.register("uiObjectTooltip", extraTooltip)
