@@ -68,5 +68,7 @@ return {
 		enchantCapacity = "Enchanting Capacity",
 		soulCapacity = "Soul Capacity",
 		lightDuration = "Duration",
+		condition = "Condition",
+		weightClasses = {"Light", "Medium", "Heavy"},
 	},
 }

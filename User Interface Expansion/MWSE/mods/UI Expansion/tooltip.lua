@@ -1,6 +1,10 @@
-local this = {}
-
 local common = require("UI Expansion.common")
+
+local hiddenDefaultFields = {
+	"^Value: ",
+	"^Weight: ",
+	"^Condition: ",
+}
 
 local function tooltipBlock(tooltip, label)
 	local block = tooltip:createBlock()
@@ -14,19 +18,36 @@ local function tooltipBlock(tooltip, label)
 end
 
 local function extraTooltip(e)
-	-- Remove weight and value.
+	if e.object.id == "Gold_001" then
+		return
+	end
+
+	-- Adjust and remove vanilla tooltip fields.
 	local parent = e.tooltip.children[1]
 	-- Iterate in reverse so we can just destroy the elements as we find them.
 	for i = #parent.children, 1, -1 do
-		if parent.children[i].text:find("^Value: ") or parent.children[i].text:find("^Weight: ") then
-			parent.children[i]:destroy()
+		-- Trim the type field so it's easier to read.
+		if parent.children[i].text:find("^Type: ") then
+			parent.children[i].text = parent.children[i].text:sub(6)
+		else
+			for k, field in pairs(hiddenDefaultFields) do
+				if parent.children[i].text:find(field) then
+					parent.children[i]:destroy()
+					break
+				end
+			end
 		end
 	end
 
 	-- Weapon specific stats
 	if e.object.objectType == tes3.objectType.weapon then
-		tooltipBlock(e.tooltip, string.format("%s: %.2f", common.dictionary.weaponSpeed, e.object.speed))
-		tooltipBlock(e.tooltip, string.format("%s: %.2f", common.dictionary.weaponReach, e.object.reach))
+		tooltipBlock(e.tooltip, string.format("%s: %.2f %s: %.2f", common.dictionary.weaponSpeed, e.object.speed, common.dictionary.weaponReach, e.object.reach))
+	end
+
+	-- Armor class
+	if e.object.objectType == tes3.objectType.armor then
+		local armorClass = e.tooltip:createLabel{text = common.dictionary.weightClasses[e.object.weightClass + 1]}
+		e.tooltip:reorderChildren(0, armorClass, 1) -- this returns false, doesn't work :(
 	end
 
 	-- Enchantment capacity (weapons, armor, clothing)
@@ -36,6 +57,20 @@ local function extraTooltip(e)
 		if e.object.enchantment == nil then
 			tooltipBlock(e.tooltip, string.format("%s: %u", common.dictionary.enchantCapacity, e.object.enchantCapacity / 10))
 		end
+	end
+	
+	-- Add condition back in (weapons and armor)
+	if e.object.objectType == tes3.objectType.weapon or
+	e.object.objectType == tes3.objectType.armor then
+		local block = e.tooltip:createBlock()
+		block.autoWidth = true
+		block.autoHeight = true
+		block.paddingAllSides = 2
+		--Temporarily removed the label.
+		--block:createLabel{text = string.format("%s:", common.dictionary.condition)}
+
+		local fillBar = block:createFillBar{current = e.object.health, max = e.object.maxCondition}
+		fillBar.borderLeft = 4
 	
 	-- Light duration
 	elseif e.object.objectType == tes3.objectType.light then
@@ -50,7 +85,7 @@ local function extraTooltip(e)
 		local blockDurationBar = e.tooltip:createBlock()
 		blockDurationBar.autoWidth = true
 		blockDurationBar.autoHeight = true
-		blockDurationBar.paddingAllSides = 10
+		blockDurationBar.paddingAllSides = 2
 		blockDurationBar:createLabel{text = string.format("%s:", common.dictionary.lightDuration)}
 
 		local labelDurationBar = blockDurationBar:createFillBar{current = duration, max = maxDuration}
@@ -69,7 +104,7 @@ local function extraTooltip(e)
 		container.widthProportional = 1.0
 		container.minHeight = 16
 		container.autoHeight = true
-		container.borderAllSides = 4
+		container.paddingAllSides = 2
 		container.childAlignX = -1.0
 
 		-- Value
@@ -79,16 +114,14 @@ local function extraTooltip(e)
 		block:createImage{ path = "icons/gold.dds" }
 		local label = block:createLabel{ text = string.format("%u", e.object.value) }
 		label.borderLeft = 4
-		label.borderRight = 4
 
 		-- Weight
 		block = container:createBlock()
 		block.autoWidth = true
 		block.autoHeight = true
-		block:createImage{ path = "icons/tx_goldicon.dds" }
+		block:createImage{ path = "icons/weight.dds" }
 		label = block:createLabel{ text = string.format("%.2f", e.object.weight) }
 		label.borderLeft = 4
-		label.borderRight = 4
 
 		parent:updateLayout()
 	end
@@ -108,7 +141,11 @@ local function extraTooltip(e)
 		end
 	end
 
-	-- Update minimum width of the whole tooltip to account for the missing value/weight fields.
+	-- Update minimum width of the whole tooltip to make sure there's space for the value/weight.
+	local widthSetter = e.tooltip:createBlock()
+	widthSetter.width = 96
+	widthSetter.height = 1
+	e.tooltip:updateLayout()
 end
 
 event.register("uiObjectTooltip", extraTooltip)

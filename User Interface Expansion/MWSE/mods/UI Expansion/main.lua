@@ -41,6 +41,7 @@ local defaultConfig = {
 		options = true,
 		rest = true,
 		stat = true,
+		tooltip = true,
 	},
 }
 local config = table.copy(defaultConfig)
@@ -89,8 +90,6 @@ local function registerModConfig()
 	mwse.registerModConfig(common.dictionary.modName, modConfig)
 end
 event.register("modConfigReady", registerModConfig)
-
-dofile("Data Files/MWSE/mods/UI Expansion/tooltip.lua")
 
 -- Run our modules.
 local function onInitialized(e)
@@ -148,6 +147,11 @@ local function onInitialized(e)
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuStat.lua")
 	else
 		mwse.log("[UI Expansion] Skipping module: stat")
+	end
+	if (config.components.tooltip) then
+		dofile("Data Files/MWSE/mods/UI Expansion/Tooltip.lua")
+	else
+		mwse.log("[UI Expansion] Skipping module: tooltip")
 	end
 end
 event.register("initialized", onInitialized)
