@@ -86,14 +86,15 @@ local function magicEffectBlock(tooltip, enchantment, effect)
 	block.maxWidth = 640
 	block.autoWidth = true
 	block.autoHeight = true
+	block.widthProportional = 1.0
 	block:createImage{ path = string.format("icons\\%s", effect.object.icon) }
-	local effectDesc = string.format("%s%s%s%s%s",
+	local label = block:createLabel{ text = 
+		string.format("%s%s%s%s%s",
 		magicEffectName(effect),
 		magicEffectMagnitude(effect),
 		magicEffectDuration(enchantment, effect),
 		magicEffectRadius(effect),
-		magicEffectTarget(enchantment, effect))
-	local label = block:createLabel{ text = effectDesc }
+		magicEffectTarget(enchantment, effect)) }
 	label.borderLeft = 4
 	label.wrapText = false
 end
