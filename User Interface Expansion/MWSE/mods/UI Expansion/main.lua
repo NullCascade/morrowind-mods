@@ -15,8 +15,9 @@ local defaultConfig = {
 	takeFilteredItems = true,
 	displayWeekday = true,
 	maxWait = 1,
-	keybindClose = { 57 },
-	keybindTakeAll = { 29, 57 },
+	keybindClose = { tes3.scanCode.space },
+	keybindTakeAll = { tes3.scanCode.leftCtrl, tes3.scanCode.space },
+	keybindShowAdditionalInfo = { tes3.scanCode.leftAlt },
 	dialogueTopicSeenColor = "journal_finished_quest_color",
 	dialogueTopicUniqueColor = "link_color",
 	mapConfig = {
@@ -40,6 +41,7 @@ local defaultConfig = {
 		options = true,
 		rest = true,
 		stat = true,
+		tooltip = true,
 	},
 }
 local config = table.copy(defaultConfig)
@@ -88,8 +90,6 @@ local function registerModConfig()
 	mwse.registerModConfig(common.dictionary.modName, modConfig)
 end
 event.register("modConfigReady", registerModConfig)
-
-dofile("Data Files/MWSE/mods/UI Expansion/tooltip.lua")
 
 -- Run our modules.
 local function onInitialized(e)
@@ -147,6 +147,11 @@ local function onInitialized(e)
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuStat.lua")
 	else
 		mwse.log("[UI Expansion] Skipping module: stat")
+	end
+	if (config.components.tooltip) then
+		dofile("Data Files/MWSE/mods/UI Expansion/Tooltip.lua")
+	else
+		mwse.log("[UI Expansion] Skipping module: tooltip")
 	end
 end
 event.register("initialized", onInitialized)

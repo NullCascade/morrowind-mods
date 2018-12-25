@@ -65,8 +65,10 @@ return {
 		stolenFromMerchant = "You have stolen an item of this type from this merchant!",
 		weaponSpeed = "Speed",
 		weaponReach = "Reach",
-		enchantCapacity = "Enchanting Capacity",
+		enchantCapacity = "Enchant Capacity",
 		soulCapacity = "Soul Capacity",
 		lightDuration = "Duration",
+		condition = "Condition",
+		weightClasses = {"Light Armor", "Medium Armor", "Heavy Armor"},
 	},
 }
