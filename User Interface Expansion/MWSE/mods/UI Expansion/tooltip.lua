@@ -14,12 +14,6 @@ local enchantmentType = {
 	tes3.findGMST(tes3.gmst.sItemCastConstant).value,
 }
 
-local enchantmentRange = {
-	tes3.findGMST(tes3.gmst.sRangeSelf).value,
-	tes3.findGMST(tes3.gmst.sRangeTouch).value,
-	tes3.findGMST(tes3.gmst.sRangeTarget).value,
-}
-
 local function labelBlock(tooltip, label)
 	local block = tooltip:createBlock()
 	block.minWidth = 1
@@ -29,74 +23,6 @@ local function labelBlock(tooltip, label)
 	local label = block:createLabel{text = label}
 	label.wrapText = true
 	return label
-end
-
-local function magicEffectName(effect)
-	local name = tes3.findGMST(effect.id + 1283).value
-	if effect.object.targetsSkills then
-		return name:gsub("Skill", tes3.findGMST(effect.skill + 896).value)	--TODO need translation independent solution
-	elseif effect.object.targetsAttributes then
-		return name:gsub("Attribute", tes3.findGMST(effect.attribute + 888).value)
-	end
-
-	return name
-end
-
-local function magicEffectDuration(enchantment, effect)
-	if effect.object.hasNoDuration or enchantment.castType == tes3.enchantmentType.constant then
-		return ""
-	end
-
-	return string.format(" %s %u %s", tes3.findGMST(tes3.gmst.sfor).value, effect.duration,
-		effect.duration == 1 and tes3.findGMST(tes3.gmst.ssecond).value or tes3.findGMST(tes3.gmst.sseconds).value) 
-end
-
---TODO This still needs to handle % vs pts for some spells
-local function magicEffectMagnitude(effect)
-	if effect.object.hasNoMagnitude then
-		return ""
-	elseif effect.min == effect.max then
-		return string.format(" %u %s", effect.min,
-			effect.min == 1 and tes3.findGMST(tes3.gmst.spoint).value or tes3.findGMST(tes3.gmst.spoints).value)
-	else
-		return string.format(" %u %s %u %s", effect.min, tes3.findGMST(tes3.gmst.sTo).value, effect.max, tes3.findGMST(tes3.gmst.spoints).value)
-	end
-end
-
-local function magicEffectRadius(effect)
-	if effect.radius == 0 then
-		return ""
-	end
-
-	return string.format(" %s %u %s", tes3.findGMST(tes3.gmst.sin).value, effect.radius, tes3.findGMST(tes3.gmst.sfeet).value)
-end
-
-local function magicEffectTarget(enchantment, effect)
-	if enchantment.castType == tes3.enchantmentType.onStrike and effect.rangeType ~= tes3.effectRange.self then
-		return ""
-	else
-		return string.format(" %s %s", tes3.findGMST(tes3.gmst.sonword).value, tes3.findGMST(effect.rangeType + 1442).value)
-	end
-end
-
-
-local function magicEffectBlock(tooltip, enchantment, effect)
-	local block = tooltip:createBlock()
-	block.minWidth = 1
-	block.maxWidth = 640
-	block.autoWidth = true
-	block.autoHeight = true
-	block.widthProportional = 1.0
-	block:createImage{ path = string.format("icons\\%s", effect.object.icon) }
-	local label = block:createLabel{ text = 
-		string.format("%s%s%s%s%s",
-		magicEffectName(effect),
-		magicEffectMagnitude(effect),
-		magicEffectDuration(enchantment, effect),
-		magicEffectRadius(effect),
-		magicEffectTarget(enchantment, effect)) }
-	label.borderLeft = 4
-	label.wrapText = false
 end
 
 local function enchantConditionBlock(tooltip, object, itemData)
@@ -121,8 +47,18 @@ local function enchantConditionBlock(tooltip, object, itemData)
 
 		for i = 1, #object.enchantment.effects do
 			-- effects is a fixed size array, empty slots have the id -1.
-			if object.enchantment.effects[i].id ~= -1 then
-				magicEffectBlock(tooltip, object.enchantment, object.enchantment.effects[i])
+			if object.enchantment.effects[i].id >= 0 then
+				--magicEffectBlock(tooltip, object.enchantment, object.enchantment.effects[i])
+				local block = tooltip:createBlock()
+				block.minWidth = 1
+				block.maxWidth = 640
+				block.autoWidth = true
+				block.autoHeight = true
+				block.widthProportional = 1.0
+				block:createImage{ path = string.format("icons\\%s", object.enchantment.effects[i].object.icon) }
+				local label = block:createLabel{ text = string.format("%s", object.enchantment.effects[i]) }
+				label.borderLeft = 4
+				label.wrapText = false
 			end
 		end
 
