@@ -47,7 +47,7 @@ local function enchantConditionBlock(tooltip, object, itemData)
 		-- Check for condition again, otherwise there could be nothing to divide.
 		if object.maxCondition ~= nil then
 			local divide = tooltip:createDivider()
-			divide.widthProportional = 0.8
+			divide.widthProportional = 0.85
 		end
 
 		tooltip:createLabel{ text = enchantmentType[object.enchantment.castType + 1] }
@@ -61,6 +61,7 @@ local function enchantConditionBlock(tooltip, object, itemData)
 				block.autoWidth = true
 				block.autoHeight = true
 				block.widthProportional = 1.0
+				block.borderAllSides = 1
 				block:createImage{ path = string.format("icons\\%s", object.enchantment.effects[i].object.icon) }
 				local label = block:createLabel{ text = string.format("%s", object.enchantment.effects[i]) }
 				label.borderLeft = 4
@@ -85,10 +86,8 @@ end
 
 local function replaceWeaponTooltip(tooltip, weapon, itemData)
 	for i = #tooltip:getContentElement().children, 3, -1 do
-		tooltip:getContentElement().children[i].visible = false--:destroy()
+		tooltip:getContentElement().children[i].visible = false
 	end
-
-	tooltip:getContentElement().children[1].borderAllSides = 4
 
 	-- Second index should be 'Type: Axe, Two Handed'
 	--TODO: this is not robust
@@ -120,7 +119,7 @@ end
 
 local function replaceArmorTooltip(tooltip, armor, itemData)
 	for i = #tooltip:getContentElement().children, 2, -1 do
-		tooltip:getContentElement().children[i].visible = false--:destroy()
+		tooltip:getContentElement().children[i].visible = false
 	end
 
 	tooltip:createLabel{ text = common.dictionary.weightClasses[armor.weightClass + 1] }
@@ -131,7 +130,7 @@ end
 
 local function replaceClothingTooltip(tooltip, clothing, itemData)
 	for i = #tooltip:getContentElement().children, 2, -1 do
-		tooltip:getContentElement().children[i].visible = false--:destroy()
+		tooltip:getContentElement().children[i].visible = false
 	end
 
 	enchantConditionBlock(tooltip, clothing, itemData)
@@ -139,17 +138,17 @@ end
 
 local function replaceBookTooltip(tooltip, book, itemData)
 	for i = #tooltip:getContentElement().children, 2, -1 do
-		tooltip:getContentElement().children[i].visible = false--:destroy()
+		tooltip:getContentElement().children[i].visible = false
 	end
-
-	labelBlock(tooltip, string.format("booktype: %u", book.type))
-
-	enchantConditionBlock(tooltip, book, itemData)
+	--TODO: magic number
+	if book.type == 1 then
+		enchantConditionBlock(tooltip, book, itemData)
+	end
 end
 
 local function replaceAlchemyTooltip(tooltip, alchemy, itemData)
 	for i = #tooltip:getContentElement().children, 2, -1 do
-		tooltip:getContentElement().children[i].visible = false--:destroy()
+		tooltip:getContentElement().children[i].visible = false
 	end
 
 	for i = 1, #alchemy.effects do
@@ -182,11 +181,14 @@ local function extraTooltip(e)
 	for i = #parent.children, 1, -1 do
 		for k, field in pairs(hiddenDefaultFields) do
 			if parent.children[i].text:find(field) then
-				parent.children[i].visible = false--:destroy()
+				parent.children[i].visible = false
 				break
 			end
 		end
 	end
+
+	-- Add padding to the title.
+	e.tooltip:getContentElement().children[1].borderAllSides = 3
 
 	if e.object.objectType == tes3.objectType.weapon then
 		replaceWeaponTooltip(e.tooltip, e.object, e.itemData)
