@@ -19,6 +19,7 @@ local function labelBlock(tooltip, label)
 	block.maxWidth = 210
 	block.autoWidth = true
 	block.autoHeight = true
+	block.paddingAllSides = 1
 	local blockLabel = block:createLabel{text = label}
 	blockLabel.wrapText = true
 	return blockLabel
@@ -45,7 +46,8 @@ local function enchantConditionBlock(tooltip, object, itemData)
 	if object.enchantment then
 		-- Check for condition again, otherwise there could be nothing to divide.
 		if object.maxCondition ~= nil then
-			tooltip:createDivider()
+			local divide = tooltip:createDivider()
+			divide.widthProportional = 0.8
 		end
 
 		tooltip:createLabel{ text = enchantmentType[object.enchantment.castType + 1] }
@@ -83,10 +85,13 @@ end
 
 local function replaceWeaponTooltip(tooltip, weapon, itemData)
 	for i = #tooltip:getContentElement().children, 3, -1 do
-		tooltip:getContentElement().children[i]:destroy()
+		tooltip:getContentElement().children[i].visible = false--:destroy()
 	end
 
+	tooltip:getContentElement().children[1].borderAllSides = 4
+
 	-- Second index should be 'Type: Axe, Two Handed'
+	--TODO: this is not robust
 	tooltip:getContentElement().children[2].text = tooltip:getContentElement().children[2].text:gsub(tes3.findGMST(tes3.gmst.sType).value .. " ", "")
 
 	if tes3.worldController.useBestAttack then
@@ -115,7 +120,7 @@ end
 
 local function replaceArmorTooltip(tooltip, armor, itemData)
 	for i = #tooltip:getContentElement().children, 2, -1 do
-		tooltip:getContentElement().children[i]:destroy()
+		tooltip:getContentElement().children[i].visible = false--:destroy()
 	end
 
 	tooltip:createLabel{ text = common.dictionary.weightClasses[armor.weightClass + 1] }
@@ -126,7 +131,7 @@ end
 
 local function replaceClothingTooltip(tooltip, clothing, itemData)
 	for i = #tooltip:getContentElement().children, 2, -1 do
-		tooltip:getContentElement().children[i]:destroy()
+		tooltip:getContentElement().children[i].visible = false--:destroy()
 	end
 
 	enchantConditionBlock(tooltip, clothing, itemData)
@@ -134,15 +139,17 @@ end
 
 local function replaceBookTooltip(tooltip, book, itemData)
 	for i = #tooltip:getContentElement().children, 2, -1 do
-		tooltip:getContentElement().children[i]:destroy()
+		tooltip:getContentElement().children[i].visible = false--:destroy()
 	end
+
+	labelBlock(tooltip, string.format("booktype: %u", book.type))
 
 	enchantConditionBlock(tooltip, book, itemData)
 end
 
 local function replaceAlchemyTooltip(tooltip, alchemy, itemData)
 	for i = #tooltip:getContentElement().children, 2, -1 do
-		tooltip:getContentElement().children[i]:destroy()
+		tooltip:getContentElement().children[i].visible = false--:destroy()
 	end
 
 	for i = 1, #alchemy.effects do
@@ -175,7 +182,7 @@ local function extraTooltip(e)
 	for i = #parent.children, 1, -1 do
 		for k, field in pairs(hiddenDefaultFields) do
 			if parent.children[i].text:find(field) then
-				parent.children[i]:destroy()
+				parent.children[i].visible = false--:destroy()
 				break
 			end
 		end
@@ -221,7 +228,7 @@ local function extraTooltip(e)
 		container.autoHeight = true
 		container.paddingAllSides = 2
 		container.paddingTop = 4
-		container.childAlignX = -1.0
+		container.childAlignX = 1.0
 
 		-- Value
 		local block = container:createBlock()
@@ -236,6 +243,7 @@ local function extraTooltip(e)
 		block.autoWidth = true
 		block.autoHeight = true
 		block:createImage{ path = "icons/weight.dds" }
+		block.borderLeft = 8
 		label = block:createLabel{ text = string.format("%.2f", e.object.weight) }
 		label.borderLeft = 4
 
