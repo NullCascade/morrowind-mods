@@ -59,7 +59,7 @@ return {
 		takeFiltered = "Take Filtered",
 		unknown = "unknown",
 		updateRequired = "UI Extensions requires the latest version of MWSE. Please run MWSE-Updater.exe.",
-		versionString = "v1.0",
+		versionString = "v1.1",
 		weekDays = { "Sundas", "Morndas", "Tirdas", "Middas", "Turdas", "Fredas", "Loredas" },
 		yes = "Yes",
 		stolenFromMerchant = "You have stolen an item of this type from this merchant!",
