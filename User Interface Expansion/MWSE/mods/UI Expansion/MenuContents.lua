@@ -116,13 +116,30 @@ local function onInventoryTileClicked(e)
 
 	-- If the player is holding the alt key, transfer the item directly.
 	if (inputController:isKeyDown(tes3.scanCode.lAlt)) then
+		local count = e.count
+		if (inputController:isKeyDown(tes3.scanCode.lCtrl)) then
+			count = 1
+		end
+
+		local containerRef = contentsMenu:getPropertyObject("MenuContents_ObjectRefr")
 		tes3.transferItem({
 			from = tes3.player,
-			to = contentsMenu:getPropertyObject("MenuContents_ObjectRefr"),
+			to = containerRef,
 			item = e.item,
 			itemData = e.itemData,
-			count = e.count,
+			count = count,
 		})
+
+		local owner = tes3.getOwner(containerRef)
+		if (owner) then
+			if (owner.playerJoined) then
+				if (containerRef.attachments["variables"].requirement <= owner.playerRank) then
+					return false
+				end
+			end
+			tes3.triggerCrime({ type = 5, victim = owner, value = e.item.value * count })
+		end
+
 		return false
 	end
 end
@@ -132,14 +149,31 @@ event.register("UIEX:InventoryTileClicked", onInventoryTileClicked)
 local function onContentsTileClicked(e)
 	-- If the player is holding the alt key, transfer the item directly.
 	if (inputController:isKeyDown(tes3.scanCode.lAlt)) then
+		local count = e.count
+		if (inputController:isKeyDown(tes3.scanCode.lCtrl)) then
+			count = 1
+		end
+
 		local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
+		local containerRef = contentsMenu:getPropertyObject("MenuContents_ObjectRefr")
 		tes3.transferItem({
-			from = contentsMenu:getPropertyObject("MenuContents_ObjectRefr"),
+			from = containerRef,
 			to = tes3.player,
 			item = e.item,
 			itemData = e.itemData,
-			count = e.count,
+			count = count,
 		})
+
+		local owner = tes3.getOwner(containerRef)
+		if (owner) then
+			if (owner.playerJoined) then
+				if (containerRef.attachments["variables"].requirement <= owner.playerRank) then
+					return false
+				end
+			end
+			tes3.triggerCrime({ type = 5, victim = owner, value = e.item.value * count })
+		end
+
 		return false
 	end
 end
