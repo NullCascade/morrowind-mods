@@ -1,10 +1,9 @@
 local common = require("UI Expansion.common")
 
---TODO need translation independent solution
 local hiddenDefaultFields = {
-	"^Value: ",
-	"^Weight: ",
-	"^Condition: ",
+	"^" .. tes3.findGMST(tes3.gmst.sValue).value .. ": ",
+	"^" .. tes3.findGMST(tes3.gmst.sWeight).value .. ": ",
+	"^" .. tes3.findGMST(tes3.gmst.sCondition).value .. ": ",
 }
 
 local enchantmentType = {
@@ -20,31 +19,38 @@ local function labelBlock(tooltip, label)
 	block.maxWidth = 210
 	block.autoWidth = true
 	block.autoHeight = true
-	local label = block:createLabel{text = label}
-	label.wrapText = true
-	return label
+	block.paddingAllSides = 1
+	local blockLabel = block:createLabel{text = label}
+	blockLabel.wrapText = true
+	return blockLabel
 end
 
 local function enchantConditionBlock(tooltip, object, itemData)
-	if object.enchantment == nil then
+	if object.enchantment == nil and object.enchantCapacity > 0 then
 		labelBlock(tooltip, string.format("%s: %u", common.dictionary.enchantCapacity, object.enchantCapacity / 10))
 	end
 
-	local block = tooltip:createBlock()
-	block.autoWidth = true
-	block.autoHeight = true
-	block.paddingAllSides = 4
-	block.paddingLeft = 2
-	block.paddingRight = 2
-	--TODO Temporarily removed the label.
-	--block:createLabel{text = string.format("%s:", common.dictionary.condition)}
+	if object.maxCondition ~= nil then
+		local block = tooltip:createBlock()
+		block.autoWidth = true
+		block.autoHeight = true
+		block.paddingAllSides = 4
+		block.paddingLeft = 2
+		block.paddingRight = 2
+		--TODO Temporarily removed the label.
+		--block:createLabel{text = string.format("%s:", common.dictionary.condition)}
 
-	local fillBar = block:createFillBar{current = itemData and itemData.condition or object.maxCondition, max = object.maxCondition}
+		block:createFillBar{current = itemData and itemData.condition or object.maxCondition, max = object.maxCondition}
+	end
 
 	if object.enchantment then
-		tooltip:createDivider()
-		tooltip:createLabel{ text = enchantmentType[object.enchantment.castType + 1] }
+		-- Check for condition again, otherwise there could be nothing to divide.
+		if object.maxCondition ~= nil then
+			local divide = tooltip:createDivider()
+			divide.widthProportional = 0.85
+		end
 
+		tooltip:createLabel{ text = enchantmentType[object.enchantment.castType + 1] }
 		for i = 1, #object.enchantment.effects do
 			-- effects is a fixed size array, empty slots have the id -1.
 			if object.enchantment.effects[i].id >= 0 then
@@ -55,6 +61,7 @@ local function enchantConditionBlock(tooltip, object, itemData)
 				block.autoWidth = true
 				block.autoHeight = true
 				block.widthProportional = 1.0
+				block.borderAllSides = 1
 				block:createImage{ path = string.format("icons\\%s", object.enchantment.effects[i].object.icon) }
 				local label = block:createLabel{ text = string.format("%s", object.enchantment.effects[i]) }
 				label.borderLeft = 4
@@ -64,14 +71,14 @@ local function enchantConditionBlock(tooltip, object, itemData)
 
 		-- Constant effect enchantments don't have a charge!
 		if object.enchantment.castType ~= tes3.enchantmentType.constant then
-			block = tooltip:createBlock()
+			local block = tooltip:createBlock()
 			block.autoWidth = true
 			block.autoHeight = true
 			block.paddingAllSides = 4
 			block.paddingLeft = 2
 			block.paddingRight = 2
-		
-			fillBar = block:createFillBar{current = itemData and itemData.charge or object.enchantment.maxCharge, max = object.enchantment.maxCharge}
+
+			local fillBar = block:createFillBar{current = itemData and itemData.charge or object.enchantment.maxCharge, max = object.enchantment.maxCharge}
 			fillBar.widget.fillColor = tes3ui.getPalette("magic_color")
 		end
 	end
@@ -79,8 +86,12 @@ end
 
 local function replaceWeaponTooltip(tooltip, weapon, itemData)
 	for i = #tooltip:getContentElement().children, 3, -1 do
-		tooltip:getContentElement().children[i]:destroy()
+		tooltip:getContentElement().children[i].visible = false
 	end
+
+	-- Second index should be 'Type: Axe, Two Handed'
+	--TODO: this is not robust
+	tooltip:getContentElement().children[2].text = tooltip:getContentElement().children[2].text:gsub(tes3.findGMST(tes3.gmst.sType).value .. " ", "")
 
 	if tes3.worldController.useBestAttack then
 		local slashAvg = (weapon.slashMin + weapon.slashMax) / 2
@@ -108,7 +119,7 @@ end
 
 local function replaceArmorTooltip(tooltip, armor, itemData)
 	for i = #tooltip:getContentElement().children, 2, -1 do
-		tooltip:getContentElement().children[i]:destroy()
+		tooltip:getContentElement().children[i].visible = false
 	end
 
 	tooltip:createLabel{ text = common.dictionary.weightClasses[armor.weightClass + 1] }
@@ -117,9 +128,50 @@ local function replaceArmorTooltip(tooltip, armor, itemData)
 	enchantConditionBlock(tooltip, armor, itemData)
 end
 
+local function replaceClothingTooltip(tooltip, clothing, itemData)
+	for i = #tooltip:getContentElement().children, 2, -1 do
+		tooltip:getContentElement().children[i].visible = false
+	end
+
+	enchantConditionBlock(tooltip, clothing, itemData)
+end
+
+local function replaceBookTooltip(tooltip, book, itemData)
+	for i = #tooltip:getContentElement().children, 2, -1 do
+		tooltip:getContentElement().children[i].visible = false
+	end
+	--TODO: magic number
+	if book.type == 1 then
+		enchantConditionBlock(tooltip, book, itemData)
+	end
+end
+
+local function replaceAlchemyTooltip(tooltip, alchemy, itemData)
+	for i = #tooltip:getContentElement().children, 2, -1 do
+		tooltip:getContentElement().children[i].visible = false
+	end
+
+	for i = 1, #alchemy.effects do
+		-- effects is a fixed size array, empty slots have the id -1.
+		if alchemy.effects[i].id >= 0 then
+			--magicEffectBlock(tooltip, object.enchantment, object.enchantment.effects[i])
+			local block = tooltip:createBlock()
+			block.minWidth = 1
+			block.maxWidth = 640
+			block.autoWidth = true
+			block.autoHeight = true
+			block.widthProportional = 1.0
+			block:createImage{ path = string.format("icons\\%s", alchemy.effects[i].object.icon) }
+			local label = block:createLabel{ text = string.format("%s", alchemy.effects[i]) }
+			label.borderLeft = 4
+			label.wrapText = false
+		end
+	end
+end
+
 local function extraTooltip(e)
-	--TODO this a) sucks and b) doesn't work for gold piles, and c) there's probably lots of other things this should apply to
-	if e.object.id == "Gold_001" then
+	-- I believe this is hardcoded in engine, so we'll just do this too.
+	if e.object.id:find("Gold_") or e.object.isKey then
 		return
 	end
 
@@ -127,31 +179,28 @@ local function extraTooltip(e)
 	local parent = e.tooltip.children[1]
 	-- Iterate in reverse so we can just destroy the elements as we find them.
 	for i = #parent.children, 1, -1 do
-		-- Trim the type field so it's easier to read.
-		if parent.children[i].text:find("^Type: ") then --TODO need translation independent solution
-			parent.children[i].text = parent.children[i].text:sub(6)
-		else
-			for k, field in pairs(hiddenDefaultFields) do --TODO need translation independent solution
-				if parent.children[i].text:find(field) then
-					parent.children[i]:destroy()
-					break
-				end
+		for k, field in pairs(hiddenDefaultFields) do
+			if parent.children[i].text:find(field) then
+				parent.children[i].visible = false
+				break
 			end
 		end
 	end
 
+	-- Add padding to the title.
+	e.tooltip:getContentElement().children[1].borderAllSides = 3
+
 	if e.object.objectType == tes3.objectType.weapon then
 		replaceWeaponTooltip(e.tooltip, e.object, e.itemData)
-
 	elseif e.object.objectType == tes3.objectType.armor then
 		replaceArmorTooltip(e.tooltip, e.object, e.itemData)
-
-	-- Enchantment capacity (clothing)
 	elseif e.object.objectType == tes3.objectType.clothing then
-		if e.object.enchantment == nil then
-			labelBlock(e.tooltip, string.format("%s: %u", common.dictionary.enchantCapacity, e.object.enchantCapacity / 10))
-		end	
-	
+		replaceClothingTooltip(e.tooltip, e.object, e.itemData)
+	elseif e.object.objectType == tes3.objectType.book then
+		replaceBookTooltip(e.tooltip, e.object, e.itemData)
+	elseif e.object.objectType == tes3.objectType.alchemy then
+		replaceAlchemyTooltip(e.tooltip, e.object, e.itemData)
+
 	-- Light duration
 	elseif e.object.objectType == tes3.objectType.light then
 		local blockDurationBar = e.tooltip:createBlock()
@@ -180,7 +229,8 @@ local function extraTooltip(e)
 		container.minHeight = 16
 		container.autoHeight = true
 		container.paddingAllSides = 2
-		container.childAlignX = -1.0
+		container.paddingTop = 4
+		container.childAlignX = 1.0
 
 		-- Value
 		local block = container:createBlock()
@@ -195,6 +245,7 @@ local function extraTooltip(e)
 		block.autoWidth = true
 		block.autoHeight = true
 		block:createImage{ path = "icons/weight.dds" }
+		block.borderLeft = 8
 		label = block:createLabel{ text = string.format("%.2f", e.object.weight) }
 		label.borderLeft = 4
 
@@ -210,13 +261,13 @@ local function extraTooltip(e)
 	if merchant ~= nil and e.object.stolenList ~= nil then
 		for i, v in pairs(e.object.stolenList) do
 			if merchant.object.name == v.name then
-				local divider = e.tooltip:createDivider()
+				e.tooltip:createDivider()
 				local label = labelBlock(e.tooltip, common.dictionary.stolenFromMerchant)
 				label.borderAllSides = 8
 				label.justifyText = "center"
 				label.color = tes3ui.getPalette("negative_color")
 				break
-			end 
+			end
 		end
 	end
 end
