@@ -1,4 +1,5 @@
 
+local GUI_ID_CursorIcon = tes3ui.registerID("CursorIcon")
 local GUI_ID_MenuContents = tes3ui.registerID("MenuContents")
 local GUI_ID_MenuContents_bucket = tes3ui.registerID("MenuContents_bucket")
 local GUI_ID_MenuContents_takeallbutton = tes3ui.registerID("MenuContents_takeallbutton")
@@ -115,12 +116,26 @@ local function onInventoryTileClicked(e)
 	end
 
 	-- If the player is holding the alt key, transfer the item directly.
-	if (inputController:isKeyDown(tes3.scanCode.lAlt)) then
+	local isAltDown = inputController:isKeyDown(tes3.scanCode.lAlt)
+	local transferByDefault = common.config.transferItemsByDefault
+	if ((transferByDefault and not isAltDown) or (not transferByDefault and isAltDown)) then
+		local cursorIcon = tes3ui.findHelpLayerMenu(GUI_ID_CursorIcon)
+		if (cursorIcon) then
+			return
+		end
+
+		-- Prevent transfering equipped items.
+		if (e.tile.isEquipped or e.tile.isBoundItem) then
+			return
+		end
+
+		-- Holding control only transfers one item.
 		local count = e.count
 		if (inputController:isKeyDown(tes3.scanCode.lCtrl)) then
 			count = 1
 		end
 
+		-- Transfer over the item(s).
 		local containerRef = contentsMenu:getPropertyObject("MenuContents_ObjectRefr")
 		tes3.transferItem({
 			from = tes3.player,
@@ -130,6 +145,7 @@ local function onInventoryTileClicked(e)
 			count = count,
 		})
 
+		-- Trigger a crime if applicable.
 		local owner = tes3.getOwner(containerRef)
 		if (owner) then
 			if (owner.playerJoined) then
@@ -148,12 +164,26 @@ event.register("UIEX:InventoryTileClicked", onInventoryTileClicked)
 -- Enable alt-clicking contents items to transfer it to the inventory menu.
 local function onContentsTileClicked(e)
 	-- If the player is holding the alt key, transfer the item directly.
-	if (inputController:isKeyDown(tes3.scanCode.lAlt)) then
+	local isAltDown = inputController:isKeyDown(tes3.scanCode.lAlt)
+	local transferByDefault = common.config.transferItemsByDefault
+	if ((transferByDefault and not isAltDown) or (not transferByDefault and isAltDown)) then
+		local cursorIcon = tes3ui.findHelpLayerMenu(GUI_ID_CursorIcon)
+		if (cursorIcon) then
+			return
+		end
+
+		-- Prevent transfering equipped items.
+		if (e.tile.isEquipped or e.tile.isBoundItem) then
+			return
+		end
+
+		-- Holding control only transfers one item.
 		local count = e.count
 		if (inputController:isKeyDown(tes3.scanCode.lCtrl)) then
 			count = 1
 		end
 
+		-- Transfer over the item(s).
 		local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
 		local containerRef = contentsMenu:getPropertyObject("MenuContents_ObjectRefr")
 		tes3.transferItem({
@@ -164,6 +194,7 @@ local function onContentsTileClicked(e)
 			count = count,
 		})
 
+		-- Trigger a crime if applicable.
 		local owner = tes3.getOwner(containerRef)
 		if (owner) then
 			if (owner.playerJoined) then

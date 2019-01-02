@@ -177,6 +177,14 @@ function this.onCreate(container)
 		key = "takeFilteredItems",
 	})
 
+	-- Transfer items with single click by default.
+	createBooleanConfigPackage({
+		parent = mainPane,
+		label = common.dictionary.configTransferStackByDefault,
+		config = this.config,
+		key = "transferItemsByDefault",
+	})
+
 	-- Toggle displaying the weekday in the rest menu.
 	createBooleanConfigPackage({
 		parent = mainPane,

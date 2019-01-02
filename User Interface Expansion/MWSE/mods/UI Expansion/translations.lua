@@ -9,6 +9,7 @@ return {
 		configMaxWaitDays = "Maximum wait days:",
 		configShowHelpTips = "Show help tooltips where available?",
 		configShowWeekDay = "Display weekday in rest menu?",
+		configTransferStackByDefault = "Transfer stack between inventories without holding alt?",
 		configUseSearchBars = "Use search bars?",
 		configUseTakeFiltered = "Replace Take All with Take Filtered in contents menu?",
 		filterAlterationHelpDescription = "Filter to alteration effects",

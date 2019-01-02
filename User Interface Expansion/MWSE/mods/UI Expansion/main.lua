@@ -13,6 +13,7 @@ local defaultConfig = {
 	selectSpellsOnSearch = true,
 	autoFilterToTradable = true,
 	takeFilteredItems = true,
+	transferItemsByDefault = false,
 	displayWeekday = true,
 	maxWait = 1,
 	keybindClose = { tes3.scanCode.space },
