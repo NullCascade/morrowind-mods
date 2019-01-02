@@ -76,7 +76,7 @@ loadConfig()
 common.loadTranslation()
 
 -- Make sure we have the latest MWSE version.
-if (mwse.buildDate < 20181023) then
+if (mwse.buildDate < 20190102) then
 	event.register("loaded", function(e)
 		tes3.messageBox(common.dictionary.updateRequired)
 	end)
