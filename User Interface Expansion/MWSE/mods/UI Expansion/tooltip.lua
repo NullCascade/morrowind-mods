@@ -14,7 +14,7 @@ local enchantmentType = {
 }
 
 local function labelBlock(tooltip, label)
-	local block = tooltip:createBlock()
+	local block = tooltip:createBlock({})
 	block.minWidth = 1
 	block.maxWidth = 210
 	block.autoWidth = true
@@ -31,7 +31,7 @@ local function enchantConditionBlock(tooltip, object, itemData)
 	end
 
 	if object.maxCondition ~= nil then
-		local block = tooltip:createBlock()
+		local block = tooltip:createBlock({})
 		block.autoWidth = true
 		block.autoHeight = true
 		block.paddingAllSides = 4
@@ -55,7 +55,7 @@ local function enchantConditionBlock(tooltip, object, itemData)
 			-- effects is a fixed size array, empty slots have the id -1.
 			if object.enchantment.effects[i].id >= 0 then
 				--magicEffectBlock(tooltip, object.enchantment, object.enchantment.effects[i])
-				local block = tooltip:createBlock()
+				local block = tooltip:createBlock({})
 				block.minWidth = 1
 				block.maxWidth = 640
 				block.autoWidth = true
@@ -71,7 +71,7 @@ local function enchantConditionBlock(tooltip, object, itemData)
 
 		-- Constant effect enchantments don't have a charge!
 		if object.enchantment.castType ~= tes3.enchantmentType.constant then
-			local block = tooltip:createBlock()
+			local block = tooltip:createBlock({})
 			block.autoWidth = true
 			block.autoHeight = true
 			block.paddingAllSides = 4
@@ -155,7 +155,7 @@ local function replaceAlchemyTooltip(tooltip, alchemy, itemData)
 		-- effects is a fixed size array, empty slots have the id -1.
 		if alchemy.effects[i].id >= 0 then
 			--magicEffectBlock(tooltip, object.enchantment, object.enchantment.effects[i])
-			local block = tooltip:createBlock()
+			local block = tooltip:createBlock({})
 			block.minWidth = 1
 			block.maxWidth = 640
 			block.autoWidth = true
@@ -203,7 +203,7 @@ local function extraTooltip(e)
 
 	-- Light duration
 	elseif e.object.objectType == tes3.objectType.light then
-		local blockDurationBar = e.tooltip:createBlock()
+		local blockDurationBar = e.tooltip:createBlock({})
 		blockDurationBar.autoWidth = true
 		blockDurationBar.autoHeight = true
 		blockDurationBar.paddingAllSides = 4
@@ -224,7 +224,7 @@ local function extraTooltip(e)
 
 	-- Add the value and weight back in.
 	if e.object.value and e.object.weight then
-		local container = e.tooltip:createBlock()
+		local container = e.tooltip:createBlock({})
 		container.widthProportional = 1.0
 		container.minHeight = 16
 		container.autoHeight = true
@@ -233,7 +233,7 @@ local function extraTooltip(e)
 		container.childAlignX = 1.0
 
 		-- Value
-		local block = container:createBlock()
+		local block = container:createBlock({})
 		block.autoWidth = true
 		block.autoHeight = true
 		block:createImage{ path = "icons/gold.dds" }
@@ -241,7 +241,7 @@ local function extraTooltip(e)
 		label.borderLeft = 4
 
 		-- Weight
-		block = container:createBlock()
+		block = container:createBlock({})
 		block.autoWidth = true
 		block.autoHeight = true
 		block:createImage{ path = "icons/weight.dds" }

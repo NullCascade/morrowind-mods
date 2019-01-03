@@ -4,6 +4,7 @@ local common = {}
 -- Generic helper functions.
 ----------------------------------------------------------------------------------------------------
 
+-- Performs a test on one or more keys.
 function common.complexKeybindTest(keybind)
 	local keybindType = type(keybind)
 	local inputController = tes3.worldController.inputController
@@ -23,6 +24,7 @@ function common.complexKeybindTest(keybind)
 	return false
 end
 
+-- Parses a color from either a table or a string.
 function common.getColor(color)
 	local colorType = type(color)
 	if (colorType == "table" and #color == 3) then
@@ -32,42 +34,128 @@ function common.getColor(color)
 	end
 end
 
-local numberInput = {
-	digit,
-	maxNumber,
-	onUpdate,
-	onSubmit,
-}
+----------------------------------------------------------------------------------------------------
+-- Keyboard-to-UI binding helpers.
+----------------------------------------------------------------------------------------------------
 
-local function onKeyInput(e)
-    if e.keyCode == tes3.scanCode.enter or e.keyCode == tes3.scanCode.numpadEnter then
-		numberInput.onSubmit(numberInput.digit)
-        event.unregister("keyDown", onKeyInput)
-    end
+local currentKeyboardBoundScrollBar = nil
+local keyboardScrollBarParams = nil
+local keyboardScrollBarNumberInput = nil
 
-	local num = tes3.scanCodeToNumber[e.keyCode]
-	if num then
-		if numberInput.digit < numberInput.maxNumber then
-			numberInput.digit = numberInput.digit * 10 + num
-		else
-			numberInput.digit = num
-		end
+local function onKeyDownForScrollBar(e)
+	-- Allow enter to fire a submit event.
+	if (keyboardScrollBarParams.onSubmit and (e.keyCode == tes3.scanCode.enter or e.keyCode == tes3.scanCode.numpadEnter)) then
+		keyboardScrollBarParams.onSubmit()
+		return
+	end
 	
-		numberInput.onUpdate(math.clamp(numberInput.digit, 0, numberInput.maxNumber))
-    end
+	local widget = currentKeyboardBoundScrollBar.widget
+	local previousValue = widget.current
+	local newValue = nil
+
+	if (e.keyCode == tes3.scanCode.keyLeft) then
+		-- Allow left to decrease value.
+		if (e.isShiftDown) then
+			newValue = math.clamp(previousValue - 10, 0, widget.max)
+		else
+			newValue = math.clamp(previousValue - 1, 0, widget.max)
+		end
+		keyboardScrollBarNumberInput = 0
+	elseif (e.keyCode == tes3.scanCode.keyRight) then
+		-- Allow left to increase value.
+		if (e.isShiftDown) then
+			newValue = math.clamp(previousValue + 10, 0, widget.max)
+		else
+			newValue = math.clamp(previousValue + 1, 0, widget.max)
+		end
+		keyboardScrollBarNumberInput = 0
+	elseif (e.keyCode == tes3.scanCode["end"]) then
+		-- Allow end to go to max value
+		newValue = widget.max
+		keyboardScrollBarNumberInput = 0
+	elseif (e.keyCode == tes3.scanCode.home) then
+		-- Allow home to go to 0.
+		newValue = 0
+		keyboardScrollBarNumberInput = 0
+	elseif (e.keyCode == tes3.scanCode.backspace) then
+		-- Backspace undoes the most recent input.
+		if (keyboardScrollBarNumberInput > 10) then
+			newValue = math.floor(keyboardScrollBarNumberInput / 10) - 1
+			keyboardScrollBarNumberInput = newValue + 1
+		else
+			newValue = 0
+			keyboardScrollBarNumberInput = 0
+		end
+	else
+		-- Otherwise look for specific number inputs.
+		local number = tes3.scanCodeToNumber[e.keyCode]
+		if (number) then
+			newValue = math.clamp(keyboardScrollBarNumberInput * 10 + number - 1, 0, widget.max)
+			keyboardScrollBarNumberInput = newValue + 1
+		end
+	end
+
+	-- If the value changed, fire off the update event.
+	if (newValue ~= nil and newValue ~= previousValue) then
+		widget.current = newValue
+		if (keyboardScrollBarParams.onUpdate) then
+			keyboardScrollBarParams.onUpdate()
+		end
+		currentKeyboardBoundScrollBar:triggerEvent("PartScrollBar_changed")
+	end
 end
 
-function common.getKeyInput(maxNumber, onUpdate, onSubmit)
-	numberInput.digit = 0
-	numberInput.maxNumber = maxNumber
-	numberInput.onUpdate = onUpdate
-	numberInput.onSubmit = onSubmit
+local function onMouseWheelForScrollBar(e)
+	local widget = currentKeyboardBoundScrollBar.widget
+	local previousValue = widget.current
+	local newValue = nil
 
-    event.register("keyDown", onKeyInput)
+	if (e.delta > 0) then
+		newValue = math.clamp(previousValue + 1, 0, widget.max)
+		keyboardScrollBarNumberInput = 0
+	else
+		newValue = math.clamp(previousValue - 1, 0, widget.max)
+		keyboardScrollBarNumberInput = 0
+	end
 
-    event.register("menuExit", function ()
-        event.unregister("keyDown", onKeyInput)
-    end, { doOnce = true})
+	if (newValue ~= previousValue) then
+		widget.current = newValue
+		if (keyboardScrollBarParams.onUpdate) then
+			keyboardScrollBarParams.onUpdate()
+		end
+		currentKeyboardBoundScrollBar:triggerEvent("PartScrollBar_changed")
+	end
+end
+
+function common.unbindScrollBarFromKeyboard()
+	if (currentKeyboardBoundScrollBar == nil) then
+		return
+	end
+
+	-- Get rid of our key events.
+	event.unregister("keyDown", onKeyDownForScrollBar)
+	event.unregister("mouseWheel", onMouseWheelForScrollBar)
+
+	-- Clean up any variables we're tracking.
+	currentKeyboardBoundScrollBar = nil
+	keyboardScrollBarParams = nil
+	keyboardScrollBarNumberInput = nil
+end
+
+-- Binds a slider to respect keyboard input. Only one slider can be hooked at a time.
+function common.bindScrollBarToKeyboard(params)
+	-- Get rid of any current binding if applicable.
+	common.unbindScrollBarFromKeyboard()
+
+	-- When this element is destroyed, clean up.
+	params.element:register("destroy", common.unbindScrollBarFromKeyboard)
+
+	-- Set up the events and variables we'll need later.
+	event.register("keyDown", onKeyDownForScrollBar)
+	event.register("mouseWheel", onMouseWheelForScrollBar)
+	currentKeyboardBoundScrollBar = params.element
+	keyboardScrollBarParams = params
+	keyboardScrollBarNumberInput = 0
 end
 
 ----------------------------------------------------------------------------------------------------

@@ -6,20 +6,19 @@ local function menuRestWait(e)
     scroll.widget.jump = 4 -- More useful default value.
     scroll:updateLayout()
 
+    -- Enable keyboard input on the scroll bar.
     local wait = e.element:findChild(tes3ui.registerID("MenuRestWait_wait_button"))
     local rest = e.element:findChild(tes3ui.registerID("MenuRestWait_rest_button"))
-    common.getKeyInput(common.config.maxWait * 24,
-    function(num)
-        scroll.widget.current = math.max(num - 1, 0)
-        scroll:triggerEvent("PartScrollBar_changed")
-    end,
-    function()
-        if (rest ~= nil) then
-            rest:triggerEvent("mouseClick")
-        else
-            wait:triggerEvent("mouseClick")
+    common.bindScrollBarToKeyboard({
+        element = scroll,
+        onSubmit = function()
+            if (rest ~= nil) then
+                rest:triggerEvent("mouseClick")
+            else
+                wait:triggerEvent("mouseClick")
+            end
         end
-    end)
+    })
 
     if (not common.config.displayWeekday) then
         return
