@@ -32,6 +32,44 @@ function common.getColor(color)
 	end
 end
 
+local numberInput = {
+	digit,
+	maxNumber,
+	onUpdate,
+	onSubmit,
+}
+
+local function onKeyInput(e)
+    if e.keyCode == tes3.scanCode.enter or e.keyCode == tes3.scanCode.numpadEnter then
+		numberInput.onSubmit(numberInput.digit)
+        event.unregister("keyDown", onKeyInput)
+    end
+
+	local num = tes3.scanCodeToNumber[e.keyCode]
+	if num then
+		if numberInput.digit < numberInput.maxNumber then
+			numberInput.digit = numberInput.digit * 10 + num
+		else
+			numberInput.digit = num
+		end
+	
+		numberInput.onUpdate(math.clamp(numberInput.digit, 0, numberInput.maxNumber))
+    end
+end
+
+function common.getKeyInput(maxNumber, onUpdate, onSubmit)
+	numberInput.digit = 0
+	numberInput.maxNumber = maxNumber
+	numberInput.onUpdate = onUpdate
+	numberInput.onSubmit = onSubmit
+
+    event.register("keyDown", onKeyInput)
+
+    event.register("menuExit", function ()
+        event.unregister("keyDown", onKeyInput)
+    end, { doOnce = true})
+end
+
 ----------------------------------------------------------------------------------------------------
 -- Expose function to (re)load translations.
 ----------------------------------------------------------------------------------------------------

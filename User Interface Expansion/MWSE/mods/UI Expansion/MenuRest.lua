@@ -1,53 +1,25 @@
 local common = require("UI Expansion.common")
 
-local digit
-
-local function getKeyInput(e)
-    local menu = tes3ui.findMenu(tes3ui.registerID("MenuRestWait"))
-    local scroll = menu:findChild(tes3ui.registerID("MenuRestWait_scrollbar"))
-    local wait = menu:findChild(tes3ui.registerID("MenuRestWait_wait_button"))
-    local rest = menu:findChild(tes3ui.registerID("MenuRestWait_rest_button"))
-
-    -- Enter pressed- start resting.
-    if (e.keyCode == 28) then
-        if (rest ~= nil) then
-            rest:triggerEvent("mouseClick")
-        else
-            wait:triggerEvent("mouseClick")
-        end
-    end
-
-    -- Not a number.
-    if (e.keyCode < 2 or e.keyCode > 11) then
-        return
-    end
-
-    local num = e.keyCode - 1
-    if (num == 10) then
-        num = 0
-    end
-
-    if (digit < common.config.maxWait * 24) then
-        digit = digit * 10 + num
-    else
-        digit = num
-    end
-
-    scroll.widget.current = math.min(math.max(0, digit - 1), common.config.maxWait * 24 - 1)
-    scroll:triggerEvent("PartScrollBar_changed")
-end
-
 local function menuRestWait(e)
     local scroll = e.element:findChild(tes3ui.registerID("MenuRestWait_scrollbar"))
     scroll.widget.max = common.config.maxWait * 24 - 1
     scroll.widget.jump = 4 -- More useful default value.
     scroll:updateLayout()
 
-    digit = 0
-    event.register("keyDown", getKeyInput)
-    event.register("menuExit", function ()
-        event.unregister("keyDown", getKeyInput)
-    end, { doOnce = true})
+    local wait = e.element:findChild(tes3ui.registerID("MenuRestWait_wait_button"))
+    local rest = e.element:findChild(tes3ui.registerID("MenuRestWait_rest_button"))
+    common.getKeyInput(common.config.maxWait * 24,
+    function(num)
+        scroll.widget.current = math.max(num - 1, 0)
+        scroll:triggerEvent("PartScrollBar_changed")
+    end,
+    function()
+        if (rest ~= nil) then
+            rest:triggerEvent("mouseClick")
+        else
+            wait:triggerEvent("mouseClick")
+        end
+    end)
 
     if (not common.config.displayWeekday) then
         return
