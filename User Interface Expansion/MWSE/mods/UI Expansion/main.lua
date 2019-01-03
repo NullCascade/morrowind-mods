@@ -39,6 +39,7 @@ local defaultConfig = {
 		magic = true,
 		map = false,
 		options = true,
+		quantity = true,
 		rest = true,
 		stat = true,
 		tooltip = true,
@@ -137,6 +138,11 @@ local function onInitialized(e)
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuOptions.lua")
 	else
 		mwse.log("[UI Expansion] Skipping module: options")
+	end
+	if (config.components.quantity) then
+		dofile("Data Files/MWSE/mods/UI Expansion/MenuQuantity.lua")
+	else
+		mwse.log("[UI Expansion] Skipping module: quantity")
 	end
 	if (config.components.rest) then
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuRest.lua")
