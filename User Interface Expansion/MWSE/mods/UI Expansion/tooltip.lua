@@ -30,7 +30,7 @@ local function enchantConditionBlock(tooltip, object, itemData)
 		labelBlock(tooltip, string.format("%s: %u", common.dictionary.enchantCapacity, object.enchantCapacity / 10))
 	end
 
-	if object.maxCondition ~= nil then
+	if object.maxCondition ~= nil and object.objectType ~= tes3.objectType.ammunition then
 		local block = tooltip:createBlock({})
 		block.autoWidth = true
 		block.autoHeight = true
@@ -93,26 +93,36 @@ local function replaceWeaponTooltip(tooltip, weapon, itemData)
 	--TODO: this is not robust
 	tooltip:getContentElement().children[2].text = tooltip:getContentElement().children[2].text:gsub(tes3.findGMST(tes3.gmst.sType).value .. " ", "")
 
-	if tes3.worldController.useBestAttack then
-		local slashAvg = (weapon.slashMin + weapon.slashMax) / 2
-		local thrustAvg = (weapon.thrustMin + weapon.thrustMax) / 2
-		local chopAvg = (weapon.chopMin + weapon.chopMax) / 2
+	if weapon.isMelee then
+		if tes3.worldController.useBestAttack then
+			local slashAvg = (weapon.slashMin + weapon.slashMax) / 2
+			local thrustAvg = (weapon.thrustMin + weapon.thrustMax) / 2
+			local chopAvg = (weapon.chopMin + weapon.chopMax) / 2
 
-		if slashAvg == thrustAvg == chopAvg or slashAvg >= chopAvg and slashAvg >= thrustAvg then
-			labelBlock(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sSlash).value, weapon.slashMin, weapon.slashMax))
-		elseif thrustAvg >= chopAvg and thrustAvg >= slashAvg then
-			labelBlock(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sThrust).value, weapon.thrustMin, weapon.thrustMax))
+			if slashAvg == thrustAvg == chopAvg or slashAvg >= chopAvg and slashAvg >= thrustAvg then
+				labelBlock(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sSlash).value, weapon.slashMin, weapon.slashMax))
+			elseif thrustAvg >= chopAvg and thrustAvg >= slashAvg then
+				labelBlock(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sThrust).value, weapon.thrustMin, weapon.thrustMax))
+			else
+				labelBlock(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sChop).value, weapon.chopMin, weapon.chopMax))
+			end
 		else
+			labelBlock(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sSlash).value, weapon.slashMin, weapon.slashMax))
+			labelBlock(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sThrust).value, weapon.thrustMin, weapon.thrustMax))
 			labelBlock(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sChop).value, weapon.chopMin, weapon.chopMax))
 		end
 	else
-		labelBlock(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sSlash).value, weapon.slashMin, weapon.slashMax))
-		labelBlock(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sThrust).value, weapon.thrustMin, weapon.thrustMax))
-		labelBlock(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sChop).value, weapon.chopMin, weapon.chopMax))
+		labelBlock(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sAttack).value, weapon.chopMin, weapon.chopMax))
 	end
 
-	labelBlock(tooltip, string.format("%s: %.2f", common.dictionary.weaponSpeed, weapon.speed))
-	labelBlock(tooltip, string.format("%s: %.2f", common.dictionary.weaponReach, weapon.reach))
+	if not weapon.isAmmo then
+		if weapon.speed ~= 1.0 then
+			labelBlock(tooltip, string.format("%s: %.2f", common.dictionary.weaponSpeed, weapon.speed))
+		end
+		if weapon.reach ~= 1.0 then
+			labelBlock(tooltip, string.format("%s: %.2f", common.dictionary.weaponReach, weapon.reach))
+		end
+	end
 
 	enchantConditionBlock(tooltip, weapon, itemData)
 end
@@ -190,7 +200,7 @@ local function extraTooltip(e)
 	-- Add padding to the title.
 	e.tooltip:getContentElement().children[1].borderAllSides = 3
 
-	if e.object.objectType == tes3.objectType.weapon then
+	if e.object.objectType == tes3.objectType.weapon or e.object.objectType == tes3.objectType.ammunition then
 		replaceWeaponTooltip(e.tooltip, e.object, e.itemData)
 	elseif e.object.objectType == tes3.objectType.armor then
 		replaceArmorTooltip(e.tooltip, e.object, e.itemData)
