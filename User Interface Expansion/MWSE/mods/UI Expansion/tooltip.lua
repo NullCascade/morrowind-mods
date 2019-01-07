@@ -1,3 +1,6 @@
+local GUI_ID_TooltipIconBar = tes3ui.registerID("UIEXP_Tooltip_IconBar")
+local GUI_ID_TooltipExtraDivider = tes3ui.registerID("UIEXP_Tooltip_ExtraDivider")
+
 local common = require("UI Expansion.common")
 
 local hiddenDefaultFields = {
@@ -179,7 +182,7 @@ local function replaceAlchemyTooltip(tooltip, alchemy, itemData)
 	end
 end
 
-local function extraTooltip(e)
+local function extraTooltipEarly(e)
 	-- I believe this is hardcoded in engine, so we'll just do this too.
 	if e.object.id:find("Gold_") or e.object.isKey then
 		return
@@ -234,7 +237,7 @@ local function extraTooltip(e)
 
 	-- Add the value and weight back in.
 	if e.object.value and e.object.weight then
-		local container = e.tooltip:createBlock({})
+		local container = e.tooltip:createBlock({id = GUI_ID_TooltipIconBar})
 		container.widthProportional = 1.0
 		container.minHeight = 16
 		container.autoHeight = true
@@ -280,6 +283,28 @@ local function extraTooltip(e)
 			end
 		end
 	end
-end
 
-event.register("uiObjectTooltip", extraTooltip)
+	-- Create an extra divider to look good with flavor text underneath. We'll show this in the lateTooltip if it's needed.
+	local divide = e.tooltip:createDivider({ id = GUI_ID_TooltipExtraDivider })
+	divide.widthProportional = 0.85
+	divide.visible = false
+end
+event.register("uiObjectTooltip", extraTooltipEarly, {priority = 100})
+
+local function extraTooltipLate(e)
+	-- If our divider isn't the last element, then something else was added, like flavor text.
+	if e.tooltip:getContentElement().children[#e.tooltip:getContentElement().children].id ~= GUI_ID_TooltipExtraDivider then
+		local divide = e.tooltip:getContentElement():findChild(GUI_ID_TooltipExtraDivider)
+		divide.visible = true
+	end
+
+	-- Now, we'll make sure our icon bar is in the position we want (currently the very bottom).
+	--TODO: add MCM option to set the position of the iconbar. Top, above enchants, above flavortext, bottom.
+	for i = #e.tooltip:getContentElement().children, 1, -1 do
+		if e.tooltip:getContentElement().children[i].id == GUI_ID_TooltipIconBar then
+			e.tooltip:getContentElement():reorderChildren(#e.tooltip:getContentElement().children, i - 1, 1)
+			break
+		end
+	end
+end
+event.register("uiObjectTooltip", extraTooltipLate, {priority = -100})
