@@ -63,7 +63,7 @@ return {
 		versionString = "v1.1",
 		weekDays = { "Sundas", "Morndas", "Tirdas", "Middas", "Turdas", "Fredas", "Loredas" },
 		yes = "Yes",
-		stolenFromMerchant = "You have stolen an item of this type from this merchant!",
+		stolenFromMerchant = "Stolen from this vendor.",
 		weaponSpeed = "Speed",
 		weaponReach = "Reach",
 		enchantCapacity = "Enchant Capacity",

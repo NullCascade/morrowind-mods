@@ -321,7 +321,7 @@ local function onItemTileUpdated(e)
 				icon.width = 16
 				icon.height = 16
 				icon.scaleMode = true
-				icon.absolutePosAlignX = 0.75
+				icon.absolutePosAlignX = 0.2
 				icon.absolutePosAlignY = 0.75
 				break
 			end
