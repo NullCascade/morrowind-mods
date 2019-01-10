@@ -29,6 +29,9 @@ end
 local function onFilterChanged()
 	if (common.config.takeFilteredItems) then
 		local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
+		if (contentsMenu == nil) then
+			return
+		end
 		local takeAllButton = contentsMenu:findChild(GUI_ID_MenuContents_takeallbutton)
 		local contentsFilter = common.allFilters.contents
 		if (contentsFilter.searchText ~= nil or #contentsFilter.filtersOrdered ~= #contentsFilter.activeFilters) then
