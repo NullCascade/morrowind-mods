@@ -48,7 +48,7 @@ local function onKeyDownForScrollBar(e)
 		keyboardScrollBarParams.onSubmit()
 		return
 	end
-	
+
 	local widget = currentKeyboardBoundScrollBar.widget
 	local previousValue = widget.current
 	local newValue = nil
@@ -169,7 +169,7 @@ function common.loadTranslation()
 	-- Load the dictionaries, and start off with English.
 	local dictionaries = require("UI Expansion.translations")
 	local dictionary = dictionaries["eng"]
-	
+
 	-- If we aren't doing English, copy over translated entries.
 	if (language ~= "eng" and dictionaries[language]) then
 		table.copy(dictionaries[language], dictionary)
@@ -211,10 +211,10 @@ function common.createSearchBar(params)
 	end)
 	input:register("keyPress", function(e)
 		local inputController = tes3.worldController.inputController
-		if (inputController:isKeyDown(15)) then
+		if (inputController:isKeyDown(tes3.scanCode.tab)) then
 			-- Prevent alt-tabbing from creating spacing.
 			return
-		elseif (inputController:isKeyDown(14) and input.text == params.placeholderText) then
+		elseif (inputController:isKeyDown(tes3.scanCode.backspace) and input.text == params.placeholderText) then
 			-- Prevent backspacing into nothing.
 			return
 		end
@@ -558,7 +558,7 @@ function common.createFilterInterface(params)
 	filterData.useIcons = params.useIcons
 	filterData.createIcons = params.createIcons
 	filterData.createButtons = params.createButtons
-	
+
 	filterData.onSearchTextPreUpdate = params.onSearchTextPreUpdate
 	filterData.onFilterChanged = params.onFilterChanged
 	filterData.extraData = params.extraData
@@ -584,7 +584,7 @@ function common.createStandardInventoryFilters(filterInterface)
 		icon = "icons/ui_exp/inventory_weapons.tga",
 		buttonText = common.dictionary.filterWeaponsButtonName,
 	})
-	
+
 	filterInterface:addFilter({
 		key = "apparel",
 		callback = function(e)
@@ -598,7 +598,7 @@ function common.createStandardInventoryFilters(filterInterface)
 		icon = "icons/ui_exp/inventory_apparel.tga",
 		buttonText = common.dictionary.filterApparelButtonName,
 	})
-	
+
 	filterInterface:addFilter({
 		key = "consumable",
 		callback = function(e)
@@ -606,7 +606,7 @@ function common.createStandardInventoryFilters(filterInterface)
 			local enchantment = item.enchantment
 			return (
 				item.objectType == tes3.objectType.alchemy or
-				( enchantment and (enchantment.castType == 0 or enchantment.castType == 2) )
+				( enchantment and (enchantment.castType == tes3.enchantmentType.castOnce or enchantment.castType == tes3.enchantmentType.onUse) )
 			)
 		end,
 		tooltip = {
@@ -616,7 +616,7 @@ function common.createStandardInventoryFilters(filterInterface)
 		icon = "icons/ui_exp/inventory_consumables.tga",
 		buttonText = common.dictionary.filterConsumablesButtonName,
 	})
-	
+
 	filterInterface:addFilter({
 		key = "ingredient",
 		callback = function(e)
@@ -629,7 +629,7 @@ function common.createStandardInventoryFilters(filterInterface)
 		icon = "icons/ui_exp/inventory_ingredients.tga",
 		buttonText = common.dictionary.filterIngredientsButtonName,
 	})
-	
+
 	filterInterface:addFilter({
 		key = "tools",
 		callback = function(e)
@@ -649,14 +649,15 @@ function common.createStandardInventoryFilters(filterInterface)
 		icon = "icons/ui_exp/inventory_tools.tga",
 		buttonText = common.dictionary.filterToolsButtonName,
 	})
-	
+
 	filterInterface:addFilter({
 		key = "other",
 		callback = function(e)
 			local objectType = e.item.objectType
 			local enchantment = e.item.enchantment
 			return (
-				(objectType == tes3.objectType.book and (enchantment == nil or (enchantment.castType ~= 0 and enchantment.castType ~= 2))) or
+				(objectType == tes3.objectType.book and(enchantment == nil or
+				(enchantment.castType ~= tes3.enchantmentType.castOnce and enchantment.castType ~= tes3.enchantmentType.onUse))) or
 				objectType == tes3.objectType.light or
 				(objectType == tes3.objectType.miscItem and (e.itemData and e.itemData.soul == nil or e.itemData == nil))
 			)

@@ -33,7 +33,7 @@ local function onMenuBarterActivated(e)
 	-- Create the filters.
 	local buttonBlock = e.element:findChild(GUI_ID_MenuBarter_bucket).parent.children[1]
 	barterFilters:createElements(buttonBlock)
-	
+
 	-- Interface with the inventory filter to show the tradable tab.
 	common.inventoryFilter:setFilterHidden("tradable", false)
 	if (common.config.autoFilterToTradable) then
