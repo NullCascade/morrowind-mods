@@ -150,6 +150,8 @@ function this.onCreate(container)
 			common.magicFilter:clearFilter()
 			common.barterFilter:setSearchBarUsage(this.config.useSearch)
 			common.barterFilter:clearFilter()
+			common.contentsFilter:setSearchBarUsage(this.config.useSearch)
+			common.contentsFilter:clearFilter()
 		end
 	})
 

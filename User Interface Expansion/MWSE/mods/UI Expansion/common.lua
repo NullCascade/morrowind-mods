@@ -200,7 +200,7 @@ function common.createSearchBar(params)
 	input.borderTop = 2
 	input.borderBottom = 4
 	input.widget.eraseOnFirstKey = true
-	input.disabled = not params.useSearch
+	--input.disabled = not params.useSearch
 
 	-- Set up the events to control text input control.
 	input.consumeMouseEvents = false
@@ -211,18 +211,22 @@ function common.createSearchBar(params)
 	end)
 	input:register("keyPress", function(e)
 		local inputController = tes3.worldController.inputController
-		if (inputController:isKeyDown(15)) then
-			-- Prevent alt-tabbing from creating spacing.
-			return
-		elseif (inputController:isKeyDown(14) and input.text == params.placeholderText) then
-			-- Prevent backspacing into nothing.
-			return
-		end
-
 		if (params.onPreUpdate) then
 			if (params.onPreUpdate() == false) then
 				return
 			end
+		end
+
+		if (not params.useSearch) then
+			return
+		end
+
+		if (inputController:isKeyDown(tes3.scanCode.tab)) then
+			-- Prevent alt-tabbing from creating spacing.
+			return
+		elseif (inputController:isKeyDown(tes3.scanCode.backspace) and input.text == params.placeholderText) then
+			-- Prevent backspacing into nothing.
+			return
 		end
 
 		input:forwardEvent(e)
@@ -272,7 +276,7 @@ function filter_functions:setSearchBarUsage(state)
 	self.useSearch = state
 	if (self.searchBlock) then
 		self.searchBlock.border.visible = state
-		self.searchBlock.input.disabled = not state
+		--self.searchBlock.input.disabled = not state
 	end
 end
 
