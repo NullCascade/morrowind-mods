@@ -8,6 +8,7 @@ local common = require("UI Expansion.common")
 ----------------------------------------------------------------------------------------------------
 
 local barterFilters = common.createFilterInterface({
+	filterName = "barter",
 	createSearchBar = true,
 	createIcons = true,
 	createButtons = true,
@@ -15,7 +16,6 @@ local barterFilters = common.createFilterInterface({
 	useSearch = common.config.useSearch,
 	onFilterChanged = tes3ui.updateBarterMenuTiles,
 })
-common.barterFilter = barterFilters
 
 common.createStandardInventoryFilters(barterFilters)
 

@@ -23,8 +23,8 @@ local function searchSubList(titleElement, listElement, isSpellFilter)
 	local matchCount = 0
 	for i, nameElement in ipairs(columnElements[1]) do
 		local filterObject = nameElement:getPropertyObject(isSpellFilter and "MagicMenu_Spell" or "MagicMenu_object")
-		local filter = common.magicFilter:triggerFilter({ text = filterObject.name, effects = (isSpellFilter and filterObject.effects or filterObject.enchantment.effects) })
-		
+		local filter = common.allFilters.magic:triggerFilter({ text = filterObject.name, effects = (isSpellFilter and filterObject.effects or filterObject.enchantment.effects) })
+
 		if (filter) then
 			matchCount = matchCount + 1
 		end
@@ -67,13 +67,14 @@ local function searchSpellsList()
 	-- Figure out dividers.
 	elements[3].visible = (hasMatchingPowers and hasMatchingSpells)
 	elements[6].visible = (hasMatchingSpells and hasMatchingItems or (not hasMatchingSpells and hasMatchingPowers and hasMatchingItems))
-	
-	if (common.magicFilter.searchText and common.config.selectSpellsOnSearch and firstSearchResult) then
+
+	if (common.allFilters.magic.searchText and common.config.selectSpellsOnSearch and firstSearchResult) then
 		firstSearchResult:triggerEvent("mouseClick")
 	end
 end
 
 local magicFilters = common.createFilterInterface({
+	filterName = "magic",
 	createSearchBar = true,
 	createIcons = true,
 	createButtons = false,
@@ -81,7 +82,6 @@ local magicFilters = common.createFilterInterface({
 	useSearch = common.config.useSearch,
 	onFilterChanged = searchSpellsList,
 })
-common.magicFilter = magicFilters
 
 local function getEffectsContainsSchool(effects, school)
 	for i = 1, #effects do

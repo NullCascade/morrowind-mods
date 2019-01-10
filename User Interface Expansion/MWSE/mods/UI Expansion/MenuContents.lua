@@ -20,7 +20,7 @@ local function onSearchTextPreUpdate()
 		takeAllButton:triggerEvent("mouseClick")
 		return false
 	-- Space (when no text) closes.
-	elseif (common.contentsFilter:getSearchText() == nil and common.complexKeybindTest(common.config.keybindClose)) then
+	elseif (common.allFilters.contents:getSearchText() == nil and common.complexKeybindTest(common.config.keybindClose)) then
 		tes3ui.leaveMenuMode()
 		return false
 	end
@@ -30,7 +30,7 @@ local function onFilterChanged()
 	if (common.config.takeFilteredItems) then
 		local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
 		local takeAllButton = contentsMenu:findChild(GUI_ID_MenuContents_takeallbutton)
-		local contentsFilter = common.contentsFilter
+		local contentsFilter = common.allFilters.contents
 		if (contentsFilter.searchText ~= nil or #contentsFilter.filtersOrdered ~= #contentsFilter.activeFilters) then
 			takeAllButton.text = common.dictionary.takeFiltered
 		else
@@ -41,6 +41,7 @@ local function onFilterChanged()
 end
 
 local contentsFilters = common.createFilterInterface({
+	filterName = "contents",
 	createSearchBar = true,
 	createIcons = true,
 	createButtons = true,
@@ -49,7 +50,6 @@ local contentsFilters = common.createFilterInterface({
 	onFilterChanged = onFilterChanged,
 	onSearchTextPreUpdate = onSearchTextPreUpdate,
 })
-common.contentsFilter = contentsFilters
 
 common.createStandardInventoryFilters(contentsFilters)
 

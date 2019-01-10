@@ -12,6 +12,7 @@ local inputController = tes3.worldController.inputController
 ----------------------------------------------------------------------------------------------------
 
 local inventoryFilters = common.createFilterInterface({
+	filterName = "inventory",
 	createSearchBar = true,
 	createIcons = true,
 	createButtons = true,
@@ -19,7 +20,6 @@ local inventoryFilters = common.createFilterInterface({
 	useSearch = common.config.useSearch,
 	onFilterChanged = tes3ui.updateInventoryTiles,
 })
-common.inventoryFilter = inventoryFilters
 
 common.createStandardInventoryFilters(inventoryFilters)
 

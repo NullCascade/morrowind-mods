@@ -541,6 +541,8 @@ function filter_functions:createElements(parent)
 	self:clearFilter()
 end
 
+common.allFilters = {}
+
 function common.createFilterInterface(params)
 	local filterData = {}
 
@@ -563,7 +565,16 @@ function common.createFilterInterface(params)
 	filterData.onFilterChanged = params.onFilterChanged
 	filterData.extraData = params.extraData
 
-	return setmetatable(filterData, filter_metatable)
+	local filterInterface = setmetatable(filterData, filter_metatable)
+	common.allFilters[params.filterName] = filterInterface
+	return filterInterface
+end
+
+function common.setAllFiltersVisibility(visible)
+	for key, filter in pairs(common.allFilters) do
+		filter:setSearchBarUsage(visible)
+		filter:clearFilter()
+	end
 end
 
 ----------------------------------------------------------------------------------------------------
