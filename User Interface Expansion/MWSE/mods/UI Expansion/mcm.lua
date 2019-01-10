@@ -144,12 +144,7 @@ function this.onCreate(container)
 		config = this.config,
 		key = "useSearch",
 		onUpdate = function(e)
-			common.inventoryFilter:setSearchBarUsage(this.config.useSearch)
-			common.inventoryFilter:clearFilter()
-			common.magicFilter:setSearchBarUsage(this.config.useSearch)
-			common.magicFilter:clearFilter()
-			common.barterFilter:setSearchBarUsage(this.config.useSearch)
-			common.barterFilter:clearFilter()
+			common.setAllFiltersVisibility(this.config.useSearch)
 		end
 	})
 

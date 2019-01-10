@@ -8,6 +8,7 @@ local common = require("UI Expansion.common")
 ----------------------------------------------------------------------------------------------------
 
 local barterFilters = common.createFilterInterface({
+	filterName = "barter",
 	createSearchBar = true,
 	createIcons = true,
 	createButtons = true,
@@ -15,7 +16,6 @@ local barterFilters = common.createFilterInterface({
 	useSearch = common.config.useSearch,
 	onFilterChanged = tes3ui.updateBarterMenuTiles,
 })
-common.barterFilter = barterFilters
 
 common.createStandardInventoryFilters(barterFilters)
 
@@ -35,14 +35,14 @@ local function onMenuBarterActivated(e)
 	barterFilters:createElements(buttonBlock)
 
 	-- Interface with the inventory filter to show the tradable tab.
-	common.inventoryFilter:setFilterHidden("tradable", false)
+	common.allFilters.inventory:setFilterHidden("tradable", false)
 	if (common.config.autoFilterToTradable) then
-		common.inventoryFilter:setFilter("tradable")
+		common.allFilters.inventory:setFilter("tradable")
 	end
 
 	-- Hide it again when this UI goes away.
 	buttonBlock:register("destroy", function(e)
-		common.inventoryFilter:setFilterHidden("tradable", true)
+		common.allFilters.inventory:setFilterHidden("tradable", true)
 	end)
 
 	-- Focus the filter search bar.

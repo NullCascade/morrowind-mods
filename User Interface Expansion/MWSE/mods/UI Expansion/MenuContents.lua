@@ -12,7 +12,7 @@ local inputController = tes3.worldController.inputController
 -- Contents: Searching and filtering.
 ----------------------------------------------------------------------------------------------------
 
-local function onSearchTextPreUpdate()
+local function onKeyInput()
 	-- Ctrl+Space (default) takes all.
 	if (common.complexKeybindTest(common.config.keybindTakeAll)) then
 		local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
@@ -20,7 +20,7 @@ local function onSearchTextPreUpdate()
 		takeAllButton:triggerEvent("mouseClick")
 		return false
 	-- Space (when no text) closes.
-	elseif (common.contentsFilter:getSearchText() == nil and common.complexKeybindTest(common.config.keybindClose)) then
+	elseif (common.allFilters.contents:getSearchText() == nil and common.complexKeybindTest(common.config.keybindClose)) then
 		tes3ui.leaveMenuMode()
 		return false
 	end
@@ -29,8 +29,11 @@ end
 local function onFilterChanged()
 	if (common.config.takeFilteredItems) then
 		local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
+		if (contentsMenu == nil) then
+			return
+		end
 		local takeAllButton = contentsMenu:findChild(GUI_ID_MenuContents_takeallbutton)
-		local contentsFilter = common.contentsFilter
+		local contentsFilter = common.allFilters.contents
 		if (contentsFilter.searchText ~= nil or #contentsFilter.filtersOrdered ~= #contentsFilter.activeFilters) then
 			takeAllButton.text = common.dictionary.takeFiltered
 		else
@@ -41,15 +44,14 @@ local function onFilterChanged()
 end
 
 local contentsFilters = common.createFilterInterface({
+	filterName = "contents",
 	createSearchBar = true,
 	createIcons = true,
 	createButtons = true,
 	useIcons = not common.config.useInventoryTextButtons,
 	useSearch = common.config.useSearch,
 	onFilterChanged = onFilterChanged,
-	onSearchTextPreUpdate = onSearchTextPreUpdate,
 })
-common.contentsFilter = contentsFilters
 
 common.createStandardInventoryFilters(contentsFilters)
 
@@ -63,6 +65,13 @@ local function onMenuContentsActivated(e)
 	if (not e.newlyCreated) then
 		return
 	end
+
+	-- Register a key event for take all and container closing.
+	event.register("keyDown", onKeyInput)
+	event.register("menuExit", function (e)
+		event.unregister("keyDown", onKeyInput,
+		{ doOnce = true })
+	end)
 
 	-- Add a new block in the right place.
 	local contentsMenu = e.element
