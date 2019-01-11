@@ -260,8 +260,9 @@ local function menuSave(e)
 		newSaveButton.borderRight = 4
 
 		-- Now we can register events on the input
-		saveInput:register("update", function()
-			if (CanSave(saveInput.text)) then
+		saveInput:register("keyPress", function(x)
+			x.source:forwardEvent(x)
+			if (not CanSave(saveInput.text)) then
 				saveButton.disabled = true
 				saveButton.widget.state = 2 -- Disabled
 			else
