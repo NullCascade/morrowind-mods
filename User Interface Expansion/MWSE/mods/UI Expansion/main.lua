@@ -42,6 +42,7 @@ local defaultConfig = {
 		options = true,
 		quantity = true,
 		rest = true,
+		saveLoad = true,
 		stat = true,
 		tooltip = true,
 	},
@@ -149,6 +150,11 @@ local function onInitialized(e)
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuRest.lua")
 	else
 		mwse.log("[UI Expansion] Skipping module: rest")
+	end
+	if (config.components.saveLoad) then
+		dofile("Data Files/MWSE/mods/UI Expansion/MenuSaveLoad.lua")
+	else
+		mwse.log("[UI Expansion] Skipping module: save/load")
 	end
 	if (config.components.stat) then
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuStat.lua")
