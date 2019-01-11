@@ -29,10 +29,17 @@ local function SetActive(listBoxElement, selected)
 			listKids[i].widget.state = 1 -- Normal
 			-- Trigger leave to encourage the element to change color properly.
 			listKids[i]:triggerEvent("mouseLeave")
+
+			if (type(selected) == "string" and listKids[i].text == selected) then
+				listKids[i].widget.state = 4
+				listKids[i]:triggerEvent("mouseLeave")
+			end
 		end
 	end
 
-	selected.widget.state = 4 -- Active
+	if (type(selected) ~= "string") then
+		selected.widget.state = 4 -- Active
+	end
 end
 
 local function FindCharacters(scrollElement, characterSelectElement)
@@ -57,7 +64,9 @@ local function FindCharacters(scrollElement, characterSelectElement)
 			SetActive(characterSelectElement, select)
 		end)
 	end
+
 	characterSelectElement.widget:contentsChanged()
+	SetActive(characterSelectElement, common.dictionary.allCharacters)
 end
 
 local load_title_id = tes3ui.registerID("MenuLoad_savelabel")
@@ -78,12 +87,11 @@ local function menuLoad(e)
 		charSelect.heightProportional = 1.0
 		charSelect.borderRight = 4
 		charSelect.paddingAllSides = 4
-		local allChars = charSelect:createTextSelect({ text = "All Characters" })
+		local allChars = charSelect:createTextSelect({ text = common.dictionary.allCharacters })
 		allChars:register("mouseClick", function(e)
 			filterGameFiles(scroll)
 			SetActive(charSelect, allChars)
 		end)
-		SetActive(charSelect, allChars)
 		charSelect:createDivider()
 
 		-- Info on the left, saves on the right.
@@ -102,6 +110,7 @@ local function menuLoad(e)
 
 	if( tes3.mobilePlayer ~= nil ) then
 		filterGameFiles(scroll, tes3.mobilePlayer.object.name)
+		SetActive(charSelect, tes3.mobilePlayer.object.name)
 	else
 		filterGameFiles(scroll)
 	end

@@ -71,5 +71,6 @@ return {
 		lightDuration = "Duration",
 		condition = "Condition",
 		weightClasses = {"Light Armor", "Medium Armor", "Heavy Armor"},
+		allCharacters = "All Characters"
 	},
 }
