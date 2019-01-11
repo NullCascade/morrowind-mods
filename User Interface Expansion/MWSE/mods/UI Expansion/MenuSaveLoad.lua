@@ -14,7 +14,8 @@ local save_showAll_id = tes3ui.registerID("UIEXP_MenuSave_ShowAll")
 local save_saveInput_id = tes3ui.registerID("UIEXP_MenuSave_SaveInput")
 
 local function SaveFileName(saveName)
-	return string.format("%s_%s", tes3.mobilePlayer.object.name:lower(), saveName:lower())
+	-- Lowercase everything, strip non-alphanumeric characters.
+	return string.format("%s_%s", tes3.mobilePlayer.object.name:lower(), saveName:lower()):gsub("%W", "")
 end
 
 local function CanSave(saveName)
@@ -297,9 +298,14 @@ local function menuSave(e)
 				saveButton.widget.state = 1 -- Normal
 			end
 		end)
-
 		saveInput:register("keyEnter", function()
 			TrySave(saveInput.text)
+		end)
+		saveInput:register("mouseClick", function()
+			tes3ui.acquireTextInput(saveInput)
+		end)
+		inputBlock:register("mouseClick", function()
+			tes3ui.acquireTextInput(saveInput)
 		end)
 
 		local showAll = buttonPanel:createButton({ id = save_showAll_id, text = common.dictionary.allCharacters })
