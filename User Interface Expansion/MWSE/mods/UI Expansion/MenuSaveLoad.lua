@@ -13,6 +13,63 @@ local save_cancelButton_id = tes3ui.registerID("MenuSave_Cancelbutton")
 local save_showAll_id = tes3ui.registerID("UIEXP_MenuSave_ShowAll")
 local save_saveInput_id = tes3ui.registerID("UIEXP_MenuSave_SaveInput")
 
+local function SaveFileName(saveName)
+	return string.format("%s_%s", tes3.mobilePlayer.object.name:lower(), saveName:lower())
+end
+
+local function CanSave(saveName)
+	-- Don't have to check for max length, as it's limited by the text input.
+	if (#saveName > 0) then
+		return true
+	end
+
+	return false
+end
+
+local function SaveExists(saveName, saveFilename)
+	for file in lfs.dir("saves") do
+		if (saveFilename) then
+			if (file == saveFilename) then
+				return true
+			end
+		elseif (string.endswith(file, ".ess") or string.endswith(file, ".tes")) then
+			if (file:sub(0, -5) == SaveFileName(saveName)) then
+				return true
+			end
+		end
+	end
+
+	return false
+end
+
+local function Save(saveName, saveFilename)
+	tes3ui.findMenu(save_menu_id):destroy()
+	tes3ui.leaveMenuMode()
+	if (saveFilename) then
+		tes3.saveGame({ file = saveFilename, name = saveName })
+	else
+		tes3.saveGame({ file = SaveFileName(saveName), name = saveName })
+	end
+end
+
+local function TrySave(saveName, saveFilename)
+	if (CanSave(saveName)) then
+		if(SaveExists(saveName, saveFilename)) then
+			tes3.messageBox({
+				message = tes3.findGMST(tes3.gmst.sMessage4).value,
+				buttons = { tes3.findGMST(tes3.gmst.sYes).value, tes3.findGMST(tes3.gmst.sNo).value },
+				callback = function(e)
+					if (e.button == 0) then
+						Save(saveName, saveFilename)
+					end
+				end
+			})
+		else
+			Save(saveName)
+		end
+	end
+end
+
 -- Returns true if we filtered successfully, false if not.
 local function filterGameFiles(scrollElement, characterName)
 	local scrollKids = scrollElement:getContentElement().children
@@ -72,10 +129,32 @@ local function SetActive(listBoxElement, selected)
 	end
 end
 
+-- Used during loading only.
 local function MakeCharacterList(scrollElement, characterSelectElement)
 	local scrollKids = scrollElement:getContentElement().children
 
 	local characters = {}
+
+	for i = 1, #scrollKids do
+		local save = scrollKids[i]:getPropertyObject("MenuLoad_file", "tes3gameFile")
+
+		-- Save game button will not have a game save property.
+		if (save) then
+			characters[save.playerName] = true
+		end
+	end
+
+	for k, v in pairs(characters) do
+		local select = characterSelectElement:createTextSelect({ text = k })
+		select:register("mouseClick", function()
+			filterGameFiles(scrollElement, k)
+			SetActive(characterSelectElement, select)
+		end)
+	end
+end
+
+local function SetSaveGameEventHandlers(scrollElement, characterSelectElement)
+	local scrollKids = scrollElement:getContentElement().children
 
 	for i = 1, #scrollKids do
 		local save = scrollKids[i]:getPropertyObject("MenuLoad_file", "tes3gameFile") or
@@ -83,9 +162,7 @@ local function MakeCharacterList(scrollElement, characterSelectElement)
 
 		-- Save game button will not have a game save property.
 		if (save) then
-			characters[save.playerName] = true
-
-			-- While we're here, add an event so we can delete saves.
+			-- Add an event so we can delete saves.
 			scrollKids[i]:register("mouseClick", function()
 				if (tes3.worldController.inputController:isKeyDown(tes3.scanCode.lShift)) then
 					tes3.messageBox({
@@ -96,38 +173,36 @@ local function MakeCharacterList(scrollElement, characterSelectElement)
 								save:deleteFile()
 								scrollKids[i]:destroy()
 								scrollElement.widget:contentsChanged()
-								MakeCharacterList(scrollElement, characterSelectElement)
+								if (characterSelectElement) then
+									MakeCharacterList(scrollElement, characterSelectElement)
+								end
 							end
 						end
 					})
-				-- Reimplement loading instead of forwarding the event.
-				else
+				-- Reimplement saving/loading instead of forwarding the event.
+				elseif (characterSelectElement) then
 					tes3ui.findMenu(load_menu_id):destroy()
 					tes3ui.leaveMenuMode()
 					tes3.loadGame(save.filename)
+				else
+					TrySave(save.description, save.filename)
 				end
 			end)
 		end
 	end
 
-	characterSelectElement:getContentElement():destroyChildren()
-	local allChars = characterSelectElement:createTextSelect({ text = common.dictionary.allCharacters })
-	allChars:register("mouseClick", function()
-		filterGameFiles(scrollElement)
-		SetActive(characterSelectElement, allChars)
-	end)
-	characterSelectElement:createDivider()
-
-	for k, v in pairs(characters) do
-		local select = characterSelectElement:createTextSelect({ text = k })
-		select:register("mouseClick", function()
-			filterGameFiles(scrollElement, k)
-			SetActive(characterSelectElement, select)
+	if (characterSelectElement) then
+		characterSelectElement:getContentElement():destroyChildren()
+		local allChars = characterSelectElement:createTextSelect({ text = common.dictionary.allCharacters })
+		allChars:register("mouseClick", function()
+			filterGameFiles(scrollElement)
+			SetActive(characterSelectElement, allChars)
 		end)
-	end
+		characterSelectElement:createDivider()
 
-	characterSelectElement.widget:contentsChanged()
-	SetActive(characterSelectElement, common.dictionary.allCharacters)
+		characterSelectElement.widget:contentsChanged()
+		SetActive(characterSelectElement, common.dictionary.allCharacters)
+	end
 end
 
 local function menuLoad(e)
@@ -161,6 +236,7 @@ local function menuLoad(e)
 
 	local scroll = e.element:findChild(load_scroll_id)
 	local charSelect = e.element:findChild(load_charSelect_id)
+	SetSaveGameEventHandlers(scroll, charSelect)
 	MakeCharacterList(scroll, charSelect)
 
 	if( tes3.mobilePlayer ~= nil ) then
@@ -171,55 +247,6 @@ local function menuLoad(e)
 	end
 end
 event.register("uiActivated", menuLoad, { filter = "MenuLoad"})
-
-local function SaveFileName(saveName)
-	return string.format("%s_%s", tes3.mobilePlayer.object.name:lower(), saveName:lower())
-end
-
-local function CanSave(saveName)
-	-- Don't have to check for max length, as it's limited by the text input.
-	if (#saveName > 0) then
-		return true
-	end
-
-	return false
-end
-
-local function SaveExists(saveName)
-	for file in lfs.dir("saves") do
-		if string.endswith(file, ".ess") or string.endswith(file, ".tes") then
-			if file:sub(0, -5) == SaveFileName(saveName) then
-				return true
-			end
-		end
-	end
-
-	return false
-end
-
-local function Save(saveName)
-	tes3ui.findMenu(save_menu_id):destroy()
-	tes3ui.leaveMenuMode()
-	tes3.saveGame({ file = SaveFileName(saveName), name = saveName })
-end
-
-local function TrySave(saveName)
-	if (CanSave(saveName)) then
-		if(SaveExists(saveName)) then
-			tes3.messageBox({
-				message = tes3.findGMST(tes3.gmst.sMessage4).value,
-				buttons = { tes3.findGMST(tes3.gmst.sYes).value, tes3.findGMST(tes3.gmst.sNo).value },
-				callback = function(e)
-					if (e.button == 0) then
-						Save(saveName)
-					end
-				end
-			})
-		else
-			Save(saveName)
-		end
-	end
-end
 
 local function menuSave(e)
 	if (e.newlyCreated) then
@@ -291,10 +318,12 @@ local function menuSave(e)
 		buttonPanel:reorderChildren(0, -3, 3)
 	end
 
+	local scroll = e.element:findChild(save_scroll_id)
+	SetSaveGameEventHandlers(scroll)
+
 	local saveInput = e.element:findChild(save_saveInput_id)
 	tes3ui.acquireTextInput(saveInput)
 
-	local scroll = e.element:findChild(save_scroll_id)
 	if (tes3.mobilePlayer ~= nil) then
 		if (not filterGameFiles(scroll, tes3.mobilePlayer.object.name)) then
 			-- Account for a new character with no saves:
