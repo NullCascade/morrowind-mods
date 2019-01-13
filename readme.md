@@ -50,6 +50,12 @@ This mod provides a very simple, generic-case auto-harvesting for organic contai
 
 * Download: [Nexus](https://www.nexusmods.com/morrowind/mods/45627)
 
+## Limited Leaping
+
+Tired of being rewarded for spamming jump on stairs? Put a bit of a cooldown on that hopping, and a minimum fatigue required to jump.
+
+* Download: [Nexus](https://www.nexusmods.com/morrowind/mods/46299)
+
 ## Memory Monitor
 
 Another simple mod that warns the player if they are approaching the 4 GB memory limit.
