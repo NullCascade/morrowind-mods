@@ -40,8 +40,6 @@ local function enchantConditionBlock(tooltip, object, itemData)
 		block.paddingAllSides = 4
 		block.paddingLeft = 2
 		block.paddingRight = 2
-		--TODO Temporarily removed the label.
-		--block:createLabel{text = string.format("%s:", common.dictionary.condition)}
 
 		block:createFillBar{current = itemData and itemData.condition or object.maxCondition, max = object.maxCondition}
 	end
@@ -57,7 +55,6 @@ local function enchantConditionBlock(tooltip, object, itemData)
 		for i = 1, #object.enchantment.effects do
 			-- effects is a fixed size array, empty slots have the id -1.
 			if object.enchantment.effects[i].id >= 0 then
-				--magicEffectBlock(tooltip, object.enchantment, object.enchantment.effects[i])
 				local block = tooltip:createBlock({})
 				block.minWidth = 1
 				block.maxWidth = 640
@@ -72,8 +69,9 @@ local function enchantConditionBlock(tooltip, object, itemData)
 			end
 		end
 
-		-- Constant effect enchantments don't have a charge!
-		if object.enchantment.castType ~= tes3.enchantmentType.constant then
+		-- Constant effect and Cast Once enchantments don't have a charge!
+		if object.enchantment.castType ~= tes3.enchantmentType.constant
+		and object.enchantment.castType ~= tes3.enchantmentType.castOnce then
 			local block = tooltip:createBlock({})
 			block.autoWidth = true
 			block.autoHeight = true
