@@ -1,11 +1,13 @@
-local GUI_ID_TooltipIconBar = tes3ui.registerID("UIEXP_Tooltip_IconBar")
-local GUI_ID_TooltipExtraDivider = tes3ui.registerID("UIEXP_Tooltip_ExtraDivider")
-local GUI_ID_TooltipEnchantmentDivider = tes3ui.registerID("UIEXP_Tooltip_EnchantmentDivider")
-local GUI_ID_TooltipEnchantCapacity = tes3ui.registerID("UIEXP_Tooltip_EnchantCapacity")
-local GUI_ID_TooltipSpeed = tes3ui.registerID("UIEXP_Tooltip_Speed")
-local GUI_ID_TooltipReach = tes3ui.registerID("UIEXP_Tooltip_Reach")
-local GUI_ID_TooltipWeightClass = tes3ui.registerID("UIEXP_Tooltip_WeightClass")
-local GUI_ID_TooltipStolenLabel = tes3ui.registerID("UIEXP_Tooltip_StolenLabel")
+local GUI_ID_TooltipIconBar				= tes3ui.registerID("UIEXP_Tooltip_IconBar")
+local GUI_ID_TooltipIconGoldBlock		= tes3ui.registerID("UIEXP_Tooltip_IconGoldBlock")
+local GUI_ID_TooltipIconWeightBlock		= tes3ui.registerID("UIEXP_Tooltip_IconWeightBlock")
+local GUI_ID_TooltipExtraDivider		= tes3ui.registerID("UIEXP_Tooltip_ExtraDivider")
+local GUI_ID_TooltipEnchantmentDivider	= tes3ui.registerID("UIEXP_Tooltip_EnchantmentDivider")
+local GUI_ID_TooltipEnchantCapacity		= tes3ui.registerID("UIEXP_Tooltip_EnchantCapacity")
+local GUI_ID_TooltipSpeed				= tes3ui.registerID("UIEXP_Tooltip_Speed")
+local GUI_ID_TooltipReach				= tes3ui.registerID("UIEXP_Tooltip_Reach")
+local GUI_ID_TooltipWeightClass			= tes3ui.registerID("UIEXP_Tooltip_WeightClass")
+local GUI_ID_TooltipStolenLabel			= tes3ui.registerID("UIEXP_Tooltip_StolenLabel")
 
 local common = require("UI Expansion.common")
 
@@ -15,6 +17,35 @@ local enchantmentType = {
 	tes3.findGMST(tes3.gmst.sItemCastWhenUsed).value,
 	tes3.findGMST(tes3.gmst.sItemCastConstant).value,
 }
+
+local function tryDestroyID(tooltip, uiid)
+	local element = tooltip:findChild(tes3ui.registerID(uiid))
+	if element ~= nil then
+		element:destroy()
+		return true
+	end
+	return false
+end
+
+local function tryDestroyAllID(tooltip, uiid)
+	while true do
+		local element = tooltip:findChild(tes3ui.registerID(uiid))
+		if element ~= nil then
+			element:destroy()
+		else
+			return
+		end
+	end
+end
+
+local function tryHideID(tooltip, uiid)
+	local element = tooltip:findChild(tes3ui.registerID(uiid))
+	if element ~= nil then
+		element.visible = false
+		return true
+	end
+	return false
+end
 
 local function labelFormatted(tooltip, label, uiid)
 	local block
@@ -42,12 +73,9 @@ local function enchantConditionBlock(tooltip, object, itemData)
 
 	if object.maxCondition ~= nil and object.objectType ~= tes3.objectType.ammunition then
 		-- Destroy the old condition block, and replace it.
-		local conditionID = tes3ui.registerID("HelpMenu_qualityCondition")
-		local oldCondition = tooltip:findChild(conditionID)
-		if oldCondition then
-			oldCondition:destroy()
-		end
-		local block = tooltip:createBlock{ id = conditionID }
+		tryDestroyID(tooltip, "HelpMenu_qualityCondition")
+
+		local block = tooltip:createBlock{ id = tes3ui.registerID("HelpMenu_qualityCondition") }
 		block.autoWidth = true
 		block.autoHeight = true
 		block.paddingAllSides = 4
@@ -58,6 +86,9 @@ local function enchantConditionBlock(tooltip, object, itemData)
 	end
 
 	if object.enchantment then
+		tryDestroyID(tooltip, "HelpMenu_castType")
+		tryDestroyID(tooltip, "HelpMenu_enchantmentContainer")
+
 		-- Check for condition again, otherwise there could be nothing to divide.
 		if object.maxCondition ~= nil then
 			local divide = tooltip:createDivider{ id = GUI_ID_TooltipEnchantmentDivider }
@@ -66,6 +97,7 @@ local function enchantConditionBlock(tooltip, object, itemData)
 
 		tooltip:createLabel{ text = enchantmentType[object.enchantment.castType + 1], id = tes3ui.registerID("HelpMenu_castType") }
 		local enchantContainer = tooltip:createBlock{ id = tes3ui.registerID("HelpMenu_enchantmentContainer") }
+		enchantContainer.flowDirection = "top_to_bottom"
 		enchantContainer.autoWidth = true
 		enchantContainer.autoHeight = true
 		for i = 1, #object.enchantment.effects do
@@ -102,9 +134,9 @@ local function enchantConditionBlock(tooltip, object, itemData)
 end
 
 local function replaceWeaponTooltip(tooltip, weapon, itemData)
-	for i = #tooltip:getContentElement().children, 3, -1 do
-		tooltip:getContentElement().children[i]:destroy()
-	end
+	tryDestroyID(tooltip, "HelpMenu_slash")
+	tryDestroyID(tooltip, "HelpMenu_chop")
+	tryDestroyID(tooltip, "HelpMenu_thrust")
 
 	-- Strip out "Type:", as it's very much self explanatory.
 	local weaponType = tooltip:findChild(tes3ui.registerID("HelpMenu_weaponType"))
@@ -145,43 +177,21 @@ local function replaceWeaponTooltip(tooltip, weapon, itemData)
 end
 
 local function replaceArmorTooltip(tooltip, armor, itemData)
-	for i = #tooltip:getContentElement().children, 2, -1 do
-		tooltip:getContentElement().children[i]:destroy()
-	end
+	tryDestroyAllID(tooltip, "HelpMenu_armorRating")
 
 	tooltip:createLabel{ text = common.dictionary.weightClasses[armor.weightClass + 1], id = GUI_ID_TooltipWeightClass }
-	tooltip:createLabel{ text = string.format("%s: %u", tes3.findGMST(tes3.gmst.sArmorRating).value, armor.armorRating), id = tes3ui.registerID("HelpMenu_armorRating") }
+	tooltip:createLabel{ text = string.format("%s: %u", tes3.findGMST(tes3.gmst.sArmorRating).value, armor:calculateArmorRating(tes3.mobilePlayer)), id = tes3ui.registerID("HelpMenu_armorRating") }
 
 	enchantConditionBlock(tooltip, armor, itemData)
 end
 
-local function replaceClothingTooltip(tooltip, clothing, itemData)
-	for i = #tooltip:getContentElement().children, 2, -1 do
-		tooltip:getContentElement().children[i]:destroy()
-	end
-
-	enchantConditionBlock(tooltip, clothing, itemData)
-end
-
-local function replaceBookTooltip(tooltip, book, itemData)
-	for i = #tooltip:getContentElement().children, 2, -1 do
-		tooltip:getContentElement().children[i]:destroy()
-	end
-
-	if book.type == tes3.bookType.scroll then
-		enchantConditionBlock(tooltip, book, itemData)
-	end
-end
-
 local function replaceAlchemyTooltip(tooltip, alchemy, itemData)
-	for i = #tooltip:getContentElement().children, 2, -1 do
-		tooltip:getContentElement().children[i]:destroy()
-	end
+	tryDestroyAllID(tooltip, "HelpMenu_effectBlock")
 
 	for i = 1, #alchemy.effects do
 		-- effects is a fixed size array, empty slots have the id -1.
 		if alchemy.effects[i].id >= 0 then
-			local block = tooltip:createBlock{ id = tes3ui.registerID("HelpMenu_effectBlock")}
+			local block = tooltip:createBlock{ id = tes3ui.registerID("HelpMenu_effectBlock") }
 			block.minWidth = 1
 			block.maxWidth = 640
 			block.autoWidth = true
@@ -198,9 +208,8 @@ end
 local function extraTooltipEarly(e)
 	-- I believe this is hardcoded in engine, so we'll just do this too.
 	if not e.object.id:find("Gold_") and not e.object.isKey then
-		-- Adjust and hide vanilla tooltip fields.
-		e.tooltip:findChild(tes3ui.registerID("HelpMenu_value")).visible = false
-		e.tooltip:findChild(tes3ui.registerID("HelpMenu_weight")).visible = false
+		tryHideID(e.tooltip, "HelpMenu_value")
+		tryHideID(e.tooltip, "HelpMenu_weight")
 
 		-- Add padding to the title.
 		e.tooltip:getContentElement().children[1].borderAllSides = 3
@@ -210,23 +219,25 @@ local function extraTooltipEarly(e)
 		elseif e.object.objectType == tes3.objectType.armor then
 			replaceArmorTooltip(e.tooltip, e.object, e.itemData)
 		elseif e.object.objectType == tes3.objectType.clothing then
-			replaceClothingTooltip(e.tooltip, e.object, e.itemData)
+			enchantConditionBlock(e.tooltip, e.object, e.itemData)
 		elseif e.object.objectType == tes3.objectType.book then
-			replaceBookTooltip(e.tooltip, e.object, e.itemData)
+			if e.object.type == tes3.bookType.scroll then
+				enchantConditionBlock(e.tooltip, e.object, e.itemData)
+			end
 		elseif e.object.objectType == tes3.objectType.alchemy then
 			replaceAlchemyTooltip(e.tooltip, e.object, e.itemData)
 
 		-- Light duration
 		elseif e.object.objectType == tes3.objectType.light then
-			local blockDurationBar = e.tooltip:createBlock({})
+			local blockDurationBar = e.tooltip:createBlock()
 			blockDurationBar.autoWidth = true
 			blockDurationBar.autoHeight = true
 			blockDurationBar.paddingAllSides = 4
 			blockDurationBar.paddingLeft = 2
 			blockDurationBar.paddingRight = 2
-			blockDurationBar:createLabel{text = string.format("%s:", common.dictionary.lightDuration)}
+			blockDurationBar:createLabel{ text = string.format("%s:", common.dictionary.lightDuration) }
 
-			local labelDurationBar = blockDurationBar:createFillBar{current = e.itemData and e.itemData.timeLeft or e.object.time, max = e.object.time}
+			local labelDurationBar = blockDurationBar:createFillBar{ current = e.itemData and e.itemData.timeLeft or e.object.time, max = e.object.time }
 			labelDurationBar.borderLeft = 4
 
 		-- Soul gem capacity
@@ -237,7 +248,7 @@ local function extraTooltipEarly(e)
 
 		-- Add the value and weight back in.
 		if e.object.value and e.object.weight then
-			local container = e.tooltip:createBlock({id = GUI_ID_TooltipIconBar})
+			local container = e.tooltip:createBlock{ id = GUI_ID_TooltipIconBar }
 			container.widthProportional = 1.0
 			container.minHeight = 16
 			container.autoHeight = true
@@ -246,7 +257,7 @@ local function extraTooltipEarly(e)
 			container.childAlignX = 1.0
 
 			-- Value
-			local block = container:createBlock({})
+			local block = container:createBlock{ id = GUI_ID_TooltipIconGoldBlock }
 			block.autoWidth = true
 			block.autoHeight = true
 			block:createImage{ path = "icons/gold.dds" }
@@ -254,15 +265,13 @@ local function extraTooltipEarly(e)
 			label.borderLeft = 4
 
 			-- Weight
-			block = container:createBlock({})
+			block = container:createBlock{ id = GUI_ID_TooltipIconWeightBlock }
 			block.autoWidth = true
 			block.autoHeight = true
 			block:createImage{ path = "icons/weight.dds" }
 			block.borderLeft = 8
 			label = block:createLabel{ text = string.format("%.2f", e.object.weight) }
 			label.borderLeft = 4
-
-			parent:updateLayout()
 
 			-- Update minimum width of the whole tooltip to make sure there's space for the value/weight.
 			e.tooltip:getContentElement().minWidth = 120
