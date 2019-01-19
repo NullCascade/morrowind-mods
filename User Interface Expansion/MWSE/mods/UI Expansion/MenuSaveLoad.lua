@@ -274,7 +274,7 @@ local function menuSave(e)
 		inputBlock.paddingBottom = 3
 		local saveInput = inputBlock:createTextInput({ id = save_saveInput_id })
 		saveInput.widget.lengthLimit = 31
-		saveInput.text = tes3.mobilePlayer.cell.name
+		saveInput.text = tes3.mobilePlayer.cell.name or tes3.mobilePlayer.cell.region.name
 
 		local saveButton = scroll.parent:findChild(save_saveButton_id)
 		saveButton:destroy()
