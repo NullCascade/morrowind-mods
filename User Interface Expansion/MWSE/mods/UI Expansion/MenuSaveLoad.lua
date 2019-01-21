@@ -276,16 +276,16 @@ local function menuSave(e)
 		saveInput.widget.lengthLimit = 31
 		saveInput.text = tes3.mobilePlayer.cell.name or tes3.mobilePlayer.cell.region.name
 
-		local saveButton = scroll.parent:findChild(save_saveButton_id)
-		saveButton:destroy()
+		local oldSaveButton = scroll.parent:findChild(save_saveButton_id)
+		oldSaveButton:destroy()
 		-- Reuse the existing save button ID.
-		local newSaveButton = buttonPanel:createButton({ id = save_saveButton_id, text = common.dictionary.save })
-		newSaveButton:register("mouseClick", function()
+		local saveButton = buttonPanel:createButton({ id = save_saveButton_id, text = common.dictionary.save })
+		saveButton:register("mouseClick", function()
 			TrySave(saveInput.text)
 		end)
-		newSaveButton.borderAllSides = 0
-		newSaveButton.borderTop = 4
-		newSaveButton.borderRight = 4
+		saveButton.borderAllSides = 0
+		saveButton.borderTop = 4
+		saveButton.borderRight = 4
 
 		-- Now we can register events on the input
 		saveInput:register("keyPress", function(x)
