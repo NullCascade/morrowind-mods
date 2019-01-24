@@ -65,17 +65,12 @@ event.register("filterContentsMenu", onFilterContentsMenu)
 
 local function calculateCapacity()
 	local menu = tes3ui.findMenu(GUI_ID_MenuContents)
-
 	local maxCapacity = menu:getPropertyFloat("MenuContents_containerweight")
 	local container = menu:getPropertyObject("MenuContents_ObjectContainer")
-	local currentCapacity = 0
-	for _, i in pairs(container.inventory) do
-		currentCapacity = currentCapacity + (i.object.weight * i.count)
-	end
 
 	local bar = menu:findChild(contents_capacity_id)
-	bar.widget.current = currentCapacity
 	bar.widget.max = maxCapacity
+	bar.widget.current = container.inventory:calculateWeight()
 end
 
 local function onMenuContentsActivated(e)
