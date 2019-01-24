@@ -2,7 +2,9 @@
 local GUI_ID_CursorIcon = tes3ui.registerID("CursorIcon")
 local GUI_ID_MenuContents = tes3ui.registerID("MenuContents")
 local GUI_ID_MenuContents_bucket = tes3ui.registerID("MenuContents_bucket")
+local GUI_ID_MenuContents_buttonContainer = tes3ui.registerID("Buttons")
 local GUI_ID_MenuContents_takeallbutton = tes3ui.registerID("MenuContents_takeallbutton")
+local contents_capacity_id = tes3ui.registerID("UIEXP_MenuContents_capacity")
 
 local common = require("UI Expansion.common")
 
@@ -61,6 +63,21 @@ local function onFilterContentsMenu(e)
 end
 event.register("filterContentsMenu", onFilterContentsMenu)
 
+local function calculateCapacity()
+	local menu = tes3ui.findMenu(GUI_ID_MenuContents)
+
+	local maxCapacity = menu:getPropertyFloat("MenuContents_containerweight")
+	local container = menu:getPropertyObject("MenuContents_ObjectContainer")
+	local currentCapacity = 0
+	for _, i in pairs(container.inventory) do
+		currentCapacity = currentCapacity + (i.object.weight * i.count)
+	end
+
+	local bar = menu:findChild(contents_capacity_id)
+	bar.widget.current = currentCapacity
+	bar.widget.max = maxCapacity
+end
+
 local function onMenuContentsActivated(e)
 	if (not e.newlyCreated) then
 		return
@@ -89,6 +106,25 @@ local function onMenuContentsActivated(e)
 
 	-- Focus the filter search bar.
 	contentsFilters:focusSearchBar()
+
+	-- Create capacity fillbar for containers.
+	local container = contentsMenu:getPropertyObject("MenuContents_ObjectContainer")
+	if (container.objectType == tes3.objectType.container) then
+		local buttonBlock = contentsMenu:findChild(GUI_ID_MenuContents_buttonContainer).children[2]
+		local capacityBar = buttonBlock:createFillBar{ id = contents_capacity_id }
+		capacityBar.width = 128
+		capacityBar.height = 21
+		capacityBar.borderAllSides = 4
+		buttonBlock:reorderChildren(0, -1, 1)
+
+		contentsMenu:register("update", function(ed)
+			calculateCapacity()
+			ed.source:forwardEvent(ed)
+		end)
+		-- Necessary as otherwise the fillbar is hidden for some reason.
+		contentsMenu:triggerEvent("update")
+	end
+
 end
 event.register("uiActivated", onMenuContentsActivated, { filter = "MenuContents" } )
 
