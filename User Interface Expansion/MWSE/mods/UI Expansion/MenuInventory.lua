@@ -102,6 +102,7 @@ local function onEnterMenuMode(e)
 		inventoryFilters:focusSearchBar()
 	end
 end
+event.register("menuEnter", onEnterMenuMode, { filter = "MenuContents" })
 event.register("menuEnter", onEnterMenuMode, { filter = "MenuInventory" })
 event.register("menuEnter", onEnterMenuMode, { filter = "MenuMagic" })
 event.register("menuEnter", onEnterMenuMode, { filter = "MenuMap" })
