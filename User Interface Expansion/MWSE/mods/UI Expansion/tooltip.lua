@@ -229,16 +229,18 @@ local function extraTooltipEarly(e)
 
 		-- Light duration
 		elseif e.object.objectType == tes3.objectType.light then
-			local blockDurationBar = e.tooltip:createBlock()
-			blockDurationBar.autoWidth = true
-			blockDurationBar.autoHeight = true
-			blockDurationBar.paddingAllSides = 4
-			blockDurationBar.paddingLeft = 2
-			blockDurationBar.paddingRight = 2
-			blockDurationBar:createLabel{ text = string.format("%s:", common.dictionary.lightDuration) }
+			if e.object.time > 0 then
+				local blockDurationBar = e.tooltip:createBlock()
+				blockDurationBar.autoWidth = true
+				blockDurationBar.autoHeight = true
+				blockDurationBar.paddingAllSides = 4
+				blockDurationBar.paddingLeft = 2
+				blockDurationBar.paddingRight = 2
+				blockDurationBar:createLabel{ text = string.format("%s:", common.dictionary.lightDuration) }
 
-			local labelDurationBar = blockDurationBar:createFillBar{ current = e.itemData and e.itemData.timeLeft or e.object.time, max = e.object.time }
-			labelDurationBar.borderLeft = 4
+				local labelDurationBar = blockDurationBar:createFillBar{ current = e.itemData and e.itemData.timeLeft or e.object.time, max = e.object.time }
+				labelDurationBar.borderLeft = 4
+			end
 
 		-- Soul gem capacity
 		elseif e.object.isSoulGem then
