@@ -19,6 +19,7 @@ local defaultConfig = {
 	keybindClose = { tes3.scanCode.space },
 	keybindTakeAll = { tes3.scanCode.leftCtrl, tes3.scanCode.space },
 	keybindShowAdditionalInfo = { tes3.scanCode.leftAlt },
+	keybindMapSwitch = { tes3.scanCode.m },
 	dialogueTopicSeenColor = "journal_finished_quest_color",
 	dialogueTopicUniqueColor = "link_color",
 	mapConfig = {
@@ -38,7 +39,8 @@ local defaultConfig = {
 		inventorySelect = true,
 		journal = false,
 		magic = true,
-		map = false,
+		map = true,
+		mapPlugin = false,
 		options = true,
 		quantity = true,
 		rest = true,
@@ -135,6 +137,11 @@ local function onInitialized(e)
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuMap.lua")
 	else
 		mwse.log("[UI Expansion] Skipping module: map")
+	end
+	if (config.components.mapPlugin) then
+		dofile("Data Files/MWSE/mods/UI Expansion/MenuMapPlugin.lua")
+	else
+		mwse.log("[UI Expansion] Skipping module: mapPlugin")
 	end
 	if (config.components.options) then
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuOptions.lua")
