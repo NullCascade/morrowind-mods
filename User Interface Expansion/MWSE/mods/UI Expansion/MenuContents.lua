@@ -71,6 +71,10 @@ local function calculateCapacity()
 	local bar = menu:findChild(contents_capacity_id)
 	bar.widget.max = maxCapacity
 	bar.widget.current = container.inventory:calculateWeight()
+
+	if (maxCapacity <= 0) then
+		bar.visible = false
+	end
 end
 
 local function onMenuContentsActivated(e)
