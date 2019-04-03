@@ -71,6 +71,11 @@ local function validCompanionCheck(actor)
 		return false
 	end
 
+	-- Restrict based on AI package type.
+	if (tes3.getCurrentAIPackageId(actor) ~= tes3.aiPackage.follow) then
+		return false
+	end
+
 	-- Respect the blacklist.
 	if (isActorInBlackList(actor)) then
 		return false
