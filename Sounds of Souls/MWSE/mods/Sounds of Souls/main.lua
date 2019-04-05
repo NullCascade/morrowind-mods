@@ -7,7 +7,7 @@
 ]]--
 
 -- Mod configuration.
-local config = mwse.loadConfig("Sounds of Souls")
+local config = require("Sounds of Souls.config")
 
 -- Action string/integer mapping.
 local soundTriggerActionNames = { "activate", "playerInventory", "cell" }
@@ -92,12 +92,12 @@ end
 
 -- 
 local function getSoulVolume(creature)
-	return math.clamp((creature and creature.soul or 0) * config.volume.soulValueScaler, config.volume.min, config.volume.max)
+	return math.clamp((creature and creature.soul or 0) * config.volume.soulValueScaler / 1000, config.volume.min / 100, config.volume.max / 100)
 end
 
 -- 
 local function getSoulPitch(creature)
-	return math.clamp((creature and creature.soul or 0) * config.pitch.soulValueScaler, config.pitch.min, config.pitch.max)
+	return math.clamp((creature and creature.soul or 0) * config.pitch.soulValueScaler / 1000, config.pitch.min / 100, config.pitch.max / 100)
 end
 
 -- Determines if a given item/variable match contains a soul gem.
@@ -185,6 +185,10 @@ end
 
 -- We want to force a check when someone activates the soulgem.
 local function onActivate(e)
+	if (not config.environmentChecks.activate.enabled) then
+		return
+	end
+
 	local target = e.target
 	local item = target.object
 	local attachments = target.attachments
@@ -211,6 +215,10 @@ event.register("activate", onActivate)
 local function playRandomInventorySoul()
 	timer.start(math.random(config.environmentChecks.playerInventory.timerMin, config.environmentChecks.playerInventory.timerMax), playRandomInventorySoul)
 
+	if (not config.environmentChecks.playerInventory.enabled) then
+		return
+	end
+
 	local soulConfig = getChoiceFromSoulList(getSoulGemListFromInventory(), soundTriggerAction.inventory)
 	if (soulConfig == nil) then
 		-- print("[nc-sos] No soul config found.")
@@ -231,6 +239,10 @@ end
 
 local function playRandomCellSoul()
 	timer.start(math.random(config.environmentChecks.cell.timerMin, config.environmentChecks.cell.timerMax), playRandomCellSoul)
+
+	if (not config.environmentChecks.cell.enabled) then
+		return
+	end
 
 	local soulConfig = getChoiceFromSoulList(getSoulGemListFromCell(tes3.getPlayerCell()), soundTriggerAction.inventory)
 	if (soulConfig == nil) then
@@ -255,3 +267,15 @@ local function onLoaded(e)
 	timer.start(math.random(config.environmentChecks.cell.timerMin, config.environmentChecks.cell.timerMax), playRandomCellSoul)
 end
 event.register("loaded", onLoaded)
+
+--
+-- MCM Setup
+--
+
+local function registerModConfig()
+	local easyMCM = include("easyMCM.modConfig")
+	if (easyMCM) then
+		mwse.registerModConfig("Sounds of Souls", easyMCM.registerModData(require("Sounds of Souls.mcm")))
+	end
+end
+event.register("modConfigReady", registerModConfig)
