@@ -32,12 +32,7 @@ if (lfs.attributes("Data Files/MWSE/lua/nc/exit/mod_init.lua")) then
 	end
 end
 
-local config = mwse.loadConfig("Expeditious Exit")
-if (not config) then
-	config = {
-		showMenuOnExit = true
-	}
-end
+local config = require("Expeditious Exit.config")
 
 -- Callback used when confirming exit
 local function checkConfirmedCloseCallback(e)
@@ -85,61 +80,14 @@ local function rebindExitButton(e)
 end
 event.register("uiCreated", rebindExitButton, { filter = "MenuOptions" })
 
--- 
+--
 -- Handle mod config menu.
--- 
+--
 
--- Package to send to the mod config.
-local modConfig = {}
-
--- Callback for our button that binds to config.showMenuOnExit
-local function modConfigToggleConfirm(e)
-	-- Update our config.
-	config.showMenuOnExit = not config.showMenuOnExit
-
-	-- Update button text to the new value.
-	local button = e.source
-	button.text = config.showMenuOnExit and tes3.findGMST(tes3.gmst.sYes).value or tes3.findGMST(tes3.gmst.sNo).value
-end
-
--- Callback for when the mod config creates our UI. We specify this if we want to manually control
--- the look and functionality of our config, rather than leaving the logic entirely up to the mod
--- config system.
-function modConfig.onCreate(container)
-	local mainBlock = container:createThinBorder({})
-	mainBlock.layoutWidthFraction = 1.0
-	mainBlock.layoutHeightFraction = 1.0
-	mainBlock.paddingAllSides = 6
-
-	do
-		-- The container is a scroll list. Create a row in that list that organizes elements horizontally.
-		local horizontalBlock = mainBlock:createBlock({})
-		horizontalBlock.flowDirection = "left_to_right"
-		horizontalBlock.layoutWidthFraction = 1.0
-		horizontalBlock.autoHeight = true
-	
-		-- The text for the config option.
-		local label = horizontalBlock:createLabel({ text = "Display confirmation message box?" })
-		label.layoutOriginFractionX = 0.0
-
-		-- Button that toggles the config value.
-		local button = horizontalBlock:createButton({ text = (config.showMenuOnExit and tes3.findGMST(tes3.gmst.sYes).value or tes3.findGMST(tes3.gmst.sNo).value) })
-		button.layoutOriginFractionX = 1.0
-		button.paddingTop = 3
-		button:register("mouseClick", modConfigToggleConfirm)
-	end
-end
-
--- Since we are taking control of the mod config system, we will manually handle saves. This is
--- called when the save button is clicked while configuring this mod.
-function modConfig.onClose(container)
-	mwse.log("[Expeditious Exit] Saving mod configuration:")
-	mwse.log(json.encode(config, { indent = true }))
-	mwse.saveConfig("Expeditious Exit", config, { indent = true })
-end
-
--- When the mod config menu is ready to start accepting registrations, register this mod.
 local function registerModConfig()
-	mwse.registerModConfig("Expeditious Exit", modConfig)
+	local easyMCM = include("easyMCM.modConfig")
+	if (easyMCM) then
+		easyMCM.registerMCM(require("Expeditious Exit.mcm"))
+	end
 end
 event.register("modConfigReady", registerModConfig)
