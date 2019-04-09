@@ -47,6 +47,7 @@ local defaultConfig = {
 		saveLoad = true,
 		stat = true,
 		tooltip = true,
+		training = true,
 	},
 }
 local config = table.copy(defaultConfig)
@@ -172,6 +173,11 @@ local function onInitialized(e)
 		dofile("Data Files/MWSE/mods/UI Expansion/Tooltip.lua")
 	else
 		mwse.log("[UI Expansion] Skipping module: tooltip")
+	end
+	if (config.components.training) then
+		dofile("Data Files/MWSE/mods/UI Expansion/MenuTraining.lua")
+	else
+		mwse.log("[UI Expansion] Skipping module: training")
 	end
 end
 event.register("initialized", onInitialized)
