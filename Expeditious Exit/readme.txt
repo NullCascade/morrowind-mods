@@ -24,6 +24,7 @@
     * Morrowind, Tribunal, and Bloodmoon.
     * MGE-XE 0.10.0
     * MWSE 2.1
+    * EasyMCM (https://www.nexusmods.com/morrowind/mods/46427) for in-game config.
 
 =====================================================================================
  ABOUT THIS MOD:
@@ -41,8 +42,10 @@
 
  Extract the archive into your Morrowind installation directory. The mod should
  contain the following files:
-    .\Data Files\MWSE\nc_exit_config.json
-    .\Data Files\MWSE\lua\nc\exit\mod_init.lua
+    .\Data Files\MWSE\config\Expeditious Exit.json
+    .\Data Files\MWSE\mods\Expeditious Exit\config.lua
+    .\Data Files\MWSE\mods\Expeditious Exit\main.lua
+    .\Data Files\MWSE\mods\Expeditious Exit\mcm.lua
 
 =====================================================================================
  PLAYING THIS PLUGIN:
@@ -65,10 +68,12 @@
  VERSION HISTORY
 =====================================================================================
 
- 1.2.1 [2018-07-26]:
+ 1.2.1 [2019-04-09]:
     * Minor refactor for new MWSE folder structure.
+    * Minor API changes.
+    * Switch to using EasyMCM for the mod config menu.
 
- 1.2.1 [2018-07-12]:
+ 1.2.0 [2018-07-12]:
     * Added support for the MWSE Mod Config Menu to modify the config file.
 
  1.1.0 [2018-05-07]:
@@ -93,7 +98,7 @@
  Special thanks to Greatness7 for his help in progressing MWSE 2.1 and to DarkElfGuy
  for inspiring people to create and release mods for the yearly modathon.
 
- Copyright 2018 Michael Wallar
+ Copyright 2018 NullCascade
 
  Permission is hereby granted, free of charge, to any person obtaining a copy of
  this software and associated documentation files (the "Software"), to deal in the
