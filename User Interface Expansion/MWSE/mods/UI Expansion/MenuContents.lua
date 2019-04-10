@@ -163,7 +163,7 @@ local function onInventoryTileClicked(e)
 	local isAltDown = inputController:isKeyDown(tes3.scanCode.lAlt)
 	local isShiftDown = inputController:isKeyDown(tes3.scanCode.lShift)
 	local transferByDefault = common.config.transferItemsByDefault
-	if ((transferByDefault and not isAltDown and isShiftDown) or (not transferByDefault and isAltDown)) then
+	if ((transferByDefault and not isAltDown and not isShiftDown) or (not transferByDefault and isAltDown)) then
 		local cursorIcon = tes3ui.findHelpLayerMenu(GUI_ID_CursorIcon)
 		if (cursorIcon) then
 			return
