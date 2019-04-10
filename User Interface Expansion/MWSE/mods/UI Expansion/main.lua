@@ -70,6 +70,14 @@ local function loadConfig()
 		table.copy(configJson, config)
 	end
 
+	-- Set component states for new components.
+	local importedComponents = config.components
+	for k, v in pairs(defaultConfig.components) do
+		if (importedComponents[k] == nil) then
+			importedComponents[k] = v
+		end
+	end
+
 	common.config = config
 
 	mwse.log("[UI Expansion] Loaded configuration:")
