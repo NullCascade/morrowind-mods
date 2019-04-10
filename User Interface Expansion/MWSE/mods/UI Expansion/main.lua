@@ -183,7 +183,7 @@ local function onInitialized(e)
 		mwse.log("[UI Expansion] Skipping module: tooltip")
 	end
 	if (config.components.training) then
-		dofile("Data Files/MWSE/mods/UI Expansion/MenuTraining.lua")
+		dofile("Data Files/MWSE/mods/UI Expansion/MenuServiceTraining.lua")
 	else
 		mwse.log("[UI Expansion] Skipping module: training")
 	end
