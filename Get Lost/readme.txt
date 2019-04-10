@@ -1,7 +1,7 @@
 =====================================================================================
                                       Get  Lost                                      
                                  Author: NullCascade                                 
-                                    Version 1.0.1                                    
+                                    Version 1.0.2                                    
 =====================================================================================
 
  INDEX:
@@ -47,9 +47,6 @@
  There is no esp file to activate. Simply install the MWSE 2.1 and this mod, and
  load up an old or new game.
 
- If you want the original yes/no confirmation box before close, navigate to the
- configuration file and set messageBox to true.
-
 =====================================================================================
  KNOWN ISSUES OR BUGS:
 =====================================================================================
@@ -60,6 +57,9 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.0.2 [2019-04-10]:
+    * Fixed crash when going through character creation.
 
  1.0.1 [2018-08-22]:
     * Fixed issue where the map menu would be visible for a single frame when
