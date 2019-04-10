@@ -165,7 +165,8 @@ local function SetSaveGameEventHandlers(scrollElement, characterSelectElement)
 		if (save) then
 			-- Add an event so we can delete saves.
 			scrollKids[i]:register("mouseClick", function()
-				if (tes3.worldController.inputController:isKeyDown(tes3.scanCode.lShift)) then
+				local inputController = tes3.worldController.inputController
+				if (inputController:isKeyDown(tes3.scanCode.lShift) or inputController:isKeyDown(tes3.scanCode.rShift)) then
 					tes3.messageBox({
 						message = tes3.findGMST(tes3.gmst.sMessage3).value,
 						buttons = { tes3.findGMST(tes3.gmst.sYes).value, tes3.findGMST(tes3.gmst.sNo).value },

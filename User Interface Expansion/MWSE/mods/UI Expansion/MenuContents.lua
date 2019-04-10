@@ -160,8 +160,8 @@ local function onInventoryTileClicked(e)
 	end
 
 	-- If the player is holding the alt key, transfer the item directly.
-	local isAltDown = inputController:isKeyDown(tes3.scanCode.lAlt)
-	local isShiftDown = inputController:isKeyDown(tes3.scanCode.lShift)
+	local isAltDown = inputController:isKeyDown(tes3.scanCode.lAlt) or inputController:isKeyDown(tes3.scanCode.rAlt)
+	local isShiftDown = inputController:isKeyDown(tes3.scanCode.lShift) or inputController:isKeyDown(tes3.scanCode.rShift)
 	local transferByDefault = common.config.transferItemsByDefault
 	if ((transferByDefault and not isAltDown and not isShiftDown) or (not transferByDefault and isAltDown)) then
 		local cursorIcon = tes3ui.findHelpLayerMenu(GUI_ID_CursorIcon)
@@ -176,7 +176,7 @@ local function onInventoryTileClicked(e)
 
 		-- Holding control only transfers one item.
 		local count = e.count
-		if (inputController:isKeyDown(tes3.scanCode.lCtrl)) then
+		if (inputController:isKeyDown(tes3.scanCode.lCtrl) or inputController:isKeyDown(tes3.scanCode.rCtrl)) then
 			count = 1
 		end
 
@@ -209,8 +209,8 @@ event.register("UIEX:InventoryTileClicked", onInventoryTileClicked)
 -- Enable alt-clicking contents items to transfer it to the inventory menu.
 local function onContentsTileClicked(e)
 	-- If the player is holding the alt key, transfer the item directly.
-	local isAltDown = inputController:isKeyDown(tes3.scanCode.lAlt)
-	local isShiftDown = inputController:isKeyDown(tes3.scanCode.lShift)
+	local isAltDown = inputController:isKeyDown(tes3.scanCode.lAlt) or inputController:isKeyDown(tes3.scanCode.rAlt)
+	local isShiftDown = inputController:isKeyDown(tes3.scanCode.lShift) or inputController:isKeyDown(tes3.scanCode.rShift)
 	local transferByDefault = common.config.transferItemsByDefault
 	if ((transferByDefault and not isAltDown and not isShiftDown) or (not transferByDefault and isAltDown)) then
 		local cursorIcon = tes3ui.findHelpLayerMenu(GUI_ID_CursorIcon)
@@ -225,7 +225,7 @@ local function onContentsTileClicked(e)
 
 		-- Holding control only transfers one item.
 		local count = e.count
-		if (inputController:isKeyDown(tes3.scanCode.lCtrl)) then
+		if (inputController:isKeyDown(tes3.scanCode.lCtrl) or inputController:isKeyDown(tes3.scanCode.rCtrl)) then
 			count = 1
 		end
 
