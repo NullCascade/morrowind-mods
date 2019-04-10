@@ -63,7 +63,7 @@ local function createConfigSliderPackage(params)
     slider.width = 300
     slider:register("PartScrollBar_changed", function(e)
         config[key] = slider:getPropertyInt("PartScrollBar_current") + params.min
-        sliderLabel.text = config[key]
+        sliderLabel.text = tostring(config[key])
         if (params.onUpdate) then
             params.onUpdate(e)
         end
@@ -129,13 +129,13 @@ function this.onCreate(container)
 		label.layoutOriginFractionX = 0.0
         label.layoutOriginFractionY = 0.5
 
-		local button = horizontalBlock:createButton({ text = (this.config.capDifficulty and tes3.getGMST(tes3.gmst.sYes).value or tes3.getGMST(tes3.gmst.sNo).value) })
+		local button = horizontalBlock:createButton({ text = (this.config.capDifficulty and tes3.findGMST(tes3.gmst.sYes).value or tes3.findGMST(tes3.gmst.sNo).value) })
 		button.layoutOriginFractionX = 1.0
         button.layoutOriginFractionY = 0.5
 		button.paddingTop = 3
         button:register("mouseClick", function(e)
             this.config.capDifficulty = not this.config.capDifficulty
-            button.text = this.config.capDifficulty and tes3.getGMST(tes3.gmst.sYes).value or tes3.getGMST(tes3.gmst.sNo).value
+            button.text = this.config.capDifficulty and tes3.findGMST(tes3.gmst.sYes).value or tes3.findGMST(tes3.gmst.sNo).value
         end)
     end
 
@@ -181,9 +181,7 @@ end
 
 function this.onClose(container)
     mwse.saveConfig("Dynamic Difficulty", this.config)
-    if (tes3.player) then
-        interop.recalculate()
-    end
+    interop.recalculate()
 end
 
 return this
