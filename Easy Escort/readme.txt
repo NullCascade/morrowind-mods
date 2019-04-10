@@ -41,7 +41,9 @@
  Extract the archive into your Morrowind installation directory. The mod should
  contain the following files:
     .\Data Files\MWSE\config\Easy Escort.json
+    .\Data Files\MWSE\mods\Easy Escort\interop.lua
     .\Data Files\MWSE\mods\Easy Escort\main.lua
+    .\Data Files\MWSE\mods\Easy Escort\mcm.lua
 
  To configure the mod, use the in-game configuration menu.
 
@@ -63,8 +65,9 @@
  VERSION HISTORY
 =====================================================================================
 
- 1.2.0 [2018-08-09]:
+ 1.2.0 [2019-04-09]:
     * Added mod config menu support.
+    * Restricted following based on the follow AI package.
 
  1.1.1 [2018-06-04]:
     * Blacklisted the chargen boat guide from following you up onto the ship.
@@ -92,7 +95,7 @@
  Special thanks to Greatness7 for his help in progressing MWSE 2.1 and to DarkElfGuy
  for inspiring people to create and release mods for the yearly modathon.
 
- Copyright 2018 Michael Wallar
+ Copyright 2018 NullCascade
 
  Permission is hereby granted, free of charge, to any person obtaining a copy of
  this software and associated documentation files (the "Software"), to deal in the

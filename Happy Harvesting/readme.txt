@@ -64,8 +64,10 @@
  VERSION HISTORY
 =====================================================================================
 
- 1.1.0 [2018-07-26]:
-    * Added ability to blacklist certain container IDs.
+ 1.1.0 [2009-04-10]:
+    * Adapted to new MWSE folder structure.
+    * Added ability to blacklist certain container IDs. Defaults to blacklisting
+      Ahnassi's food and drink barrels.
     * Added Mod Config Menu support to allow for easy blacklisting.
 
  1.0.1 [2018-05-26]:

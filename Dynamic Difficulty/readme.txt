@@ -40,7 +40,9 @@
  Extract the archive into your Morrowind installation directory. The mod should
  contain the following files:
     .\Data Files\MWSE\config\Dynamic Difficulty.json
+    .\Data Files\MWSE\mods\Dynamic Difficulty\interop.lua
     .\Data Files\MWSE\mods\Dynamic Difficulty\main.lua
+    .\Data Files\MWSE\mods\Dynamic Difficulty\mcm.lua
 
  To configure the mod, use the in-game mod configuration menu.
 
@@ -62,7 +64,7 @@
  VERSION HISTORY
 =====================================================================================
 
- 1.1.0 [2018-08-09]:
+ 1.1.0 [2019-04-09]:
     * Added Mod Config Menu support.
 
  1.0.0 [2018-05-28]:

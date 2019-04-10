@@ -46,17 +46,20 @@ local function recalculateDifficulty()
 	-- Get base difficulty.
 	local difficulty = config.baseDifficulty or 0
 
-	-- Scale with player level.
-	local playerLevel = tes3.player.object.level
-	difficulty = difficulty + config.increasePerLevel * (playerLevel - 1)
-
-	-- Add any region modifiers.
-	local lastExteriorCell = tes3.getDataHandler().lastExteriorCell
-	if (lastExteriorCell ~= nil) then
-		if (lastExteriorCell.region ~= nil) then
-			local modifier = config.regionModifiers[lastExteriorCell.region.id]
-			if (modifier ~= nil) then
-				difficulty = difficulty + modifier
+	-- Checks to perform if we're actually in-game.
+	if (tes3.player) then
+		-- Scale with player level.
+		local playerLevel = tes3.player.object.level
+		difficulty = difficulty + config.increasePerLevel * (playerLevel - 1)
+	
+		-- Add any region modifiers.
+		local lastExteriorCell = tes3.getDataHandler().lastExteriorCell
+		if (lastExteriorCell ~= nil) then
+			if (lastExteriorCell.region ~= nil) then
+				local modifier = config.regionModifiers[lastExteriorCell.region.id]
+				if (modifier ~= nil) then
+					difficulty = difficulty + modifier
+				end
 			end
 		end
 	end

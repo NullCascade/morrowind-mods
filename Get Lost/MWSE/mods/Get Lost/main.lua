@@ -1,7 +1,11 @@
 
 -- As soon as the map menu is activated, destroy it.
 local function onMenuMapActivated(e)
-	e.element:destroy()
+	if (tes3.getGlobal("CharGenState") < 0) then
+		e.element:destroy()
+	else
+		timer.delayOneFrame(function() e.element:destroy() end)
+	end
 end
 event.register("uiActivated", onMenuMapActivated, { filter = "MenuMap" })
 
