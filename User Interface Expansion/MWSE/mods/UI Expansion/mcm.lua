@@ -179,13 +179,20 @@ function this.onCreate(container)
 		config = this.config,
 		key = "transferItemsByDefault",
 	})
-
-	-- Toggle displaying the weekday in the rest menu.
+	
 	createBooleanConfigPackage({
 		parent = mainPane,
 		label = common.dictionary.configShowWeekDay,
 		config = this.config,
 		key = "displayWeekday",
+	})
+
+	-- Toggle displaying the weekday in the rest menu.
+	createBooleanConfigPackage({
+		parent = mainPane,
+		label = common.dictionary.autoAcceptAlchemyQuantityMenu,
+		config = this.config,
+		key = "autoAcceptAlchemyQuantityMenu",
 	})
 
 	-- Select the maximum wait time.
@@ -197,6 +204,19 @@ function this.onCreate(container)
 		min = 1,
 		max = 14,
 		jump = 7,
+		step = 1,
+	})
+
+	
+	-- Select the default brew quantity.
+	createConfigSliderPackage({
+		parent = mainPane,
+		label = common.dictionary.alchemyDefaultQuantity,
+		config = this.config,
+		key = "alchemyDefaultQuantity",
+		min = 1,
+		max = 100,
+		jump = 5,
 		step = 1,
 	})
 

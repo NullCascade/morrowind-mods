@@ -345,9 +345,61 @@ function filter_functions:clearFilter()
 	self:setFiltersExact()
 end
 
+-- Get the maximum number of visible effects based on current alchemy skill.
+local function getVisibleEffectsCount()
+    local skill = tes3.mobilePlayer.alchemy.current
+    local gmst = tes3.findGMST(tes3.gmst.fWortChanceValue)
+    return math.clamp(math.floor(skill / gmst.value), 0, 4)
+end
+
+local function getEffectName(effect, stat)
+	local statName
+	if effect then
+		if  effect.targetsAttributes then
+			statName = tes3.findGMST(888 + stat).value
+		elseif  effect.targetsSkills then
+			statName = tes3.findGMST(896 + stat).value
+		end
+
+		local effectName = tes3.findGMST(1283 + effect.id).value
+		if statName then
+			return effectName:match("%S+") .. " " .. statName
+		else
+			return effectName
+		end
+	end
+end
+
 function filter_functions:triggerFilter(params)
+
+	local inEffects = false
+	local inName = false
+	local item = params.item
 	-- Search by name.
-	if (self.searchText and params.text and not string.find(string.lower(params.text), self.searchText, 1, true)) then
+
+	if(self.searchText and params.text ) then
+		inName = string.find(string.lower(params.text), self.searchText, 1, true)
+		-- Search by effects. | maybe config option
+		local numVisibleEff = getVisibleEffectsCount()
+		if(item ~= nil and item.effects ~= nil) then
+			local isIngred = item.objectType == tes3.objectType.ingredient
+			for i=1,#item.effects do 
+				if #item.effects >= i and item.effectAttributeIds ~= nil and item.effectSkillIds ~= nil and #item.effectAttributeIds >= i and #item.effectSkillIds >= i then
+					local effect = tes3.getMagicEffect(item.effects[i])
+					local target = math.max(item.effectAttributeIds[i], item.effectSkillIds[i])
+					local effectName = getEffectName(effect,target)
+					if effectName ~= nil then
+						inEffects = inEffects or ((not isIngred or i <= numVisibleEff) and string.find(string.lower(effectName), string.lower(self.searchText), 1, true))
+					end
+				end
+			end
+		end
+	else
+		 inName = true	
+	end
+
+
+	if(not inName and not inEffects) then
 		return false
 	end
 

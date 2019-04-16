@@ -15,7 +15,9 @@ local defaultConfig = {
 	takeFilteredItems = true,
 	transferItemsByDefault = false,
 	displayWeekday = true,
+	autoAcceptAlchemyQuantityMenu = false,
 	maxWait = 1,
+	alchemyDefaultQuantity = 1,
 	keybindClose = { tes3.scanCode.space },
 	keybindTakeAll = { tes3.scanCode.leftCtrl, tes3.scanCode.space },
 	keybindShowAdditionalInfo = { tes3.scanCode.leftAlt },
@@ -48,6 +50,7 @@ local defaultConfig = {
 		stat = true,
 		tooltip = true,
 		training = true,
+		alchemy = true,
 	},
 }
 local config = table.copy(defaultConfig)
@@ -186,6 +189,11 @@ local function onInitialized(e)
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuServiceTraining.lua")
 	else
 		mwse.log("[UI Expansion] Skipping module: training")
+	end
+	if (config.components.alchemy) then
+		dofile("Data Files/MWSE/mods/UI Expansion/MenuAlchemy.lua")
+	else
+		mwse.log("[UI Expansion] Skipping module: alchemy")
 	end
 end
 event.register("initialized", onInitialized)
