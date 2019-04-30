@@ -21,7 +21,13 @@ local function usesOffHandSlot(item)
 end
 
 local function onEquip(e)
+	-- We only care about the player.
 	if (e.reference ~= tes3.player) then
+		return
+	end
+
+	-- We only do this if the player is in combat.
+	if (not tes3.mobilePlayer.inCombat) then
 		return
 	end
 
