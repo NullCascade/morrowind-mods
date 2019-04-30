@@ -11,7 +11,8 @@ local function createCrimeStructure(e)
 
 	crime.type = e.type
 	crime.value = e.value
-	crime.timestamp = e.realTimestamp
+	crime.timestamp = tes3.getSimulationTimestamp()
+	crime.realTimestamp = e.realTimestamp
 	
 	crime.witnesses = {}
 
@@ -22,7 +23,7 @@ end
 -- Finds a crime table matching the given crimeWitnessed event data.
 local function findCrimeStructure(e)
 	for _, crime in ipairs(crimes) do
-		if (crime.timestamp == e.realTimestamp and crime.type == e.type and crime.value == e.value) then
+		if (crime.realTimestamp == e.realTimestamp and crime.type == e.type and crime.value == e.value) then
 			return crime
 		end
 	end
@@ -50,21 +51,26 @@ event.register("crimeWitnessed", onCrimeWitnessed)
 -- When a character dies, go look for any crimes by that witness and remove the witness.
 -- If the witness list is then empty, forgive the crime.
 local function onDeath(e)
+	-- Do we have crimes this actor has witnessed?
 	local baseObject = e.reference.baseObject
 	local witnessedCrimes = crimesByWitness[baseObject]
 	if (witnessedCrimes == nil) then
 		return
 	end
 
+	-- Gather a list of crimes to remove.
 	local removeList = {}
 	for crime, _ in pairs(witnessedCrimes) do
 		table.insert(removeList, crime)
 	end
 
+	-- We can't do this in one pass, as we'll be modifying the collection we're operating on.
 	for _, crime in ipairs(removeList) do
+		-- Clear any associated tables.
 		witnessedCrimes[crime] = nil
 		crime.witnesses[baseObject] = nil
 
+		-- Was this the last witness?
 		if (table.empty(crime.witnesses)) then
 			tes3.messageBox("The last witness has been killed. Crime forgiven.")
 			tes3.mobilePlayer.bounty = tes3.mobilePlayer.bounty - crime.value
@@ -74,6 +80,7 @@ local function onDeath(e)
 		end
 	end
 
+	-- Was this the last crime witnessed by this actor? If so, that table.
 	if (table.empty(witnessedCrimes)) then
 		crimesByWitness[baseObject] = nil
 	end
@@ -86,3 +93,9 @@ local function onLoaded()
 	crimesByWitness = {}
 end
 event.register("loaded", onLoaded)
+
+-- TODO:
+-- Sync crime state to save.
+-- Sort crimes by timestamp.
+-- Only give a 5 in-game minute (configurable) grace period where witnesses can be killed.
+-- MCM
