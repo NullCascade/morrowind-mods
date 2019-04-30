@@ -5,6 +5,11 @@ local crimes = {}
 -- Quick access to all crimes witnessed by a given base object.
 local crimesByWitness = {}
 
+-- Sorts crimes by their timestamps.
+local function crimeSorter(a, b)
+	return a.timestamp < b.timestamp
+end
+
 -- Create a crime table, and insert it into the crimes table.
 local function createCrimeStructure(e)
 	local crime = {}
@@ -17,6 +22,7 @@ local function createCrimeStructure(e)
 	crime.witnesses = {}
 
 	table.insert(crimes, crime)
+	table.sort(crimes, crimeSorter)
 	return crime
 end
 
@@ -36,7 +42,7 @@ local function onCrimeWitnessed(e)
 
 	-- Find/create the crime and add this as a witness to it.
 	local crime = findCrimeStructure(e) or createCrimeStructure(e)
-	crime.witnesses[baseObject] = e.position
+	table.insert(crime.witnesses, baseObject)
 
 	-- Cache the crime by the witness.
 	local byWitness = crimesByWitness[baseObject]
@@ -44,7 +50,7 @@ local function onCrimeWitnessed(e)
 		byWitness = {}
 		crimesByWitness[baseObject] = byWitness
 	end
-	byWitness[crime] = e.position
+	byWitness[crime] = true
 end
 event.register("crimeWitnessed", onCrimeWitnessed)
 
@@ -68,15 +74,15 @@ local function onDeath(e)
 	for _, crime in ipairs(removeList) do
 		-- Clear any associated tables.
 		witnessedCrimes[crime] = nil
-		crime.witnesses[baseObject] = nil
+		table.removevalue(crime.witnesses, baseObject)
 
 		-- Was this the last witness?
-		if (table.empty(crime.witnesses)) then
+		if (#crime.witnesses == 0) then
 			tes3.messageBox("The last witness has been killed. Crime forgiven.")
 			tes3.mobilePlayer.bounty = tes3.mobilePlayer.bounty - crime.value
 			table.removevalue(crimes, crime)
 		else
-			tes3.messageBox("One more witness killed. %d remain.", table.size(crime.witnesses))
+			tes3.messageBox("One more witness killed. %d remain.", #crime.witnesses)
 		end
 	end
 
@@ -87,15 +93,44 @@ local function onDeath(e)
 end
 event.register("death", onDeath)
 
+local function onSave(e)
+	tes3.player.data.nc_crimes = crimes
+end
+event.register("save", onSave)
+
 -- When the game is reloaded, clear any crime data. Crime forgiveness won't persist between saves.
 local function onLoaded()
-	crimes = {}
+	crimes = tes3.player.data.nc_crimes or {}
 	crimesByWitness = {}
+	
+	-- Convert the serialized data to what we need.
+	for _, crime in ipairs(crimes) do
+		local serializedWitnesses = crime.witnesses
+		crime.witnesses = {}
+		for _, witness in ipairs(serializedWitnesses) do
+			-- Get the witness object and add it to the witness list.
+			local witnessId = string.match(witness, ":(.*)")
+			local witnessObject = tes3.getObject(witnessId)
+			table.insert(crime.witnesses, witnessObject)
+
+			-- Fixup the quick lookup by witness table.
+			local byWitness = crimesByWitness[witnessObject]
+			if (byWitness == nil) then
+				byWitness = {}
+				crimesByWitness[witnessObject] = byWitness
+			end
+			byWitness[crime] = true
+		end
+	end
+	
+	-- Sort crimes again.
+	table.sort(crimes, crimeSorter)
+
+	-- We don't need the data redundantly stored.
+	tes3.player.data.nc_crimes = nil
 end
 event.register("loaded", onLoaded)
 
 -- TODO:
--- Sync crime state to save.
--- Sort crimes by timestamp.
 -- Only give a 5 in-game minute (configurable) grace period where witnesses can be killed.
 -- MCM
