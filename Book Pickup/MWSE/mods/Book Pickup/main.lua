@@ -63,8 +63,8 @@ local function registerModConfig()
 	local template = easyMCM.createTemplate("Book Pickup")
 	template:saveOnClose("Book Pickup", config)
 
-    local page = template:createPage()
-    page:createOnOffButton{
+	local page = template:createPage()
+	page:createOnOffButton{
 		label = "Pickup by default?",
 		variable = easyMCM.createTableVariable{
 			id = "pickupByDefault",
@@ -72,7 +72,7 @@ local function registerModConfig()
 		}
 	}
 
-    easyMCM.register(template)
+	easyMCM.register(template)
 end
 event.register("modConfigReady", registerModConfig)
 

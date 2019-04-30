@@ -44,8 +44,8 @@ local function registerModConfig()
 	local template = easyMCM.createTemplate("HUD Hider")
 	template:saveOnClose("HUD Hider", config)
 
-    local page = template:createPage()
-    page:createKeyBinder{
+	local page = template:createPage()
+	page:createKeyBinder{
 		label = "Assign Keybind",
 		allowCombinations = true,
 		variable = easyMCM.createTableVariable{
@@ -60,6 +60,6 @@ local function registerModConfig()
 		}
 	}
 
-    easyMCM.register(template)
+	easyMCM.register(template)
 end
 event.register("modConfigReady", registerModConfig)
