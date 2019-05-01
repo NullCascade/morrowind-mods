@@ -5,6 +5,10 @@ local crimes = {}
 -- Quick access to all crimes witnessed by a given base object.
 local crimesByWitness = {}
 
+-- Load configuration.
+local config = mwse.loadConfig("The Last Witness") or {}
+config.timeLimit = config.timeLimit or 10
+
 -- Sorts crimes by their timestamps.
 local function crimeSorter(a, b)
 	return a.timestamp < b.timestamp
@@ -131,6 +135,72 @@ local function onLoaded()
 end
 event.register("loaded", onLoaded)
 
--- TODO:
--- Only give a 5 in-game minute (configurable) grace period where witnesses can be killed.
--- MCM
+-- Clear after a time.
+local function onSimulate(e)
+	-- Ignore the time limit if it's set to.
+	if (config.timeLimit == 0 or #crimes == 0) then
+		return
+	end
+
+	-- Get a list of crimes we need to remove.
+	local removeList = {}
+	local timeThreshold = e.timestamp - config.timeLimit/60
+	for _, crime in ipairs(crimes) do
+		if (timeThreshold > crime.timestamp) then
+			table.insert(removeList, crime)
+		end
+	end
+
+	-- Go through and remove the crimes.
+	for _, crime in ipairs(removeList) do
+		-- The base crime.
+		table.removevalue(crimes, crime)
+
+		-- Witness lookup.
+		for _, witness in ipairs(crime.witnesses) do
+			table.removevalue(crimesByWitness[witness], crime)
+		end
+	end
+
+	-- Get a list of witnesses to clean up.
+	removeList = {}
+	for witness, crimeList in ipairs(crimesByWitness) do
+		if (#crimeList == 0) then
+			table.insert(removeList, witness)
+		end
+	end
+
+	-- And clear the witnesses.
+	for _, witness in ipairs(removeList) do
+		crimesByWitness[witness] = nil
+	end
+end
+event.register("simulate", onSimulate)
+
+-- Handle mod config menu.
+local function registerModConfig()
+	local easyMCM = include("easyMCM.EasyMCM")
+	if (easyMCM == nil) then
+		return
+	end
+
+	local template = easyMCM.createTemplate("The Last Witness")
+	template:saveOnClose("The Last Witness", config)
+
+	local page = template:createPage()
+	page:createSlider({
+		label = "Time Limit",
+		description = "The number of in-game minutes for witnesses to be silenced.",
+		min = 1,
+		max = 60,
+		step = 1,
+		jump = 5,
+		variable = easyMCM.createTableVariable({
+			id = "timeLimit",
+			table = config,
+		}),
+	})
+
+	easyMCM.register(template)
+end
+event.register("modConfigReady", registerModConfig)
