@@ -3,7 +3,19 @@ local GUI_ID_MenuPersuasion = nil
 local GUI_ID_MenuPersuasion_ServiceList = nil
 local GUI_ID_MenuPersuasion_ServiceList_GiveGift = nil
 
-local bribeItemValueModifier = 0.075
+local function calculateItemPersuasionModifier(item, data)
+	local value = item.value
+
+	if (data) then
+		if (item.maxCondition) then
+			value = value * (data.condition / item.maxCondition)
+		elseif (item.time) then
+			value = value * (data.timeLeft / item.time)
+		end
+	end
+
+	return math.log10(value) * 25
+end
 
 local function onInventoryItemSelected(e)
 	local MenuPersuasion = tes3ui.findMenu(GUI_ID_MenuPersuasion)
@@ -16,7 +28,7 @@ local function onInventoryItemSelected(e)
 	-- Make the persuasion attempt.
 	local dialoguePage
 	local dialogueHeaderText
-	if (tes3.persuade({ actor = actor, modifier = e.item.value * bribeItemValueModifier })) then
+	if (tes3.persuade({ actor = actor, modifier = calculateItemPersuasionModifier(e.item, e.itemData) })) then
 		dialoguePage = 8
 		dialogueHeaderText = tes3.findGMST(tes3.gmst.sBribeSuccess).value
 
@@ -60,7 +72,7 @@ local function onInventoryItemSelected(e)
 end
 
 local function filterGifts(e)
-	return e.item.value * bribeItemValueModifier > 0
+	return calculateItemPersuasionModifier(e.item, e.itemData) > 0
 end
 
 local function onGiveAGiftClick(e)
