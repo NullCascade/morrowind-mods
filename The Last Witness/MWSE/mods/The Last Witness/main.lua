@@ -82,11 +82,9 @@ local function onDeath(e)
 
 		-- Was this the last witness?
 		if (#crime.witnesses == 0) then
-			tes3.messageBox("The last witness has been killed. Crime forgiven.")
+			tes3.messageBox("The last witness has been killed.")
 			tes3.mobilePlayer.bounty = tes3.mobilePlayer.bounty - crime.value
 			table.removevalue(crimes, crime)
-		else
-			tes3.messageBox("One more witness killed. %d remain.", #crime.witnesses)
 		end
 	end
 
