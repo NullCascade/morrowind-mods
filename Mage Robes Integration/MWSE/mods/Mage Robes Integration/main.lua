@@ -180,13 +180,15 @@ local function onInitialized()
 
 	-- Hit all the NPCs and give them new robes.
 	for npc in tes3.iterateObjects(tes3.objectType.npc) do
-		local qualifies, newRobe, oldRobe = getRobeForNPC(npc)
-		if (qualifies) then
-			-- local highestSkill, highestSkillValue = getHighestMagicSkill(npc)
-			-- mwse.log("Replacing robes for %s (%s). %s -> %s. Faction: %s (%s). Highest skill: %s (%d)", npc.id, npc.sourceMod, oldRobe and oldRobe.id, newRobe.id, npc.faction.id, table.find(mgRank, npc.factionRank), table.find(tes3.skill, highestSkill), highestSkillValue)
-			npc.inventory:addItem({ item = newRobe })
-			if (oldRobe) then
-				npc.inventory:removeItem({ item = oldRobe })
+		if (not npc.isInstance) then
+			local qualifies, newRobe, oldRobe = getRobeForNPC(npc)
+			if (qualifies) then
+				-- local highestSkill, highestSkillValue = getHighestMagicSkill(npc)
+				-- mwse.log("Replacing robes for %s (%s). %s -> %s. Faction: %s (%s). Highest skill: %s (%d)", npc.id, npc.sourceMod, oldRobe and oldRobe.id, newRobe.id, npc.faction.id, table.find(mgRank, npc.factionRank), table.find(tes3.skill, highestSkill), highestSkillValue)
+				npc.inventory:addItem({ item = newRobe })
+				if (oldRobe) then
+					npc.inventory:removeItem({ item = oldRobe })
+				end
 			end
 		end
 	end
