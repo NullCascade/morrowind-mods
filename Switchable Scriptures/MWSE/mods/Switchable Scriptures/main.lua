@@ -148,7 +148,7 @@ local function onKeyDown(e)
 	
 	-- Is this a supported book?
 	local target = tes3.getPlayerTarget()
-	if (isBookSupported(target.object) == false) then
+	if (target == nil or isBookSupported(target.object) == false) then
 		return
 	end
 
