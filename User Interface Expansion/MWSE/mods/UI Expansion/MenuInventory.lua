@@ -28,7 +28,7 @@ local currentMerchant
 inventoryFilters:addFilter({
 	key = "tradable",
 	callback = function(e)
-		return tes3.checkMerchantTradesItem({ reference = currentMerchant, item = e.item })
+		return currentMerchant and tes3.checkMerchantTradesItem({ reference = currentMerchant, item = e.item })
 	end,
 	tooltip = {
 		text = common.dictionary.filterTradableHelpDescription,
@@ -40,8 +40,10 @@ inventoryFilters:addFilter({
 })
 
 local function onFilterInventory(e)
-	e.text = e.item.name
-	e.filter = inventoryFilters:triggerFilter(e)
+	if tes3.menuMode() then
+		e.text = e.item.name
+		e.filter = inventoryFilters:triggerFilter(e)
+	end
 end
 event.register("filterInventory", onFilterInventory)
 
