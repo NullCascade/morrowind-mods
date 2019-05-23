@@ -190,6 +190,19 @@ local function SetSaveGameEventHandlers(scrollElement, characterSelectElement)
 					TrySave(save.description, save.filename)
 				end
 			end)
+			-- Edit tooltip.
+			scrollKids[i]:register("help", function(e)
+				e.source:forwardEvent(e)
+				local tip = tes3ui.findHelpLayerMenu(tes3ui.registerID("HelpMenu"))
+				local m = scrollElement:getTopLevelMenu()
+				if (tip) then
+					-- Set image aspect to match screen aspect.
+					local image = tip:findChild(tes3ui.registerID("image"))
+					image.width = 180 * m.maxWidth / m.maxHeight
+					image.height = 180
+					tip:updateLayout()
+				end
+			end)
 		end
 	end
 
@@ -209,15 +222,16 @@ end
 
 local function menuLoad(e)
 	if (e.newlyCreated) then
-		e.element.width = 600
+		e.element.width = 0.5 * e.element.maxWidth
+		e.element.height = 0.6 * e.element.maxHeight
 
 		local scroll = e.element:findChild(load_scroll_id)
-		scroll.widthProportional = 1.2
+		scroll.widthProportional = 1.5
 		local panel = scroll.parent
 		panel.flowDirection = "left_to_right"
 
 		local charSelect = panel:createVerticalScrollPane({ id = load_charSelect_id })
-		charSelect.widthProportional = 0.8
+		charSelect.widthProportional = 0.5
 		charSelect.heightProportional = 1.0
 		charSelect.borderRight = 4
 		charSelect.paddingAllSides = 4
@@ -253,7 +267,8 @@ event.register("uiActivated", menuLoad, { filter = "MenuLoad"})
 local function menuSave(e)
 	if (e.newlyCreated) then
 		local scroll = e.element:findChild(save_scroll_id)
-		e.element.width = 600
+		e.element.width = 0.5 * e.element.maxWidth
+		e.element.height = 0.6 * e.element.maxHeight
 
 		scroll.widthProportional = 1.0
 
@@ -266,13 +281,13 @@ local function menuSave(e)
 		buttonPanel.flowDirection = "left_to_right"
 
 		local inputBlock = buttonPanel:createThinBorder()
-		inputBlock.width = 240 -- 31 characters of width
+		inputBlock.width = 400
 		inputBlock.height = 21
 		inputBlock.borderTop = 4
 		inputBlock.borderRight = 4
 		inputBlock.paddingLeft = 4
 		inputBlock.paddingRight = 4
-		inputBlock.paddingBottom = 3
+		inputBlock.childAlignY = 0.5
 		local saveInput = inputBlock:createTextInput({ id = save_saveInput_id })
 		saveInput.widget.lengthLimit = 31
 		saveInput.text = tes3.mobilePlayer.cell.name or tes3.mobilePlayer.cell.region.name
@@ -303,9 +318,11 @@ local function menuSave(e)
 			TrySave(saveInput.text)
 		end)
 		saveInput:register("mouseClick", function()
+			saveInput.text = saveInput.text .. "|"
 			tes3ui.acquireTextInput(saveInput)
 		end)
 		inputBlock:register("mouseClick", function()
+			saveInput.text = saveInput.text .. "|"
 			tes3ui.acquireTextInput(saveInput)
 		end)
 
@@ -343,4 +360,4 @@ local function menuSave(e)
 		filterGameFiles(scroll)
 	end
 end
-event.register("uiActivated", menuSave, { filter = "MenuSave"})
+event.register("uiActivated", menuSave, { filter = "MenuSave" })

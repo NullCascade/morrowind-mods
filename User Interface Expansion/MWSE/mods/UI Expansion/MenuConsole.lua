@@ -8,12 +8,17 @@ local GUI_ID_UIEXP_ConsoleInputBox = tes3ui.registerID("UIEXP:ConsoleInputBox")
 local common = require("UI Expansion.common")
 
 local luaMode = false
-
 local currentHistoryIndex = 1
 local previousEntries = { { text = "", lua = false } }
 
-local function addEntry(text)
-	table.insert(previousEntries, { text = text, lua = luaMode })
+
+
+local function updateScriptButton(button)
+	if (luaMode) then
+		button.text = "lua"
+	else
+		button.text = "mwscript"
+	end
 end
 
 local function onSubmitCommand(e)
@@ -24,7 +29,14 @@ local function onSubmitCommand(e)
 
 	if (luaMode) then
 		tes3ui.logToConsole(text, true)
-		local f, message = loadstring(text)
+		
+		-- Try compiling command as an expression first.
+		local f, message = loadstring("return " .. text)
+		if (not f) then
+			f, message = loadstring(text)
+		end
+		
+		-- Run command and show output in console.
 		if (f) then
 			local status, errorOrResult = pcall(f)
 			if (status) then
@@ -38,6 +50,10 @@ local function onSubmitCommand(e)
 			tes3ui.logToConsole(message)
 		end
 	else
+		-- Any of the togglestats reporting outputs will destroy the text input,
+		-- which is recreated on the next key input, so send one.
+		menuConsole:triggerEvent("keyEnter")
+		
 		local vanillaInputText = menuConsole:findChild(GUI_ID_MenuConsole_text_input)
 		vanillaInputText.text = text
 		menuConsole:triggerEvent("keyEnter")
@@ -47,9 +63,16 @@ local function onSubmitCommand(e)
 	if (vanillaInputText) then
 		vanillaInputText.visible = false
 	end
+
+	-- updateLayout twice, first to layout text, second to update scroll pane
+	menuConsole:updateLayout()
+	menuConsole:updateLayout()
 	tes3ui.acquireTextInput(inputBox)
-	
-	table.insert(previousEntries, { text = text, lua = luaMode })
+
+	if (text ~= "") then
+		table.insert(previousEntries, { text = text, lua = luaMode })
+		currentHistoryIndex = 1
+	end
 end
 
 local function onMenuConsoleActivated(e)
@@ -67,77 +90,78 @@ local function onMenuConsoleActivated(e)
 	vanillaInputText.visible = false
 
 	-- Create a new input block for our new controls..
-	local inputBlock = mainPane:createBlock({})
+	local inputBlock = mainPane:createBlock{}
 	inputBlock.flowDirection = "left_to_right"
 	inputBlock.widthProportional = 1.0
 	inputBlock.autoHeight = true
 	inputBlock.borderTop = 4
 	inputBlock.childAlignY = 0.5
 
-	-- Create a input box.
-	local border = inputBlock:createThinBorder({})
+	-- Create an input frame.
+	local border = inputBlock:createThinBorder{}
 	border.autoWidth = true
 	border.autoHeight = true
 	border.widthProportional = 1.0
 
-	-- Create the search input itself.
-	local input = border:createTextInput({ id = tes3ui.registerID("UIEXP:ConsoleInputBox") })
+	-- Create the command input.
+	local input = border:createTextInput{ id = tes3ui.registerID("UIEXP:ConsoleInputBox") }
 	input.borderLeft = 5
 	input.borderRight = 5
 	input.borderTop = 2
 	input.borderBottom = 4
+	input.font = 1
 	input.widget.lengthLimit = nil
 	input.widget.eraseOnFirstKey = true
 	input:register("keyEnter", onSubmitCommand)
 
 	-- Create toggle button.
-	local scriptToggleButton = inputBlock:createButton({ text = "mwscript" })
+	local scriptToggleButton = inputBlock:createButton{ text = "mwscript" }
 	scriptToggleButton.borderAllSides = 0
 	scriptToggleButton.borderLeft = 4
+	scriptToggleButton.minWidth = 90
+	scriptToggleButton.width = 90
 	scriptToggleButton:register("mouseClick", function(e)
 		luaMode = not luaMode
-		if (luaMode) then
-			scriptToggleButton.text = "lua"
-		else
-			scriptToggleButton.text = "mwscript"
-		end
+		updateScriptButton(scriptToggleButton)
+		menuConsole:updateLayout()
 	end)
+	local toggleText = scriptToggleButton.children[1]
+	toggleText.wrapText = true
+	toggleText.justifyText = "center"
+
 	input:register("keyPress", function(e)
-		local inputController = tes3.worldController.inputController
-		if (inputController:isKeyDown(15)) then
+		local key = e.data0
+
+		if (key == 9) then
 			-- Prevent alt-tabbing from creating spacing.
 			return
-		elseif (inputController:isKeyDown(14) and input.text == "") then
-			-- Prevent backspacing into nothing.
-			return
-		elseif (inputController:isKeyDown(200)) then
+		elseif (key == -0x7FFFFFFD) then
 			-- Pressing up goes to the previous entry in the history.
 			currentHistoryIndex = currentHistoryIndex - 1
 			if (currentHistoryIndex < 1) then
 				currentHistoryIndex = #previousEntries
 			end
-			input.text = previousEntries[currentHistoryIndex].text
+
+			-- Add caret to allow immediate editing.
+			input.text = previousEntries[currentHistoryIndex].text .. "|"
 			luaMode = previousEntries[currentHistoryIndex].lua
-			if (luaMode) then
-				scriptToggleButton.text = "lua"
-			else
-				scriptToggleButton.text = "mwscript"
-			end
+
+			updateScriptButton(scriptToggleButton)
+			menuConsole:updateLayout()
 			return
-		elseif (inputController:isKeyDown(208)) then
+		elseif (key == -0x7FFFFFFC) then
 			-- Pressing down goes to the next entry in the history.
 			currentHistoryIndex = currentHistoryIndex + 1
 			if (currentHistoryIndex > #previousEntries) then
 				currentHistoryIndex = 1
 			end
-			input.text = previousEntries[currentHistoryIndex].text
-			luaMode = previousEntries[currentHistoryIndex].lua
-			if (luaMode) then
-				scriptToggleButton.text = "lua"
-			else
-				scriptToggleButton.text = "mwscript"
-			end
 
+			-- Add caret to allow immediate editing.
+			input.text = previousEntries[currentHistoryIndex].text .. "|"
+			luaMode = previousEntries[currentHistoryIndex].lua
+
+			updateScriptButton(scriptToggleButton)
+			menuConsole:updateLayout()
 			return
 		end
 
@@ -150,6 +174,7 @@ local function onMenuConsoleActivated(e)
 		tes3ui.acquireTextInput(input)
 	end)
 
+	menuConsole:updateLayout()
 	tes3ui.acquireTextInput(input)
 end
 event.register("uiActivated", onMenuConsoleActivated, { filter = "MenuConsole" } )
