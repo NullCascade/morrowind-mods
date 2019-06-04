@@ -10,6 +10,7 @@ local common = require("UI Expansion.common")
 local luaMode = false
 local currentHistoryIndex = 1
 local previousEntries = { { text = "", lua = false } }
+local sandbox = {}
 
 
 
@@ -19,6 +20,17 @@ local function updateScriptButton(button)
 	else
 		button.text = "mwscript"
 	end
+end
+
+function sandboxInit()
+    setmetatable(sandbox, { __index = _G })
+    sandbox.print = tes3ui.logToConsole
+end
+    
+function sandboxScript(f)
+    sandbox.currentRef = tes3ui.findMenu(GUI_ID_MenuConsole):getPropertyObject("MenuConsole_current_ref")
+    setfenv(f, sandbox)
+    return pcall(f)
 end
 
 local function onSubmitCommand(e)
@@ -38,7 +50,7 @@ local function onSubmitCommand(e)
 		
 		-- Run command and show output in console.
 		if (f) then
-			local status, errorOrResult = pcall(f)
+			local status, errorOrResult = sandboxScript(f)
 			if (status) then
 				if (errorOrResult ~= nil) then
 					tes3ui.logToConsole(string.format("> %s", errorOrResult))
@@ -177,4 +189,6 @@ local function onMenuConsoleActivated(e)
 	menuConsole:updateLayout()
 	tes3ui.acquireTextInput(input)
 end
+
+sandboxInit()
 event.register("uiActivated", onMenuConsoleActivated, { filter = "MenuConsole" } )
