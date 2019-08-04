@@ -46,13 +46,13 @@ local function createBooleanConfigPackage(params)
     label.layoutOriginFractionX = 0.0
     label.layoutOriginFractionY = 0.5
 
-    local button = horizontalBlock:createButton({ text = (this.config[params.key] and tes3.getGMST(tes3.gmst.sYes).value or tes3.getGMST(tes3.gmst.sNo).value) })
+    local button = horizontalBlock:createButton({ text = (this.config[params.key] and tes3.findGMST(tes3.gmst.sYes).value or tes3.findGMST(tes3.gmst.sNo).value) })
     button.layoutOriginFractionX = 1.0
     button.layoutOriginFractionY = 0.5
     button.paddingTop = 3
     button:register("mouseClick", function(e)
         this.config[params.key] = not this.config[params.key]
-        button.text = this.config[params.key] and tes3.getGMST(tes3.gmst.sYes).value or tes3.getGMST(tes3.gmst.sNo).value
+        button.text = this.config[params.key] and tes3.findGMST(tes3.gmst.sYes).value or tes3.findGMST(tes3.gmst.sNo).value
         
         if (params.onUpdate) then
             params.onUpdate(e)
