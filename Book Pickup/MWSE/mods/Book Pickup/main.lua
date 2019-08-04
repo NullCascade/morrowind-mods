@@ -23,7 +23,7 @@ local function onActivate(e)
 	end
 
 	-- Ignore scripted references for now.
-	if (reference.script ~= nil) then
+	if (item.script ~= nil) then
 		return
 	end
 
