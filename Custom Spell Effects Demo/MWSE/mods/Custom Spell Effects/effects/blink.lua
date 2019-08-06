@@ -9,13 +9,23 @@ local common = require("Custom Spell Effects.common")
 
 tes3.claimSpellEffectId("blink", 201)
 
+local blinkEffect = nil
+
 local function onSpellEffectCollision(e)
 	local caster = e.sourceInstance.caster
 	tes3.positionCell({ reference = caster, position = e.collision.point, cell = caster.cell })
+
+	-- Play a fancy VFX.
+	e.sourceInstance:playVisualEffect({
+		reference = caster,
+		position = caster.position,
+		visual = blinkEffect.hitVisualEffect,
+		effectIndex = e.sourceInstance.source:getFirstIndexOfEffect(tes3.effect.blink),
+	})
 end
 
 local function addCustomMagicEffect()
-	tes3.addMagicEffect({
+	blinkEffect = tes3.addMagicEffect({
 		-- Base information.
 		id = tes3.effect.blink,
 		name = "Blink",
