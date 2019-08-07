@@ -7,7 +7,7 @@
 		- Contingency: Set another spell to be cast when a certain condition is met.
 		- Create rune: Like a trap, but spawns a new placeable that releases another spell when triggered.
 		x Create trap: Put a previously cast spell onto a door/container.
-		- Destroy Undead: Damage spell. Only targets undead.
+		x Destroy Undead: Damage spell. Only targets undead.
 		- Release Soul: Select a soul gem. Release the creature inside of it.
 		- Repair Equipment: Repairs a piece of equipment a bit.
 		- Simple custom bound armor: Need to fix shit so that the drop behavior is consistent.
@@ -22,3 +22,4 @@
 -- Create our spells.
 dofile("Data Files/MWSE/mods/Custom Spell Effects/effects/blink.lua")
 dofile("Data Files/MWSE/mods/Custom Spell Effects/effects/createTrap.lua")
+dofile("Data Files/MWSE/mods/Custom Spell Effects/effects/destroyUndead.lua")

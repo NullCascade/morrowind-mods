@@ -61,6 +61,11 @@ local function onSpellEffectTick(e)
 		return
 	end
 
+	-- We only care about the spell when it is finally ending. Ignore all other frames.
+	if (e.sourceInstance.state ~= tes3.spellState.ending) then
+		return
+	end
+
 	-- Get the player's target.
 	local target = tes3.getPlayerTarget()
 	if (target == nil) then
