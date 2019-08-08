@@ -85,7 +85,8 @@ local magicFilters = common.createFilterInterface({
 
 local function getEffectsContainsSchool(effects, school)
 	for i = 1, #effects do
-		if (effects[i].object.school == school) then
+		local obj = effects[i].object
+		if (obj and obj.school == school) then
 			return true
 		end
 	end
