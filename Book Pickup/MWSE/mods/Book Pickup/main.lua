@@ -4,8 +4,12 @@
 
 --]]
 
-local config = mwse.loadConfig("Book Pickup")
-config = config or {}
+if (mwse.buildDate < 20190818) then
+	mwse.log("[Book Pickup] Error: MWSE version is out of date! Run MWSE-Updater.exe.")
+	return
+end
+
+local config = mwse.loadConfig("Book Pickup") or {}
 if (config.pickupByDefault == nil) then
 	config.pickupByDefault = true
 end
@@ -22,8 +26,9 @@ local function onActivate(e)
 		return
 	end
 
-	-- Ignore scripted references for now.
-	if (item.script ~= nil) then
+	-- Is use enabled? Or was it blocked by a script?
+	local itemData = reference.itemData
+	if (not reference:testActionFlag(tes3.actionFlag.useEnabled)) then
 		return
 	end
 
@@ -44,35 +49,42 @@ local function onActivate(e)
 	end
 
 	-- Add it to the player's inventory manually.
-	mwscript.addItem({ reference = tes3.player, item = item, count = math.min(reference.stackSize or 1, 1) })
-	mwscript.disable({ reference = reference })
-	mwscript.setDelete({ reference = reference, delete = true })
-	tes3.playItemPickupSound({ item = item })
+	tes3.addItem({
+		reference = tes3.player,
+		item = item,
+		itemData = itemData,
+		count = itemData and itemData.count or 1
+	})
 
+	-- Delete the reference. Detach the itemData first.
+	reference.itemData = nil
+	reference:disable()
+	mwscript.setDelete({ reference = reference, delete = true })
+	
 	return false
 end
-event.register("activate", onActivate)
+event.register("activate", onActivate, { priority = 10 })
 
 
 local function registerModConfig()
-	local easyMCM = include("easyMCM.EasyMCM")
-	if (easyMCM == nil) then
+	local mcm = require("mcm.mcm")
+	if (mcm == nil) then
 		return
 	end
 
-	local template = easyMCM.createTemplate("Book Pickup")
+	local template = mcm.createTemplate("Book Pickup")
 	template:saveOnClose("Book Pickup", config)
 
 	local page = template:createPage()
 	page:createOnOffButton{
 		label = "Pickup by default?",
-		variable = easyMCM.createTableVariable{
+		variable = mcm.createTableVariable{
 			id = "pickupByDefault",
 			table = config
 		}
 	}
 
-	easyMCM.register(template)
+	mcm.register(template)
 end
 event.register("modConfigReady", registerModConfig)
 

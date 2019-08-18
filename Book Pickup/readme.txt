@@ -1,7 +1,7 @@
 =====================================================================================
                                      Book Pickup                                     
                                  Author: NullCascade                                 
-                                    Version 1.0.1                                    
+                                    Version 1.1.0                                    
 =====================================================================================
 
  INDEX:
@@ -60,6 +60,11 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.1.0 [2019-08-18]:
+    * Improved support with scripted objects. Will correctly pick up books that
+      don't make use of OnActivate scripts. Picked up items with script data will
+      have that data preserved.
 
  1.0.1 [2019-08-04]:
     * Fixed issue where books with scripts would be picked up, thus bypassing their
