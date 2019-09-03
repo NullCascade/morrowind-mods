@@ -32,7 +32,7 @@ local defaultConfig = {
 	},
 	components = {
 		barter = true,
-		console = false,
+		console = true,
 		contents = true,
 		dialog = true,
 		inventory = true,
