@@ -131,7 +131,7 @@ function this.onCreate(container)
 		label = common.dictionary.configFilterButtons,
 		config = this.config,
 		key = "useInventoryTextButtons",
-		onUpdate = function(e)
+		onUpdate = function()
 			common.inventoryFilter:setIconUsage(not this.config.useInventoryTextButtons)
 			common.barterFilter:setIconUsage(not this.config.useInventoryTextButtons)
 		end
@@ -143,7 +143,7 @@ function this.onCreate(container)
 		label = common.dictionary.configUseSearchBars,
 		config = this.config,
 		key = "useSearch",
-		onUpdate = function(e)
+		onUpdate = function()
 			common.setAllFiltersVisibility(this.config.useSearch)
 		end
 	})
@@ -210,7 +210,7 @@ end
 
 -- Since we are taking control of the mod config system, we will manually handle saves. This is
 -- called when the save button is clicked while configuring this mod.
-function this.onClose(container)
+function this.onClose()
 	mwse.saveConfig("UI Expansion", this.config)
 end
 

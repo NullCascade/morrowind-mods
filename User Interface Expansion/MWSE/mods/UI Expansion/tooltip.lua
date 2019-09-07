@@ -185,7 +185,7 @@ local function replaceArmorTooltip(tooltip, armor, itemData)
 	enchantConditionBlock(tooltip, armor, itemData)
 end
 
-local function replaceAlchemyTooltip(tooltip, alchemy, itemData)
+local function replaceAlchemyTooltip(tooltip, alchemy)
 	tryDestroyAllID(tooltip, "HelpMenu_effectBlock")
 
 	for i = 1, #alchemy.effects do
@@ -225,7 +225,7 @@ local function extraTooltipEarly(e)
 				enchantConditionBlock(e.tooltip, e.object, e.itemData)
 			end
 		elseif e.object.objectType == tes3.objectType.alchemy then
-			replaceAlchemyTooltip(e.tooltip, e.object, e.itemData)
+			replaceAlchemyTooltip(e.tooltip, e.object)
 
 		-- Light duration
 		elseif e.object.objectType == tes3.objectType.light then

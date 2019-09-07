@@ -1,4 +1,4 @@
-local common = require("UI Expansion.common")
+---local common = require("UI Expansion.common")
 
 -- Hook map changes.
 local extern = include("uiextension")
@@ -25,7 +25,7 @@ local function onMapMenuActivated(e)
 	zoomBar = newBottomBlock:createSlider({ current = 0, max = 300, step = 1, jump = 10 })
 	zoomBar.absolutePosAlignY = 0.5
 	zoomBar.width = 300
-	zoomBar:register("PartScrollBar_changed", function(e)
+	zoomBar:register("PartScrollBar_changed", function()
 		currentZoom = zoomBar:getPropertyInt("PartScrollBar_current")/100 + 1.0
 		extern.setMapZoom(currentZoom)
 	end)

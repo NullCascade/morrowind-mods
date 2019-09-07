@@ -108,7 +108,7 @@ end
 local function onMouseWheelForScrollBar(e)
 	local widget = currentKeyboardBoundScrollBar.widget
 	local previousValue = widget.current
-	local newValue = nil
+	local newValue
 
 	if (e.delta > 0) then
 		newValue = math.clamp(previousValue + 1, 0, widget.max)
@@ -214,9 +214,17 @@ function common.createSearchBar(params)
 		if (inputController:isKeyDown(tes3.scanCode.tab)) then
 			-- Prevent alt-tabbing from creating spacing.
 			return
-		elseif (inputController:isKeyDown(tes3.scanCode.backspace) and input.text == params.placeholderText) then
-			-- Prevent backspacing into nothing.
-			return
+		elseif (inputController:isKeyDown(tes3.scanCode.backspace)) then
+			if (inputController:isKeyDown(tes3.scanCode.leftAlt)) then
+				input.text = '' -- Alt + Backspace = clearfilter /abot
+			elseif input.text == params.placeholderText then
+				-- Prevent backspacing into nothing.
+				return
+			end
+		elseif (inputController:isKeyDown(tes3.scanCode.a)) then
+			if (inputController:isKeyDown(tes3.scanCode.leftAlt)) then
+				input.text = '' -- Alt + A = clearfilter /abot
+			end
 		end
 
 		if (params.onPreUpdate) then
@@ -233,6 +241,24 @@ function common.createSearchBar(params)
 		end
 		input:updateLayout()
 	end)
+
+	-- search clear icon added
+	local icon = border:createImage({ id = "UIEXP:SearchClearIcon", path = "icons/ui_exp/filter_reset.dds" })
+	icon.imageScaleX = 0.6
+	icon.imageScaleY = 0.6
+	icon.borderLeft = 0
+	icon.borderRight = 0
+	icon.borderTop = 0
+	icon.borderBottom = 0
+	icon.borderAllSides = 0
+	icon:register("mouseClick", function(e)
+		input.text = '' --"Search by name..."
+		input:forwardEvent(e)
+		input.color = params.textColor or tes3ui.getPalette("normal_color")
+		params.onUpdate(e)
+		input:updateLayout()
+	end)
+
 	border:register("mouseClick", function()
 		tes3ui.acquireTextInput(input)
 	end)
@@ -432,7 +458,7 @@ function filter_functions:onTooltip(filter)
 
 	if (common.config.showHelpText and filter.tooltip.helpText) then
 		local disabledPalette = tes3ui.getPalette("disabled_color")
-		for index, text in pairs(filter.tooltip.helpText) do
+		for _, text in pairs(filter.tooltip.helpText) do
 			local helpText = tooltipBlock:createLabel({ text = text })
 			helpText.color = disabledPalette
 			helpText.borderTop = 6
@@ -505,7 +531,7 @@ function filter_functions:createElements(parent)
 		block.paddingRight = 3
 
 		self.iconFiltersBlock = block
-		block:register("destroy", function(e)
+		block:register("destroy", function()
 			self.iconFiltersBlock = nil
 		end)
 
@@ -527,11 +553,11 @@ function filter_functions:createElements(parent)
 		block.borderTop = 1
 
 		self.buttonFiltersBlock = block
-		block:register("destroy", function(e)
+		block:register("destroy", function()
 			self.buttonFiltersBlock = nil
 		end)
 
-		for index, filter in pairs(self.filtersOrdered) do
+		for _, filter in pairs(self.filtersOrdered) do
 			self:createFilterButton(filter)
 		end
 
@@ -571,7 +597,7 @@ function common.createFilterInterface(params)
 end
 
 function common.setAllFiltersVisibility(visible)
-	for key, filter in pairs(common.allFilters) do
+	for _, filter in pairs(common.allFilters) do
 		filter:setSearchBarUsage(visible)
 		filter:clearFilter()
 	end

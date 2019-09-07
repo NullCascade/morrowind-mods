@@ -145,7 +145,7 @@ local function MakeCharacterList(scrollElement, characterSelectElement)
 		end
 	end
 
-	for k, v in pairs(characters) do
+	for k, _ in pairs(characters) do
 		local select = characterSelectElement:createTextSelect({ text = k })
 		select:register("mouseClick", function()
 			filterGameFiles(scrollElement, k)

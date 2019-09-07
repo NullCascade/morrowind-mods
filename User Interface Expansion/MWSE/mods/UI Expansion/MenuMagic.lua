@@ -2,7 +2,6 @@
 local GUI_ID_MagicMenu_spells_list = tes3ui.registerID("MagicMenu_spells_list")
 local GUI_ID_MenuMagic = tes3ui.registerID("MenuMagic")
 
-local GUI_ID_UIEXP_MagicMenu_SchoolFilters = tes3ui.registerID("UIEXP_MagicMenu_SchoolFilters")
 
 local common = require("UI Expansion.common")
 
@@ -15,7 +14,7 @@ local firstSearchResult = nil
 local function searchSubList(titleElement, listElement, isSpellFilter)
 	-- Gather a list of all the columns/rows so we don't have to keep creating tables later.
 	local columnElements = {}
-	for i, element in ipairs(listElement.children) do
+	for _, element in ipairs(listElement.children) do
 		table.insert(columnElements, element.children)
 	end
 
@@ -85,9 +84,13 @@ local magicFilters = common.createFilterInterface({
 
 local function getEffectsContainsSchool(effects, school)
 	for i = 1, #effects do
-		local obj = effects[i].object
-		if (obj and obj.school == school) then
-			return true
+		local eff = effects[i]
+		if eff then
+			if eff.object then
+				if eff.object.school == school then
+					return true
+				end
+			end
 		end
 	end
 	return false
@@ -178,9 +181,9 @@ local function onMenuMagicActivated(e)
 end
 event.register("uiActivated", onMenuMagicActivated, { filter = "MenuMagic" } )
 
-local function onEnterMenuMode(e)
+local function onEnterMenuMode()
 	magicFilters:clearFilter()
-	
+
 	if (common.config.autoSelectInput == "Magic") then
 		magicFilters:focusSearchBar()
 	end

@@ -1,6 +1,5 @@
 local GUI_ID_HelpMenu = tes3ui.registerID("HelpMenu")
 local GUI_ID_MenuStat_faction_layout = tes3ui.registerID("MenuStat_faction_layout")
-local GUI_ID_MenuStat_scroll_pane = tes3ui.registerID("MenuStat_scroll_pane")
 local GUI_ID_PartScrollPane_pane = tes3ui.registerID("PartScrollPane_pane")
 
 local GUI_Palette_Disabled = tes3ui.getPalette("disabled_color")
@@ -29,6 +28,10 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect, sta
 
 	-- Create a new tooltip block.
 	local tooltip = tes3ui.findHelpLayerMenu(GUI_ID_HelpMenu)
+	if not tooltip then
+		return
+	end
+
 	local adjustmentsBlock = tooltip:createBlock({})
 	adjustmentsBlock.flowDirection = "top_to_bottom"
 	adjustmentsBlock.autoHeight = true

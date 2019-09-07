@@ -1,11 +1,9 @@
 
 local GUI_ID_MenuBarter = tes3ui.registerID("MenuBarter")
 local GUI_ID_MenuInventory_button_layout = tes3ui.registerID("MenuInventory_button_layout")
-local GUI_ID_MenuInventory_scrollpane = tes3ui.registerID("MenuInventory_scrollpane")
 
 local common = require("UI Expansion.common")
 
-local inputController = tes3.worldController.inputController
 
 ----------------------------------------------------------------------------------------------------
 -- Inventory: Searching and filtering.
@@ -91,12 +89,12 @@ local function onMenuInventoryActivated(e)
 end
 event.register("uiActivated", onMenuInventoryActivated, { filter = "MenuInventory" } )
 
-local function onMenuBarterActivated(e)
+local function onMenuBarterActivated()
 	currentMerchant = tes3ui.getServiceActor()
 end
 event.register("uiActivated", onMenuBarterActivated, { filter = "MenuBarter" } )
 
-local function onEnterMenuMode(e)
+local function onEnterMenuMode()
 	inventoryFilters:setFilterHidden("tradable", true)
 	inventoryFilters:clearFilter()
 

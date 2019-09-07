@@ -17,6 +17,22 @@ local GUI_Palette_TopicUnique = common.getColor(common.config.dialogueTopicUniqu
 -- Dialogue: Adds colorization to show what topics provide new and unique responses.
 ----------------------------------------------------------------------------------------------------
 
+--[[
+adds number prefix to Choice answers and makes them working pressing the number key /abot
+--]]
+local answers = {}
+
+local function keyDown(e)
+	local key = e.keyCode - 1
+	if answers then
+		local answer = answers[key]
+		if answer then
+			tes3.messageBox(answer.text)
+			answer:triggerEvent("mouseClick")
+		end
+	end
+end
+
 local function updateTopicsList(e)
 	-- If the function lacks context to the dialogue menu, look it up.
 	local menuDialogue = tes3ui.findMenu(GUI_ID_MenuDialog)
@@ -29,19 +45,31 @@ local function updateTopicsList(e)
 
 		-- Were we forced out of dialogue?
 		if (tes3ui.findMenu(GUI_ID_MenuDialog) == nil) then
+			answers = {}
 			return
 		end
 
 		-- Make sure that the first heard from field is always used.
-		if (e.info and e.actor and e.info.firstHeardFrom == nil and textPane:findChild(GUI_ID_MenuDialog_answer_block) == nil) then
+		if e.info and e.actor and (e.info.firstHeardFrom == nil)
+		and (textPane:findChild(GUI_ID_MenuDialog_answer_block) == nil) then
 			e.info.firstHeardFrom = e.actor
 		end
 	end
 
 	-- Catch events from hyperlinks.
+
+	local i = 0
+	answers = {}
 	for _, element in pairs(textPane.children) do
 		if (element.id == GUI_ID_MenuDialog_hyper or element.id == GUI_ID_MenuDialog_answer_block) then
 			element:register("mouseClick", updateTopicsList)
+		end
+		if element.id == GUI_ID_MenuDialog_answer_block then
+			i = i + 1
+			if string.match(element.text,"^%d+") == nil then
+				element.text = string.format("%s %s", i, element.text)
+				answers[i] = element
+			end
 		end
 	end
 
@@ -75,7 +103,6 @@ local function updateTopicsList(e)
 			element:register("mouseClick", function(mouseClickEventData)
 				mouseClickEventData.info = info
 				mouseClickEventData.actor = actor
-
 				updateTopicsList(mouseClickEventData)
 			end)
 		end
@@ -89,11 +116,12 @@ local function onDialogueMenuActivated(e)
 	end
 
 	-- Set the pre-update event to update the topic list.
+	answers = {}
 	e.element:register("preUpdate", function(preUpdateEventData)
 		-- We only want this event to fire once. We'll manually track changes above to be more efficient.
 		e.element:unregister("preUpdate")
-
 		updateTopicsList(preUpdateEventData)
 	end)
 end
 event.register("uiActivated", onDialogueMenuActivated, { filter = "MenuDialog" })
+event.register("keyDown", keyDown)

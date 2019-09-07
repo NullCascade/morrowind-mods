@@ -19,7 +19,7 @@ local defaultConfig = {
 	keybindClose = { tes3.scanCode.space },
 	keybindTakeAll = { tes3.scanCode.leftCtrl, tes3.scanCode.space },
 	keybindShowAdditionalInfo = { tes3.scanCode.leftAlt },
-	keybindMapSwitch = { tes3.scanCode.m },
+	keybindMapSwitch = { tes3.scanCode.rightAlt }, -- don't use a standard key to avoid conflicts with filters
 	dialogueTopicSeenColor = "journal_finished_quest_color",
 	dialogueTopicUniqueColor = "link_color",
 	mapConfig = {
@@ -91,7 +91,7 @@ common.loadTranslation()
 
 -- Make sure we have the latest MWSE version.
 if (mwse.buildDate < 20190102) then
-	event.register("loaded", function(e)
+	event.register("loaded", function()
 		tes3.messageBox(common.dictionary.updateRequired)
 	end)
 	return
@@ -106,7 +106,7 @@ end
 event.register("modConfigReady", registerModConfig)
 
 -- Run our modules.
-local function onInitialized(e)
+local function onInitialized()
 	if (config.components.barter) then
 		dofile("Data Files/MWSE/mods/UI Expansion/MenuBarter.lua")
 	else

@@ -19,7 +19,9 @@ local function onKeyInput()
 	if (common.complexKeybindTest(common.config.keybindTakeAll)) then
 		local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
 		local takeAllButton = contentsMenu:findChild(GUI_ID_MenuContents_takeallbutton)
-		takeAllButton:triggerEvent("mouseClick")
+		if takeAllButton then --- it may be nil /abot
+			takeAllButton:triggerEvent("mouseClick")
+		end
 		return false
 	-- Space (when no text) closes.
 	elseif (common.allFilters.contents:getSearchText() == nil and common.complexKeybindTest(common.config.keybindClose)) then
@@ -35,11 +37,13 @@ local function onFilterChanged()
 			return
 		end
 		local takeAllButton = contentsMenu:findChild(GUI_ID_MenuContents_takeallbutton)
-		local contentsFilter = common.allFilters.contents
-		if (contentsFilter.searchText ~= nil or #contentsFilter.filtersOrdered ~= #contentsFilter.activeFilters) then
-			takeAllButton.text = common.dictionary.takeFiltered
-		else
-			takeAllButton.text = common.dictionary.takeAll
+		if takeAllButton then --- it may be nil /abot
+			local contentsFilter = common.allFilters.contents
+			if (contentsFilter.searchText ~= nil or #contentsFilter.filtersOrdered ~= #contentsFilter.activeFilters) then
+				takeAllButton.text = common.dictionary.takeFiltered
+			else
+				takeAllButton.text = common.dictionary.takeAll
+			end
 		end
 	end
 	tes3ui.updateContentsMenuTiles()
@@ -84,9 +88,8 @@ local function onMenuContentsActivated(e)
 
 	-- Register a key event for take all and container closing.
 	event.register("keyDown", onKeyInput)
-	event.register("menuExit", function (e)
-		event.unregister("keyDown", onKeyInput,
-		{ doOnce = true })
+	event.register("menuExit", function()
+		event.unregister("keyDown", onKeyInput, { doOnce = true })
 	end)
 
 	-- Add a new block in the right place.

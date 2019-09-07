@@ -41,7 +41,7 @@ local function onMenuBarterActivated(e)
 	end
 
 	-- Hide it again when this UI goes away.
-	buttonBlock:register("destroy", function(e)
+	buttonBlock:register("destroy", function()
 		common.allFilters.inventory:setFilterHidden("tradable", true)
 	end)
 

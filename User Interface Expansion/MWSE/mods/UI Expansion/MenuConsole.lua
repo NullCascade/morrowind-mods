@@ -5,8 +5,6 @@ local GUI_ID_MenuConsole_scroll_pane = tes3ui.registerID("MenuConsole_scroll_pan
 
 local GUI_ID_UIEXP_ConsoleInputBox = tes3ui.registerID("UIEXP:ConsoleInputBox")
 
-local common = require("UI Expansion.common")
-
 local luaMode = false
 local currentHistoryIndex = 1
 local previousEntries = { { text = "", lua = false } }
@@ -26,14 +24,14 @@ function sandboxInit()
     setmetatable(sandbox, { __index = _G })
     sandbox.print = tes3ui.logToConsole
 end
-    
+
 function sandboxScript(f)
     sandbox.currentRef = tes3ui.findMenu(GUI_ID_MenuConsole):getPropertyObject("MenuConsole_current_ref")
     setfenv(f, sandbox)
     return pcall(f)
 end
 
-local function onSubmitCommand(e)
+local function onSubmitCommand()
 	local menuConsole = tes3ui.findMenu(GUI_ID_MenuConsole)
 	local inputBox = menuConsole:findChild(GUI_ID_UIEXP_ConsoleInputBox)
 	local text = inputBox.text
@@ -41,13 +39,13 @@ local function onSubmitCommand(e)
 
 	if (luaMode) then
 		tes3ui.logToConsole(text, true)
-		
+
 		-- Try compiling command as an expression first.
 		local f, message = loadstring("return " .. text)
 		if (not f) then
 			f, message = loadstring(text)
 		end
-		
+
 		-- Run command and show output in console.
 		if (f) then
 			local status, errorOrResult = sandboxScript(f)
@@ -65,7 +63,7 @@ local function onSubmitCommand(e)
 		-- Any of the togglestats reporting outputs will destroy the text input,
 		-- which is recreated on the next key input, so send one.
 		menuConsole:triggerEvent("keyEnter")
-		
+
 		local vanillaInputText = menuConsole:findChild(GUI_ID_MenuConsole_text_input)
 		vanillaInputText.text = text
 		menuConsole:triggerEvent("keyEnter")
@@ -92,11 +90,11 @@ local function onMenuConsoleActivated(e)
 		tes3ui.acquireTextInput(e.element:findChild(GUI_ID_UIEXP_ConsoleInputBox))
 		return
 	end
-	
+
 	local menuConsole = e.element
 	local mainPane = menuConsole:findChild(GUI_ID_MenuConsole_scroll_pane).parent
 	mainPane.borderBottom = 0
-	
+
 	-- Disable normal input method.
 	local vanillaInputText = menuConsole:findChild(GUI_ID_MenuConsole_text_input)
 	vanillaInputText.visible = false
@@ -132,7 +130,7 @@ local function onMenuConsoleActivated(e)
 	scriptToggleButton.borderLeft = 4
 	scriptToggleButton.minWidth = 90
 	scriptToggleButton.width = 90
-	scriptToggleButton:register("mouseClick", function(e)
+	scriptToggleButton:register("mouseClick", function()
 		luaMode = not luaMode
 		updateScriptButton(scriptToggleButton)
 		menuConsole:updateLayout()
@@ -141,7 +139,7 @@ local function onMenuConsoleActivated(e)
 	toggleText.wrapText = true
 	toggleText.justifyText = "center"
 
-	input:register("keyPress", function(e)
+	input:register("keyPress", function()
 		local key = e.data0
 
 		if (key == 9) then
