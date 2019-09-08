@@ -75,5 +75,11 @@ return {
 		currentCharacter = "Current Character",
 		save = "Save",
 		load = "Load",
+		goldAbbr = "gp",
+		expertiseLevels = { "Novice", "Apprentice", "Journeyman", "Expert", "Master" },
+		trainer = "Trainer",
+		trainTo = "Train to Level %d\n",
+		attributeLimit = "Your %s limits you\nto Level %d.",
+		trainerLimit = "Your trainer has\nnothing new to teach you.",
 	},
 }
