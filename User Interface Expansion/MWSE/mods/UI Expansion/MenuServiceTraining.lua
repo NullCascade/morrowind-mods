@@ -106,9 +106,9 @@ local function createTrainSkillElement(parent, id, data)
 	border.paddingAllSides = 4
 	border.absolutePosAlignX = 0.5
 
-    local button = ImageButton.create(border, data.skill.iconPath, 128, 128)
-    button:setPropertyInt("UIEXP_ListIndex", data.forward)
-    button:register("mouseClick", onClickTrainSkill)
+	local button = ImageButton.create(border, data.skill.iconPath, 128, 128)
+	button:setPropertyInt("UIEXP_ListIndex", data.forward)
+	button:register("mouseClick", onClickTrainSkill)
 
 	-- Unpleasant hack:
 	border.height = 136
