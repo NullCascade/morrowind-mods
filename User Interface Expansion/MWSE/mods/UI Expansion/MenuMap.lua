@@ -9,7 +9,7 @@ local function changeCell(e)
 		return
 	end
 
-	local MenuMap_switch = menuMap:findChild(GUIID_MenuMap_switch)
+	local MenuMap_switch = MenuMap:findChild(GUIID_MenuMap_switch)
 	if (MenuMap_switch == nil) then
 		return
 	end
