@@ -17,19 +17,25 @@ local GUI_Palette_TopicUnique = common.getColor(common.config.dialogueTopicUniqu
 -- Dialogue: Adds colorization to show what topics provide new and unique responses.
 ----------------------------------------------------------------------------------------------------
 
---[[
-adds number prefix to Choice answers and makes them working pressing the number key /abot
---]]
+-- Adds number prefix to Choice answers and makes them working pressing the number key.
 local answers = {}
 
-local function keyDown(e)
+local function checkForAnswerHotkey(e)
+	-- Make sure we're in the dialogue menu.
+	local topMenu = tes3.getTopMenu()
+	if (topMenu == nil or topMenu.id ~= GUI_ID_MenuDialog) then
+		return
+	end
+
+	-- Make sure we have answers.
+	if answers == nil or #answers == 0 then
+		return
+	end
+	
 	local key = e.keyCode - 1
-	if answers then
-		local answer = answers[key]
-		if answer then
-			tes3.messageBox(answer.text)
-			answer:triggerEvent("mouseClick")
-		end
+	local answer = answers[key]
+	if answer then
+		answer:triggerEvent("mouseClick")
 	end
 end
 
@@ -57,18 +63,21 @@ local function updateTopicsList(e)
 	end
 
 	-- Catch events from hyperlinks.
-
-	local i = 0
+	local answerIndex = 1
 	answers = {}
 	for _, element in pairs(textPane.children) do
-		if (element.id == GUI_ID_MenuDialog_hyper or element.id == GUI_ID_MenuDialog_answer_block) then
+		if (element.id == GUI_ID_MenuDialog_hyper) then
 			element:register("mouseClick", updateTopicsList)
-		end
-		if element.id == GUI_ID_MenuDialog_answer_block then
-			i = i + 1
+		elseif (element.id == GUI_ID_MenuDialog_answer_block) then
+			local oldText = element.text
+			element:register("mouseClick", function(e)
+				tes3.messageBox(oldText)
+				updateTopicsList(e)
+			end)
 			if string.match(element.text,"^%d+") == nil then
-				element.text = string.format("%s %s", i, element.text)
-				answers[i] = element
+				element.text = string.format("%d. %s", answerIndex, element.text)
+				answers[answerIndex] = element
+				answerIndex = answerIndex + 1
 			end
 		end
 	end
@@ -124,4 +133,4 @@ local function onDialogueMenuActivated(e)
 	end)
 end
 event.register("uiActivated", onDialogueMenuActivated, { filter = "MenuDialog" })
-event.register("keyDown", keyDown)
+event.register("keyDown", checkForAnswerHotkey)
