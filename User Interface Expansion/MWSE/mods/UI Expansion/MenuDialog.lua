@@ -31,8 +31,8 @@ local function checkForAnswerHotkey(e)
 	if answers == nil or #answers == 0 then
 		return
 	end
-	
-	local key = e.keyCode - 1
+
+	local key = tes3.scanCodeToNumber[e.keyCode]
 	local answer = answers[key]
 	if answer then
 		answer:triggerEvent("mouseClick")
