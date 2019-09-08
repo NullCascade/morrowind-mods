@@ -1,6 +1,15 @@
 local common = require("UI Expansion.common")
 local lastTarget
 
+local id_serviceList = tes3ui.registerID("MenuServiceTraining_ServiceList")
+local id_pane = tes3ui.registerID("PartScrollPane_pane")
+
+local id_cancel = tes3ui.registerID("UIEXP_MenuTraining_Cancel")
+local id_skill_1 = tes3ui.registerID("UIEXP_MenuTraining_Skill1")
+local id_skill_2 = tes3ui.registerID("UIEXP_MenuTraining_Skill2")
+local id_skill_3 = tes3ui.registerID("UIEXP_MenuTraining_Skill3")
+local id_gold = tes3ui.registerID("UIEXP_MenuTraining_Gold")
+
 local function onAfterTrainTimer()
 	if (lastTarget ~= nil and tes3.getPlayerTarget() == lastTarget) then
 		tes3.player:activate(lastTarget)
@@ -17,16 +26,6 @@ local function menuTraining(e)
 end
 
 event.register("uiActivated", menuTraining, { filter = "MenuServiceTraining"})
-
---HRNCHAMD
-id_serviceList = tes3ui.registerID("MenuServiceTraining_ServiceList")
-id_pane = tes3ui.registerID("PartScrollPane_pane")
-
-id_cancel = tes3ui.registerID("UIEXP_MenuTraining_Cancel")
-id_skill_1 = tes3ui.registerID("UIEXP_MenuTraining_Skill1")
-id_skill_2 = tes3ui.registerID("UIEXP_MenuTraining_Skill2")
-id_skill_3 = tes3ui.registerID("UIEXP_MenuTraining_Skill3")
-id_gold = tes3ui.registerID("UIEXP_MenuTraining_Gold")
 
 local function expertiseText(skill)
 	for i = 4, 0, -1 do
@@ -142,11 +141,11 @@ local function createTrainSkillElement(parent, id, data)
 	if (level.base < attr.base and level.base < trainerLevel.base) then
 		text = string.format(common.dictionary.trainTo, level.base + 1)
 	else
-		if (level.base >= attr.base) then
+		if (level.base >= trainerLevel.base) then
+			text = common.dictionary.trainerLimit
+		else
 			text = tes3.findGMST(tes3.gmst.sAttributeStrength + data.skill.attribute).value
 			text = string.format(common.dictionary.attributeLimit, text, level.base)
-		else
-			text = common.dictionary.trainerLimit
 		end
 		textColor = tes3ui.getPalette("negative_color")
 		button.disabled = true
