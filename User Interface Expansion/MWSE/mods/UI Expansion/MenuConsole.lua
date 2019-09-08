@@ -139,7 +139,7 @@ local function onMenuConsoleActivated(e)
 	toggleText.wrapText = true
 	toggleText.justifyText = "center"
 
-	input:register("keyPress", function()
+	input:register("keyPress", function(e)
 		local key = e.data0
 
 		if (key == 9) then
