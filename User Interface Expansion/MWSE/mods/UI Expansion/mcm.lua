@@ -205,6 +205,7 @@ function this.onCreate(container)
 	mainPane:createLabel({ text = "  Programming: NullCascade, Hrnchamd, Petethegoat, Jiopsi, Remiros, Mort, Wix, abot" })
 	mainPane:createLabel({ text = "  Colored Magic School Icons: R-Zero" })
 	mainPane:createLabel({ text = "  Inventory Filter Icons: Remiros" })
+	mainPane:createLabel({ text = "  Training Skill Icons: RedFurryDemon" })
 	mainPane:createLabel({ text = "  Concepts and Testing: Morrowind Modding Community Discord" })
 end
 

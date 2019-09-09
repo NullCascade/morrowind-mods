@@ -96,7 +96,7 @@ end
 
 local function createTrainSkillElement(parent, id, data)
 	local train = parent:createBlock{id = id}
-	train.width = 270
+	train.width = 180
 	train.autoHeight = true
 	train.flowDirection = "top_to_bottom"
 
@@ -105,9 +105,18 @@ local function createTrainSkillElement(parent, id, data)
 	border.paddingAllSides = 4
 	border.absolutePosAlignX = 0.5
 
-	local button = ImageButton.create(border, data.skill.iconPath, 128, 128)
+	local skillIconPath = data.skill.iconPath:gsub("\\k\\", "\\rfd\\")
+	if not lfs.attributes("data files/" .. skillIconPath) then
+		skillIconPath = data.skill.iconPath
+	end
+
+	local button = ImageButton.create(border, string.format("icons/ui_exp/skillbg_%s.dds", tes3.specializationName[data.skill.specialization]), 128, 128)
 	button:setPropertyInt("UIEXP_ListIndex", data.forward)
 	button:register("mouseClick", onClickTrainSkill)
+	local skillIcon = border:createImage{path = skillIconPath}
+	skillIcon.consumeMouseEvents = false
+	skillIcon.absolutePosAlignX = 0.5
+	skillIcon.absolutePosAlignY = 0.5
 
 	-- Unpleasant hack:
 	border.height = 136
