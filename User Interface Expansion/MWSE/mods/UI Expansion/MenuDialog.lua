@@ -24,21 +24,17 @@ local function checkForAnswerHotkey(e)
 	-- Make sure we're in the dialogue menu.
 	local topMenu = tes3.getTopMenu()
 	if not topMenu then
-		---mwse.log("checkForAnswerHotkey: topMenu = %s", topMenu)
 		return
 	end
 	if not (topMenu.id == GUI_ID_MenuDialog) then
-		---mwse.log("checkForAnswerHotkey: topMenu.id = %s, GUI_ID_MenuDialog = %s", topMenu.id, GUI_ID_MenuDialog)
 		return
 	end
 
 	-- Make sure we have answers.
 	if not answers then
-		---mwse.log("checkForAnswerHotkey: answers = %s", answers)
 		return
 	end
 	if #answers <= 0 then
-		---mwse.log("checkForAnswerHotkey: #answers = %s", #answers)
 		return
 	end
 
@@ -49,7 +45,6 @@ local function checkForAnswerHotkey(e)
 
 	local answer = answers[key]
 	if not answer then
-		---mwse.log("checkForAnswerHotkey: key = %s, answer not found", key)
 		return
 	end
 
@@ -75,31 +70,25 @@ local function updateTopicsList(e)
 
 		-- Were we forced out of dialogue?
 		if (tes3ui.findMenu(GUI_ID_MenuDialog) == nil) then
-			---mwse.log("updateTopicsList tes3ui.findMenu(GUI_ID_MenuDialog) == nil");
 			answers = {}
 			return
 		end
 
 		-- Make sure that the node heard from field is always used.
 		if e.info then
-			---mwse.log("[UI Expansion] e.info = %s", e.info);
 			if e.actor then
-				---mwse.log("[UI Expansion] e.actor = %s", e.actor);
 				if (e.info.firstHeardFrom == nil) then
 					if (textPane:findChild(GUI_ID_MenuDialog_answer_block) == nil) then
 						e.info.firstHeardFrom = e.actor
 					end
 				end
-				---mwse.log("[UI Expansion] e.info.firstHeardFrom = %s", e.info.firstHeardFrom)
 			end
 		end
 	end
 
 	-- Catch events from hyperlinks.
 	for _, element in pairs(textPane.children) do
-		---mwse.log("[UI Expansion] _ = %s, element = %s, element.id = %s, %s", _, element, element.id, element.text)
 		if (element.id == GUI_ID_MenuDialog_hyper) then
-			---mwse.log("[UI Expansion] GUI_ID_MenuDialog_hyper = element.id = %s, %s", element.id, element.text)
 			element:register("mouseClick", updateTopicsList)
 		end
 	end
@@ -138,13 +127,9 @@ local function updateTopicsList(e)
 			end)
 		end
 	end
-	---mwse.log( json.encode(textPane.children,{indent = true}) ) -- something is not right, it seems GUI_ID_MenuDialog_answer_block are not added on greeting /abot
 end
 
 local function update()
-
-	--answers = {}
-
 	local function traverse(element)
 		local path = {}
 		local i = 0
@@ -180,18 +165,11 @@ local function update()
 
 	local menuDialog = tes3ui.findMenu(GUI_ID_MenuDialog)
 	if menuDialog then
-		---mwse.log("GUI_ID_MenuDialog_hyper = %s, GUI_ID_MenuDialog_answer_block = %s", GUI_ID_MenuDialog_hyper, GUI_ID_MenuDialog_answer_block)
 		local scroll_pane = menuDialog:findChild(GUI_ID_MenuDialog_scroll_pane)
 		if scroll_pane then
 			local pane_pane = scroll_pane:findChild(GUI_ID_PartScrollPane_pane)
 			if pane_pane then
 				traverse(pane_pane)
-				--[[
-				local path = traverse(pane_pane)
-				local s = json.encode(path,{indent = true})
-				mwse.log("scroll_pane:")
-				mwse.log(s)
-				--]]
 			end
 		end
 
