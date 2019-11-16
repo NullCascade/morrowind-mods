@@ -1,7 +1,7 @@
 =====================================================================================
                               Sophisticated Save System                              
                                  Author: NullCascade                                 
-                                    Version 1.0.2                                    
+                                    Version 1.1.0                                    
 =====================================================================================
 
  INDEX:
@@ -85,6 +85,7 @@
  1.1.0 [2018-08-20]:
     * Fixed issue where saves would be created right after loading a game.
     * Moved configuration to the Mod Config Menu.
+    * Added ability to delete old file structure for old installations.
 
  1.0.2 [2018-06-04]:
     * Fixed issue where saves would be created during character generation.

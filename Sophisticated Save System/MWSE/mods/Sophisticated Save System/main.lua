@@ -18,6 +18,20 @@
 
 local lfs = require("lfs")
 
+-- Ensure we don't have an old version installed.
+if (lfs.attributes("Data Files/MWSE/lua/nc/save/mod_init.lua")) then
+	if (lfs.rmdir("Data Files/MWSE/lua/nc/save/", true)) then
+		mwse.log("[Sophisticated Save System] Old install found and deleted.")
+
+		-- Additional, probably not necessarily cleanup. It will only delete these if they are empty.
+		lfs.rmdir("Data Files/MWSE/lua/nc")
+		lfs.rmdir("Data Files/MWSE/lua")
+	else
+		mwse.log("[Sophisticated Save System] Old install found but could not be deleted. Please remove the folder 'Data Files/MWSE/lua/nc/save' and restart Morrowind.")
+		return
+	end
+end
+
 -- Default configuration values.
 local defaultConfig = {
 	timeBetweenAutoSaves = 10,
@@ -147,7 +161,7 @@ local autosaveTimer = nil
 local autosavePasses = 0
 local blockAutosaves = true
 local function autosave()
-	if (not config.saveOnTimer or blockAutosaves or tes3.getGlobal("CharGenState") ~= -1) then
+	if (not config.saveOnTimer or blockAutosaves or tes3.worldController.charGenState.value ~= -1) then
 		return
 	end
 
@@ -192,7 +206,7 @@ event.register("initialized", initialized)
 -- flag to see if they are newly starting combat.
 local function combatStart(e)
 	-- Do we care about this save event?
-	if (not config.saveOnCombatStart or blockAutosaves or tes3.getGlobal("CharGenState") ~= -1) then
+	if (not config.saveOnCombatStart or blockAutosaves or tes3.worldController.charGenState.value ~= -1) then
 		return
 	end
 
@@ -219,7 +233,7 @@ event.register("combatStart", combatStart)
 -- see if the player is out of combat when this event ends and cause a save.
 local function combatStopped(e)
 	-- Do we care about this save event?
-	if (not config.saveOnCombatEnd or blockAutosaves or tes3.getGlobal("CharGenState") ~= -1) then
+	if (not config.saveOnCombatEnd or blockAutosaves or tes3.worldController.charGenState.value ~= -1) then
 		return
 	end
 
@@ -238,7 +252,7 @@ event.register("combatStopped", combatStopped)
 -- Check for cell change event.
 local function cellChanged(e)
 	-- Do we care about this save event?
-	if (not config.saveOnCellChange or blockAutosaves or tes3.getGlobal("CharGenState") ~= -1) then
+	if (not config.saveOnCellChange or blockAutosaves or tes3.worldController.charGenState.value ~= -1) then
 		return
 	end
 
