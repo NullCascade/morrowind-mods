@@ -37,10 +37,6 @@ local config = table.copy(defaultConfig)
 local lastAutoSaveTimestamp = os.clock()
 
 -- Our config menus need to be forward declared so they can be moved between cleanly.
-local configShowEnableDisableFeatureMenu
-local configShowConfigSaveCountMenu
-local configShowConfigTimerMenu
-local configShowConfigMinimumTimerMenu
 local configShowMainMenu
 
 -- Generates a save name with a keyed meaning. These meanings are:
@@ -187,7 +183,7 @@ end
 -- and is about to show the main menu. The only thing we want to do here is let the
 -- log know that we're up and going.
 local function initialized(e)
-	mwse.log("[Sophisticated Save System] Initialized MWSE Sophisticated Save System v1.0.0.")
+	mwse.log("[Sophisticated Save System] Initialized MWSE Sophisticated Save System v1.1.0.")
 end
 event.register("initialized", initialized)
 
