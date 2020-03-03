@@ -214,6 +214,8 @@ local function extraTooltipEarly(e)
 		-- Add padding to the title.
 		e.tooltip:getContentElement().children[1].borderAllSides = 3
 
+		local objectValue = e.object.value
+
 		if e.object.objectType == tes3.objectType.weapon or e.object.objectType == tes3.objectType.ammunition then
 			replaceWeaponTooltip(e.tooltip, e.object, e.itemData)
 		elseif e.object.objectType == tes3.objectType.armor then
@@ -244,12 +246,20 @@ local function extraTooltipEarly(e)
 
 		-- Soul gem capacity
 		elseif e.object.isSoulGem then
-			local soulValue = tes3.findGMST(tes3.gmst.fSoulGemMult).value * e.object.value
+			local rawSoulValue = e.itemData.soul.soul
+			local soulValue = tes3.findGMST(tes3.gmst.fSoulGemMult).value * rawSoulValue
 			labelFormatted(e.tooltip, string.format("%s: %u", common.dictionary.soulCapacity, soulValue))
+
+			-- Fixup item value based on MCP feature state.
+			if (tes3.hasCodePatchFeature(65)) then
+				objectValue = (rawSoulValue ^ 3) / 10000 + rawSoulValue * 2
+			else
+				objectValue = objectValue * rawSoulValue
+			end
 		end
 
 		-- Add the value and weight back in.
-		if e.object.value and e.object.weight then
+		if objectValue and e.object.weight then
 			local container = e.tooltip:createBlock{ id = GUI_ID_TooltipIconBar }
 			container.widthProportional = 1.0
 			container.minHeight = 16
@@ -263,7 +273,7 @@ local function extraTooltipEarly(e)
 			block.autoWidth = true
 			block.autoHeight = true
 			block:createImage{ path = "icons/gold.dds" }
-			local label = block:createLabel{ text = string.format("%u", e.object.value) }
+			local label = block:createLabel{ text = string.format("%u", objectValue) }
 			label.borderLeft = 4
 
 			-- Weight
