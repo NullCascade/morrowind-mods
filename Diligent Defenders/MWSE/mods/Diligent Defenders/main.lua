@@ -54,7 +54,7 @@ local function inBlackList(actor)
 	end
 
 	-- Is it in our blacklist?
-	if (table.find(config.blackList, id) ~= nil) then
+	if (table.find(config.blacklist, id) ~= nil) then
 		return true
 	end
 
