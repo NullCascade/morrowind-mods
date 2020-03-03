@@ -188,6 +188,10 @@ end
 local function replaceAlchemyTooltip(tooltip, alchemy)
 	tryDestroyAllID(tooltip, "HelpMenu_effectBlock")
 
+	-- Values we'll use to see if the alchemy effect should be visible.
+	local playerCurrentAlchemy = tes3.mobilePlayer.alchemy.current
+	local fWortChanceValue = tes3.findGMST(tes3.gmst.fWortChanceValue).value
+
 	for i = 1, #alchemy.effects do
 		-- effects is a fixed size array, empty slots have the id -1.
 		if alchemy.effects[i].id >= 0 then
@@ -201,6 +205,11 @@ local function replaceAlchemyTooltip(tooltip, alchemy)
 			local label = block:createLabel{ text = string.format("%s", alchemy.effects[i]), id = tes3ui.registerID("HelpMenu_effectLabel") }
 			label.borderLeft = 4
 			label.wrapText = false
+			
+			-- Hide the block if the PC's skill is too low.
+            if playerCurrentAlchemy < i * fWortChanceValue then
+                block.visible = false
+            end
 		end
 	end
 end
