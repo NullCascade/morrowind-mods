@@ -183,7 +183,27 @@ local function createTrainSkillElement(parent, id, data)
 end
 
 
-function modifyWindow(menu)
+local function onCancel(e)
+	local menu = e.source:getTopLevelParent()
+	local ok = menu:findChild(tes3ui.registerID("MenuServiceTraining_Okbutton"))
+	ok:triggerEvent(e)
+end
+
+local function onClickTrainSkill(e)
+	if (e.source.disabled) then
+		return
+	end
+
+	local menu = e.widget:getTopLevelParent()
+	local list = menu:findChild(id_serviceList)
+	local i = e.widget:getPropertyInt("UIEXP_ListIndex")
+	local s = list:findChild(id_pane).children[i].children[1]
+	s:triggerEvent(e)
+	
+	timer.start({ duration = 1, callback = onAfterTrainTimer })
+end
+
+local function modifyWindow(menu)
 	local list = menu:findChild(id_serviceList)
 
 	local debug = false
@@ -246,29 +266,7 @@ function modifyWindow(menu)
 	menu:getTopLevelParent():updateLayout()
 end
 
-function onClickTrainSkill(e)
-	if (e.source.disabled) then
-		return
-	end
-
-	local menu = e.widget:getTopLevelParent()
-	local list = menu:findChild(id_serviceList)
-	local i = e.widget:getPropertyInt("UIEXP_ListIndex")
-	local s = list:findChild(id_pane).children[i].children[1]
-	s:triggerEvent(e)
-	
-	timer.start({ duration = 1, callback = onAfterTrainTimer })
-end
-
-
-function onCancel(e)
-	local menu = e.source:getTopLevelParent()
-	local ok = menu:findChild(tes3ui.registerID("MenuServiceTraining_Okbutton"))
-	ok:triggerEvent(e)
-end
-
-
-function onTraining(e)
+local function onTraining(e)
 	if (e.newlyCreated) then
 		modifyWindow(e.element)
 	end

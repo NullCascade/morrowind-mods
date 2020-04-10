@@ -1,5 +1,7 @@
 local common = require("UI Expansion.common")
 
+local GUI_ID_MenuContents = tes3ui.registerID("MenuContents")
+
 local function menuQuantity(e)
     -- Enable keyboard support for the scroll bar.
     local scrollBar = e.element:findChild(tes3ui.registerID("MenuQuantity_scrollbar"))
@@ -10,5 +12,14 @@ local function menuQuantity(e)
             submitButton:triggerEvent("mouseClick")
         end
     })
+
+    -- Register event so that when mouseClick happens on ok button an update event is
+    -- sent to the contents menu.
+    local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
+    submitButton:register("mouseClick",
+        function(e2)
+            e2.source:forwardEvent(e2)
+            contentsMenu:triggerEvent("update")
+        end)
 end
 event.register("uiActivated", menuQuantity, { filter = "MenuQuantity"})
