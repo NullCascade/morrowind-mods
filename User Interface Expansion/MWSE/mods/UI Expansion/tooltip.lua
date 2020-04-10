@@ -254,7 +254,7 @@ local function extraTooltipEarly(e)
 			end
 
 		-- Soul gem capacity
-		elseif e.object.isSoulGem then
+		elseif e.itemData and e.object.isSoulGem then
 			local rawSoulValue = e.itemData.soul.soul
 			local soulValue = tes3.findGMST(tes3.gmst.fSoulGemMult).value * rawSoulValue
 			labelFormatted(e.tooltip, string.format("%s: %u", common.dictionary.soulCapacity, soulValue))
