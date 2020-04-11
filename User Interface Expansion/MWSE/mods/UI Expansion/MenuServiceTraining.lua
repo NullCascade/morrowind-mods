@@ -94,6 +94,20 @@ function ImageButton.create(parent, imagePath, w, h)
 	return background
 end
 
+local function onClickTrainSkill(e)
+	if (e.source.disabled) then
+		return
+	end
+
+	local menu = e.widget:getTopLevelParent()
+	local list = menu:findChild(id_serviceList)
+	local i = e.widget:getPropertyInt("UIEXP_ListIndex")
+	local s = list:findChild(id_pane).children[i].children[1]
+	s:triggerEvent(e)
+	
+	timer.start({ duration = 1, callback = onAfterTrainTimer })
+end
+
 local function createTrainSkillElement(parent, id, data)
 	local train = parent:createBlock{id = id}
 	train.width = 180
@@ -187,20 +201,6 @@ local function onCancel(e)
 	local menu = e.source:getTopLevelParent()
 	local ok = menu:findChild(tes3ui.registerID("MenuServiceTraining_Okbutton"))
 	ok:triggerEvent(e)
-end
-
-local function onClickTrainSkill(e)
-	if (e.source.disabled) then
-		return
-	end
-
-	local menu = e.widget:getTopLevelParent()
-	local list = menu:findChild(id_serviceList)
-	local i = e.widget:getPropertyInt("UIEXP_ListIndex")
-	local s = list:findChild(id_pane).children[i].children[1]
-	s:triggerEvent(e)
-	
-	timer.start({ duration = 1, callback = onAfterTrainTimer })
 end
 
 local function modifyWindow(menu)
