@@ -2,6 +2,12 @@
 
 This repository contains some of the mods I have created for *The Elder Scrolls III: Morrowind*. These primarily use the new Lua modding API available in MWSE 2.1.
 
+## Assetless No-Glow
+
+Pluginless *and* assetless no-glow. Use less memory, be more compatible! 
+
+* Download: [Nexus](https://www.nexusmods.com/morrowind/mods/47925/)
+
 ## Controlled Consumption
 
 Provides a configurable restriction on the amount of potions the player can drink at any one time, removing one of the largest exploits in the game.
