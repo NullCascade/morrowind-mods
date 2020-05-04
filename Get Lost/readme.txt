@@ -1,7 +1,7 @@
 =====================================================================================
                                       Get  Lost                                      
                                  Author: NullCascade                                 
-                                    Version 1.0.2                                    
+                                    Version 1.0.3                                    
 =====================================================================================
 
  INDEX:
@@ -57,6 +57,10 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.1.0 [2020-05-03]:
+    * Changed the mod to hide/move the map off screen instead of deleting it. This
+      improves stability and compatibility. Thanks to Petethegoat for the change.
 
  1.0.2 [2019-04-10]:
     * Fixed crash when going through character creation.
