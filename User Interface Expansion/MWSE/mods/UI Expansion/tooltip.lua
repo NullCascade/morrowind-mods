@@ -254,7 +254,7 @@ local function extraTooltipEarly(e)
 			end
 
 		-- Soul gem capacity
-		elseif e.itemData and e.object.isSoulGem then
+		elseif e.object.isSoulGem and e.itemData and e.itemData.soul then
 			local rawSoulValue = e.itemData.soul.soul
 			local soulValue = tes3.findGMST(tes3.gmst.fSoulGemMult).value * rawSoulValue
 			labelFormatted(e.tooltip, string.format("%s: %u", common.dictionary.soulCapacity, soulValue))
@@ -335,7 +335,9 @@ local function extraTooltipLate(e)
 	-- If our divider isn't the last element, then something else was added, like flavor text.
 	if children[#children].id ~= GUI_ID_TooltipExtraDivider then
 		local divide = element:findChild(GUI_ID_TooltipExtraDivider)
-		divide.visible = true
+		if (divide) then
+			divide.visible = true
+		end
 	end
 
 	-- Now, we'll make sure our icon bar is in the position we want (currently the very bottom).
