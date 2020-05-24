@@ -156,6 +156,37 @@ magicFilters:addFilter({
 	icon = "icons/ui_exp/magic_restoration.tga",
 })
 
+local function addSpellIcons(spellsList, guiIdPrefix, namesBlockId, isSpell)
+	local namesBlock = spellsList:findChild(tes3ui.registerID(namesBlockId))
+
+	-- Create icons column.
+	local columnsBlock = namesBlock.parent
+	local iconsColumn = columnsBlock:createBlock({ id = string.format("UIEXP:MagicMenu:SpellsList:%s:Icons", guiIdPrefix) })
+	iconsColumn.flowDirection = "top_to_bottom"
+	iconsColumn.autoWidth = true
+	iconsColumn.autoHeight = true
+	iconsColumn.paddingRight = 4
+	iconsColumn.paddingLeft = 2
+	columnsBlock:reorderChildren(0, -1, 1)
+
+	-- Find and create icons for the available spells.
+	if (isSpell) then
+		for _, nameElement in ipairs(namesBlock.children) do
+			local spell = nameElement:getPropertyObject("MagicMenu_Spell")
+			local icon = iconsColumn:createImage({ path = string.format("icons\\%s", spell.effects[1].object.icon)  })
+			icon.borderTop = 2
+			icon:setPropertyObject("MagicMenu_Spell", spell)
+		end
+	else
+		for _, nameElement in ipairs(namesBlock.children) do
+			local object = nameElement:getPropertyObject("MagicMenu_object")
+			local icon = iconsColumn:createImage({ path = string.format("icons\\%s", object.enchantment.effects[1].object.icon)  })
+			icon.borderTop = 2
+			icon:setPropertyObject("MagicMenu_object", object)
+		end
+	end
+end
+
 local function onMenuMagicActivated(e)
 	if (not e.newlyCreated) then
 		return
@@ -178,6 +209,10 @@ local function onMenuMagicActivated(e)
 
 	-- Actually create our filter elements.
 	magicFilters:createElements(filterBlock)
+
+	-- Create spell icons.
+	addSpellIcons(spellsList, "Powers", "MagicMenu_power_names", true)
+	addSpellIcons(spellsList, "Spells", "MagicMenu_spell_names", true)
 end
 event.register("uiActivated", onMenuMagicActivated, { filter = "MenuMagic" } )
 
