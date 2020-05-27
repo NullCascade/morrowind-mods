@@ -207,13 +207,14 @@ local function replaceAlchemyTooltip(tooltip, alchemy)
 			label.wrapText = false
 			
 			-- Hide the block if the PC's skill is too low.
-            if playerCurrentAlchemy < i * fWortChanceValue then
-                block.visible = false
-            end
+			if playerCurrentAlchemy < i * fWortChanceValue then
+				block.visible = false
+			end
 		end
 	end
 end
 
+local useMCPSoulgemValueRebalance = tes3.hasCodePatchFeature(65)
 local function extraTooltipEarly(e)
 	-- I believe this is hardcoded in engine, so we'll just do this too.
 	if not e.object.id:find("Gold_") and not e.object.isKey then
@@ -260,7 +261,7 @@ local function extraTooltipEarly(e)
 			labelFormatted(e.tooltip, string.format("%s: %u", common.dictionary.soulCapacity, soulValue))
 
 			-- Fixup item value based on MCP feature state.
-			if (tes3.hasCodePatchFeature(65)) then
+			if (useMCPSoulgemValueRebalance) then
 				objectValue = (rawSoulValue ^ 3) / 10000 + rawSoulValue * 2
 			else
 				objectValue = objectValue * rawSoulValue

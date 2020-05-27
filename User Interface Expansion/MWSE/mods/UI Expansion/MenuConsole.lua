@@ -21,14 +21,14 @@ local function updateScriptButton(button)
 end
 
 local function sandboxInit()
-    setmetatable(sandbox, { __index = _G })
-    sandbox.print = tes3ui.logToConsole
+	setmetatable(sandbox, { __index = _G })
+	sandbox.print = tes3ui.logToConsole
 end
 
 local function sandboxScript(f)
-    sandbox.currentRef = tes3ui.findMenu(GUI_ID_MenuConsole):getPropertyObject("MenuConsole_current_ref")
-    setfenv(f, sandbox)
-    return pcall(f)
+	sandbox.currentRef = tes3ui.findMenu(GUI_ID_MenuConsole):getPropertyObject("MenuConsole_current_ref")
+	setfenv(f, sandbox)
+	return pcall(f)
 end
 
 local function onSubmitCommand()
