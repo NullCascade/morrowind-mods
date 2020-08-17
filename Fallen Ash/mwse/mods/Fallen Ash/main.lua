@@ -304,6 +304,11 @@ local function onSimulate(e)
 end
 event.register("simulate", onSimulate)
 
+local function onLoad(e)
+    clearAllAshDecals()
+end
+event.register("load", onLoad)
+
 --- Fixup body parts that are assigned after a level has already been set.
 local function onBodyPartsUpdated(e)
     local level = getAshLevelForReference(e.reference)
