@@ -16,8 +16,6 @@ local ASH_LEVELS = 3
 --- A dictionary of all loaded ash decals. ashDecals.variant.level returns an NiSourceTexture.
 local ashDecals = {}
 
-local debugTexture = nil
-
 --- A map with all valid texture paths as keys for quick checking.
 local ashDecalPathsToData = {}
 local function isAshDecalTexture(path)
@@ -37,8 +35,6 @@ local function onInitialized()
             ashDecalPathsToData[path] = { variant = v, level = l, texture = texture }
         end
     end
-
-    debugTexture = niSourceTexture.createFromPath("textures\\tx_blood.dds")
 end
 event.register("initialized", onInitialized)
 
@@ -108,7 +104,6 @@ local function setAshLevelForProperty(object, prop, level)
             if (data) then
                 if (level == 0) then
                     prop:removeDecalMap(index)
-                    -- map.texture = debugTexture
                     -- mwse.log("[Fallen Ash] Removed decal from '%s' (%s)", object.name, object.RTTI.name)
                 else
                     map.texture = ashDecals[data.variant][level]
