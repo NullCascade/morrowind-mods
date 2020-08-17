@@ -185,24 +185,24 @@ local function determineLocalAshLevel()
     local nextWeather = weatherController.nextWeather
 
     if (tes3.getPlayerCell().region == nil) then
-        return 0
+        return 0, true
     end
 
     -- Determine our weather state.
     if (currentWeather and currentWeather.index == tes3.weather.ash) then
         if (nextWeather) then
             -- We're transitioning out of an ash storm.
-            return math.floor(ASH_LEVELS * weatherController.transitionScalar)
+            return math.floor(ASH_LEVELS * (1-weatherController.transitionScalar)), true
         else
             -- We're in a stable ash storm.
-            return ASH_LEVELS
+            return ASH_LEVELS, false
         end
     elseif (nextWeather and nextWeather.index == tes3.weather.ash) then
         -- We are in the process of ashing.
-        return math.floor(ASH_LEVELS * weatherController.transitionScalar)
+        return math.floor(ASH_LEVELS * weatherController.transitionScalar), false
     end
 
-    return 0
+    return 0, true
 end
 
 
@@ -253,20 +253,6 @@ local function onCellChanged(e)
 end
 event.register("cellChanged", onCellChanged)
 
---- Persistent timers: Coming soon...
-local function onSimulate(e)
-    countDownToUpdate = countDownToUpdate - e.delta
-    if (countDownToUpdate <= 0) then
-        -- mwse.log("[Fallen Ash] Forcing update due to time passed.")
-        local ashLevel = determineLocalAshLevel()
-        if (ashLevel ~= 0) then
-            setAshLevelForActiveCells(ashLevel)
-        end
-        countDownToUpdate = 10
-    end
-end
-event.register("simulate", onSimulate)
-
 --------------------------------------------
 -- WEATHER TRANSITION HANDLING            --
 --------------------------------------------
@@ -296,6 +282,27 @@ end
 --------------------------------------------
 -- OTHER MISC. HANDLING                   --
 --------------------------------------------
+
+--- Persistent timers: Coming soon...
+local function onSimulate(e)
+    countDownToUpdate = countDownToUpdate - e.delta
+    if (countDownToUpdate <= 0) then
+        -- local weatherController = tes3.worldController.weatherController
+        -- local currentWeather = weatherController.currentWeather
+        -- local nextWeather = weatherController.nextWeather
+
+        local ashLevel, skipUpdate = determineLocalAshLevel()
+
+        -- mwse.log("[Fallen Ash] Forcing update due to time passed. Level: %d; Skip: %s; Weather: %s -> %s @ %.2f.", ashLevel, skipUpdate, currentWeather and table.find(tes3.weather, currentWeather.index), nextWeather and table.find(tes3.weather, nextWeather.index), weatherController.transitionScalar)
+
+        if (not skipUpdate) then
+            setAshLevelForActiveCells(ashLevel)
+        end
+
+        countDownToUpdate = 10
+    end
+end
+event.register("simulate", onSimulate)
 
 --- Fixup body parts that are assigned after a level has already been set.
 local function onBodyPartsUpdated(e)
@@ -342,7 +349,7 @@ local function debugToggleAshWeather(e)
         region:changeWeather(tes3.weather.ash)
     end
 end
-event.register("keyDown", debugToggleAshWeather, { filter = tes3.scanCode.z })
+-- event.register("keyDown", debugToggleAshWeather, { filter = tes3.scanCode.z })
 
 local function debugAdjustAshLevel(e)
     local hit = tes3.rayTest({ position = tes3.getPlayerEyePosition(), direction = tes3.getPlayerEyeVector() })
@@ -362,7 +369,7 @@ local function debugAdjustAshLevel(e)
     -- mwse.log("[Fallen Ash] Setting ash level for '%s' from %d to %d.", ref, currentLevel, newLevel)
     setAshLevelForReference(ref, newLevel)
 end
-event.register("keyDown", debugAdjustAshLevel, { filter = tes3.scanCode.x })
+-- event.register("keyDown", debugAdjustAshLevel, { filter = tes3.scanCode.x })
 
 local function debugRefocusAshLevel(e)
     if (e.isAltDown) then
@@ -374,4 +381,4 @@ local function debugRefocusAshLevel(e)
     end
     countDownToUpdate = 10
 end
-event.register("keyDown", debugRefocusAshLevel, { filter = tes3.scanCode.c })
+-- event.register("keyDown", debugRefocusAshLevel, { filter = tes3.scanCode.c })
