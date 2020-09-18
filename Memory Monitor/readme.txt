@@ -1,7 +1,7 @@
 =====================================================================================
                                    Memory  Monitor                                   
                                  Author: NullCascade                                 
-                                    Version 1.1.0                                    
+                                    Version 2.0.0                                    
 =====================================================================================
 
  INDEX:
@@ -29,8 +29,11 @@
  ABOUT THIS MOD:
 =====================================================================================
 
- This simple mod provides an in-game alert if the current game is approaching the
- 4 GB memory limit. 
+ This simple mod provides a fillbar on the interface, above the map. The bar shows
+ how much memory Morrowind is using. A crash can be expected when the bar fills up.
+
+ When using large mod lists, this can be useful to monitor how at risk of a crash
+ you are.
 
 =====================================================================================
  INSTALLATION:
@@ -39,7 +42,7 @@
  Extract the archive into your Morrowind installation directory. The mod consists of
  two files, which should end up located at:
     .\Data Files\MWSE\config\Memory Monitor.json
-    .\Data Files\MWSE\mods\Memory Monitor\mod_init.lua
+    .\Data Files\MWSE\mods\Memory Monitor\main.lua
 
 =====================================================================================
  PLAYING THIS PLUGIN:
@@ -48,7 +51,8 @@
  There is no esp file to activate. Simply install the MWSE 2.1 and this mod, and
  load up an old or new game.
 
- The memory thresholds for warnings can be configured in Memory Monitor.json.
+ The memory thresholds for displaying the bar can be configured in
+ Memory Monitor.json.
 
 =====================================================================================
  KNOWN ISSUES OR BUGS:
@@ -60,6 +64,12 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 2.0.0 [2020-09-18]:
+    * No longer displays message boxes. Instead shows a HUD element.
+    * When the warning threshold is hit, it shows a blocking message box prompting
+      the user to save.
+    * From the message, the user can save and quit.
 
  1.0.1 [2018-07-26]:
     * Minor refactor for new MWSE folder structure.

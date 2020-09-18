@@ -1,5 +1,6 @@
 {
-    "checkInterval": 60,
-    "warnThreshold": 3.75,
-    "criticalThreshold": 3.85
+	"visibleThreshold": 0.5,
+	"criticalThreshold": 0.90,
+	"criticalSaveFile": "memory_low",
+	"criticalSaveName": "Critical Memory Warning"
 }
