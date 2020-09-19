@@ -176,6 +176,7 @@ local function addSpellIcons(spellsList, guiIdPrefix, namesBlockId, isSpell)
 			local icon = iconsColumn:createImage({ path = string.format("icons\\%s", spell.effects[1].object.icon)  })
 			icon.borderTop = 2
 			icon:setPropertyObject("MagicMenu_Spell", spell)
+			icon:register("mouseClick", function() nameElement:triggerEvent("mouseClick") end)
 			icon.visible = nameElement.visible
 		end
 	else
@@ -184,6 +185,7 @@ local function addSpellIcons(spellsList, guiIdPrefix, namesBlockId, isSpell)
 			local icon = iconsColumn:createImage({ path = string.format("icons\\%s", object.enchantment.effects[1].object.icon)  })
 			icon.borderTop = 2
 			icon:setPropertyObject("MagicMenu_object", object)
+			icon:register("mouseClick", function() nameElement:triggerEvent("mouseClick") end)
 			icon.visible = nameElement.visible
 		end
 	end
