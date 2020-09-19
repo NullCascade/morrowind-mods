@@ -676,7 +676,7 @@ function common.createStandardInventoryFilters(filterInterface)
 				objectType == tes3.objectType.probe or
 				objectType == tes3.objectType.lockpick or
 				objectType == tes3.objectType.repairItem or
-				(objectType == tes3.objectType.miscItem and e.itemData and e.itemData.soul ~= nil)
+				(e.item.isSoulGem and e.itemData and e.itemData.soul ~= nil)
 			)
 		end,
 		tooltip = {
@@ -696,7 +696,7 @@ function common.createStandardInventoryFilters(filterInterface)
 				(objectType == tes3.objectType.book and(enchantment == nil or
 				(enchantment.castType ~= tes3.enchantmentType.castOnce and enchantment.castType ~= tes3.enchantmentType.onUse))) or
 				objectType == tes3.objectType.light or
-				(objectType == tes3.objectType.miscItem and (e.itemData and e.itemData.soul == nil or e.itemData == nil))
+				(e.item.isSoulGem and (e.itemData and e.itemData.soul == nil or e.itemData == nil))
 			)
 		end,
 		tooltip = {
