@@ -176,6 +176,7 @@ local function addSpellIcons(spellsList, guiIdPrefix, namesBlockId, isSpell)
 			local icon = iconsColumn:createImage({ path = string.format("icons\\%s", spell.effects[1].object.icon)  })
 			icon.borderTop = 2
 			icon:setPropertyObject("MagicMenu_Spell", spell)
+			icon.visible = nameElement.visible
 		end
 	else
 		for _, nameElement in ipairs(namesBlock.children) do
@@ -183,6 +184,7 @@ local function addSpellIcons(spellsList, guiIdPrefix, namesBlockId, isSpell)
 			local icon = iconsColumn:createImage({ path = string.format("icons\\%s", object.enchantment.effects[1].object.icon)  })
 			icon.borderTop = 2
 			icon:setPropertyObject("MagicMenu_object", object)
+			icon.visible = nameElement.visible
 		end
 	end
 end
