@@ -161,7 +161,7 @@ local function addSpellIcons(spellsList, guiIdPrefix, namesBlockId, isSpell)
 
 	-- Create icons column.
 	local columnsBlock = namesBlock.parent
-	local iconsColumn = columnsBlock:createBlock({ id = string.format("UIEXP:MagicMenu:SpellsList:%s:Icons", guiIdPrefix) })
+	local iconsColumn = columnsBlock:createBlock({ id = tes3ui.registerID(string.format("UIEXP:MagicMenu:SpellsList:%s:Icons", guiIdPrefix)) })
 	iconsColumn.flowDirection = "top_to_bottom"
 	iconsColumn.autoWidth = true
 	iconsColumn.autoHeight = true
@@ -187,8 +187,40 @@ local function addSpellIcons(spellsList, guiIdPrefix, namesBlockId, isSpell)
 	end
 end
 
+local function removeSpellIcons(spellsList, guiIdPrefix, namesBlockId)
+	local namesBlock = spellsList:findChild(tes3ui.registerID(namesBlockId))
+	local iconColumn = namesBlock.parent:findChild(tes3ui.registerID(string.format("UIEXP:MagicMenu:SpellsList:%s:Icons", guiIdPrefix)))
+	iconColumn:destroy()
+end
+
+local function updateSpellIcons()
+	local magicMenu = tes3ui.findMenu(GUI_ID_MenuMagic)
+	if (not magicMenu) then
+		return
+	end
+
+	local spellsList = magicMenu:findChild(GUI_ID_MagicMenu_spells_list)
+
+	-- Delete current spell icons.
+	removeSpellIcons(spellsList, "Powers", "MagicMenu_power_names")
+	removeSpellIcons(spellsList, "Spells", "MagicMenu_spell_names")
+
+	-- Create spell icons.
+	addSpellIcons(spellsList, "Powers", "MagicMenu_power_names", true)
+	addSpellIcons(spellsList, "Spells", "MagicMenu_spell_names", true)
+end
+
+local function onMenuMagicUpdate(e)
+	updateSpellIcons()
+	event.trigger("UIEXP:magicMenuPreUpdate")
+	e.source:forwardEvent(e)
+	event.trigger("UIEXP:magicMenuPreUpdated")
+end
+
 local function onMenuMagicActivated(e)
 	if (not e.newlyCreated) then
+		tes3.messageBox("Updated magic menu")
+		updateSpellIcons()
 		return
 	end
 
@@ -199,7 +231,7 @@ local function onMenuMagicActivated(e)
 	spellsListParent.flowDirection = "top_to_bottom"
 
 	-- Make a consistent container and move it to the top of the block.
-	local filterBlock = spellsListParent:createBlock({ id = "UIEXP:MagicMenu:FilterBlock" })
+	local filterBlock = spellsListParent:createBlock({ id = tes3ui.registerID("UIEXP:MagicMenu:FilterBlock") })
 	filterBlock.flowDirection = "left_to_right"
 	filterBlock.widthProportional = 1.0
 	filterBlock.autoHeight = true
@@ -213,6 +245,9 @@ local function onMenuMagicActivated(e)
 	-- Create spell icons.
 	addSpellIcons(spellsList, "Powers", "MagicMenu_power_names", true)
 	addSpellIcons(spellsList, "Spells", "MagicMenu_spell_names", true)
+
+	-- Listen for future pre-updates to refresh spell icons.
+	e.element:register("preUpdate", onMenuMagicUpdate)
 end
 event.register("uiActivated", onMenuMagicActivated, { filter = "MenuMagic" } )
 
