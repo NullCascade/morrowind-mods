@@ -1,5 +1,9 @@
 
+local GUI_ID_MenuAlchemy = tes3ui.registerID("MenuAlchemy")
+local GUI_ID_MenuInventorySelect = tes3ui.registerID("MenuInventorySelect")
+local GUI_ID_MenuInventorySelect_item_brick = tes3ui.registerID("MenuInventorySelect_item_brick")
 local GUI_ID_MenuInventorySelect_prompt = tes3ui.registerID("MenuInventorySelect_prompt")
+local GUI_ID_MenuInventorySelect_scrollpane = tes3ui.registerID("MenuInventorySelect_scrollpane")
 
 local common = require("UI Expansion.common")
 
@@ -47,8 +51,8 @@ local function getShownIngredientEffectCount()
 end
 
 local function updateIngredientList()
-	local MenuAlchemy = tes3ui.findMenu(tes3ui.registerID("MenuAlchemy"))
-	local MenuInventorySelect = tes3ui.findMenu(tes3ui.registerID("MenuInventorySelect"))
+	local MenuAlchemy = tes3ui.findMenu(GUI_ID_MenuAlchemy)
+	local MenuInventorySelect = tes3ui.findMenu(GUI_ID_MenuInventorySelect)
 	if (MenuAlchemy and MenuInventorySelect) then
 		-- Values we'll use to see if the alchemy effect should be visible.
 		local maxShownEffect = getShownIngredientEffectCount()
@@ -61,7 +65,7 @@ local function updateIngredientList()
 		-- Build a list of effects that work.
 		local effects = {}
 		for _, v in ipairs({ "one", "two", "three", "four" }) do
-			local block = MenuAlchemy:findChild(tes3ui.registerID("MenuAlchemy_ingredient_" .. v))
+			local block = MenuAlchemy:findChild(tes3ui.registerID("MenuAlchemy_ingredient_".. v))
 			local ingredient = block:getPropertyObject("MenuAlchemy_object")
 			if (ingredient) then
 				for i = 1, maxShownEffect do
@@ -70,9 +74,9 @@ local function updateIngredientList()
 						local r = effects[ingredient.effects[i]] or {}
 						r.attribute = r.attribute or {}
 						r.skill = r.skill or {}
-
-						r.attribute[ingredient.effectAttributeIds[i]] = true
-						r.skill[ingredient.effectSkillIds[i]] = true
+						
+						r.attribute[common.getIngredientEffectAttributeId(ingredient, i)] = true
+						r.skill[common.getIngredientEffectSkillId(ingredient, i)] = true
 						effects[ingredient.effects[i]] = r
 					end
 				end
@@ -85,14 +89,14 @@ local function updateIngredientList()
 		end
 
 		-- Loop through blocks...
-		for _, child in ipairs(MenuInventorySelect:findChild(tes3ui.registerID("MenuInventorySelect_scrollpane")).widget.contentPane) do
+		for _, child in ipairs(MenuInventorySelect:findChild(GUI_ID_MenuInventorySelect_scrollpane).widget.contentPane.children) do
 			local ingredient = child:getPropertyObject("MenuInventorySelect_object")
 
 			-- Look for a match for the current ingredients.
 			local match = false
 			for i = 1, maxShownEffect do
 				local submatch = effects[ingredient.effects[i]]
-				if (submatch and (submatch.attribute[ingredient.effectAttributeIds[i]] and submatch.skill[ingredient.effectSkillIds[i]])) then
+				if (submatch and submatch.attribute[common.getIngredientEffectAttributeId(ingredient, i)] and submatch.skill[common.getIngredientEffectSkillId(ingredient, i)]) then
 					match = true
 					break
 				end
@@ -100,7 +104,7 @@ local function updateIngredientList()
 
 			-- If we didn't get a match, use the disabled color.
 			if (not match) then
-				local text = child:findChild(tes3ui.registerID("MenuInventorySelect_item_brick"))
+				local text = child:findChild(GUI_ID_MenuInventorySelect_item_brick)
 				text.color = tes3ui.getPalette("disabled_color")
 			end
 		end

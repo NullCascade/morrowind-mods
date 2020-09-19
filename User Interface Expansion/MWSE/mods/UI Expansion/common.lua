@@ -34,6 +34,38 @@ function common.getColor(color)
 	end
 end
 
+common.effectsWithAttributes = {
+	[tes3.effect.absorbAttribute] = true,
+	[tes3.effect.damageAttribute] = true,
+	[tes3.effect.drainAttribute] = true,
+	[tes3.effect.fortifyAttribute] = true,
+	[tes3.effect.restoreAttribute] = true,
+}
+
+function common.getIngredientEffectAttributeId(ingredient, index)
+	if (common.effectsWithAttributes[ingredient.effects[index]]) then
+		return ingredient.effectAttributeIds[index]
+	else
+		return -1
+	end
+end
+
+common.effectsWithSkills = {
+	[tes3.effect.absorbSkill] = true,
+	[tes3.effect.damageSkill] = true,
+	[tes3.effect.drainSkill] = true,
+	[tes3.effect.fortifySkill] = true,
+	[tes3.effect.restoreSkill] = true,
+}
+
+function common.getIngredientEffectSkillId(ingredient, index)
+	if (common.effectsWithSkills[ingredient.effects[index]]) then
+		return ingredient.effectSkillIds[index]
+	else
+		return -1
+	end
+end
+
 ----------------------------------------------------------------------------------------------------
 -- Keyboard-to-UI binding helpers.
 ----------------------------------------------------------------------------------------------------
@@ -676,7 +708,7 @@ function common.createStandardInventoryFilters(filterInterface)
 				objectType == tes3.objectType.probe or
 				objectType == tes3.objectType.lockpick or
 				objectType == tes3.objectType.repairItem or
-				(e.item.isSoulGem and e.itemData and e.itemData.soul ~= nil)
+				(objectType == tes3.objectType.miscItem and e.itemData and e.itemData.soul ~= nil)
 			)
 		end,
 		tooltip = {
@@ -696,7 +728,7 @@ function common.createStandardInventoryFilters(filterInterface)
 				(objectType == tes3.objectType.book and(enchantment == nil or
 				(enchantment.castType ~= tes3.enchantmentType.castOnce and enchantment.castType ~= tes3.enchantmentType.onUse))) or
 				objectType == tes3.objectType.light or
-				(e.item.isSoulGem and (e.itemData and e.itemData.soul == nil or e.itemData == nil))
+				(objectType == tes3.objectType.miscItem and (e.itemData and e.itemData.soul == nil or e.itemData == nil))
 			)
 		end,
 		tooltip = {
