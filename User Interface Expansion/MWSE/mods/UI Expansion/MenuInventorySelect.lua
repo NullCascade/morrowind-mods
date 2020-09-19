@@ -7,6 +7,11 @@ local common = require("UI Expansion.common")
 -- Generic filter cases
 ----------------------------------------------------------------------------------------------------
 
+local function updateInventorySelectTiles()
+	tes3ui.updateInventorySelectTiles()
+	event.trigger("UIEXP:updatedInventorySelectTiles")
+end
+
 local genericFilter = common.createFilterInterface({
 	filterName = "inventorySelect",
 	createSearchBar = true,
@@ -14,7 +19,7 @@ local genericFilter = common.createFilterInterface({
 	createButtons = false,
 	useIcons = true,
 	useSearch = common.config.useSearch,
-	onFilterChanged = tes3ui.updateInventorySelectTiles,
+	onFilterChanged = updateInventorySelectTiles,
 })
 
 common.createStandardInventoryFilters(genericFilter)
@@ -30,7 +35,92 @@ local genericFilterNoIcons = common.createFilterInterface({
 	createButtons = false,
 	useIcons = false,
 	useSearch = common.config.useSearch,
-	onFilterChanged = tes3ui.updateInventorySelectTiles,
+	onFilterChanged = updateInventorySelectTiles,
+})
+
+----------------------------------------------------------------------------------------------------
+-- Custom filter for handling ingredients.
+----------------------------------------------------------------------------------------------------
+
+local function getShownIngredientEffectCount()
+	return math.clamp(math.floor(tes3.mobilePlayer.alchemy.current / tes3.findGMST(tes3.gmst.fWortChanceValue).value), 0, 4)
+end
+
+local function updateIngredientList()
+	local MenuAlchemy = tes3ui.findMenu(tes3ui.registerID("MenuAlchemy"))
+	local MenuInventorySelect = tes3ui.findMenu(tes3ui.registerID("MenuInventorySelect"))
+	if (MenuAlchemy and MenuInventorySelect) then
+		-- Values we'll use to see if the alchemy effect should be visible.
+		local maxShownEffect = getShownIngredientEffectCount()
+
+		-- If we don't know any effects, no features apply so save ourself the trouble.
+		if (maxShownEffect == 0) then
+			return
+		end
+		
+		-- Build a list of effects that work.
+		local effects = {}
+		for _, v in ipairs({ "one", "two", "three", "four" }) do
+			local block = MenuAlchemy:findChild(tes3ui.registerID("MenuAlchemy_ingredient_" .. v))
+			local ingredient = block:getPropertyObject("MenuAlchemy_object")
+			if (ingredient) then
+				for i = 1, maxShownEffect do
+					local effectId = ingredient.effects[i]
+					if (effectId >= 0) then
+						local r = effects[ingredient.effects[i]] or {}
+						r.attribute = r.attribute or {}
+						r.skill = r.skill or {}
+
+						r.attribute[ingredient.effectAttributeIds[i]] = true
+						r.skill[ingredient.effectSkillIds[i]] = true
+						effects[ingredient.effects[i]] = r
+					end
+				end
+			end
+		end
+
+		-- If we haven't found any effects then bail.
+		if (table.empty(effects)) then
+			return
+		end
+
+		-- Loop through blocks...
+		for _, child in ipairs(MenuInventorySelect:findChild(tes3ui.registerID("MenuInventorySelect_scrollpane")).widget.contentPane) do
+			local ingredient = child:getPropertyObject("MenuInventorySelect_object")
+
+			-- Look for a match for the current ingredients.
+			local match = false
+			for i = 1, maxShownEffect do
+				local submatch = effects[ingredient.effects[i]]
+				if (submatch and (submatch.attribute[ingredient.effectAttributeIds[i]] and submatch.skill[ingredient.effectSkillIds[i]])) then
+					match = true
+					break
+				end
+			end
+
+			-- If we didn't get a match, use the disabled color.
+			if (not match) then
+				local text = child:findChild(tes3ui.registerID("MenuInventorySelect_item_brick"))
+				text.color = tes3ui.getPalette("disabled_color")
+			end
+		end
+	end
+end
+
+local function updateIngredientSelectTiles()
+	tes3ui.updateInventorySelectTiles()
+	updateIngredientList()
+	event.trigger("UIEXP:updatedInventorySelectTiles")
+end
+
+local ingredientFilterNoIcons = common.createFilterInterface({
+	filterName = "inventorySelectIngredientsNoIcons",
+	createSearchBar = true,
+	createIcons = false,
+	createButtons = false,
+	useIcons = false,
+	useSearch = common.config.useSearch,
+	onFilterChanged = updateIngredientSelectTiles,
 })
 
 ----------------------------------------------------------------------------------------------------
@@ -52,7 +142,7 @@ event.register("filterInventorySelect", onFilterInventorySelect )
 local inventorySelectTypeFilterMap = {
 	["alembic"] = genericFilterNoIcons,
 	["calcinator"] = genericFilterNoIcons,
-	["ingredient"] = genericFilterNoIcons,
+	["ingredient"] = ingredientFilterNoIcons,
 	["mortar"] = genericFilterNoIcons,
 	["retort"] = genericFilterNoIcons,
 	["soulGemFilled"] = genericFilterNoIcons,
@@ -78,7 +168,8 @@ local function onMenuInventorySelectActivated(e)
 	filterBlock:register("destroy", function() currentFilter = nil end)
 
 	-- Change filtering options based on what menu we're specifically looking at.
-	currentFilter = inventorySelectTypeFilterMap[tes3ui.getInventorySelectType()] or genericFilter
+	local inventorySelectType = tes3ui.getInventorySelectType()
+	currentFilter = inventorySelectTypeFilterMap[inventorySelectType] or genericFilter
 	currentFilter:createElements(filterBlock)
 	currentFilter:focusSearchBar()
 end
