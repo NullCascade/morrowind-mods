@@ -273,9 +273,6 @@ event.register("loaded", onLoaded)
 --
 
 local function registerModConfig()
-	local easyMCM = include("easyMCM.modConfig")
-	if (easyMCM) then
-		easyMCM.registerMCM(require("Sounds of Souls.mcm"))
-	end
+	mwse.mcm.registerMCM(require("Sounds of Souls.mcm"))
 end
 event.register("modConfigReady", registerModConfig)
