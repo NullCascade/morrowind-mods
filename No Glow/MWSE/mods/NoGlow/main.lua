@@ -1,3 +1,10 @@
+--[[
+	Assumes the following ASM structure:
+		mov		ecx, worldController	; __thiscall param
+		push	eax             		; enchantment
+		push	edi             		; parent node
+		call	WorldController__applyEnchantEffect
+]]--
 local function disableEnchantCallAt(address)
 	local previousCallAddress = mwse.memory.readCallAddress({ address = address + 0x8 })
 	if (previousCallAddress == 0x410B00 ) then
