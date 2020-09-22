@@ -164,7 +164,7 @@ local function doSoulTrapFill(caster, target)
 	end
 
 	-- We want to sort our results so smallest soulgems are latest.
-	table.sort(availableSoulGemStacks, function(a, b) return soulCapacity[a.object] < soulCapacity[b.object] end)
+	table.sort(availableSoulGemStacks, function(a, b) return soulCapacity[a.object] > soulCapacity[b.object] end)
 
 	-- We have all of the data we need... now do some work.
 	if (not addSoul(caster, target.reference.object, target)) then
