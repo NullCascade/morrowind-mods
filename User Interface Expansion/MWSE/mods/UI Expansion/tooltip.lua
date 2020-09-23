@@ -255,16 +255,20 @@ local function extraTooltipEarly(e)
 			end
 
 		-- Soul gem capacity
-		elseif e.object.isSoulGem and e.itemData and e.itemData.soul then
-			local rawSoulValue = e.itemData.soul.soul
-			local soulValue = tes3.findGMST(tes3.gmst.fSoulGemMult).value * rawSoulValue
-			labelFormatted(e.tooltip, string.format("%s: %u", common.dictionary.soulCapacity, soulValue))
+		elseif e.object.isSoulGem then
+			local soulCapacity = e.object.soulGemData.value * tes3.findGMST(tes3.gmst.fSoulGemMult).value
+			if (e.itemData and e.itemData.soul) then
+				local soulValue = e.itemData.soul.soul
+				labelFormatted(e.tooltip, string.format("%s: %u / %u", common.dictionary.soulCapacity, soulValue, soulCapacity))
 
-			-- Fixup item value based on MCP feature state.
-			if (useMCPSoulgemValueRebalance) then
-				objectValue = (rawSoulValue ^ 3) / 10000 + rawSoulValue * 2
+				-- Fixup item value based on MCP feature state.
+				if (useMCPSoulgemValueRebalance) then
+					objectValue = (soulValue ^ 3) / 10000 + soulValue * 2
+				else
+					objectValue = objectValue * soulValue
+				end
 			else
-				objectValue = objectValue * rawSoulValue
+				labelFormatted(e.tooltip, string.format("%s: %u", common.dictionary.soulCapacity, soulCapacity))
 			end
 		end
 
