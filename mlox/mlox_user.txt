@@ -258,5 +258,13 @@ Dagon fell additions- ROHT.ESP
 ROHT - SMSOP_patch.esp
 UL_3.5_RoHT_1.52_Add-on.esp
 
+[ORDER]
+Uvirith's Legacy_3.53.esp
+UL_3.5_TR_20.02_Add-on.esp
+
 [Nearend]
+Merged Objects.esp
+
+[ORDER]
+multipatch.esp
 Merged Objects.esp
