@@ -269,6 +269,50 @@ UL_3.5_TR_20.02_Add-on.esp
 higher faction requirements - Full.ESP
 TR_Factions.esp
 
+; Prefer Urnest Loot over FMI_GraveDust. Urnest Loot provides a chance for gravedust.
+[ORDER]
+FMI_GraveDust.ESP
+Urnest Loot.esp
+
+; Make sure people aren't using two versions of Dagon Fell Additions
+[Conflict]
+ Choose only one plugin:
+  Dagon fell additions.esp - Without Rise of House Telvanni
+  Dagon fell additions- ROHT.esp - With Rise of House Telvanni
+ (Ref: "https://www.nexusmods.com/morrowind/mods/48683?")
+Dagon fell additions.esp
+Dagon fell additions- ROHT.esp
+
+; Arrange creature balancing.
+[ORDER]
+Beware the Sixth House.ESP
+Ash Vampire Script Fix.esp
+Keening belongs to odros.ESP
+Sunder and keening hurt on pickup.ESP
+Sixth House Rebalance.ESP
+tribunal rebalance.ESP
+tribunal npc rebalance.ESP
+tribunal more goblins.ESP
+tribunal goblin rebalance.ESP
+dark brotherhood armor nerf.ESP
+Bloodmoon Rebalance.esp
+Bloodmoon Boss Rebalance.ESP
+Bloodmoon Creature Rebalance.ESP
+Bloodmoon NPC Rebalance.ESP
+Bloodmoon Undead Rebalance.ESP
+Bloodmoon Werewolf Rebalance.ESP
+Creatures_RP_Standard.ESP
+Creatures_RP_Purist.ESP
+
+; Make sure people are only using one version of "Vanilla friendly creatures and undeads expansion"
+[Conflict]
+ Choose only one plugin:
+  Creatures_RP_Standard.ESP
+  Creatures_RP_Purist.ESP
+ (Ref: "https://www.nexusmods.com/morrowind/mods/48818/?")
+Creatures_RP_Standard.ESP
+Creatures_RP_Purist.ESP
+
 [Nearend]
 Merged Objects.esp
 
