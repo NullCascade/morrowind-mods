@@ -252,19 +252,27 @@ Complete Armor Joints.esp
 DaedricArmor.ESP
 BearArmorReplacer.ESP
 
+; Get the Rise of House Telvanni files in order.
 [ORDER]
 ROHT_2_0_8.ESP
 Dagon fell additions- ROHT.ESP
 ROHT - SMSOP_patch.esp
 UL_3.5_RoHT_1.52_Add-on.esp
 
+; Recognize the 20.02 updated Uvirith's Legacy/Tamriel Rebuilt patch.
 [ORDER]
 Uvirith's Legacy_3.53.esp
 UL_3.5_TR_20.02_Add-on.esp
 
+; TR_Factions generally has higher requirements than this plugin, but doesn't cover all of them.
+[ORDER]
+higher faction requirements - Full.ESP
+TR_Factions.esp
+
 [Nearend]
 Merged Objects.esp
 
+; multipatch will fix some data that needs to be merged.
 [ORDER]
 multipatch.esp
 Merged Objects.esp
