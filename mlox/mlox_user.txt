@@ -1,0 +1,262 @@
+[ORDER]
+Mage Robes.esp
+Mage Robes_Weak.esp
+Mage Robes - Caldera MG Expanded.esp
+Starfires NPC Additions ver-1.13.esp
+Starfire NPC Addon - Westly's FCOT.esp
+Mage Robes - Starfires NPC Additions.esp
+Outlaws.esp
+OutlawsTR.esp
+
+[NearStart]
+Half11 misc mods + anticheese.ESP
+
+[NearStart]
+Morrowind Anti-Cheese.ESP
+
+[NearStart]
+Ownership Overhaul.esp
+
+[NearStart]
+Ownership Overhaul.esm
+
+[ORDER]
+Patch for Purists.esm
+Ownership Overhaul.esm
+
+[ORDER]
+Improved Inns Expanded - LGNPC Seyda Neen - Entertainers.ESP
+RP_NPCs.ESP
+
+
+[ORDER]
+Concept art Hlaalu Balconies - Balmora and Suran.ESP
+Suran_the_pearl_vanilla_style.esp
+
+[ORDER]
+WhiteSuran2_MD_Edition.esp
+WhiteSuran_WhiteTempleAddon.esp
+Concept art Hlaalu Balconies - Balmora and WhiteSuran.ESP
+Suran_the_pearl_white_style.esp
+
+[ORDER]
+RP_NPCs.ESP
+SilverArmourIntegration.ESP
+
+[ORDER]
+RP_NPCs.ESP
+SilverArmourIntegration.ESP
+
+[ORDER]
+Pelagiad + Ebonheart + Gnisis + Hla Oad + Khuul + Seyda + Suran + Mok + Ald Velothi.ESP
+Mamaea Awakened.ESP
+
+[ORDER]
+DD_Caldera_Expansion v15 + Stonewood Pass + Foyada Mamaea Overhaul Patch.ESP
+Carelessly_Crazy_Caldera_Community_StoneWoodPass.ESP
+
+[ORDER]
+DD_Caldera_Expansion v15 + Stonewood Pass + Foyada Mamaea Overhaul Patch_RMR version.ESP
+Carelessly_Crazy_Caldera_Community_StoneWoodPass.ESP
+
+
+[ORDER]
+RedMountainReborn.esp
+RR_Ghost_Gate_Fortress_Eng.ESP
+Foyada Mamaea Overhaul.ESP
+DD_Caldera_Expansion v15 + Stonewood Pass + Foyada Mamaea Overhaul Patch_RMR version.ESP
+DD_Caldera_Expansion v15 + Stonewood Pass + Foyada Mamaea Overhaul Patch.esp
+DD_Caldera_Expansion v15 + Stonewood Pass Patch.ESP
+Carelessly_Crazy_Caldera_Community_StoneWoodPass.ESP
+Moonmoth Legion Fort Overhaul.ESP
+AldRuhn_seat_of_power_RR_Skar_RMR.ESP
+AldRuhn_seat_of_power.ESP
+AldRuhn_seat_of_power_RMR.ESP
+AldRuhn_seat_of_power_RR_Skar.ESP
+AldRuhn_seat_of_power_no_underskar.ESP
+
+[ORDER]
+Animated_Morrowind - merged.esp
+RP_NPCs.esp
+
+[ORDER]
+RP_Overhaul.esp
+RP_NPCs.esp
+
+[ORDER]
+RP_NPCs.esp
+Quorn Resource Integration+NX9 Studded armor.ESP
+MDMD - More Deadly Morrowind Denizens.ESP
+MDMD+Q+SK+MTP.ESP
+
+[ORDER]
+RP_NPCs.esp
+Quorn Resource Integration.ESP
+MDMD - More Deadly Morrowind Denizens.ESP
+MDMD+Q+SK+MTP.ESP
+
+[ORDER]
+Concept art Gnisis - Lightweight.ESP
+Mamaea Awakened.ESP
+
+[ORDER]
+abotGondoliers.esp
+abotGondoliers_RVP.esp
+
+[ORDER]
+abotBoats.esp
+abotBoats_RVP.esp
+
+[ORDER]
+abotBoatsTR2002.esp
+abotBoatsTR2002_RVP.esp
+
+[ORDER]
+Unofficial Morrowind Official Plugins Patched.ESP
+Improved Inns Expanded - LGNPC Seyda Neen - Entertainers.ESP
+Improved Inns Expanded - TR Addon.ESP
+BM_S_Inn.ESP
+
+[ORDER]
+Caldera Mages Guild Expanded.esp
+Stav_MaGAO.esp
+Stav_MaGAO_OpenVivec.ESP
+
+[ORDER]
+Sheogorad - Groves of the North.esp
+Illuminated Order v2.0 - Lore Friendly_RMR.ESP
+Illuminated Order v2.0 - Lore Friendly.ESP
+SGOTN and Illuminated Order patch.ESP
+
+
+[ORDER]
+Caldera Mages Guild Expanded.esp
+Stav_MaGAO_OpenVivec.ESP
+
+[ORDER]
+Mournhold Overhaul by RP.ESP
+RP_Overhaul.ESP
+
+[ORDER]
+Uvirith's Legacy_3.53.esp
+The Raven 1.5.4.esp
+
+[ORDER]
+Unofficial Morrowind Official Plugins Patched.ESP
+The Raven 1.5.4.esp
+
+[ORDER]
+Half11 misc mods + anticheese.ESPHalf11 misc mods + anticheese.ESP
+The Raven 1.5.4.esp
+
+[ORDER]
+LGNPC_SeydaNeen (Necro Edit).esp
+Improved Inns Expanded - LGNPC Seyda Neen.esp
+
+[ORDER]
+LGNPC_SeydaNeen.esp
+Improved Inns Expanded - LGNPC Seyda Neen.esp
+
+[ORDER]
+Half11 misc mods + anticheese.ESP
+Religions Elaborated.esp
+
+[ORDER]
+Half11 misc mods + anticheese.ESP
+Full Game Balance - BTB and Wackim combined.ESP
+Full Game Balance - BTB and Wackim combined - 2 - Enchanting module.esp
+Full Game Balance - BTB and Wackim combined - 3 - Alchemy and Spells.esp
+Full Game Balance - BTB and Wackim combined - 4 - Equipment.esp
+
+[ORDER]
+Adventurer's backback.ESP
+Ashfall.esp
+
+[ORDER]
+Hold it - replacerWS.ESP
+AAA 4.0 Addon - Vanilla.ESP
+Morag Tong Polished+NX9.ESP
+Combined clothing plugins and desele.ESP
+Face Originality and Duner Nobles Overhaul.ESP
+
+[ORDER]
+Face Originality and Duner Nobles Overhaul.ESP
+Animated_Morrowind - merged.esp
+
+[ORDER]
+Hold it - replacerWS.ESP
+DD_Caldera_Expansion + Stonewood Pass Patch.ESP
+
+[ORDER]
+Vurt's BC Tree Replacer II for Zobator Bitte coast.ESP
+RR - Bitter Coast.esp
+
+[ORDER]
+Half11 misc mods + anticheese.ESP
+Tel Vos Overhaul XTREME.esp
+
+[ORDER]
+Epic_Aldruhn + SadrithMora + Indye + NX9 House + Red Vos.esp
+Half11 misc mods + anticheese.ESP
+
+[ORDER]
+Better Clothes_v1.1.esp
+Articus Solstheim Clothes.esp
+
+[ORDER]
+Hold it - replacerWS.ESP
+Hold it - Dreamers.ESP
+Hold it - COM addon.ESP
+Hold it - SF npc addon.ESP
+
+[ORDER]
+ST_Alchemy_Base_1.5 + Pearls Enhanced.esp
+ST_Alchemy_Replacer_1.3.esp
+ST_Alch_Economy.esp
+
+[ORDER]
+Undead arise from death 3.5.esp
+Half11 misc mods + anticheese.ESP
+
+
+[ORDER]
+Epic_Aldruhn + SadrithMora + Indye + NX9 House + Red Vos.esp
+Yet Another Guard Diversity - Full Cephalopod.ESP
+RR_Danke's_Cephalopod_Armor_Eng.esp
+
+
+[ORDER]
+danke_armors.esp
+RR_Danke's_Cephalopod_Armor_Eng.esp
+
+[ORDER]
+Unofficial Morrowind Official Plugins Patched.ESP
+Necrolesian's Official Plugins Integrated.ESP
+Area Effect Arrows Integrated + UMOPP Patch.esp
+
+[ORDER]
+Caldera Mages Guild Expanded.esp
+Stav_MaGAO.esp
+
+[ORDER]
+Better Clothes_v1.1.esp
+Better Robes_v0.3.1 Patch.esp
+UFR_v3dot2_Patch.esp
+Unique weapons and armors replacer.esp
+
+[ORDER]
+Better Morrowind Armor.esp
+Better Morrowind Armor DeFemm(o).ESP
+Plangke's Female Cuirass Replacer.esp
+Complete Armor Joints.esp
+DaedricArmor.ESP
+BearArmorReplacer.ESP
+
+[ORDER]
+ROHT_2_0_8.ESP
+Dagon fell additions- ROHT.ESP
+ROHT - SMSOP_patch.esp
+UL_3.5_RoHT_1.52_Add-on.esp
+
+[Nearend]
+Merged Objects.esp
