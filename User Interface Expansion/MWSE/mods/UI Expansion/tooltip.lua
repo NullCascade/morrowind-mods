@@ -185,13 +185,25 @@ local function replaceArmorTooltip(tooltip, armor, itemData)
 	enchantConditionBlock(tooltip, armor, itemData)
 end
 
+local useMCPShowAllStandardPotionEffects = tes3.hasCodePatchFeature(162)
+local function getAlchemyEffectsShown(alchemy)
+	-- Check for MCP patch to show all standard effects.
+	if (useMCPShowAllStandardPotionEffects and not alchemy.modified and not alchemy.blocked) then
+		return 8
+	end
+
+	local alchemySkill = tes3.mobilePlayer.alchemy.current
+	local fWortChanceValue = tes3.findGMST(tes3.gmst.fWortChanceValue).value
+	return math.floor(alchemySkill / fWortChanceValue) * 2
+end
+
 local function replaceAlchemyTooltip(tooltip, alchemy)
 	tryDestroyAllID(tooltip, "HelpMenu_effectBlock")
 
-	-- Values we'll use to see if the alchemy effect should be visible.
-	local playerCurrentAlchemy = tes3.mobilePlayer.alchemy.current
-	local fWortChanceValue = tes3.findGMST(tes3.gmst.fWortChanceValue).value
+	-- Value we'll use to see if the alchemy effect should be visible.
+	local effectsShown = getAlchemyEffectsShown(alchemy)
 
+	-- Loop through effects.
 	for i = 1, #alchemy.effects do
 		-- effects is a fixed size array, empty slots have the id -1.
 		if alchemy.effects[i].id >= 0 then
@@ -207,7 +219,7 @@ local function replaceAlchemyTooltip(tooltip, alchemy)
 			label.wrapText = false
 			
 			-- Hide the block if the PC's skill is too low.
-			if playerCurrentAlchemy < i * fWortChanceValue then
+			if i > effectsShown then
 				block.visible = false
 			end
 		end
@@ -253,13 +265,11 @@ local function extraTooltipEarly(e)
 				local labelDurationBar = blockDurationBar:createFillBar{ current = e.itemData and e.itemData.timeLeft or e.object.time, max = e.object.time }
 				labelDurationBar.borderLeft = 4
 			end
-
 		-- Soul gem capacity
 		elseif e.object.isSoulGem then
-			local soulCapacity = e.object.soulGemData.value * tes3.findGMST(tes3.gmst.fSoulGemMult).value
 			if (e.itemData and e.itemData.soul) then
 				local soulValue = e.itemData.soul.soul
-				labelFormatted(e.tooltip, string.format("%s: %u / %u", common.dictionary.soulCapacity, soulValue, soulCapacity))
+				labelFormatted(e.tooltip, string.format("%s: %u / %u", common.dictionary.soulCapacity, soulValue, e.object.soulGemCapacity))
 
 				-- Fixup item value based on MCP feature state.
 				if (useMCPSoulgemValueRebalance) then
@@ -268,7 +278,7 @@ local function extraTooltipEarly(e)
 					objectValue = objectValue * soulValue
 				end
 			else
-				labelFormatted(e.tooltip, string.format("%s: %u", common.dictionary.soulCapacity, soulCapacity))
+				labelFormatted(e.tooltip, string.format("%s: %u", common.dictionary.soulCapacity, e.object.soulGemCapacity))
 			end
 		end
 
