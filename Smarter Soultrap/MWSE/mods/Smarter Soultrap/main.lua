@@ -16,19 +16,6 @@ event.register("modConfigReady", registerModConfig)
 
 -- Temporary upvalue variables.
 local availableSoulGemStacks
-local soulCapacity
-
--- Cache for soulgem objects.
-local soulGemDataMap = {}
-local function onInitialized()
-	for item in tes3.iterateObjects(tes3.objectType.miscItem) do
-		local soulGemData = item.soulGemData
-		if (soulGemData) then
-			soulGemDataMap[item] = soulGemData
-		end
-	end
-end
-event.register("initialized", onInitialized, { priority = -1 })
 
 local function checkLevelRequirement(caster, key)
 	-- Make sure the feature is enabled.
@@ -45,11 +32,6 @@ local function checkLevelRequirement(caster, key)
 	end
 
 	return true
-
-end
-
-local function getSoulgemCapacity(object)
-	return soulGemDataMap[object].value * tes3.findGMST(tes3.gmst.fSoulGemMult)
 end
 
 --- @param caster tes3mobileActor
@@ -57,7 +39,6 @@ end
 --- @param targetMobile tes3mobileActor
 local function addSoul(caster, target, targetMobile)
 	-- A displaced soul, if applicable.
-	local canDisplace = checkLevelRequirement(caster, "displacement")
 	local displaced = nil
 
 	-- Find the best soulgem to fill.
@@ -68,22 +49,24 @@ local function addSoul(caster, target, targetMobile)
 		local filterSoulGemTarget = event.trigger("filterSoulGemTarget", { soulGem = stack.object, actor = target, mobile = targetMobile, reference = targetMobile and targetMobile.reference })
 		if (not filterSoulGemTarget.filter) then
 			-- Does the soul fit in this gem?
-			if (targetSoulValue <= soulCapacity[stack.object]) then
+			if (targetSoulValue <= stack.object.soulGemCapacity) then
 				local emptyCount = stack.count - (stack.variables and #stack.variables or 0)
 				if (emptyCount > 0) then
 					bestStack = stack
 					bestItemData = nil
 				else
 					for _, itemData in ipairs(stack.variables) do
-						if (bestItemData) then
-							if (itemData.soul.soul < bestItemData.soul.soul) then
-								bestStack = stack
-								bestItemData = itemData
-							end
-						else
-							if (itemData.soul.soul < targetSoulValue) then
-								bestStack = stack
-								bestItemData = itemData
+						if (itemData) then
+							if (bestItemData) then
+								if (itemData.soul.soul < bestItemData.soul.soul) then
+									bestStack = stack
+									bestItemData = itemData
+								end
+							else
+								if (itemData.soul.soul < targetSoulValue) then
+									bestStack = stack
+									bestItemData = itemData
+								end
 							end
 						end
 					end
@@ -112,12 +95,8 @@ local function addSoul(caster, target, targetMobile)
 		end
 	end
 
-	-- What message are we showing?
-	if (displaced and config.showDisplacementMessage) then
-	end
-
 	-- Do we have a displaced soul we can relocate?
-	if (displaced) then
+	if (displaced and checkLevelRequirement(caster, "displacement")) then
 		local message = nil
 		if (config.showDisplacementMessage) then
 			message = string.format("%s was displaced from %s", displaced.name, bestStack.object.name)
@@ -146,7 +125,7 @@ local function doSoulTrapFill(caster, target)
 	-- Run through our caster's inventory and collect available soulgem stacks.
 	availableSoulGemStacks = {}
 	for _, stack in pairs(caster.reference.object.inventory) do
-		if (soulGemDataMap[stack.object]) then
+		if (stack.object.isSoulGem) then
 			table.insert(availableSoulGemStacks, stack)
 		end
 	end
@@ -155,16 +134,8 @@ local function doSoulTrapFill(caster, target)
 	if (#availableSoulGemStacks == 0) then
 		return false
 	end
-
-	-- Cache soulgem capacity. We want to keep this fresh in case someone changes the GMST.
-	soulCapacity = {}
-	local fSoulGemMult = tes3.findGMST(tes3.gmst.fSoulGemMult).value
-	for _, stack in ipairs(availableSoulGemStacks) do
-		soulCapacity[stack.object] = soulGemDataMap[stack.object].value * fSoulGemMult
-	end
-
 	-- We want to sort our results so smallest soulgems are latest.
-	table.sort(availableSoulGemStacks, function(a, b) return soulCapacity[a.object] > soulCapacity[b.object] end)
+	table.sort(availableSoulGemStacks, function(a, b) return a.object.soulGemCapacity > b.object.soulGemCapacity end)
 
 	-- We have all of the data we need... now do some work.
 	if (not addSoul(caster, target.reference.object, target)) then
