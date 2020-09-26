@@ -1,7 +1,7 @@
 
 local common = require("UI Expansion.common")
 
-common.version = 1.1
+common.version = 1.2
 
 -- Configuration table.
 local defaultConfig = {
@@ -90,7 +90,7 @@ loadConfig()
 common.loadTranslation()
 
 -- Make sure we have the latest MWSE version.
-if (mwse.buildDate < 20190102) then
+if (mwse.buildDate < 20200926) then
 	event.register("loaded", function()
 		tes3.messageBox(common.dictionary.updateRequired)
 	end)

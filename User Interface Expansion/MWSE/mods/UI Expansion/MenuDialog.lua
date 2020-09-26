@@ -172,7 +172,6 @@ local function update()
 				traverse(pane_pane)
 			end
 		end
-
 	end
 end
 
@@ -185,13 +184,13 @@ local function onDialogueMenuActivated(e)
 	-- Set the pre-update event to update the topic list.
 	e.element:register("preUpdate", function(preUpdateEventData)
 		-- We only want this event to fire once. We'll manually track changes above to be more efficient.
-		e.element:unregister("preUpdate")
 		updateTopicsList(preUpdateEventData)
+		e.element:unregister("preUpdate")
 	end)
 
 	-- special as I am not able to find GUI_ID_MenuDialog_answer_block in pairs(children) on greetings /abot
 	answers = {}
-	e.element:register("update", update)
+	e.element:registerAfter("update", update)
 
 end
 event.register("uiActivated", onDialogueMenuActivated, { filter = "MenuDialog" })
