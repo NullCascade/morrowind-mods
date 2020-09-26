@@ -127,6 +127,78 @@ local ingredientFilterNoIcons = common.createFilterInterface({
 	onFilterChanged = updateIngredientSelectTiles,
 })
 
+
+----------------------------------------------------------------------------------------------------
+-- Custom filter for handling soulgems.
+----------------------------------------------------------------------------------------------------
+
+local function updateSoulGemList()
+	local MenuInventorySelect = tes3ui.findMenu(GUI_ID_MenuInventorySelect)
+	if (MenuInventorySelect) then
+		local pane = MenuInventorySelect:findChild(GUI_ID_MenuInventorySelect_scrollpane).widget.contentPane
+
+		-- Sort elements.
+		pane:sortChildren(function(a, b)
+			local itemDataA = a:getPropertyObject("MenuInventorySelect_extra", "tes3itemData")
+			local itemDataB = b:getPropertyObject("MenuInventorySelect_extra", "tes3itemData")
+			return itemDataA.soul.soul < itemDataB.soul.soul
+		end)
+
+		-- Flush out the elements.
+		for _, child in ipairs(pane.children) do
+			-- General fixes.
+			child.childAlignY = 0.5
+
+			-- Get the associated itemData.
+			local soulGem = child:getPropertyObject("MenuInventorySelect_object")
+			local itemData = child:getPropertyObject("MenuInventorySelect_extra", "tes3itemData")
+
+			-- Hide the original text.
+			local label = child:findChild(GUI_ID_MenuInventorySelect_item_brick)
+			label.visible = false
+
+			-- Create a new block with the soulgem name and soul name.
+			local newBlock = child:createBlock({ id = "UIEXP:InventorySelect:NamesBlock" })
+			newBlock.flowDirection = "top_to_bottom"
+			newBlock.heightProportional = 1.0
+			newBlock.autoWidth = true
+			newBlock.childAlignY = 0.5
+			newBlock.borderLeft = 2
+			newBlock.consumeMouseEvents = false
+
+			-- Show the name.
+			local name = newBlock:createLabel({ id = "UIEXP:InventorySelect:SoulGemName" })
+			name.text = soulGem.name
+			name.consumeMouseEvents = false
+
+			-- Show the soul contents.
+			local soulName = newBlock:createLabel({ id = "UIEXP:InventorySelect:SoulValue" })
+			soulName.text = string.format("%s (%d/%d)", itemData.soul.name, itemData.soul.soul, soulGem.soulGemCapacity)
+			soulName.color = tes3ui.getPalette("disabled_color")
+			soulName.consumeMouseEvents = false
+
+			child:updateLayout()
+		end
+		
+	end
+end
+
+local function updateSoulGemSelectTiles()
+	tes3ui.updateInventorySelectTiles()
+	updateSoulGemList()
+	event.trigger("UIEXP:updatedInventorySelectTiles")
+end
+
+local soulGemFilterNoIcons = common.createFilterInterface({
+	filterName = "inventorySelectSoulGemsNoIcons",
+	createSearchBar = true,
+	createIcons = false,
+	createButtons = false,
+	useIcons = false,
+	useSearch = common.config.useSearch,
+	onFilterChanged = updateSoulGemSelectTiles,
+})
+
 ----------------------------------------------------------------------------------------------------
 -- Inventory Select: Searching and advanced filtering.
 ----------------------------------------------------------------------------------------------------
@@ -149,7 +221,7 @@ local inventorySelectTypeFilterMap = {
 	["ingredient"] = ingredientFilterNoIcons,
 	["mortar"] = genericFilterNoIcons,
 	["retort"] = genericFilterNoIcons,
-	["soulGemFilled"] = genericFilterNoIcons,
+	["soulGemFilled"] = soulGemFilterNoIcons,
 }
 common.inventorySelectTypeFilterMap = inventorySelectTypeFilterMap
 
