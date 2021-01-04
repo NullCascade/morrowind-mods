@@ -57,16 +57,21 @@ local function addSoul(caster, target, targetMobile)
 				else
 					for _, itemData in ipairs(stack.variables) do
 						if (itemData) then
-							if (bestItemData) then
-								if (itemData.soul.soul < bestItemData.soul.soul) then
-									bestStack = stack
-									bestItemData = itemData
+							if (itemData.soul) then
+								if (bestItemData and bestItemData.soul) then
+									if (itemData.soul.soul < bestItemData.soul.soul) then
+										bestStack = stack
+										bestItemData = itemData
+									end
+								else
+									if (itemData.soul.soul < targetSoulValue) then
+										bestStack = stack
+										bestItemData = itemData
+									end
 								end
 							else
-								if (itemData.soul.soul < targetSoulValue) then
-									bestStack = stack
-									bestItemData = itemData
-								end
+								bestStack = stack
+								bestItemData = itemData
 							end
 						end
 					end
@@ -82,6 +87,7 @@ local function addSoul(caster, target, targetMobile)
 		-- Are we replacing something?
 		if (bestItemData) then
 			displaced = bestItemData.soul
+			bestItemData.charge = 0 -- Hacky workaround...
 			bestItemData.soul = target
 			success = true
 		else
