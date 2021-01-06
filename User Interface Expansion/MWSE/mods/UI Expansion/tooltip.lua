@@ -388,3 +388,22 @@ local function onItemTileUpdated(e)
 	end
 end
 event.register("itemTileUpdated", onItemTileUpdated, {filter = "MenuInventory"})
+
+--
+-- Show how long is left to recharge a power.
+--
+
+local function extraSpellTooltipLate(e)
+	-- We have no way of knowing this is hovering over the player's power, but...
+	-- where the hell else would you find powers?
+	if (e.spell.castType == tes3.spellType.power) then
+		local castTimestamp = tes3.mobilePlayer:getPowerUseTimestamp(e.spell)
+		if (castTimestamp) then
+			local timeToRecharge = tes3.getSimulationTimestamp() - castTimestamp
+			local label = e.tooltip:createLabel({ id = "UIEXP:PowerRechargeCooldown", text = string.format(common.dictionary.powerRechargeCooldown, timeToRecharge) })
+			label.borderBottom = 4
+			label.color = tes3ui.getPalette("disabled_color")
+		end
+	end
+end
+event.register("uiSpellTooltip", extraSpellTooltipLate, { priority = -100 })

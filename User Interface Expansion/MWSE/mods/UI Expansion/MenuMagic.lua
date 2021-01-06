@@ -177,6 +177,7 @@ local function addSpellIcons(spellsList, guiIdPrefix, namesBlockId, isSpell)
 			icon.borderTop = 2
 			icon:setPropertyObject("MagicMenu_Spell", spell)
 			icon:register("mouseClick", function() nameElement:triggerEvent("mouseClick") end)
+			icon:register("help", function() nameElement:triggerEvent("help") end)
 			icon.visible = nameElement.visible
 		end
 	else
@@ -186,6 +187,7 @@ local function addSpellIcons(spellsList, guiIdPrefix, namesBlockId, isSpell)
 			icon.borderTop = 2
 			icon:setPropertyObject("MagicMenu_object", object)
 			icon:register("mouseClick", function() nameElement:triggerEvent("mouseClick") end)
+			icon:register("help", function() nameElement:triggerEvent("help") end)
 			icon.visible = nameElement.visible
 		end
 	end
@@ -214,8 +216,26 @@ local function updateSpellIcons()
 	addSpellIcons(spellsList, "Spells", "MagicMenu_spell_names", true)
 end
 
+local function updatePowerUsability()
+	local magicMenu = tes3ui.findMenu(GUI_ID_MenuMagic)
+	if (not magicMenu) then
+		return
+	end
+
+	local powersList = magicMenu:findChild(GUI_ID_MagicMenu_spells_list):findChild(tes3ui.registerID("MagicMenu_power_names"))
+	for _, nameElement in ipairs(powersList.children) do
+		local power = nameElement:getPropertyObject("MagicMenu_Spell")
+		if (tes3.mobilePlayer:hasUsedPower(power)) then
+			nameElement.widget.idle = tes3ui.getPalette("disabled_color")
+		else
+			nameElement.widget.idle = tes3ui.getPalette("normal_color")
+		end
+	end
+end
+
 local function onMenuMagicUpdate(e)
 	updateSpellIcons()
+	updatePowerUsability()
 	event.trigger("UIEXP:magicMenuPreUpdate")
 	e.source:forwardEvent(e)
 	event.trigger("UIEXP:magicMenuPreUpdated")
@@ -266,3 +286,42 @@ event.register("menuEnter", onEnterMenuMode, { filter = "MenuInventory" })
 event.register("menuEnter", onEnterMenuMode, { filter = "MenuMagic" })
 event.register("menuEnter", onEnterMenuMode, { filter = "MenuMap" })
 event.register("menuEnter", onEnterMenuMode, { filter = "MenuStat" })
+
+--
+-- Update power used colors on cast/when recharged.
+--
+
+local function getNameBlockForPower(power)
+	local magicMenu = tes3ui.findMenu(GUI_ID_MenuMagic)
+	if (not magicMenu) then
+		return
+	end
+
+	local powersList = magicMenu:findChild(GUI_ID_MagicMenu_spells_list):findChild(tes3ui.registerID("MagicMenu_power_names"))
+	for _, nameElement in ipairs(powersList.children) do
+		local power = nameElement:getPropertyObject("MagicMenu_Spell")
+		if (nameElement:getPropertyObject("MagicMenu_Spell") == power) then
+			return nameElement
+		end
+	end
+end
+
+local function onSpellCasted(e)
+	if (e.caster == tes3.player and e.source.castType == tes3.spellType.power) then
+		local nameElement = getNameBlockForPower(e.source)
+		if (nameElement) then
+			nameElement.widget.idle = tes3ui.getPalette("normal_color")
+		end
+	end
+end
+event.register("spellCasted", onSpellCasted)
+
+local function onPowerRecharged(e)
+	if (e.mobile == tes3.mobilePlayer) then
+		local nameElement = getNameBlockForPower(e.power)
+		if (nameElement) then
+			nameElement.widget.idle = tes3ui.getPalette("disabled_color")
+		end
+	end
+end
+event.register("powerRecharged", onPowerRecharged)
