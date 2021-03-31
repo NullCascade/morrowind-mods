@@ -1,7 +1,7 @@
 =====================================================================================
                               Sophisticated Save System                              
                                  Author: NullCascade                                 
-                                    Version 1.1.0                                    
+                                    Version 2.0.0                                    
 =====================================================================================
 
  INDEX:
@@ -81,6 +81,13 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 2.0.0 [in progress]:
+    * Rewrite of mod.
+    * Added interop and config modules so other mods can queue saves or make use of
+      SSS features/config.
+    * Guarded saves from happening while the background thread was running, to
+      prevent lockups on saving.
 
  1.1.0 [2018-08-20]:
     * Fixed issue where saves would be created right after loading a game.

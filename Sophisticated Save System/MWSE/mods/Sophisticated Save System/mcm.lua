@@ -1,5 +1,8 @@
 local this = {}
 
+local config = require("Sophisticated Save System.config")
+local interop = require("Sophisticated Save System.interop")
+
 local function createConfigSliderPackage(params)
     local horizontalBlock = params.parent:createBlock({})
     horizontalBlock.flowDirection = "left_to_right"
@@ -46,13 +49,13 @@ local function createBooleanConfigPackage(params)
     label.layoutOriginFractionX = 0.0
     label.layoutOriginFractionY = 0.5
 
-    local button = horizontalBlock:createButton({ text = (this.config[params.key] and tes3.findGMST(tes3.gmst.sYes).value or tes3.findGMST(tes3.gmst.sNo).value) })
+    local button = horizontalBlock:createButton({ text = (config[params.key] and tes3.findGMST(tes3.gmst.sYes).value or tes3.findGMST(tes3.gmst.sNo).value) })
     button.layoutOriginFractionX = 1.0
     button.layoutOriginFractionY = 0.5
     button.paddingTop = 3
     button:register("mouseClick", function(e)
-        this.config[params.key] = not this.config[params.key]
-        button.text = this.config[params.key] and tes3.findGMST(tes3.gmst.sYes).value or tes3.findGMST(tes3.gmst.sNo).value
+        config[params.key] = not config[params.key]
+        button.text = config[params.key] and tes3.findGMST(tes3.gmst.sYes).value or tes3.findGMST(tes3.gmst.sNo).value
         
         if (params.onUpdate) then
             params.onUpdate(e)
@@ -73,19 +76,19 @@ function this.onCreate(container)
     createConfigSliderPackage({
         parent = mainPane,
         label = "Minimum time between autosaves:",
-        config = this.config,
+        config = config,
         key = "minimumTimeBetweenAutoSaves",
         min = 1,
         max = 60,
         step = 1,
         jump = 5,
-        onUpdate = this.resetAutosaveTimer
+        onUpdate = interop.resetSaveThrottler
     })
 
     createConfigSliderPackage({
         parent = mainPane,
         label = "Number of autosaves to keep:",
-        config = this.config,
+        config = config,
         key = "maxSaveCount",
         min = 1,
         max = 100,
@@ -96,53 +99,53 @@ function this.onCreate(container)
     createBooleanConfigPackage({
         parent = mainPane,
         label = "Make quicksave load the latest save instead of the latest quicksave?",
-        config = this.config,
+        config = config,
         key = "loadLatestSave",
     })
 
     createBooleanConfigPackage({
         parent = mainPane,
         label = "Create autosaves on a timer?",
-        config = this.config,
+        config = config,
         key = "saveOnTimer",
     })
 
     createConfigSliderPackage({
         parent = mainPane,
         label = "Autosave timer duration:",
-        config = this.config,
+        config = config,
         key = "timeBetweenAutoSaves",
         min = 1,
         max = 60,
         step = 1,
         jump = 5,
-        onUpdate = this.resetAutosaveTimer
+        onUpdate = interop.resetSaveThrottler
     })
 
     createBooleanConfigPackage({
         parent = mainPane,
         label = "Create autosaves when combat starts?",
-        config = this.config,
+        config = config,
         key = "saveOnCombatStart",
     })
 
     createBooleanConfigPackage({
         parent = mainPane,
         label = "Create autosaves when combat ends?",
-        config = this.config,
+        config = config,
         key = "saveOnCombatEnd",
     })
 
     createBooleanConfigPackage({
         parent = mainPane,
         label = "Create autosaves after changing cells?",
-        config = this.config,
+        config = config,
         key = "saveOnCellChange",
     })
 end
 
 function this.onClose(container)
-    mwse.saveConfig("Sophisticated Save System", this.config)
+    mwse.saveConfig("Sophisticated Save System", config)
 end
 
 return this
