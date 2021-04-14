@@ -399,7 +399,7 @@ local function extraSpellTooltipLate(e)
 	if (e.spell.castType == tes3.spellType.power) then
 		local castTimestamp = tes3.mobilePlayer:getPowerUseTimestamp(e.spell)
 		if (castTimestamp) then
-			local timeToRecharge = tes3.getSimulationTimestamp() - castTimestamp
+			local timeToRecharge = math.abs(24 - (tes3.getSimulationTimestamp() - castTimestamp))
 			local label = e.tooltip:createLabel({ id = "UIEXP:PowerRechargeCooldown", text = string.format(common.dictionary.powerRechargeCooldown, timeToRecharge) })
 			label.borderBottom = 4
 			label.color = tes3ui.getPalette("disabled_color")
