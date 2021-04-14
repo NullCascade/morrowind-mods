@@ -194,7 +194,7 @@ local function onInventoryTileClicked(e)
 		})
 
 		-- Trigger a crime if applicable.
-		if (not tes3.hasOwnershipAccess({ target = contaienrRef })) then
+		if (not tes3.hasOwnershipAccess({ target = containerRef })) then
 			tes3.triggerCrime({ type = 5, victim = tes3.getOwner(containerRef), value = e.item.value * count })
 		end
 
@@ -238,7 +238,7 @@ local function onContentsTileClicked(e)
 		})
 
 		-- Trigger a crime if applicable.
-		if (not tes3.hasOwnershipAccess({ target = contaienrRef })) then
+		if (not tes3.hasOwnershipAccess({ target = containerRef })) then
 			tes3.triggerCrime({ type = 5, victim = tes3.getOwner(containerRef), value = e.item.value * count })
 		end
 
