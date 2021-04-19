@@ -183,9 +183,10 @@ local function SetSaveGameEventHandlers(scrollElement, characterSelectElement)
 					})
 				-- Reimplement saving/loading instead of forwarding the event.
 				elseif (characterSelectElement) then
+					local saveFilename = save.filename
 					tes3ui.findMenu(load_menu_id):destroy()
 					tes3ui.leaveMenuMode()
-					tes3.loadGame(save.filename)
+					tes3.loadGame(saveFilename)
 				else
 					TrySave(save.description, save.filename)
 				end
