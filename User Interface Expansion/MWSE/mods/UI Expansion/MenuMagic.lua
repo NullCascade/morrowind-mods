@@ -57,8 +57,20 @@ local function searchSpellsList()
 	-- Clear first search result hit.
 	firstSearchResult = nil
 
+	-- Get magic menu.
+	local magicMenu = tes3ui.findMenu(GUI_ID_MenuMagic)
+	if (not magicMenu) then
+		return
+	end
+
+	-- Get spells list.
+	local spellsList = magicMenu:findChild(GUI_ID_MagicMenu_spells_list)
+	if (not spellsList) then
+		return
+	end
+
 	-- Filter all of our sub groups.
-	local elements = tes3ui.findMenu(GUI_ID_MenuMagic):findChild(GUI_ID_MagicMenu_spells_list).widget.contentPane.children
+	local elements = spellsList.widget.contentPane.children
 	local hasMatchingPowers = searchSubList(elements[1], elements[2], true)
 	local hasMatchingSpells = searchSubList(elements[4], elements[5], true)
 	local hasMatchingItems = searchSubList(elements[7], elements[8], false)
