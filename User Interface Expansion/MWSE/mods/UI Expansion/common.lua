@@ -374,7 +374,7 @@ function filter_functions:setFiltersExact(params)
 
 	self:updateFilterIcons()
 	if (self.onFilterChanged) then
-		self.onFilterChanged()
+		self:onFilterChanged()
 	end
 end
 
