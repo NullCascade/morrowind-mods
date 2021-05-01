@@ -23,6 +23,7 @@ end
 local function sandboxInit()
 	setmetatable(sandbox, { __index = _G })
 	sandbox.print = tes3ui.logToConsole
+	event.trigger("UIEXP:sandboxConsole", { sanxbox = sandbox })
 end
 
 local function sandboxScript(f)
