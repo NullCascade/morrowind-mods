@@ -52,16 +52,7 @@ end
 
 -- Determines if an actor is in the blacklist.
 local function isActorInBlackList(actor)
-	local reference = actor.reference
-
-	-- Get the ID. If we're looking at an instance, check against the base object instead.
-	local id = reference.id
-	if (reference.object.isInstance) then
-		id = reference.object.baseObject.id
-	end
-
-	-- Is it not in our blacklist?
-	return isInBlacklist(id)
+	return isInBlacklist(actor.reference.baseObject.id)
 end
 
 -- Determines if an actor is a valid companion.
@@ -72,7 +63,7 @@ local function validCompanionCheck(actor)
 	end
 
 	-- Restrict based on AI package type.
-	if (tes3.getCurrentAIPackageId(actor) ~= tes3.aiPackage.follow) then
+	if (tes3.getCurrentAIPackageId({ reference = actor }) ~= tes3.aiPackage.follow) then
 		return false
 	end
 
