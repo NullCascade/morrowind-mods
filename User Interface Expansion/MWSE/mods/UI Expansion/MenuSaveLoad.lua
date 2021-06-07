@@ -195,8 +195,9 @@ local function SetSaveGameEventHandlers(scrollElement, characterSelectElement)
 			scrollKids[i]:register("help", function(e)
 				e.source:forwardEvent(e)
 				local tip = tes3ui.findHelpLayerMenu(tes3ui.registerID("HelpMenu"))
-				local m = scrollElement:getTopLevelMenu()
 				if (tip) then
+					local m = scrollElement:getTopLevelMenu()
+					
 					-- Set image aspect to match screen aspect.
 					local image = tip:findChild(tes3ui.registerID("image"))
 					image.width = 180 * m.maxWidth / m.maxHeight
