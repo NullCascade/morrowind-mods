@@ -19,7 +19,7 @@ local function onMapMenuActivated(e)
 	newBottomBlock.absolutePosAlignY = 1.0
 
 	-- The world map itself. Cache it here to show/hide the zoom bar based on this element's visibility.
-	local worldMap = mapMenu:findChild(tes3ui.registerID("MenuMap_world"))
+	local worldMap = mapMenu:findChild("MenuMap_world")
 
 	-- Create a horizontal bar that lets us zoom in/out.
 	zoomBar = newBottomBlock:createSlider({ current = 0, max = 300, step = 1, jump = 10 })
@@ -32,7 +32,7 @@ local function onMapMenuActivated(e)
 	extern.setMapZoom(currentZoom)
 
 	-- Find the old button so we can reuse it.
-	local oldButton = mapMenu:findChild(tes3ui.registerID("MenuMap_switch"))
+	local oldButton = mapMenu:findChild("MenuMap_switch")
 	oldButton.visible = false
 
 	-- Create a new button in a new container, and map it to the old map switch button.

@@ -13,15 +13,15 @@ local id_gold = tes3ui.registerID("UIEXP_MenuTraining_Gold")
 local function onAfterTrainTimer()
 	if (lastTarget ~= nil and tes3.getPlayerTarget() == lastTarget) then
 		tes3.player:activate(lastTarget)
-		local menu = tes3ui.findMenu(tes3ui.registerID("MenuDialog"))
-		local trainbtn = menu:findChild(tes3ui.registerID("MenuDialog_service_training"))
+		local menu = tes3ui.findMenu("MenuDialog")
+		local trainbtn = menu:findChild("MenuDialog_service_training")
 		trainbtn:triggerEvent("mouseClick")
 	end
 end
 
 local function menuTraining(e)
 	lastTarget = tes3ui.getServiceActor().reference
-	local menu = tes3ui.findMenu(tes3ui.registerID("MenuDialog"))
+	local menu = tes3ui.findMenu("MenuDialog")
 	menu.visible = false
 end
 
@@ -199,7 +199,7 @@ end
 
 local function onCancel(e)
 	local menu = e.source:getTopLevelParent()
-	local ok = menu:findChild(tes3ui.registerID("MenuServiceTraining_Okbutton"))
+	local ok = menu:findChild("MenuServiceTraining_Okbutton")
 	ok:triggerEvent(e)
 end
 

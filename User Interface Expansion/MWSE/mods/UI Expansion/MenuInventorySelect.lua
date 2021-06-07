@@ -65,7 +65,7 @@ local function updateIngredientList()
 		-- Build a list of effects that work.
 		local effects = {}
 		for _, v in ipairs({ "one", "two", "three", "four" }) do
-			local block = MenuAlchemy:findChild(tes3ui.registerID("MenuAlchemy_ingredient_".. v))
+			local block = MenuAlchemy:findChild("MenuAlchemy_ingredient_".. v)
 			local ingredient = block:getPropertyObject("MenuAlchemy_object")
 			if (ingredient) then
 				for i = 1, maxShownEffect do

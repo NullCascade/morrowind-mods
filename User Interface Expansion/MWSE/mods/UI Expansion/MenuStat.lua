@@ -156,8 +156,7 @@ end
 local function onMenuStatActivated(e)
 	local idParts = {"agility", "endurance", "intellegence", "luck", "personality", "speed", "strength", "willpower"}
 	for _, idPart in pairs(idParts) do
-		local MenuStat_attribute_layout =
-			e.element:findChild(tes3ui.registerID(string.format("MenuStat_attribute_layout_%s", idPart)))
+		local MenuStat_attribute_layout = e.element:findChild(string.format("MenuStat_attribute_layout_%s", idPart))
 		MenuStat_attribute_layout:register("help", onMenuStatAttributeTooltip)
 
 		-- Prevent children from using their own events.

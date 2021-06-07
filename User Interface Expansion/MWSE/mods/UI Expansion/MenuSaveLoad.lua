@@ -194,12 +194,12 @@ local function SetSaveGameEventHandlers(scrollElement, characterSelectElement)
 			-- Edit tooltip.
 			scrollKids[i]:register("help", function(e)
 				e.source:forwardEvent(e)
-				local tip = tes3ui.findHelpLayerMenu(tes3ui.registerID("HelpMenu"))
+				local tip = tes3ui.findHelpLayerMenu("HelpMenu")
 				if (tip) then
 					local m = scrollElement:getTopLevelMenu()
 					
 					-- Set image aspect to match screen aspect.
-					local image = tip:findChild(tes3ui.registerID("image"))
+					local image = tip:findChild("image")
 					image.width = 180 * m.maxWidth / m.maxHeight
 					image.height = 180
 					tip:updateLayout()

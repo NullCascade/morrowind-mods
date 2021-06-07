@@ -1,14 +1,14 @@
 local common = require("UI Expansion.common")
 
 local function menuRestWait(e)
-	local scroll = e.element:findChild(tes3ui.registerID("MenuRestWait_scrollbar"))
+	local scroll = e.element:findChild("MenuRestWait_scrollbar")
 	scroll.widget.max = common.config.maxWait * 24 - 1
 	scroll.widget.jump = 4 -- More useful default value.
 	scroll:updateLayout()
 
 	-- Enable keyboard input on the scroll bar.
-	local wait = e.element:findChild(tes3ui.registerID("MenuRestWait_wait_button"))
-	local rest = e.element:findChild(tes3ui.registerID("MenuRestWait_rest_button"))
+	local wait = e.element:findChild("MenuRestWait_wait_button")
+	local rest = e.element:findChild("MenuRestWait_rest_button")
 	common.bindScrollBarToKeyboard({
 		element = scroll,
 		onSubmit = function()

@@ -169,11 +169,11 @@ magicFilters:addFilter({
 })
 
 local function addSpellIcons(spellsList, guiIdPrefix, namesBlockId, isSpell)
-	local namesBlock = spellsList:findChild(tes3ui.registerID(namesBlockId))
+	local namesBlock = spellsList:findChild(namesBlockId)
 
 	-- Create icons column.
 	local columnsBlock = namesBlock.parent
-	local iconsColumn = columnsBlock:createBlock({ id = tes3ui.registerID(string.format("UIEXP:MagicMenu:SpellsList:%s:Icons", guiIdPrefix)) })
+	local iconsColumn = columnsBlock:createBlock({ id = string.format("UIEXP:MagicMenu:SpellsList:%s:Icons", guiIdPrefix) })
 	iconsColumn.flowDirection = "top_to_bottom"
 	iconsColumn.autoWidth = true
 	iconsColumn.autoHeight = true
@@ -206,8 +206,8 @@ local function addSpellIcons(spellsList, guiIdPrefix, namesBlockId, isSpell)
 end
 
 local function removeSpellIcons(spellsList, guiIdPrefix, namesBlockId)
-	local namesBlock = spellsList:findChild(tes3ui.registerID(namesBlockId))
-	local iconColumn = namesBlock.parent:findChild(tes3ui.registerID(string.format("UIEXP:MagicMenu:SpellsList:%s:Icons", guiIdPrefix)))
+	local namesBlock = spellsList:findChild(namesBlockId)
+	local iconColumn = namesBlock.parent:findChild(string.format("UIEXP:MagicMenu:SpellsList:%s:Icons", guiIdPrefix))
 	iconColumn:destroy()
 end
 
@@ -234,7 +234,7 @@ local function updatePowerUsability()
 		return
 	end
 
-	local powersList = magicMenu:findChild(GUI_ID_MagicMenu_spells_list):findChild(tes3ui.registerID("MagicMenu_power_names"))
+	local powersList = magicMenu:findChild(GUI_ID_MagicMenu_spells_list):findChild("MagicMenu_power_names")
 	for _, nameElement in ipairs(powersList.children) do
 		local power = nameElement:getPropertyObject("MagicMenu_Spell")
 		if (tes3.mobilePlayer:hasUsedPower(power)) then
@@ -267,7 +267,7 @@ local function onMenuMagicActivated(e)
 	spellsListParent.flowDirection = "top_to_bottom"
 
 	-- Make a consistent container and move it to the top of the block.
-	local filterBlock = spellsListParent:createBlock({ id = tes3ui.registerID("UIEXP:MagicMenu:FilterBlock") })
+	local filterBlock = spellsListParent:createBlock({ id = "UIEXP:MagicMenu:FilterBlock" })
 	filterBlock.flowDirection = "left_to_right"
 	filterBlock.widthProportional = 1.0
 	filterBlock.autoHeight = true
@@ -311,7 +311,7 @@ local function getNameBlockForPower(power)
 		return
 	end
 
-	local powersList = magicMenu:findChild(GUI_ID_MagicMenu_spells_list):findChild(tes3ui.registerID("MagicMenu_power_names"))
+	local powersList = magicMenu:findChild(GUI_ID_MagicMenu_spells_list):findChild("MagicMenu_power_names")
 	for _, nameElement in ipairs(powersList.children) do
 		local power = nameElement:getPropertyObject("MagicMenu_Spell")
 		if (nameElement:getPropertyObject("MagicMenu_Spell") == power) then

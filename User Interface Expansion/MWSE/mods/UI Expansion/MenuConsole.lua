@@ -115,7 +115,7 @@ local function onMenuConsoleActivated(e)
 	border.widthProportional = 1.0
 
 	-- Create the command input.
-	local input = border:createTextInput{ id = tes3ui.registerID("UIEXP:ConsoleInputBox") }
+	local input = border:createTextInput{ id = "UIEXP:ConsoleInputBox" }
 	input.borderLeft = 5
 	input.borderRight = 5
 	input.borderTop = 2

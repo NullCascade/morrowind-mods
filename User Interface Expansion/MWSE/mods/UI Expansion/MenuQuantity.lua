@@ -4,8 +4,8 @@ local GUI_ID_MenuContents = tes3ui.registerID("MenuContents")
 
 local function menuQuantity(e)
 	-- Enable keyboard support for the scroll bar.
-	local scrollBar = e.element:findChild(tes3ui.registerID("MenuQuantity_scrollbar"))
-	local submitButton = e.element:findChild(tes3ui.registerID("MenuQuantity_buttonok"))
+	local scrollBar = e.element:findChild("MenuQuantity_scrollbar")
+	local submitButton = e.element:findChild("MenuQuantity_buttonok")
 	common.bindScrollBarToKeyboard({
 		element = scrollBar,
 		onSubmit = function()

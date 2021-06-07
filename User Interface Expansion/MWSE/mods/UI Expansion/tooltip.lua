@@ -20,7 +20,7 @@ local enchantmentType = {
 }
 
 local function tryDestroyID(tooltip, uiid)
-	local element = tooltip:findChild(tes3ui.registerID(uiid))
+	local element = tooltip:findChild(uiid)
 	if element ~= nil then
 		element:destroy()
 		return true
@@ -30,7 +30,7 @@ end
 
 local function tryDestroyAllID(tooltip, uiid)
 	while true do
-		local element = tooltip:findChild(tes3ui.registerID(uiid))
+		local element = tooltip:findChild(uiid)
 		if element ~= nil then
 			element:destroy()
 		else
@@ -40,7 +40,7 @@ local function tryDestroyAllID(tooltip, uiid)
 end
 
 local function tryHideID(tooltip, uiid)
-	local element = tooltip:findChild(tes3ui.registerID(uiid))
+	local element = tooltip:findChild(uiid)
 	if element ~= nil then
 		element.visible = false
 		return true
@@ -49,16 +49,7 @@ local function tryHideID(tooltip, uiid)
 end
 
 local function labelFormatted(tooltip, label, uiid)
-	local block
-	if uiid ~= nil then
-		if type(uiid) == "string" then
-			block = tooltip:createLabel{ text = label, id = tes3ui.registerID(uiid) }
-		else
-			block = tooltip:createLabel{ text = label, id = uiid }
-		end
-	else
-		block = tooltip:createLabel{ text = label }
-	end
+	local block = tooltip:createLabel{ text = label, id = uiid }
 	block.minWidth = 1
 	block.maxWidth = 210
 	block.autoWidth = true
@@ -76,7 +67,7 @@ local function enchantConditionBlock(tooltip, object, itemData)
 		-- Destroy the old condition block, and replace it.
 		tryDestroyID(tooltip, "HelpMenu_qualityCondition")
 
-		local block = tooltip:createBlock{ id = tes3ui.registerID("HelpMenu_qualityCondition") }
+		local block = tooltip:createBlock{ id = "HelpMenu_qualityCondition" }
 		block.autoWidth = true
 		block.autoHeight = true
 		block.paddingAllSides = 4
@@ -96,23 +87,23 @@ local function enchantConditionBlock(tooltip, object, itemData)
 			divide.widthProportional = 0.85
 		end
 
-		tooltip:createLabel{ text = enchantmentType[object.enchantment.castType + 1], id = tes3ui.registerID("HelpMenu_castType") }
-		local enchantContainer = tooltip:createBlock{ id = tes3ui.registerID("HelpMenu_enchantmentContainer") }
+		tooltip:createLabel{ text = enchantmentType[object.enchantment.castType + 1], id = "HelpMenu_castType" }
+		local enchantContainer = tooltip:createBlock{ id = "HelpMenu_enchantmentContainer" }
 		enchantContainer.flowDirection = "top_to_bottom"
 		enchantContainer.autoWidth = true
 		enchantContainer.autoHeight = true
 		for i = 1, #object.enchantment.effects do
 			-- effects is a fixed size array, empty slots have the id -1.
 			if object.enchantment.effects[i].id >= 0 then
-				local block = enchantContainer:createBlock{ id = tes3ui.registerID("HelpMenu_enchantEffectBlock") }
+				local block = enchantContainer:createBlock{ id = "HelpMenu_enchantEffectBlock" }
 				block.minWidth = 1
 				block.maxWidth = 640
 				block.autoWidth = true
 				block.autoHeight = true
 				block.widthProportional = 1.0
 				block.borderAllSides = 1
-				block:createImage{ path = string.format("icons\\%s", object.enchantment.effects[i].object.icon), id = tes3ui.registerID("image") }
-				local label = block:createLabel{ text = string.format("%s", object.enchantment.effects[i]), id = tes3ui.registerID("HelpMenu_enchantEffectLabel") }
+				block:createImage{ path = string.format("icons\\%s", object.enchantment.effects[i].object.icon), id = "image" }
+				local label = block:createLabel{ text = string.format("%s", object.enchantment.effects[i]), id = "HelpMenu_enchantEffectLabel" }
 				label.borderLeft = 4
 				label.wrapText = false
 			end
@@ -121,7 +112,7 @@ local function enchantConditionBlock(tooltip, object, itemData)
 		-- Constant effect and Cast Once enchantments don't have a charge!
 		if object.enchantment.castType ~= tes3.enchantmentType.constant
 		and object.enchantment.castType ~= tes3.enchantmentType.castOnce then
-			local block = tooltip:createBlock{ id = tes3ui.registerID("HelpMenu_chargeBlock") }
+			local block = tooltip:createBlock{ id = "HelpMenu_chargeBlock" }
 			block.autoWidth = true
 			block.autoHeight = true
 			block.paddingAllSides = 4
@@ -140,7 +131,7 @@ local function replaceWeaponTooltip(tooltip, weapon, itemData)
 	tryDestroyID(tooltip, "HelpMenu_thrust")
 
 	-- Strip out "Type:", as it's very much self explanatory.
-	local weaponType = tooltip:findChild(tes3ui.registerID("HelpMenu_weaponType"))
+	local weaponType = tooltip:findChild("HelpMenu_weaponType")
 	weaponType.text = weaponType.text:gsub(tes3.findGMST(tes3.gmst.sType).value .. " ", "")
 
 	if weapon.isMelee then
@@ -181,7 +172,7 @@ local function replaceArmorTooltip(tooltip, armor, itemData)
 	tryDestroyAllID(tooltip, "HelpMenu_armorRating")
 
 	tooltip:createLabel{ text = common.dictionary.weightClasses[armor.weightClass + 1], id = GUI_ID_TooltipWeightClass }
-	tooltip:createLabel{ text = string.format("%s: %u", tes3.findGMST(tes3.gmst.sArmorRating).value, armor:calculateArmorRating(tes3.mobilePlayer)), id = tes3ui.registerID("HelpMenu_armorRating") }
+	tooltip:createLabel{ text = string.format("%s: %u", tes3.findGMST(tes3.gmst.sArmorRating).value, armor:calculateArmorRating(tes3.mobilePlayer)), id = "HelpMenu_armorRating" }
 
 	enchantConditionBlock(tooltip, armor, itemData)
 end
@@ -208,14 +199,14 @@ local function replaceAlchemyTooltip(tooltip, alchemy)
 	for i = 1, #alchemy.effects do
 		-- effects is a fixed size array, empty slots have the id -1.
 		if alchemy.effects[i].id >= 0 then
-			local block = tooltip:createBlock{ id = tes3ui.registerID("HelpMenu_effectBlock") }
+			local block = tooltip:createBlock{ id = "HelpMenu_effectBlock" }
 			block.minWidth = 1
 			block.maxWidth = 640
 			block.autoWidth = true
 			block.autoHeight = true
 			block.widthProportional = 1.0
-			block:createImage{ path = string.format("icons\\%s", alchemy.effects[i].object.icon), id = tes3ui.registerID("HelpMenu_effectIcon") }
-			local label = block:createLabel{ text = string.format("%s", alchemy.effects[i]), id = tes3ui.registerID("HelpMenu_effectLabel") }
+			block:createImage{ path = string.format("icons\\%s", alchemy.effects[i].object.icon), id = "HelpMenu_effectIcon" }
+			local label = block:createLabel{ text = string.format("%s", alchemy.effects[i]), id = "HelpMenu_effectLabel" }
 			label.borderLeft = 4
 			label.wrapText = false
 			
