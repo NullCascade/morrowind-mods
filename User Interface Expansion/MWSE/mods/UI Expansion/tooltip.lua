@@ -1,6 +1,7 @@
 local GUI_ID_TooltipIconBar				= tes3ui.registerID("UIEXP_Tooltip_IconBar")
 local GUI_ID_TooltipIconGoldBlock		= tes3ui.registerID("UIEXP_Tooltip_IconGoldBlock")
 local GUI_ID_TooltipIconWeightBlock		= tes3ui.registerID("UIEXP_Tooltip_IconWeightBlock")
+local GUI_ID_TooltipIconRatioBlock      = tes3ui.registerID("UIEXP_Tooltip_IconRatioBlock")
 local GUI_ID_TooltipExtraDivider		= tes3ui.registerID("UIEXP_Tooltip_ExtraDivider")
 local GUI_ID_TooltipEnchantmentDivider	= tes3ui.registerID("UIEXP_Tooltip_EnchantmentDivider")
 local GUI_ID_TooltipEnchantCapacity		= tes3ui.registerID("UIEXP_Tooltip_EnchantCapacity")
@@ -293,24 +294,51 @@ local function extraTooltipEarly(e)
 			container.childAlignX = 1.0
 
 			-- Value
-			local block = container:createBlock{ id = GUI_ID_TooltipIconGoldBlock }
-			block.autoWidth = true
-			block.autoHeight = true
-			block:createImage{ path = "icons/gold.dds" }
-			local label = block:createLabel{ text = string.format("%u", objectValue) }
+			local valueBlock = container:createBlock{ id = GUI_ID_TooltipIconGoldBlock }
+			valueBlock.autoWidth = true
+			valueBlock.autoHeight = true
+			valueBlock:createImage{ path = "icons/gold.dds" }
+			local label = valueBlock:createLabel{ text = string.format("%u", objectValue) }
 			label.borderLeft = 4
 
 			-- Weight
-			block = container:createBlock{ id = GUI_ID_TooltipIconWeightBlock }
-			block.autoWidth = true
-			block.autoHeight = true
-			block:createImage{ path = "icons/weight.dds" }
-			block.borderLeft = 8
-			label = block:createLabel{ text = string.format("%.2f", e.object.weight) }
+			local weightBlock = container:createBlock{ id = GUI_ID_TooltipIconWeightBlock }
+			weightBlock.autoWidth = true
+			weightBlock.autoHeight = true
+			weightBlock:createImage{ path = "icons/weight.dds" }
+			weightBlock.borderLeft = 8
+			label = weightBlock:createLabel{ text = string.format("%.2f", e.object.weight) }
 			label.borderLeft = 4
 
-			-- Update minimum width of the whole tooltip to make sure there's space for the value/weight.
-			e.tooltip:getContentElement().minWidth = 120
+			-- Value/Weight Ratio
+			local ratioBlock
+			if common.config.displayRatio and e.object.weight > 0 then
+				local ratio = math.round(objectValue) / e.object.weight
+				ratioBlock = container:createBlock{ id = GUI_ID_TooltipIconRatioBlock }
+				ratioBlock.autoWidth = true
+				ratioBlock.autoHeight = true
+				ratioBlock:createImage{ path = "icons/ratio.dds" }
+				ratioBlock.borderLeft = 8
+				label = ratioBlock:createLabel{ text = string.format("%.2f", ratio) }
+				label.borderLeft = 4
+			end
+
+			-- Update minimum width of the whole tooltip to make sure there's space for the value/weight/ratio.
+			-- We have to updateLayout an extra time so we can get the correct element widths.
+			e.tooltip:updateLayout()
+			local blockPaddingWidth = 8
+			local extraWidth = 16
+			local valueBlockWidth = valueBlock.width
+			local weightBlockWidth = weightBlock.width + blockPaddingWidth
+			local widthNoRatio = valueBlockWidth + weightBlockWidth + extraWidth
+
+			if common.config.displayRatio and e.object.weight > 0 then
+				local ratioBlockWidth = ratioBlock.width + blockPaddingWidth
+				local widthWithRatio = widthNoRatio + ratioBlockWidth
+				e.tooltip:getContentElement().minWidth = widthWithRatio
+			else
+				e.tooltip:getContentElement().minWidth = widthNoRatio
+			end
 			e.tooltip:updateLayout()
 		end
 

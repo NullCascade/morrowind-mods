@@ -137,6 +137,14 @@ function this.onCreate(container)
 		end
 	})
 
+	-- Toggle value/weight ratio display.
+	createBooleanConfigPackage({
+		parent = mainPane,
+		label = common.dictionary.configRatioDisplay,
+		config = this.config,
+		key = "displayRatio",
+	})
+
 	-- Toggle search bars.
 	createBooleanConfigPackage({
 		parent = mainPane,
@@ -202,10 +210,11 @@ function this.onCreate(container)
 
 	-- Credits:
 	mainPane:createLabel({ text = common.dictionary.configCredits }).borderTop = 6
-	mainPane:createLabel({ text = "  Programming: NullCascade, Hrnchamd, Petethegoat, Jiopsi, Remiros, Mort, Wix, abot" })
+	mainPane:createLabel({ text = "  Programming: NullCascade, Hrnchamd, Petethegoat, Jiopsi, Remiros, Mort, Wix, abot, Necrolesian" })
 	mainPane:createLabel({ text = "  Colored Magic School Icons: R-Zero" })
 	mainPane:createLabel({ text = "  Inventory Filter Icons: Remiros" })
 	mainPane:createLabel({ text = "  Training Skill Icons: RedFurryDemon" })
+	mainPane:createLabel({ text = "  Value/Weight Ratio Icon: Necrolesian" })
 	mainPane:createLabel({ text = "  Concepts and Testing: Morrowind Modding Community Discord" })
 end
 

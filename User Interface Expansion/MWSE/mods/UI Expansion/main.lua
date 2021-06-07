@@ -13,6 +13,7 @@ local defaultConfig = {
 	selectSpellsOnSearch = true,
 	autoFilterToTradable = true,
 	takeFilteredItems = true,
+	displayRatio = false,
 	transferItemsByDefault = false,
 	displayWeekday = true,
 	maxWait = 1,
