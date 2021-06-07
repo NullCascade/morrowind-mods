@@ -51,41 +51,12 @@ local defaultConfig = {
 		training = true,
 	},
 }
-local config = table.copy(defaultConfig)
+local config = mwse.loadConfig("UI Expansion", defaultConfig)
+mwse.log("[UI Expansion] Loaded configuration:")
+mwse.log(json.encode(config, { indent = true }))
 
--- Loads the configuration file for use.
-local function loadConfig()
-	-- Clear any current config values.
-	config = {}
-
-	-- First, load the defaults.
-	table.copy(defaultConfig, config)
-
-	-- Then load any other values from the config file.
-	local configJson = mwse.loadConfig("UI Expansion")
-	if (configJson ~= nil) then
-		if (configJson.version == nil or common.version > configJson.version) then
-			configJson.components = nil
-		end
-
-		-- Merge the configs.
-		table.copy(configJson, config)
-	end
-
-	-- Set component states for new components.
-	local importedComponents = config.components
-	for k, v in pairs(defaultConfig.components) do
-		if (importedComponents[k] == nil) then
-			importedComponents[k] = v
-		end
-	end
-
-	common.config = config
-
-	mwse.log("[UI Expansion] Loaded configuration:")
-	mwse.log(json.encode(config, { indent = true }))
-end
-loadConfig()
+-- Make config available to the common module.
+common.config = config
 
 -- Load translation data.
 common.loadTranslation()
