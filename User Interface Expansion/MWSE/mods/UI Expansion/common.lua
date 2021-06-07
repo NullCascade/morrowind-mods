@@ -228,7 +228,7 @@ function common.createSearchBar(params)
 	input.color = params.placeholderTextColor or tes3ui.getPalette("disabled_color")
 	input.text = params.placeholderText or ""
 	input.borderLeft = 5
-	input.borderRight = 5
+	input.borderRight = 5 + 10
 	input.borderTop = 2
 	input.borderBottom = 4
 	input.widget.eraseOnFirstKey = true
