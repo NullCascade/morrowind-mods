@@ -276,13 +276,11 @@ function common.createSearchBar(params)
 
 	-- search clear icon added
 	local icon = border:createImage({ id = "UIEXP:SearchClearIcon", path = "icons/ui_exp/filter_reset.dds" })
-	icon.imageScaleX = 0.6
-	icon.imageScaleY = 0.6
-	icon.borderLeft = 0
-	icon.borderRight = 0
-	icon.borderTop = 0
-	icon.borderBottom = 0
-	icon.borderAllSides = 0
+	icon.imageScaleX = 0.5
+	icon.imageScaleY = 0.5
+	icon.absolutePosAlignX = 1.0
+	icon.absolutePosAlignY = 0.5
+	icon.borderRight = 4
 	icon:register("mouseClick", function(e)
 		input.text = '' --"Search by name..."
 		input:forwardEvent(e)
