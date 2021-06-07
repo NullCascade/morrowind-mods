@@ -208,7 +208,9 @@ end
 local function removeSpellIcons(spellsList, guiIdPrefix, namesBlockId)
 	local namesBlock = spellsList:findChild(namesBlockId)
 	local iconColumn = namesBlock.parent:findChild(string.format("UIEXP:MagicMenu:SpellsList:%s:Icons", guiIdPrefix))
-	iconColumn:destroy()
+	if (iconColumn) then
+		iconColumn:destroy()
+	end
 end
 
 local function updateSpellIcons()
@@ -222,10 +224,12 @@ local function updateSpellIcons()
 	-- Delete current spell icons.
 	removeSpellIcons(spellsList, "Powers", "MagicMenu_power_names")
 	removeSpellIcons(spellsList, "Spells", "MagicMenu_spell_names")
+	removeSpellIcons(spellsList, "Items", "MagicMenu_item_names")
 
 	-- Create spell icons.
 	addSpellIcons(spellsList, "Powers", "MagicMenu_power_names", true)
 	addSpellIcons(spellsList, "Spells", "MagicMenu_spell_names", true)
+	addSpellIcons(spellsList, "Items", "MagicMenu_item_names", false)
 end
 
 local function updatePowerUsability()
