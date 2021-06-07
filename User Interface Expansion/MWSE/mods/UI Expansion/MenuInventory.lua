@@ -96,7 +96,10 @@ event.register("uiActivated", onMenuBarterActivated, { filter = "MenuBarter" } )
 
 local function onEnterMenuMode()
 	inventoryFilters:setFilterHidden("tradable", true)
-	inventoryFilters:clearFilter()
+
+	if (common.config.alwaysClearFiltersOnOpen) then
+		inventoryFilters:clearFilter()
+	end
 
 	if (common.config.autoSelectInput == "Inventory") then
 		inventoryFilters:focusSearchBar()

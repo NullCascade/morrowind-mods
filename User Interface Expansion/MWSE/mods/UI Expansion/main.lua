@@ -8,6 +8,7 @@ local defaultConfig = {
 	version = common.version,
 	showHelpText = true,
 	autoSelectInput = "Magic",
+	alwaysClearFiltersOnOpen = true,
 	useSearch = true,
 	useInventoryTextButtons = true,
 	selectSpellsOnSearch = true,

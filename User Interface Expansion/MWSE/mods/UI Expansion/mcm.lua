@@ -145,6 +145,14 @@ function this.onCreate(container)
 		key = "displayRatio",
 	})
 
+	-- Toggle value/weight ratio display.
+	createBooleanConfigPackage({
+		parent = mainPane,
+		label = common.dictionary.configAlwaysClearFiltersOnOpen,
+		config = this.config,
+		key = "alwaysClearFiltersOnOpen",
+	})
+
 	-- Toggle search bars.
 	createBooleanConfigPackage({
 		parent = mainPane,

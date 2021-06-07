@@ -288,7 +288,9 @@ end
 event.register("uiActivated", onMenuMagicActivated, { filter = "MenuMagic" } )
 
 local function onEnterMenuMode()
-	magicFilters:clearFilter()
+	if (common.config.alwaysClearFiltersOnOpen) then
+		magicFilters:clearFilter()
+	end
 
 	if (common.config.autoSelectInput == "Magic") then
 		magicFilters:focusSearchBar()
