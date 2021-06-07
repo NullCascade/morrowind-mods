@@ -224,7 +224,7 @@ function common.createSearchBar(params)
 	border.visible = params.useSearch
 
 	-- Create the search input itself.
-	local input = border:createTextInput({ id = tes3ui.registerID(params.id) })
+	local input = border:createTextInput({ id = params.id })
 	input.color = params.placeholderTextColor or tes3ui.getPalette("disabled_color")
 	input.text = params.placeholderText or ""
 	input.borderLeft = 5
