@@ -92,6 +92,10 @@ local function enchantConditionBlock(tooltip, object, itemData)
 		enchantContainer.flowDirection = "top_to_bottom"
 		enchantContainer.autoWidth = true
 		enchantContainer.autoHeight = true
+		enchantContainer.borderAllSides = 4
+		enchantContainer.borderLeft = 6
+		enchantContainer.borderRight = 6
+
 		for i = 1, #object.enchantment.effects do
 			-- effects is a fixed size array, empty slots have the id -1.
 			if object.enchantment.effects[i].id >= 0 then
@@ -102,9 +106,11 @@ local function enchantConditionBlock(tooltip, object, itemData)
 				block.autoHeight = true
 				block.widthProportional = 1.0
 				block.borderAllSides = 1
-				block:createImage{ path = string.format("icons\\%s", object.enchantment.effects[i].object.icon), id = "image" }
+
+				local icon = block:createImage{ path = string.format("icons\\%s", object.enchantment.effects[i].object.icon), id = "image" }
+				icon.borderTop = 1
+				icon.borderRight = 6
 				local label = block:createLabel{ text = string.format("%s", object.enchantment.effects[i]), id = "HelpMenu_enchantEffectLabel" }
-				label.borderLeft = 4
 				label.wrapText = false
 			end
 		end
@@ -192,6 +198,12 @@ end
 local function replaceAlchemyTooltip(tooltip, alchemy)
 	tryDestroyAllID(tooltip, "HelpMenu_effectBlock")
 
+	-- Add space between title and effects.
+	local title = tooltip:getContentElement().children[1]
+	if title then
+		title.borderBottom = 7
+	end
+
 	-- Value we'll use to see if the alchemy effect should be visible.
 	local effectsShown = getAlchemyEffectsShown(alchemy)
 
@@ -205,11 +217,16 @@ local function replaceAlchemyTooltip(tooltip, alchemy)
 			block.autoWidth = true
 			block.autoHeight = true
 			block.widthProportional = 1.0
-			block:createImage{ path = string.format("icons\\%s", alchemy.effects[i].object.icon), id = "HelpMenu_effectIcon" }
+			block.borderAllSides = 1
+			block.borderLeft = 7
+			block.borderRight = 7
+
+			local icon = block:createImage{ path = string.format("icons\\%s", alchemy.effects[i].object.icon), id = "HelpMenu_effectIcon" }
+			icon.borderTop = 1
+			icon.borderRight = 6
 			local label = block:createLabel{ text = string.format("%s", alchemy.effects[i]), id = "HelpMenu_effectLabel" }
-			label.borderLeft = 4
 			label.wrapText = false
-			
+
 			-- Hide the block if the PC's skill is too low.
 			if i > effectsShown then
 				block.visible = false
@@ -408,9 +425,51 @@ local function onItemTileUpdated(e)
 end
 event.register("itemTileUpdated", onItemTileUpdated, {filter = "MenuInventory"})
 
---
+-- Improve layout of spell tooltip.
+
+local function extraSpellTooltipEarly(e)
+	local GUI_ID_effect = tes3ui.registerID("effect")
+
+	local main = e.tooltip:findChild("PartHelpMenu_main")
+	if (not main) then
+		return
+	end
+	
+	local effectContainer = main:findChild(GUI_ID_effect)
+	if (not effectContainer) then
+		return
+	end
+
+	local helptext = main:findChild("helptext")
+	if (helptext) then
+		-- Spell title block.
+		helptext.borderAllSides = 4
+	end
+	
+	effectContainer.childAlignX = 0.5
+	effectContainer.borderLeft = 6
+	effectContainer.borderRight = 6
+
+	for _, child in pairs(effectContainer.children) do
+		if (child.id == GUI_ID_effect) then
+			-- Fix magic effect alignment.
+			local imgBlock = child.children[1]
+			local textBlock = child.children[2]
+			child.borderAllSides = 1
+			imgBlock.borderRight = 4
+			imgBlock.borderTop = 1
+			textBlock.borderTop = nil
+		else
+			-- Probably spell school text. Not present for powers.
+			child.borderAllSides = nil
+			child.borderBottom = 9
+		end
+	end
+
+	e.tooltip:updateLayout()
+end
+
 -- Show how long is left to recharge a power.
---
 
 local function extraSpellTooltipLate(e)
 	-- We have no way of knowing this is hovering over the player's power, but...
@@ -425,4 +484,5 @@ local function extraSpellTooltipLate(e)
 		end
 	end
 end
+event.register("uiSpellTooltip", extraSpellTooltipEarly, { priority = 100 })
 event.register("uiSpellTooltip", extraSpellTooltipLate, { priority = -100 })
