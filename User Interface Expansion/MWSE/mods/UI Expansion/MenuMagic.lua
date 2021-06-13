@@ -249,18 +249,14 @@ local function updatePowerUsability()
 	end
 end
 
-local function onMenuMagicUpdate(e)
+local function updateMagicMenu()
 	updateSpellIcons()
 	updatePowerUsability()
 	event.trigger("UIEXP:magicMenuPreUpdate")
-	e.source:forwardEvent(e)
-	event.trigger("UIEXP:magicMenuPreUpdated")
 end
 
 local function onMenuMagicActivated(e)
 	if (not e.newlyCreated) then
-		tes3.messageBox("Updated magic menu")
-		updateSpellIcons()
 		return
 	end
 
@@ -287,7 +283,7 @@ local function onMenuMagicActivated(e)
 	addSpellIcons(spellsList, "Spells", "MagicMenu_spell_names", true)
 
 	-- Listen for future pre-updates to refresh spell icons.
-	e.element:register("preUpdate", onMenuMagicUpdate)
+	e.element:registerAfter("preUpdate", updateMagicMenu)
 end
 event.register("uiActivated", onMenuMagicActivated, { filter = "MenuMagic" } )
 
