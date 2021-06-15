@@ -38,10 +38,8 @@ inventoryFilters:addFilter({
 })
 
 local function onFilterInventory(e)
-	if tes3.menuMode() then
-		e.text = e.item.name
-		e.filter = inventoryFilters:triggerFilter(e)
-	end
+	e.text = e.item.name
+	e.filter = inventoryFilters:triggerFilter(e)
 end
 event.register("filterInventory", onFilterInventory)
 
