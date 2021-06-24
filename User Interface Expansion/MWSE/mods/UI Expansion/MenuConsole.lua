@@ -10,8 +10,6 @@ local currentHistoryIndex = 1
 local previousEntries = { { text = "", lua = false } }
 local sandbox = {}
 
-
-
 local function updateScriptButton(button)
 	if (luaMode) then
 		button.text = "lua"
@@ -40,34 +38,44 @@ local function onSubmitCommand()
 
 	if (luaMode) then
 		tes3ui.logToConsole(text, true)
+	end
 
-		-- Try compiling command as an expression first.
-		local f, message = loadstring("return " .. text)
-		if (not f) then
-			f, message = loadstring(text)
-		end
+	local context = (luaMode and "lua" or "mwscript")
+	local e = event.trigger("UIEXP:consoleCommand", { command = text, context = context }, { filter = context })
+	if (e) then
+		text = e.command
+	end
 
-		-- Run command and show output in console.
-		if (f) then
-			local status, errorOrResult = sandboxScript(f)
-			if (status) then
-				if (errorOrResult ~= nil) then
-					tes3ui.logToConsole(string.format("> %s", errorOrResult))
+	if (not e or not e.block) then
+		if (luaMode) then
+			-- Try compiling command as an expression first.
+			local f, message = loadstring("return " .. text)
+			if (not f) then
+				f, message = loadstring(text)
+			end
+
+			-- Run command and show output in console.
+			if (f) then
+				local status, errorOrResult = sandboxScript(f)
+				if (status) then
+					if (errorOrResult ~= nil) then
+						tes3ui.logToConsole(string.format("> %s", errorOrResult))
+					end
+				else
+					tes3ui.logToConsole(errorOrResult)
 				end
 			else
-				tes3ui.logToConsole(errorOrResult)
+				tes3ui.logToConsole(message)
 			end
 		else
-			tes3ui.logToConsole(message)
-		end
-	else
-		-- Any of the togglestats reporting outputs will destroy the text input,
-		-- which is recreated on the next key input, so send one.
-		menuConsole:triggerEvent("keyEnter")
+			-- Any of the togglestats reporting outputs will destroy the text input,
+			-- which is recreated on the next key input, so send one.
+			menuConsole:triggerEvent("keyEnter")
 
-		local vanillaInputText = menuConsole:findChild(GUI_ID_MenuConsole_text_input)
-		vanillaInputText.text = text
-		menuConsole:triggerEvent("keyEnter")
+			local vanillaInputText = menuConsole:findChild(GUI_ID_MenuConsole_text_input)
+			vanillaInputText.text = text
+			menuConsole:triggerEvent("keyEnter")
+		end
 	end
 
 	local vanillaInputText = menuConsole:findChild(GUI_ID_MenuConsole_text_input)
