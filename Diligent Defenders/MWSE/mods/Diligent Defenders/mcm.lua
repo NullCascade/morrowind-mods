@@ -16,7 +16,7 @@ local function createBlackListRow(container, id)
 	local removeBtn = row:createButton({ text = "Remove" })
 	removeBtn.layoutOriginFractionX = 1.0
 	removeBtn:register("mouseClick", function(e)
-		table.removevalue(this.config.blacklist, id)
+		this.config.ignoreList[id] = nil
 		row:destroy()
 		refreshActiveList()
 		container:getTopLevelParent():updateLayout()
@@ -33,9 +33,15 @@ local function refreshBlackList()
 	if (blackListActualPane) then
 		blackListActualPane:destroyChildren()
 	end
-	table.sort(this.config.blacklist, caseInsensitiveSorter)
-	for i = 1, #this.config.blacklist do
-		createBlackListRow(blackListPane, this.config.blacklist[i])
+
+	local sortedBlacklistIds = {}
+	for id, _ in pairs(this.config.ignoreList) do
+		table.insert(sortedBlacklistIds, id)
+	end
+	table.sort(sortedBlacklistIds, caseInsensitiveSorter)
+	
+	for _, id in ipairs(sortedBlacklistIds) do
+		createBlackListRow(blackListPane, id)
 	end
 end
 
@@ -55,11 +61,11 @@ local function createActiveListRow(container, follower)
 
 	local label = row:createLabel({ text = followerBaseId })
 
-	if (table.find(this.config.blacklist, followerBaseId) == nil) then
+	if (not this.config.ignoreList[followerBaseId]) then
 		local removeBtn = row:createButton({ text = "Blacklist" })
 		removeBtn.layoutOriginFractionX = 1.0
 		removeBtn:register("mouseClick", function(e)
-			table.insert(this.config.blacklist, followerBaseId)
+			this.config.ignoreList[followerBaseId] = true
 			refreshBlackList()
 			removeBtn.visible = false
 		end)
@@ -116,7 +122,7 @@ function this.onCreate(parent)
 		blackListBox.layoutWidthFraction = 1.0
 		blackListBox.layoutHeightFraction = 1.0
 	
-		local label = blackListBox:createLabel({ text = "Blacklist:" })
+		local label = blackListBox:createLabel({ text = "Ignore List:" })
 		label.borderBottom = 6
 
 		blackListPane = blackListBox:createVerticalScrollPane({})
