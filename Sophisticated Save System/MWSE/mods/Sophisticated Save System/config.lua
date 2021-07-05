@@ -7,5 +7,5 @@ return mwse.loadConfig("Sophisticated Save System", {
 	saveOnCombatStart = true,
 	saveOnCombatEnd = true,
 	saveOnCellChange = true,
-	logLevel = "warn",
+	logSaves = false,
 })

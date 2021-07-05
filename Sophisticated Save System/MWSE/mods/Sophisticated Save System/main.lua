@@ -133,7 +133,7 @@ local function onSave(e)
 		})
 		return false
 	end
-	
+
 	-- Redirect quick/auto saves to use sss_* saves.
 	if (e.filename == "quiksave") then
 		e.filename = interop.getSaveName("q")
@@ -142,9 +142,6 @@ local function onSave(e)
 		e.filename = interop.getSaveName("a")
 		e.name = string.format("Autosave (%s)", os.date("%x %X"))
 	end
-
-	-- Show the save.
-	mwse.log("Creating save: %s -> %s", e.name, e.filename)
 
 	-- Reset our throttler.
 	resetSaveThrottler()
@@ -155,14 +152,16 @@ event.register("save", onSave)
 -- opportunity to clear out any old saves that we don't need to care about anymore.
 local function onSaved(e)
 	-- Show the save information.
-	-- mwse.log("Created save: %s -> %s", e.name, e.filename)
+	if (config.logSaves) then
+		mwse.log("Created save: %s -> %s", e.name, e.filename)
+	end
 
 	-- Clean up any old saves.
 	interop.clearOldSaves()
 end
 event.register("saved", onSaved)
 
--- 
+-- Checks to make sure that both the game can accept a save from this context and that we are ready to save.
 function interop.canPerformSave()
 	return not tes3.dataHandler.backgroundThreadRunning -- Prevent saving when there's something in the background thread.
 		and tes3.worldController.charGenState.value == -1 -- We don't want to save before chargen is over.
@@ -211,8 +210,7 @@ event.register("simulate", onSimulate)
 
 -- Setup MCM.
 local function registerModConfig()
-	local modConfig = require("Sophisticated Save System.mcm")
-	mwse.registerModConfig("Sophisticated Save System", modConfig)
+	dofile("Sophisticated Save System.mcm")
 end
 event.register("modConfigReady", registerModConfig)
 
