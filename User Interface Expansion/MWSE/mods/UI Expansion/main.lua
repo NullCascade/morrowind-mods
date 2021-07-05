@@ -47,6 +47,7 @@ local defaultConfig = {
 		quantity = true,
 		rest = true,
 		saveLoad = true,
+		serviceSpells = true,
 		stat = true,
 		tooltip = true,
 		training = true,
@@ -142,6 +143,11 @@ local function onInitialized()
 	end
 	if (config.components.saveLoad) then
 		dofile("UI Expansion.MenuSaveLoad")
+	else
+		mwse.log("[UI Expansion] Skipping module: save/load")
+	end
+	if (config.components.serviceSpells) then
+		dofile("UI Expansion.MenuServiceSpells")
 	else
 		mwse.log("[UI Expansion] Skipping module: save/load")
 	end
