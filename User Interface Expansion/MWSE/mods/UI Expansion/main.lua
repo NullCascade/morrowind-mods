@@ -81,82 +81,82 @@ event.register("modConfigReady", registerModConfig)
 -- Run our modules.
 local function onInitialized()
 	if (config.components.barter) then
-		dofile("Data Files/MWSE/mods/UI Expansion/MenuBarter.lua")
+		dofile("UI Expansion.MenuBarter")
 	else
 		mwse.log("[UI Expansion] Skipping module: barter")
 	end
 	if (config.components.console) then
-		dofile("Data Files/MWSE/mods/UI Expansion/MenuConsole.lua")
+		dofile("UI Expansion.MenuConsole")
 	else
 		mwse.log("[UI Expansion] Skipping module: console")
 	end
 	if (config.components.contents) then
-		dofile("Data Files/MWSE/mods/UI Expansion/MenuContents.lua")
+		dofile("UI Expansion.MenuContents")
 	else
 		mwse.log("[UI Expansion] Skipping module: contents")
 	end
 	if (config.components.dialog) then
-		dofile("Data Files/MWSE/mods/UI Expansion/MenuDialog.lua")
+		dofile("UI Expansion.MenuDialog")
 	else
 		mwse.log("[UI Expansion] Skipping module: dialog")
 	end
 	if (config.components.inventory) then
-		dofile("Data Files/MWSE/mods/UI Expansion/MenuInventory.lua")
+		dofile("UI Expansion.MenuInventory")
 	else
 		mwse.log("[UI Expansion] Skipping module: inventory")
 	end
 	if (config.components.inventorySelect) then
-		dofile("Data Files/MWSE/mods/UI Expansion/MenuInventorySelect.lua")
+		dofile("UI Expansion.MenuInventorySelect")
 	else
 		mwse.log("[UI Expansion] Skipping module: inventorySelect")
 	end
 	if (config.components.magic) then
-		dofile("Data Files/MWSE/mods/UI Expansion/MenuMagic.lua")
+		dofile("UI Expansion.MenuMagic")
 	else
 		mwse.log("[UI Expansion] Skipping module: magic")
 	end
 	if (config.components.map) then
-		dofile("Data Files/MWSE/mods/UI Expansion/MenuMap.lua")
+		dofile("UI Expansion.MenuMap")
 	else
 		mwse.log("[UI Expansion] Skipping module: map")
 	end
 	if (config.components.mapPlugin) then
-		dofile("Data Files/MWSE/mods/UI Expansion/MenuMapPlugin.lua")
+		dofile("UI Expansion.MenuMapPlugin")
 	else
 		mwse.log("[UI Expansion] Skipping module: mapPlugin")
 	end
 	if (config.components.options) then
-		dofile("Data Files/MWSE/mods/UI Expansion/MenuOptions.lua")
+		dofile("UI Expansion.MenuOptions")
 	else
 		mwse.log("[UI Expansion] Skipping module: options")
 	end
 	if (config.components.quantity) then
-		dofile("Data Files/MWSE/mods/UI Expansion/MenuQuantity.lua")
+		dofile("UI Expansion.MenuQuantity")
 	else
 		mwse.log("[UI Expansion] Skipping module: quantity")
 	end
 	if (config.components.rest) then
-		dofile("Data Files/MWSE/mods/UI Expansion/MenuRest.lua")
+		dofile("UI Expansion.MenuRest")
 	else
 		mwse.log("[UI Expansion] Skipping module: rest")
 	end
 	if (config.components.saveLoad) then
-		dofile("Data Files/MWSE/mods/UI Expansion/MenuSaveLoad.lua")
+		dofile("UI Expansion.MenuSaveLoad")
 	else
 		mwse.log("[UI Expansion] Skipping module: save/load")
 	end
 	if (config.components.stat) then
-		dofile("Data Files/MWSE/mods/UI Expansion/MenuStat.lua")
+		dofile("UI Expansion.MenuStat")
 	else
 		mwse.log("[UI Expansion] Skipping module: stat")
 	end
 	if (config.components.tooltip) then
-		dofile("Data Files/MWSE/mods/UI Expansion/Tooltip.lua")
+		dofile("UI Expansion.Tooltip")
 	else
 		mwse.log("[UI Expansion] Skipping module: tooltip")
 	end
 	if (config.components.training) then
-		dofile("Data Files/MWSE/mods/UI Expansion/MenuServiceTraining.lua")
+		dofile("UI Expansion.MenuServiceTraining")
 	else
 		mwse.log("[UI Expansion] Skipping module: training")
 	end
