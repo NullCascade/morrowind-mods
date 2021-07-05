@@ -124,6 +124,12 @@ local function ori()
 		end
 	end
 
+	-- Display lua reference data.
+	local refData = reference.data
+	if (refData and not table.empty(refData)) then
+		log("Lua Data: %s", json.encode(refData, { indent = true }))
+	end
+
 	if (config.logToFile) then
 		mwse.log("--------------------")
 	end
