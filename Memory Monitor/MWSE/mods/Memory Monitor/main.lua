@@ -77,7 +77,8 @@ event.register("enterFrame", updateMemoryUseBar)
 
 local function onMemoryUsageHelp(e)
 	local tooltip = tes3ui.createTooltipMenu()
-	tooltip:createLabel({ text = string.format("Current usage: %d MB", getMemoryUsageInMB()) })
+	tooltip:createLabel({ text = string.format("Total usage: %d MB", getMemoryUsageInMB()) })
+	tooltip:createLabel({ text = string.format("Lua usage: %d MB", collectgarbage("count") / 1024) })
 end
 
 -- Create our menu with the main HUD.
