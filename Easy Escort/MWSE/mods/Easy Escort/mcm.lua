@@ -13,12 +13,12 @@ local function createBlackListRow(container, id)
 	row.autoHeight = true
 	blackListActualPane = row.parent
 
-	local label = row:createLabel({ text = id })
+	row:createLabel({ text = id })
 
 	local removeBtn = row:createButton({ text = "Remove" })
 	removeBtn.layoutOriginFractionX = 1.0
 	removeBtn:register("mouseClick", function(e)
-		table.removevalue(this.config.blacklist, id)
+		interop.removeFromBlacklist(id)
 		row:destroy()
 		refreshActiveList()
 		container:getTopLevelParent():updateLayout()
@@ -35,9 +35,15 @@ local function refreshBlackList()
 	if (blackListActualPane) then
 		blackListActualPane:destroyChildren()
 	end
-	table.sort(this.config.blacklist, caseInsensitiveSorter)
-	for i = 1, #this.config.blacklist do
-		createBlackListRow(blackListPane, this.config.blacklist[i])
+
+	local sortedBlacklist = {}
+	for id, _ in pairs(this.config.ignoreList) do
+		table.insert(sortedBlacklist, id)
+	end
+	table.sort(sortedBlacklist, caseInsensitiveSorter)
+
+	for _, id in ipairs(sortedBlacklist) do
+		createBlackListRow(blackListPane, id)
 	end
 end
 
@@ -50,18 +56,14 @@ local function createActiveListRow(container, follower)
 	row.autoHeight = true
 	activeListActualPane = row.parent
 
-	local followerBaseId = follower.id
-	if (follower.isInstance) then
-		followerBaseId = follower.baseObject.id
-	end
+	local followerBaseId = follower.baseObject.id:lower()
 
-	local label = row:createLabel({ text = followerBaseId })
-
-	if (not interop.blacklistContains(followerBaseId)) then
+	row:createLabel({ text = followerBaseId })
+	if (not interop.blackListContains(followerBaseId)) then
 		local removeBtn = row:createButton({ text = "Blacklist" })
 		removeBtn.layoutOriginFractionX = 1.0
 		removeBtn:register("mouseClick", function(e)
-			table.insert(this.config.blacklist, followerBaseId)
+			interop.addToBlacklist(followerBaseId)
 			refreshBlackList()
 			removeBtn.visible = false
 		end)
