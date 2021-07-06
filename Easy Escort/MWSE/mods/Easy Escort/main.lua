@@ -193,6 +193,7 @@ local config = mwse.loadConfig("Easy Escort", {
 		["hlaalu guard"] = true,
 		["imperial guard_ebonhear"] = true,
 		["imperial guard"] = true,
+		["mer_tgw_guar"] = true,
 		["ordinator stationary"] = true,
 		["ordinator wander"] = true,
 		["ordinator_high fane"] = true,
