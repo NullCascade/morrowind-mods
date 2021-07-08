@@ -105,3 +105,6 @@ local function onEnchantItem(e)
 	end
 end
 event.register("enchantedItemCreated", onEnchantItem)
+
+-- Handle MCM.
+dofile("Consistent Enchanting.mcm")
