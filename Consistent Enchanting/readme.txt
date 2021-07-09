@@ -63,6 +63,9 @@
  VERSION HISTORY
 =====================================================================================
 
+ 1.1.0 [2021-07-09]:
+    * Added preservation of the soul used to enchant the item.
+
  1.0.0 [2021-07-08]:
     * Initial release.
 

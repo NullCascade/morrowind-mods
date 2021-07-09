@@ -103,6 +103,11 @@ local function onEnchantItem(e)
 	if (config.storeBaseObject) then
 		itemData.data.ncceEnchantedFrom = e.baseObject.id:lower()
 	end
+
+	-- Store soul so other mods can reference it?
+	if (config.storeSoulUsed) then
+		itemData.data.ncceEnchantedSoul = e.soul.id:lower()
+	end
 end
 event.register("enchantedItemCreated", onEnchantItem)
 
