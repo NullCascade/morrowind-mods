@@ -82,12 +82,13 @@
  VERSION HISTORY
 =====================================================================================
 
- 2.0.0 [in progress]:
+ 2.0.0 [2021-07-06]:
     * Rewrite of mod.
     * Added interop and config modules so other mods can queue saves or make use of
       SSS features/config.
     * Guarded saves from happening while the background thread was running, to
       prevent lockups on saving.
+    * New mod config menu.
 
  1.1.0 [2018-08-20]:
     * Fixed issue where saves would be created right after loading a game.
