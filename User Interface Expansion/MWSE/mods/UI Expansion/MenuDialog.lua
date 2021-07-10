@@ -54,6 +54,7 @@ local function checkForAnswerHotkey(e)
 			s = answer.txt
 		end
 		tes3.messageBox(s)
+		answers = {}
 		answer:triggerEvent("mouseClick")
 	end
 end
