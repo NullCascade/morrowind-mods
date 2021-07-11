@@ -17,6 +17,7 @@ local defaultConfig = {
 	displayRatio = false,
 	transferItemsByDefault = false,
 	displayWeekday = true,
+	displayRestTargetHour = true,
 	maxWait = 1,
 	keybindClose = { tes3.scanCode.space },
 	keybindTakeAll = { tes3.scanCode.leftCtrl, tes3.scanCode.space },

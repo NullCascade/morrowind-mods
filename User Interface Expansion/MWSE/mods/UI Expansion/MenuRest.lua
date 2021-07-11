@@ -1,6 +1,41 @@
 local common = require("UI Expansion.common")
 
+local function format12HourTime(hour)
+	local hour = math.floor(hour)
+	while (hour > 24) do
+		hour = hour - 24
+	end
+
+	local isAM = true
+	if (hour >= 12) then
+		hour = hour - 12
+		isAM = hour == 12
+	end
+
+	if (hour == 0) then
+		hour = 12
+	end
+
+	return hour, tes3.findGMST(isAM and tes3.gmst.sSaveMenuHelp04 or tes3.gmst.sSaveMenuHelp05).value
+end
+
+local function updateDesiredHourText()
+	local menuRestWait = tes3ui.findMenu("MenuRestWait")
+	if (not menuRestWait) then
+		return
+	end
+
+	local hoursToPass = menuRestWait:findChild("MenuRestWait_scrollbar").widget.current + 1
+	local hour, suffix = format12HourTime(tes3.worldController.hour.value + hoursToPass)
+	local hoursElement = menuRestWait:findChild("MenuRestWait_hour_text").parent.children[2]
+	hoursElement.text = string.format("%s (%s %s)", tes3.findGMST(tes3.gmst.sRestMenu2).value, hour, suffix)
+end
+
 local function menuRestWait(e)
+	if (not e.newlyCreated) then
+		return
+	end
+
 	local scroll = e.element:findChild("MenuRestWait_scrollbar")
 	scroll.widget.max = common.config.maxWait * 24 - 1
 	scroll.widget.jump = 4 -- More useful default value.
@@ -11,20 +46,26 @@ local function menuRestWait(e)
 	local rest = e.element:findChild("MenuRestWait_rest_button")
 	common.bindScrollBarToKeyboard({
 		element = scroll,
+		onUpdate = function()
+			e.element:updateLayout()
+		end,
 		onSubmit = function()
-			if (rest ~= nil) then
-				rest:triggerEvent("mouseClick")
-			else
-				wait:triggerEvent("mouseClick")
-			end
-		end
+			(rest or wait):triggerEvent("mouseClick")
+		end,
 	})
 
-	if (not common.config.displayWeekday) then
-		return
+	-- Show day of week.
+	if (common.config.displayWeekday) then
+		-- +3 offset, since the 16th of Last Seed (starting day) should be Thurdas.
+		local day = common.dictionary.weekDays[(tes3.worldController.daysPassed.value + 3) % 7 + 1]
+		local userFriendlyTimestampElement = e.element.children[2].children[1]
+		userFriendlyTimestampElement.text =  day .. ", " .. userFriendlyTimestampElement.text
 	end
-	-- +3 offset, since the 16th of Last Seed (starting day) should be Thurdas.
-	local day = common.dictionary.weekDays[(tes3.worldController.daysPassed.value + 3) % 7 + 1]
-	e.element.children[2].children[1].text =  day .. ", " .. e.element.children[2].children[1].text
+
+	-- Show rest target hour.
+	if (common.config.displayRestTargetHour) then
+		e.element:registerAfter("update", updateDesiredHourText)
+		updateDesiredHourText()
+	end
 end
 event.register("uiActivated", menuRestWait, { filter = "MenuRestWait"})
