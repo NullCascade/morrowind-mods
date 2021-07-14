@@ -11,12 +11,16 @@ function common.complexKeybindTest(keybind)
 	if (keybindType == "number") then
 		return inputController:isKeyDown(keybind)
 	elseif (keybindType == "table") then
-		for _, k in pairs(keybind) do
-			if (not common.complexKeybindTest(k)) then
-				return false
+		if (keybind.keyCode) then
+			return mwse.mcm.testKeyBind(keybind)
+		else
+			for _, k in pairs(keybind) do
+				if (not common.complexKeybindTest(k)) then
+					return false
+				end
 			end
+			return true
 		end
-		return true
 	elseif (keybindType == "string") then
 		return inputController:keybindTest(tes3.keybind[keybind])
 	end

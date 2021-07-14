@@ -1,235 +1,183 @@
-local this = {}
 
 local common = require("UI Expansion.common")
 
-local function createConfigSliderPackage(params)
-	local horizontalBlock = params.parent:createBlock({})
-	horizontalBlock.flowDirection = "left_to_right"
-	horizontalBlock.widthProportional = 1.0
-	horizontalBlock.height = 24
-
-	local label = horizontalBlock:createLabel({ text = params.label })
-	label.absolutePosAlignX = 0.0
-	label.absolutePosAlignY = 0.5
-
-	local config = params.config
-	local key = params.key
-	local value = config[key] or params.default or 0
-
-	local sliderLabel = horizontalBlock:createLabel({ text = tostring(value) })
-	sliderLabel.absolutePosAlignX = 1.0
-	sliderLabel.absolutePosAlignY = 0.5
-	sliderLabel.borderRight = 306
-
-	local range = params.max - params.min
-
-	local slider = horizontalBlock:createSlider({ current = value - params.min, max = range, step = params.step, jump = params.jump })
-	slider.absolutePosAlignX = 1.0
-	slider.absolutePosAlignY = 0.5
-	slider.width = 300
-	slider:register("PartScrollBar_changed", function(e)
-		config[key] = slider:getPropertyInt("PartScrollBar_current") + params.min
-		sliderLabel.text = config[key]
-		if (params.onUpdate) then
-			params.onUpdate(e)
-		end
-	end)
-
-	return { block = horizontalBlock, label = label, sliderLabel = sliderLabel, slider = slider }
+local function saveConfig()
+	mwse.saveConfig("UI Expansion", common.config)
 end
 
-local function createBooleanConfigPackage(params)
-	local horizontalBlock = params.parent:createBlock({})
-	horizontalBlock.flowDirection = "left_to_right"
-	horizontalBlock.widthProportional = 1.0
-	horizontalBlock.height = 32
+-- Setup MCM.
+local function registerModConfig()
+	local template = mwse.mcm.createTemplate({ name = "UI Expansion" })
+	template:saveOnClose("UI Expansion", common.config)
 
-	local label = horizontalBlock:createLabel({ text = params.label })
-	label.absolutePosAlignX = 0.0
-	label.absolutePosAlignY = 0.5
+	local creditsText = common.dictionary.modName .. " " .. common.dictionary.versionString
+		.. "\n\n" .. common.dictionary.configCredits
+		.. "\n  Programming: NullCascade, Hrnchamd, Petethegoat, Jiopsi, Remiros, Mort, Wix, abot, Necrolesian"
+		.. "\n  Colored Magic School Icons: R-Zero"
+		.. "\n  Inventory Filter Icons: Remiros"
+		.. "\n  Training Skill Icons: RedFurryDemon"
+		.. "\n  Value/Weight Ratio Icon: Necrolesian"
+		.. "\n  Concepts and Testing: Morrowind Modding Community Discord"
+	
+	-- Components section
+	do
+		local pageComponents = template:createSideBarPage({ label = common.dictionary.configTabComponent })
+		pageComponents.sidebar:createInfo({ text = creditsText .. "\n\nThe settings in this tab will not take affect until the next restart." })
 
-	local button = horizontalBlock:createButton({ text = (this.config[params.key] and common.dictionary.yes or common.dictionary.no) })
-	button.absolutePosAlignX = 1.0
-	button.absolutePosAlignY = 0.5
-	button.paddingTop = 3
-	button:register("mouseClick", function(e)
-		this.config[params.key] = not this.config[params.key]
-		button.text = this.config[params.key] and common.dictionary.yes or common.dictionary.no
-
-		if (params.onUpdate) then
-			params.onUpdate(e)
+		local components = {
+			barter = "configComponentBarter",
+			console = "configComponentConsole",
+			contents = "configComponentContents",
+			dialog = "configComponentDialog",
+			inventory = "configComponentInventory",
+			inventorySelect = "configComponentInventorySelect",
+			magic = "configComponentMagic",
+			map = "configComponentMap",
+			options = "configComponentOptions",
+			quantity = "configComponentQuantity",
+			rest = "configComponentRest",
+			saveLoad = "configComponentSaveLoad",
+			serviceSpells = "configComponentServiceSpells",
+			serviceTraining = "configComponentServiceTraining",
+		}
+		for _, k in ipairs(table.keys(components)) do
+			pageComponents:createOnOffButton({
+				label = common.dictionary[components[k]],
+				description = common.dictionary[components[k] .. "Description"],
+				variable = mwse.mcm.createTableVariable({ id = k, table = common.config.components }),
+			})
 		end
-	end)
+	end
 
-	return { block = horizontalBlock, label = label, button = button }
+	-- Features setting
+	do
+		local pageFeatures = template:createSideBarPage({ label = common.dictionary.configTabFeature })
+		pageFeatures.sidebar:createInfo({ text = creditsText })
+
+		-- Help tooltips
+		pageFeatures:createOnOffButton({
+			label = common.dictionary.configShowHelpTips,
+			description = common.dictionary.configShowHelpTipsDescription,
+			variable = mwse.mcm.createTableVariable({ id = "showHelpText", table = common.config }),
+		})
+
+		-- Use text search?
+		pageFeatures:createOnOffButton({
+			label = common.dictionary.configUseSearchBars,
+			description = common.dictionary.configUseSearchBarsDescription,
+			variable = mwse.mcm.createTableVariable({ id = "useSearch", table = common.config }),
+		})
+
+		-- Use text search?
+		pageFeatures:createOnOffButton({
+			label = common.dictionary.configFilterButtons,
+			description = common.dictionary.configFilterButtonsDescription,
+			variable = mwse.mcm.createTableVariable({ id = "useInventoryTextButtons", table = common.config }),
+		})
+
+		-- Auto-selection
+		pageFeatures:createDropdown({
+			label = common.dictionary.configAutoSelectSearch,
+			description = common.dictionary.configAutoSelectSearchDescription,
+			options = {
+				{ label = common.dictionary.configAutoSelectSearchOptions[1], value = "Inventory" },
+				{ label = common.dictionary.configAutoSelectSearchOptions[2], value = "Magic" },
+				{ label = common.dictionary.configAutoSelectSearchOptions[3], value = "None" },
+			},
+			variable = mwse.mcm.createTableVariable({ id = "autoSelectInput", table = common.config }),
+		})
+
+		-- Auto-equip spells
+		pageFeatures:createOnOffButton({
+			label = common.dictionary.configAutoSelectSpells,
+			description = common.dictionary.configAutoSelectSpellsDescription,
+			variable = mwse.mcm.createTableVariable({ id = "selectSpellsOnSearch", table = common.config }),
+		})
+
+		-- Auto-filter to barterable items
+		pageFeatures:createOnOffButton({
+			label = common.dictionary.configAutoFilterToTradable,
+			description = common.dictionary.configAutoFilterToTradableDescription,
+			variable = mwse.mcm.createTableVariable({ id = "autoFilterToTradable", table = common.config }),
+		})
+
+		-- Auto-clear filters
+		pageFeatures:createOnOffButton({
+			label = common.dictionary.configAlwaysClearFiltersOnOpen,
+			description = common.dictionary.configAlwaysClearFiltersOnOpenDescription,
+			variable = mwse.mcm.createTableVariable({ id = "alwaysClearFiltersOnOpen", table = common.config }),
+		})
+
+		-- Display value/weight ratio
+		pageFeatures:createOnOffButton({
+			label = common.dictionary.configRatioDisplay,
+			description = common.dictionary.configRatioDisplayDescription,
+			variable = mwse.mcm.createTableVariable({ id = "displayRatio", table = common.config }),
+		})
+
+		-- Quick-transfer items without having to hold alt
+		pageFeatures:createOnOffButton({
+			label = common.dictionary.configTransferStackByDefault,
+			description = common.dictionary.configTransferStackByDefaultDescription,
+			variable = mwse.mcm.createTableVariable({ id = "transferItemsByDefault", table = common.config }),
+		})
+
+		-- Display day of week in rest menu
+		pageFeatures:createOnOffButton({
+			label = common.dictionary.configShowWeekDay,
+			description = common.dictionary.configShowWeekDayDescription,
+			variable = mwse.mcm.createTableVariable({ id = "displayWeekday", table = common.config }),
+		})
+
+		-- Display target rest hour
+		pageFeatures:createOnOffButton({
+			label = common.dictionary.configDisplayRestTargetHour,
+			description = common.dictionary.configDisplayRestTargetHourDescription,
+			variable = mwse.mcm.createTableVariable({ id = "displayRestTargetHour", table = common.config }),
+		})
+
+		-- Max number of days to wait/rest
+		pageFeatures:createTextField({
+			label = common.dictionary.configMaxWaitDays,
+			description = common.dictionary.configMaxWaitDaysDescription,
+			variable = mwse.mcm.createTableVariable({ id = "maxWait", table = common.config }),
+			numbersOnly = true
+		})
+
+		-- Key binding: close inventory
+		pageFeatures:createKeyBinder({
+			label = common.dictionary.configCloseKey,
+			description = common.dictionary.configCloseKeyDescription,
+			allowCombinations = true,
+			variable = mwse.mcm.createTableVariable({ id = "keybindClose", table = common.config }),
+		})
+
+		-- Key binding: take all/filtered
+		pageFeatures:createKeyBinder({
+			label = common.dictionary.configTakeAllKey,
+			description = common.dictionary.configTakeAllKeyDescription,
+			allowCombinations = true,
+			variable = mwse.mcm.createTableVariable({ id = "keybindTakeAll", table = common.config }),
+		})
+
+		-- Key binding: show additional info
+		pageFeatures:createKeyBinder({
+			label = common.dictionary.configShowAdditionalInfoKey,
+			description = common.dictionary.configShowAdditionalInfoKeyDescription,
+			allowCombinations = true,
+			variable = mwse.mcm.createTableVariable({ id = "keybindShowAdditionalInfo", table = common.config }),
+		})
+
+		-- Key binding: map switch
+		pageFeatures:createKeyBinder({
+			label = common.dictionary.configMapSwitchKey,
+			description = common.dictionary.configMapSwitchKeyDescription,
+			allowCombinations = true,
+			variable = mwse.mcm.createTableVariable({ id = "keybindMapSwitch", table = common.config }),
+		})
+	end
+	
+	-- Finish up.
+	template:register()
 end
-
-local function createTableConfigPackage(params)
-	local horizontalBlock = params.parent:createBlock({})
-	horizontalBlock.flowDirection = "left_to_right"
-	horizontalBlock.widthProportional = 1.0
-	horizontalBlock.height = 32
-
-	local label = horizontalBlock:createLabel({ text = params.label })
-	label.absolutePosAlignX = 0.0
-	label.absolutePosAlignY = 0.5
-
-	local button = horizontalBlock:createButton({ text = this.config[params.key] })
-	button.absolutePosAlignX = 1.0
-	button.absolutePosAlignY = 0.5
-	button.paddingTop = 3
-	button:register("mouseClick", function(e)
-		for k,v in pairs(params.table) do
-			if (v == this.config[params.key]) then
-				this.config[params.key] = params.table[k + 1] or params.table[1]
-				button.text = params.names[k + 1] or params.names[1]
-				break
-			end
-		end
-
-		if (params.onUpdate) then
-			params.onUpdate(e)
-		end
-	end)
-
-	return { block = horizontalBlock, label = label, button = button }
-end
-
-function this.onCreate(container)
-	-- Create the main pane for a uniform look.
-	local mainPane = container:createThinBorder({})
-	mainPane.flowDirection = "top_to_bottom"
-	mainPane.widthProportional = 1.0
-	mainPane.heightProportional = 1.0
-	mainPane.paddingAllSides = 6
-
-	--
-	local title = mainPane:createLabel({ text = string.format("%s %s", common.dictionary.modName, common.dictionary.versionString) })
-	title.borderBottom = 6
-
-	-- Allow selecting the default focus for searching.
-	createTableConfigPackage({
-		parent = mainPane,
-		label = common.dictionary.configAutoSelectSearch,
-		config = this.config,
-		key = "autoSelectInput",
-		table = { "Inventory", "Magic", "None" },
-		names = common.dictionary.configAutoSelectSearchOptions
-	})
-
-	-- Toggle help text.
-	createBooleanConfigPackage({
-		parent = mainPane,
-		label = common.dictionary.configShowHelpTips,
-		config = this.config,
-		key = "showHelpText",
-	})
-
-	-- Toggle vanilla-style inventory filter buttons.
-	createBooleanConfigPackage({
-		parent = mainPane,
-		label = common.dictionary.configFilterButtons,
-		config = this.config,
-		key = "useInventoryTextButtons",
-		onUpdate = function()
-			common.inventoryFilter:setIconUsage(not this.config.useInventoryTextButtons)
-			common.barterFilter:setIconUsage(not this.config.useInventoryTextButtons)
-		end
-	})
-
-	-- Toggle value/weight ratio display.
-	createBooleanConfigPackage({
-		parent = mainPane,
-		label = common.dictionary.configRatioDisplay,
-		config = this.config,
-		key = "displayRatio",
-	})
-
-	-- Toggle value/weight ratio display.
-	createBooleanConfigPackage({
-		parent = mainPane,
-		label = common.dictionary.configAlwaysClearFiltersOnOpen,
-		config = this.config,
-		key = "alwaysClearFiltersOnOpen",
-	})
-
-	-- Toggle search bars.
-	createBooleanConfigPackage({
-		parent = mainPane,
-		label = common.dictionary.configUseSearchBars,
-		config = this.config,
-		key = "useSearch",
-		onUpdate = function()
-			common.setAllFiltersVisibility(this.config.useSearch)
-		end
-	})
-
-	-- Toggle help text.
-	createBooleanConfigPackage({
-		parent = mainPane,
-		label = common.dictionary.configAutoSelectSpells,
-		config = this.config,
-		key = "selectSpellsOnSearch",
-	})
-
-	-- Toggle auto-filtering to tradable items when bartering.
-	createBooleanConfigPackage({
-		parent = mainPane,
-		label = common.dictionary.configAutoFilterToTradable,
-		config = this.config,
-		key = "autoFilterToTradable",
-	})
-
-	-- Take only filtered items in contents menu.
-	createBooleanConfigPackage({
-		parent = mainPane,
-		label = common.dictionary.configUseTakeFiltered,
-		config = this.config,
-		key = "takeFilteredItems",
-	})
-
-	-- Transfer items with single click by default.
-	createBooleanConfigPackage({
-		parent = mainPane,
-		label = common.dictionary.configTransferStackByDefault,
-		config = this.config,
-		key = "transferItemsByDefault",
-	})
-
-	-- Toggle displaying the weekday in the rest menu.
-	createBooleanConfigPackage({
-		parent = mainPane,
-		label = common.dictionary.configShowWeekDay,
-		config = this.config,
-		key = "displayWeekday",
-	})
-
-	-- Select the maximum wait time.
-	createConfigSliderPackage({
-		parent = mainPane,
-		label = common.dictionary.configMaxWaitDays,
-		config = this.config,
-		key = "maxWait",
-		min = 1,
-		max = 14,
-		jump = 7,
-		step = 1,
-	})
-
-	-- Credits:
-	mainPane:createLabel({ text = common.dictionary.configCredits }).borderTop = 6
-	mainPane:createLabel({ text = "  Programming: NullCascade, Hrnchamd, Petethegoat, Jiopsi, Remiros, Mort, Wix, abot, Necrolesian" })
-	mainPane:createLabel({ text = "  Colored Magic School Icons: R-Zero" })
-	mainPane:createLabel({ text = "  Inventory Filter Icons: Remiros" })
-	mainPane:createLabel({ text = "  Training Skill Icons: RedFurryDemon" })
-	mainPane:createLabel({ text = "  Value/Weight Ratio Icon: Necrolesian" })
-	mainPane:createLabel({ text = "  Concepts and Testing: Morrowind Modding Community Discord" })
-end
-
--- Since we are taking control of the mod config system, we will manually handle saves. This is
--- called when the save button is clicked while configuring this mod.
-function this.onClose()
-	mwse.saveConfig("UI Expansion", this.config)
-end
-
-return this
+event.register("modConfigReady", registerModConfig)

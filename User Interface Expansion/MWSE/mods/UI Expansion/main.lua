@@ -1,7 +1,7 @@
 
 local common = require("UI Expansion.common")
 
-common.version = 1.2
+common.version = 1.5
 
 -- Configuration table.
 local defaultConfig = {
@@ -19,10 +19,10 @@ local defaultConfig = {
 	displayWeekday = true,
 	displayRestTargetHour = true,
 	maxWait = 1,
-	keybindClose = { tes3.scanCode.space },
-	keybindTakeAll = { tes3.scanCode.leftCtrl, tes3.scanCode.space },
-	keybindShowAdditionalInfo = { tes3.scanCode.leftAlt },
-	keybindMapSwitch = { tes3.scanCode.rightAlt }, -- don't use a standard key to avoid conflicts with filters
+	keybindClose = { keyCode = tes3.scanCode.space, isShiftDown = false, isControlDown = false, isAltDown = false },
+	keybindTakeAll = { keyCode = tes3.scanCode.space, isShiftDown = false, isControlDown = true, isAltDown = false },
+	keybindShowAdditionalInfo = { keyCode = tes3.scanCode.leftAlt, isShiftDown = false, isControlDown = false, isAltDown = true },
+	keybindMapSwitch = { keyCode = tes3.scanCode.rightAlt, isShiftDown = false, isControlDown = false, isAltDown = true }, -- don't use a standard key to avoid conflicts with filters
 	dialogueTopicSeenColor = "journal_finished_quest_color",
 	dialogueTopicUniqueColor = "link_color",
 	mapConfig = {
@@ -55,7 +55,40 @@ local defaultConfig = {
 	},
 }
 local config = mwse.loadConfig("UI Expansion", defaultConfig)
-mwse.log("[UI Expansion] Loaded configuration:")
+
+-- Convert keybinds from previous to new version.
+local function convertKeyBind(keyArray)
+	-- Don't convert already converted bindings.
+	if (keyArray.keyCode) then
+		-- But do make sure no botched config merges make it through.
+		return { keyCode = keyArray.keyCode, isShiftDown = keyArray.isShiftDown, isControlDown = keyArray.isControlDown, isAltDown = keyArray.isAltDown }
+	end
+
+	-- Actually convert.
+	local keyBind = {}
+	for _, code in ipairs(keyArray) do
+		if (code == tes3.scanCode.leftShift or code == tes3.scanCode.rightShift) then
+			keyBind.isShiftDown = true
+		elseif (code == tes3.scanCode.leftControl or code == tes3.scanCode.rightControl) then
+			keyBind.isControlDown = true
+		elseif (code == tes3.scanCode.leftAlt or code == tes3.scanCode.rightAlt) then
+			keyBind.isAltDown = true
+		else
+			keyBind.keyCode = code
+		end
+	end
+
+	-- Ensure that a keybind was actually assigned.
+	if (not keyBind.keyCode) then
+		keyBind.keyCode = keyArray[1]
+	end
+
+	return keyBind
+end
+config.keybindClose = convertKeyBind(config.keybindClose)
+config.keybindTakeAll = convertKeyBind(config.keybindTakeAll)
+config.keybindShowAdditionalInfo = convertKeyBind(config.keybindShowAdditionalInfo)
+config.keybindMapSwitch = convertKeyBind(config.keybindMapSwitch)
 mwse.log(json.encode(config, { indent = true }))
 
 -- Make config available to the common module.
@@ -73,12 +106,7 @@ if (mwse.buildDate < 20200926) then
 end
 
 -- Set up MCM.
-local modConfig = require("UI Expansion.mcm")
-modConfig.config = config
-local function registerModConfig()
-	mwse.registerModConfig(common.dictionary.modName, modConfig)
-end
-event.register("modConfigReady", registerModConfig)
+dofile("UI Expansion.mcm")
 
 -- Run our modules.
 local function onInitialized()
