@@ -28,7 +28,7 @@ event.register("referenceActivated", onReferenceActivated)
 local function onReferenceDeactivated(e)
 	trackedReferences[e.reference] = nil
 end
-event.register("referenceActivated", onReferenceActivated)
+event.register("referenceDeactivated", onReferenceDeactivated)
 
 --
 -- Our actual reference updating code
