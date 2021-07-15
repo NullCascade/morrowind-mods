@@ -73,7 +73,7 @@ function interop.checkSupport(obj)
 	local dayNightSwitchNode = (#sceneNode.children > 0) and sceneNode.children[1] or nil
 
 	-- Make sure the node has the name we care about.
-	if (dayNightSwitchNode and dayNightSwitchNode.name ~= "NightDaySwitch") then
+	if (not dayNightSwitchNode or dayNightSwitchNode.name ~= "NightDaySwitch") then
 		objectSupportCache[object] = false
 		return false
 	end
@@ -81,6 +81,29 @@ function interop.checkSupport(obj)
 	-- All checks passed.
 	objectSupportCache[object] = true
 	return true
+end
+
+local customLights = {}
+
+function interop.setLightForMesh(mesh, light)
+	customLights[mesh:lower()] = light
+end
+
+function interop.getLightForMesh(mesh)
+	-- Look for custom light.
+	local light = customLights[mesh:lower()]
+	if (light ~= nil) then
+		return light:clone()
+	end
+
+	-- Otherwise make a new light.
+	light = niPointLight.new()
+	-- light.name = "GitD Standard Interior Light"
+	light.diffuse.r = 1
+	light.diffuse.g = 1
+	light.diffuse.b = 1
+	light:setRadius(200)
+	return light
 end
 
 return interop

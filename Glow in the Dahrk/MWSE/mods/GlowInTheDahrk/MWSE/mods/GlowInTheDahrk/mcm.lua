@@ -44,6 +44,12 @@ local function registerModConfig()
 	})
 
 	preferences:createOnOffButton({
+		label = "Add sunrays to interiors?",
+		description = "When enabled, sunrays will be added around windows when they are lit from the outside.\n\nDefault: On",
+		variable = mwse.mcm:createTableVariable({ id = "addInteriorSunrays", table = config }),
+	})
+
+	preferences:createOnOffButton({
 		label = "Add interior lights to windows?",
 		description = "When enabled, light will be added around windows when they are lit from the outside.\n\nDefault: On",
 		variable = mwse.mcm:createTableVariable({ id = "addInteriorLights", table = config }),
