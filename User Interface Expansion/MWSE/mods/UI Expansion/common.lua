@@ -206,6 +206,23 @@ function common.loadTranslation()
 	local dictionaries = dofile("UI Expansion.translations")
 	local dictionary = dictionaries[language]
 
+	-- Debug code to find out if we have any missing translations.
+	-- local missingTranslations = {}
+	-- local englishDictionary = dictionaries["eng"]
+	-- local keys = table.keys(englishDictionary, true)
+	-- local languages = table.keys(dictionaries, true)
+	-- table.removevalue(languages, "eng")
+	-- for _, language in ipairs(languages) do
+	-- 	for _, key in ipairs(keys) do
+	-- 		if (not dictionaries[language][key]) then
+	-- 			table.insert(missingTranslations, string.format("%s.%s", language, key))
+	-- 		end
+	-- 	end
+	-- end
+	-- if (#missingTranslations > 0) then
+	-- 	mwse.log("[UI Expansion] Missing translations found: %s", json.encode(missingTranslations))
+	-- end
+
 	-- If we aren't doing English, copy over missing entries.
 	if (language ~= "eng") then
 		table.copymissing(dictionary, dictionaries["eng"])
