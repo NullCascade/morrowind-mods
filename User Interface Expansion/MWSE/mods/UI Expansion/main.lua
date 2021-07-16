@@ -18,6 +18,7 @@ local defaultConfig = {
 	transferItemsByDefault = false,
 	displayWeekday = true,
 	displayRestTargetHour = true,
+	changeMapModeOnCellChange = true,
 	maxWait = 1,
 	keybindClose = { keyCode = tes3.scanCode.space, isShiftDown = false, isControlDown = false, isAltDown = false },
 	keybindTakeAll = { keyCode = tes3.scanCode.space, isShiftDown = false, isControlDown = true, isAltDown = false },
@@ -112,88 +113,54 @@ dofile("UI Expansion.mcm")
 local function onInitialized()
 	if (config.components.barter) then
 		dofile("UI Expansion.MenuBarter")
-	else
-		mwse.log("[UI Expansion] Skipping module: barter")
 	end
 	if (config.components.console) then
 		dofile("UI Expansion.MenuConsole")
-	else
-		mwse.log("[UI Expansion] Skipping module: console")
 	end
 	if (config.components.contents) then
 		dofile("UI Expansion.MenuContents")
-	else
-		mwse.log("[UI Expansion] Skipping module: contents")
 	end
 	if (config.components.dialog) then
 		dofile("UI Expansion.MenuDialog")
-	else
-		mwse.log("[UI Expansion] Skipping module: dialog")
 	end
 	if (config.components.inventory) then
 		dofile("UI Expansion.MenuInventory")
-	else
-		mwse.log("[UI Expansion] Skipping module: inventory")
 	end
 	if (config.components.inventorySelect) then
 		dofile("UI Expansion.MenuInventorySelect")
-	else
-		mwse.log("[UI Expansion] Skipping module: inventorySelect")
 	end
 	if (config.components.magic) then
 		dofile("UI Expansion.MenuMagic")
-	else
-		mwse.log("[UI Expansion] Skipping module: magic")
 	end
 	if (config.components.map) then
 		dofile("UI Expansion.MenuMap")
-	else
-		mwse.log("[UI Expansion] Skipping module: map")
 	end
 	if (config.components.mapPlugin) then
 		dofile("UI Expansion.MenuMapPlugin")
-	else
-		mwse.log("[UI Expansion] Skipping module: mapPlugin")
 	end
 	if (config.components.options) then
 		dofile("UI Expansion.MenuOptions")
-	else
-		mwse.log("[UI Expansion] Skipping module: options")
 	end
 	if (config.components.quantity) then
 		dofile("UI Expansion.MenuQuantity")
-	else
-		mwse.log("[UI Expansion] Skipping module: quantity")
 	end
 	if (config.components.rest) then
 		dofile("UI Expansion.MenuRest")
-	else
-		mwse.log("[UI Expansion] Skipping module: rest")
 	end
 	if (config.components.saveLoad) then
 		dofile("UI Expansion.MenuSaveLoad")
-	else
-		mwse.log("[UI Expansion] Skipping module: save/load")
 	end
 	if (config.components.serviceSpells) then
 		dofile("UI Expansion.MenuServiceSpells")
-	else
-		mwse.log("[UI Expansion] Skipping module: save/load")
 	end
 	if (config.components.stat) then
 		dofile("UI Expansion.MenuStat")
-	else
-		mwse.log("[UI Expansion] Skipping module: stat")
 	end
 	if (config.components.tooltip) then
 		dofile("UI Expansion.Tooltip")
-	else
-		mwse.log("[UI Expansion] Skipping module: tooltip")
 	end
 	if (config.components.training) then
 		dofile("UI Expansion.MenuServiceTraining")
-	else
-		mwse.log("[UI Expansion] Skipping module: training")
 	end
 end
 event.register("initialized", onInitialized)
