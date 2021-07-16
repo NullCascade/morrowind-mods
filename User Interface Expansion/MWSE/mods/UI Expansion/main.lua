@@ -90,7 +90,6 @@ config.keybindClose = convertKeyBind(config.keybindClose)
 config.keybindTakeAll = convertKeyBind(config.keybindTakeAll)
 config.keybindShowAdditionalInfo = convertKeyBind(config.keybindShowAdditionalInfo)
 config.keybindMapSwitch = convertKeyBind(config.keybindMapSwitch)
-mwse.log(json.encode(config, { indent = true }))
 
 -- Make config available to the common module.
 common.config = config

@@ -203,12 +203,12 @@ function common.loadTranslation()
 	local language = tes3.getLanguage()
 
 	-- Load the dictionaries, and start off with English.
-	local dictionaries = require("UI Expansion.translations")
-	local dictionary = dictionaries["eng"]
+	local dictionaries = dofile("UI Expansion.translations")
+	local dictionary = dictionaries[language]
 
-	-- If we aren't doing English, copy over translated entries.
-	if (language ~= "eng" and dictionaries[language]) then
-		table.copy(dictionaries[language], dictionary)
+	-- If we aren't doing English, copy over missing entries.
+	if (language ~= "eng") then
+		table.copymissing(dictionary, dictionaries["eng"])
 	end
 
 	-- Set the dictionary.

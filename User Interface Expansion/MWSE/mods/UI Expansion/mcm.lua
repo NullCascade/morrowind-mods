@@ -13,11 +13,12 @@ local function registerModConfig()
 	local creditsText = common.dictionary.modName .. " " .. common.dictionary.versionString
 		.. "\n\n" .. common.dictionary.configCredits
 		.. "\n  Programming: NullCascade, Hrnchamd, Petethegoat, Jiopsi, Remiros, Mort, Wix, abot, Necrolesian"
+		.. "\n  Translations: Daichix, Fesswood, Monsterzeichner, and Google Translate"
+		.. "\n  Concepts and Testing: Morrowind Modding Community Discord"
 		.. "\n  Colored Magic School Icons: R-Zero"
 		.. "\n  Inventory Filter Icons: Remiros"
 		.. "\n  Training Skill Icons: RedFurryDemon"
 		.. "\n  Value/Weight Ratio Icon: Necrolesian"
-		.. "\n  Concepts and Testing: Morrowind Modding Community Discord"
 	
 	-- Components section
 	do
