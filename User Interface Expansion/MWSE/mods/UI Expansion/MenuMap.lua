@@ -4,6 +4,10 @@ local GUIID_MenuMap = tes3ui.registerID("MenuMap")
 local GUIID_MenuMap_switch = tes3ui.registerID("MenuMap_switch")
 
 local function changeCell(e)
+	if (not common.config.changeMapModeOnCellChange) then
+		return
+	end
+
 	local MenuMap = tes3ui.findMenu(GUIID_MenuMap)
 	if (MenuMap == nil) then
 		return

@@ -59,6 +59,8 @@ return {
 		configTakeAllKeyDescription = "This key combination will take all items from a container. If the option to take filtered is on, it will only take shown items.",
 		configShowAdditionalInfoKey = "Keybind to show additional information.",
 		configShowAdditionalInfoKeyDescription = "This key combination will show optional additional information in tooltips.",
+		configChangeMapModeOnCellChange = "Change map mode on cell change?",
+		configChangeMapModeOnCellChangeDescription = "If enabled, changing to an exterior cell will cause the map to switch to world mode, and changing to an interior will cause the map to switch to local mode.",
 		configMapSwitchKey = "Keybind for map mode switching.",
 		configMapSwitchKeyDescription = "This key combination will switch from map between world and local modes.",
 		configTransferStackByDefault = "Transfer stack between inventories without holding alt?",

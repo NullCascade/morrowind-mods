@@ -140,7 +140,7 @@ local function registerModConfig()
 		pageFeatures:createTextField({
 			label = common.dictionary.configMaxWaitDays,
 			description = common.dictionary.configMaxWaitDaysDescription,
-			variable = mwse.mcm.createTableVariable({ id = "maxWait", table = common.config }),
+			variable = mwse.mcm.createTableVariable({ id = "maxWait", converter = tonumber, table = common.config }),
 			numbersOnly = true
 		})
 
@@ -166,6 +166,13 @@ local function registerModConfig()
 			description = common.dictionary.configShowAdditionalInfoKeyDescription,
 			allowCombinations = true,
 			variable = mwse.mcm.createTableVariable({ id = "keybindShowAdditionalInfo", table = common.config }),
+		})
+
+		-- Display target rest hour
+		pageFeatures:createOnOffButton({
+			label = common.dictionary.configChangeMapModeOnCellChange,
+			description = common.dictionary.configChangeMapModeOnCellChangeDescription,
+			variable = mwse.mcm.createTableVariable({ id = "changeMapModeOnCellChange", table = common.config }),
 		})
 
 		-- Key binding: map switch
