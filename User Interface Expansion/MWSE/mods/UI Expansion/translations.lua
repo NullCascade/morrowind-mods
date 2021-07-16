@@ -218,7 +218,6 @@ return {
 		takeFiltered = "Prendre ceci",
 		unknown = "inconnu",
 		updateRequired = "\"Extension de l'interface utilisateur\" requiert la derni�re version de MWSE 2.1 pour fonctionner. Lancez MWSE-Updater.exe. pour la mettre � jour.",
-		versionString = "v1.2.1",
 		weaponReach = "Port�e ",
 		weaponSpeed = "Vitesse ",
 		weekDays = { "Sundas", "Morndas", "Tirdas", "Middas", "Turdas", "Fredas", "Loredas" },
@@ -305,6 +304,7 @@ return {
 		weightClasses = {"Легкая Броня", "Среднеяя Броня", "Тяжелая Броня"},
 		yes = "Да",
 	},
+	-- German translation by Monsterzeichner.
 	["deu"] = {
 		allCharacters = "Alle Charaktere",
 		attributeLimit = "Dein %s beschr?nkt dich\nauf Level %d.",
@@ -382,7 +382,6 @@ return {
 		trainTo = "Trainiere bis Level %d\n",
 		unknown = "unbekannt",
 		updateRequired = "UI Extensions ben?tigt die j?ngste Version von MWSE. Bitte die MWSE-Updater.exe nutzen.",
-		versionString = "v1.2",
 		weaponReach = "Reichweite",
 		weaponSpeed = "Geschwindigkeit",
 		weekDays = { "Sundas", "Morndas", "Tirdas", "Middas", "Turdas", "Fredas", "Loredas" },
