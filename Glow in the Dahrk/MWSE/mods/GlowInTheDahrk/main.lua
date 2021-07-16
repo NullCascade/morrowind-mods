@@ -179,15 +179,15 @@ local function updateReferences(now)
 
 				-- Do we need to add a light to an interior?
 				if (not useExteriorLogic) then
+					local cachedLight = nil
 					local light = nil
 
 					-- Perform state switches.
 					if (previousIndex == 0 and index == 2) then
 						-- Add light.
 						if (addInteriorLights) then
-							local light = interop.getLightForMesh("meshes\\" .. reference.object.mesh)
-
-							light = reference:getOrCreateAttachedDynamicLight(light)
+							cachedLight = interop.getLightForMesh("meshes\\" .. reference.object.mesh)
+							light = reference:getOrCreateAttachedDynamicLight(cachedLight)
 						end
 
 						-- Setup sunrays
@@ -203,8 +203,9 @@ local function updateReferences(now)
 
 					-- Update lighting data.
 					light = light or reference.light
-					if (light and currentRegionSunColor) then
-						light.diffuse = currentRegionSunColor
+					if (light and light.RTTI and currentRegionSunColor) then
+						cachedLight = cachedLight or interop.getLightForMesh("meshes\\" .. reference.object.mesh)
+						light.diffuse = cachedLight.diffuse:lerp(currentRegionSunColor, 0.5)
 						light.dimmer = currentDimmer
 					end
 				end

@@ -90,11 +90,6 @@ function interop.getCurrentWeatherBrightness()
 	return weatherBrightness[currentWeather.index]
 end
 
-function interop.lerpColor(from, to, transition)
-	local it = (1.0 - transition)
-	return niColor.new(from.r * it + to.r * transition, from.g * it + to.g * transition, from.b * it + to.b * transition)
-end
-
 function interop.getDawnDuskHours()
 	-- Base data.
 	local worldController = tes3.worldController
@@ -153,13 +148,13 @@ function interop.calculateRegionSunColor(region)
 	elseif (gameHour >= sunsetMidPoint) then
 		-- Transition from sunset to night
 		local timeTransitionScalar = (gameHour - sunsetMidPoint) / (sunsetTotalDuration / 2)
-		currentWeatherColor = interop.lerpColor(weather.sunSunsetColor, weather.sunNightColor, timeTransitionScalar)
-		nextWeatherColor = nextWeather and  interop.lerpColor(nextWeather.sunSunsetColor, nextWeather.sunNightColor, timeTransitionScalar)
+		currentWeatherColor = weather.sunSunsetColor:lerp(weather.sunNightColor, timeTransitionScalar)
+		nextWeatherColor = nextWeather and  nextWeather.sunSunsetColor:lerp(nextWeather.sunNightColor, timeTransitionScalar)
 	elseif (gameHour >= sunsetStartTime) then
 		-- Transition from day to sunset
 		local timeTransitionScalar = (gameHour - sunsetStartTime) / (sunsetTotalDuration / 2)
-		currentWeatherColor = interop.lerpColor(weather.sunDayColor, weather.sunSunsetColor, timeTransitionScalar)
-		nextWeatherColor = nextWeather and  interop.lerpColor(nextWeather.sunDayColor, nextWeather.sunSunsetColor, timeTransitionScalar)
+		currentWeatherColor = weather.sunDayColor:lerp(weather.sunSunsetColor, timeTransitionScalar)
+		nextWeatherColor = nextWeather and  nextWeather.sunDayColor:lerp(nextWeather.sunSunsetColor, timeTransitionScalar)
 	elseif (gameHour >= sunriseStopTime) then
 		-- Day time
 		currentWeatherColor = weather.sunDayColor
@@ -167,18 +162,18 @@ function interop.calculateRegionSunColor(region)
 	elseif (gameHour >= sunriseMidPoint) then
 		-- Transition from sunrise to day
 		local timeTransitionScalar = (gameHour - sunriseMidPoint) / (sunriseTotalDuration / 2)
-		currentWeatherColor = interop.lerpColor(weather.sunSunriseColor, weather.sunDayColor, timeTransitionScalar)
-		nextWeatherColor = nextWeather and  interop.lerpColor(nextWeather.sunSunriseColor, nextWeather.sunDayColor, timeTransitionScalar)
+		currentWeatherColor = weather.sunSunriseColor:lerp(weather.sunDayColor, timeTransitionScalar)
+		nextWeatherColor = nextWeather and  nextWeather.sunSunriseColor:lerp(nextWeather.sunDayColor, timeTransitionScalar)
 	elseif (gameHour >= sunriseStartTime) then
 		-- Transition from night to sunrise
 		local timeTransitionScalar = (gameHour - sunriseStartTime) / (sunriseTotalDuration / 2)
-		currentWeatherColor = interop.lerpColor(weather.sunNightColor, weather.sunSunriseColor, timeTransitionScalar)
-		nextWeatherColor = nextWeather and  interop.lerpColor(nextWeather.sunNightColor, nextWeather.sunSunriseColor, timeTransitionScalar)
+		currentWeatherColor = weather.sunNightColor:lerp(weather.sunSunriseColor, timeTransitionScalar)
+		nextWeatherColor = nextWeather and  nextWeather.sunNightColor:lerp(nextWeather.sunSunriseColor, timeTransitionScalar)
 	end
 
 	-- Return the lerped value between current and next weather.
 	if (nextWeather) then
-		return interop.lerpColor(currentWeatherColor, nextWeatherColor, weatherTransitionScalar)
+		return currentWeatherColor:lerp(nextWeatherColor, weatherTransitionScalar)
 	else
 		return currentWeatherColor
 	end
