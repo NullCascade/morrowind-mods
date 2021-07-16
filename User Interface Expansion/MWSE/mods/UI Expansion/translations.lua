@@ -2,6 +2,11 @@ return {
 	["eng"] = {
 		configTabComponent = "Components",
 		configTabFeature = "Features",
+		configCategoryTooltips = "Tooltips",
+		configCategorySearchFilter = "Search & Filtering",
+		configCategoryMap = "Map Menu",
+		configCategoryRestWait = "Rest & Wait Menu",
+		configCategoryKeyConfig = "Key Configuration",
 		configComponentBarter = "Enable bartering menu component?",
 		configComponentBarterDescription = "",
 		configComponentConsole = "Enable console menu component?",
