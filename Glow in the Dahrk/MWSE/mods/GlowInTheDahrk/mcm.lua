@@ -10,26 +10,10 @@ local function registerModConfig()
 	preferences.sidebar:createInfo({
 		text = "Glow in the Dahrk\n\nModels and textures by Melchior Dahrk\nScripting by NullCascade.\n\nMouse over a feature for more info."
 	})
-	
-	preferences:createSlider({
-		label = "Dawn hour",
-		description = "Hour when objects transition to daytime appearance.\n\nDefault: 6",
-		min = 4,
-		max = 8,
-		variable = mwse.mcm:createTableVariable({ id = "dawnHour", table = config }),
-	})
-	
-	preferences:createSlider({
-		label = "Dusk hour",
-		description = "Hour when objects transition to nighttime appearance.\n\nDefault: 20",
-		min = 18,
-		max = 22,
-		variable = mwse.mcm:createTableVariable({ id = "duskHour", table = config }),
-	})
 
 	preferences:createOnOffButton({
 		label = "Stagger exterior transitions?",
-		description = "This can look unnatural on buildings with multiple windows. But with it turned off, all windows will light up/go dark at the same time.\n\nDefault: Off",
+		description = "This can look unnatural on small buildings with multiple windows. But with it turned off, all windows will light up/go dark at the same time.\n\nDefault: On",
 		variable = mwse.mcm:createTableVariable({ id = "useVariance", table = config }),
 	})
 

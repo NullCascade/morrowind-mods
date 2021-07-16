@@ -201,12 +201,44 @@ local function updateReferences(now)
 						reference:deleteDynamicLightAttachment(true)
 					end
 
-					-- Update lighting data.
-					light = light or reference.light
-					if (light and light.RTTI and currentRegionSunColor) then
-						cachedLight = cachedLight or interop.getLightForMesh("meshes\\" .. reference.object.mesh)
-						light.diffuse = cachedLight.diffuse:lerp(currentRegionSunColor, 0.5)
-						light.dimmer = currentDimmer
+					-- Update interior windows.
+					if (index == 2) then
+						-- Update lighting data.
+						local lerpedColor = currentRegionSunColor
+						light = light or reference.light
+						if (light and light.RTTI and currentRegionSunColor) then
+							cachedLight = cachedLight or interop.getLightForMesh("meshes\\" .. reference.object.mesh)
+							lerpedColor = cachedLight.diffuse:lerp(currentRegionSunColor, 0.5)
+	
+							light.diffuse = lerpedColor
+							light.dimmer = currentDimmer
+						end
+
+						-- Update rays.
+						local currentActiveNode = switchNode.children[index + 1]
+						if (addInteriorSunrays) then
+							local maybeRays = currentActiveNode.children[1]
+							if (maybeRays and maybeRays.name == "rays") then
+								for ray in table.traverse({ maybeRays.children[1] }) do
+									local materialProperty = ray:getProperty(0x2)
+									if (materialProperty) then
+										materialProperty.alpha = currentDimmer
+									end
+								end
+							end
+						end
+
+						-- Update window color.
+						for _, child in ipairs(currentActiveNode.children) do
+							if (child.name ~= "rays") then
+								local materialProperty = child:getProperty(0x2)
+								if (materialProperty) then
+									materialProperty.ambient = lerpedColor
+									materialProperty.diffuse = lerpedColor
+									materialProperty.emissive = lerpedColor * currentDimmer
+								end
+							end
+						end
 					end
 				end
 			end
