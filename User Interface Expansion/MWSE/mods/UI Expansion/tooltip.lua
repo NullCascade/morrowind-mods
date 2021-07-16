@@ -63,7 +63,7 @@ local function enchantConditionBlock(tooltip, object, itemData)
 		labelFormatted(tooltip, string.format("%s: %u", common.dictionary.enchantCapacity, object.enchantCapacity / 10), GUI_ID_TooltipEnchantCapacity)
 	end
 
-	if object.maxCondition ~= nil and object.objectType ~= tes3.objectType.ammunition then
+	if object.hasDurability then
 		-- Destroy the old condition block, and replace it.
 		tryDestroyID(tooltip, "HelpMenu_qualityCondition")
 
