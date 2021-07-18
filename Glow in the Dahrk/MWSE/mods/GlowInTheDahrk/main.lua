@@ -35,7 +35,7 @@ end
 event.register("referenceDeactivated", onReferenceDeactivated)
 
 local function updateReferenceQueue()
-	referenceUpdateQueue = {}
+	table.clear(referenceUpdateQueue)
 	for reference, supported in pairs(trackedReferences) do
 		if (supported) then
 			table.insert(referenceUpdateQueue, reference)
@@ -220,7 +220,7 @@ local function updateReferences(now)
 							local maybeRays = currentActiveNode.children[1]
 							if (maybeRays and maybeRays.name == "rays") then
 								for ray in table.traverse({ maybeRays.children[1] }) do
-									local materialProperty = ray:getProperty(0x2)
+									local materialProperty = ray.materialProperty
 									if (materialProperty) then
 										materialProperty.alpha = currentDimmer
 									end
@@ -231,7 +231,7 @@ local function updateReferences(now)
 						-- Update window color.
 						for _, child in ipairs(currentActiveNode.children) do
 							if (child.name ~= "rays") then
-								local materialProperty = child:getProperty(0x2)
+								local materialProperty = child.materialProperty
 								if (materialProperty) then
 									materialProperty.ambient = lerpedColor
 									materialProperty.diffuse = lerpedColor
@@ -310,47 +310,15 @@ dofile("GlowInTheDahrk.mcm")
 -- Expose some useful info for debugging.
 --
 
-local debug = { interop = interop, config = config }
-debug.trackedReferences = trackedReferences
-debug.referenceUpdateQueue = referenceUpdateQueue
-debug.maxUpdatesPerFrame = maxUpdatesPerFrame
+local debug = require("GlowInTheDahrk.debug")
+
+debug.cellRegionCache = cellRegionCache
 debug.getRegion = getRegion
+debug.referenceUpdateQueue = referenceUpdateQueue
+debug.trackedReferences = trackedReferences
 
 local function addDebugCommands(e)
 	e.sandbox.GlowInTheDahrk = debug
 	e.sandbox.GitD = debug
 end
 event.register("UIEXP:sandboxConsole", addDebugCommands)
-
-event.register("weatherChangedImmediate", function(e) mwse.log("Weather changed to %s.", table.find(tes3.weather, e.to.index)) end)
-event.register("weatherTransitionStarted", function(e) mwse.log("Weather transition from %s to %s started.", table.find(tes3.weather, e.from.index), table.find(tes3.weather, e.to.index)) end)
-event.register("weatherTransitionFinished", function(e) mwse.log("Weather transition to %s finished.", table.find(tes3.weather, e.to.index)) end)
-
-function debug.printColorTimings()
-	local weatherController = tes3.worldController.weatherController
-	local fields = { "skyPostSunriseTime", "skyPostSunsetTime", "skyPreSunriseTime", "skyPreSunsetTime", "sunriseDuration", "sunriseHour", "sunsetDuration", "sunsetHour" }
-	mwse.log("[Glow in the Dahrk] tes3weatherController timings:")
-	for _, field in ipairs(fields) do
-		mwse.log("  %s = %.2f", field, weatherController[field])
-	end
-
-	-- Figure out when our important sunrise times are.
-	local sunriseStartTime = weatherController.sunriseHour - weatherController.skyPreSunriseTime
-	local sunriseTotalDuration = weatherController.skyPostSunriseTime + weatherController.sunriseDuration + weatherController.skyPreSunriseTime
-	local sunriseMidPoint = sunriseStartTime + (sunriseTotalDuration / 2)
-	local sunriseStopTime = sunriseStartTime + sunriseTotalDuration
-	mwse.log("  sunriseStartTime = %.2f", sunriseStartTime)
-	mwse.log("  sunriseTotalDuration = %.2f", sunriseTotalDuration)
-	mwse.log("  sunriseMidPoint = %.2f", sunriseMidPoint)
-	mwse.log("  sunriseStopTime = %.2f", sunriseStopTime)
-
-	-- Figure out when our important sunset times are.
-	local sunsetStartTime = weatherController.sunsetHour - weatherController.skyPreSunsetTime
-	local sunsetTotalDuration = weatherController.skyPostSunsetTime + weatherController.sunsetDuration + weatherController.skyPreSunsetTime
-	local sunsetMidPoint = sunsetStartTime + (sunsetTotalDuration / 2)
-	local sunsetStopTime = sunsetStartTime + sunsetTotalDuration
-	mwse.log("  sunsetStartTime = %.2f", sunsetStartTime)
-	mwse.log("  sunsetTotalDuration = %.2f", sunsetTotalDuration)
-	mwse.log("  sunsetMidPoint = %.2f", sunsetMidPoint)
-	mwse.log("  sunsetStopTime = %.2f", sunsetStopTime)
-end
