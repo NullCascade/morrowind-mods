@@ -10,7 +10,7 @@ local function menuQuantity(e)
 		element = scrollBar,
 		onSubmit = function()
 			submitButton:triggerEvent("mouseClick")
-		end
+		end,
 	})
 
 	-- Register event so that when mouseClick happens on ok button an update event is
@@ -23,4 +23,4 @@ local function menuQuantity(e)
 		end)
 	end
 end
-event.register("uiActivated", menuQuantity, { filter = "MenuQuantity"})
+event.register("uiActivated", menuQuantity, { filter = "MenuQuantity" })

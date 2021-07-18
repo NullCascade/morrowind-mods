@@ -8,7 +8,8 @@ local function debugWeatherChangedImmediate(e)
 end
 
 local function debugWeatherTransitionStarted(e)
-	mwse.log("Weather transition from %s to %s started.", table.find(tes3.weather, e.from.index), table.find(tes3.weather, e.to.index))
+	mwse.log("Weather transition from %s to %s started.", table.find(tes3.weather, e.from.index),
+	         table.find(tes3.weather, e.to.index))
 end
 
 local function debugWeatherTransitionFinished(e)
@@ -29,7 +30,16 @@ end
 
 function debug.printColorTimings()
 	local weatherController = tes3.worldController.weatherController
-	local fields = { "skyPostSunriseTime", "skyPostSunsetTime", "skyPreSunriseTime", "skyPreSunsetTime", "sunriseDuration", "sunriseHour", "sunsetDuration", "sunsetHour" }
+	local fields = {
+		"skyPostSunriseTime",
+		"skyPostSunsetTime",
+		"skyPreSunriseTime",
+		"skyPreSunsetTime",
+		"sunriseDuration",
+		"sunriseHour",
+		"sunsetDuration",
+		"sunsetHour",
+	}
 	mwse.log("[Glow in the Dahrk] tes3weatherController timings:")
 	for _, field in ipairs(fields) do
 		mwse.log("  %s = %.2f", field, weatherController[field])
@@ -37,7 +47,8 @@ function debug.printColorTimings()
 
 	-- Figure out when our important sunrise times are.
 	local sunriseStartTime = weatherController.sunriseHour - weatherController.skyPreSunriseTime
-	local sunriseTotalDuration = weatherController.skyPostSunriseTime + weatherController.sunriseDuration + weatherController.skyPreSunriseTime
+	local sunriseTotalDuration = weatherController.skyPostSunriseTime + weatherController.sunriseDuration +
+	                             weatherController.skyPreSunriseTime
 	local sunriseMidPoint = sunriseStartTime + (sunriseTotalDuration / 2)
 	local sunriseStopTime = sunriseStartTime + sunriseTotalDuration
 	mwse.log("  sunriseStartTime = %.2f", sunriseStartTime)
@@ -47,7 +58,8 @@ function debug.printColorTimings()
 
 	-- Figure out when our important sunset times are.
 	local sunsetStartTime = weatherController.sunsetHour - weatherController.skyPreSunsetTime
-	local sunsetTotalDuration = weatherController.skyPostSunsetTime + weatherController.sunsetDuration + weatherController.skyPreSunsetTime
+	local sunsetTotalDuration = weatherController.skyPostSunsetTime + weatherController.sunsetDuration +
+	                            weatherController.skyPreSunsetTime
 	local sunsetMidPoint = sunsetStartTime + (sunsetTotalDuration / 2)
 	local sunsetStopTime = sunsetStartTime + sunsetTotalDuration
 	mwse.log("  sunsetStartTime = %.2f", sunsetStartTime)

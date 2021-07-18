@@ -1,5 +1,4 @@
 ---local common = require("UI Expansion.common")
-
 -- Hook map changes.
 local extern = include("uiextension")
 if (extern == nil) then
@@ -26,7 +25,7 @@ local function onMapMenuActivated(e)
 	zoomBar.absolutePosAlignY = 0.5
 	zoomBar.width = 300
 	zoomBar:register("PartScrollBar_changed", function()
-		currentZoom = zoomBar:getPropertyInt("PartScrollBar_current")/100 + 1.0
+		currentZoom = zoomBar:getPropertyInt("PartScrollBar_current") / 100 + 1.0
 		extern.setMapZoom(currentZoom)
 	end)
 	extern.setMapZoom(currentZoom)
@@ -55,7 +54,7 @@ local function onMouseWheel(e)
 		return
 	end
 
-	zoomBar.widget.current = math.clamp(zoomBar.widget.current + 10 * e.delta/math.abs(e.delta), 0, 300)
+	zoomBar.widget.current = math.clamp(zoomBar.widget.current + 10 * e.delta / math.abs(e.delta), 0, 300)
 	zoomBar:triggerEvent("PartScrollBar_changed")
 	zoomBar:getTopLevelParent():updateLayout()
 	zoomBar:updateLayout()

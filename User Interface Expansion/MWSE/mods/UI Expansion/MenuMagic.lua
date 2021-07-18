@@ -1,7 +1,5 @@
-
 local GUI_ID_MagicMenu_spells_list = tes3ui.registerID("MagicMenu_spells_list")
 local GUI_ID_MenuMagic = tes3ui.registerID("MenuMagic")
-
 
 local common = require("UI Expansion.common")
 
@@ -22,7 +20,10 @@ local function searchSubList(titleElement, listElement, isSpellFilter)
 	local matchCount = 0
 	for i, nameElement in ipairs(columnElements[1]) do
 		local filterObject = nameElement:getPropertyObject(isSpellFilter and "MagicMenu_Spell" or "MagicMenu_object")
-		local filter = common.allFilters.magic:triggerFilter({ text = filterObject.name, effects = (isSpellFilter and filterObject.effects or filterObject.enchantment.effects) })
+		local filter = common.allFilters.magic:triggerFilter({
+			text = filterObject.name,
+			effects = (isSpellFilter and filterObject.effects or filterObject.enchantment.effects),
+		})
 
 		if (filter) then
 			matchCount = matchCount + 1
@@ -77,7 +78,8 @@ local function searchSpellsList()
 
 	-- Figure out dividers.
 	elements[3].visible = (hasMatchingPowers and hasMatchingSpells)
-	elements[6].visible = (hasMatchingSpells and hasMatchingItems or (not hasMatchingSpells and hasMatchingPowers and hasMatchingItems))
+	elements[6].visible = (hasMatchingSpells and hasMatchingItems or
+	                      (not hasMatchingSpells and hasMatchingPowers and hasMatchingItems))
 
 	if (common.allFilters.magic.searchText and common.config.selectSpellsOnSearch and firstSearchResult) then
 		firstSearchResult:triggerEvent("mouseClick")
@@ -110,7 +112,9 @@ end
 
 magicFilters:addFilter({
 	key = "alteration",
-	callback = function(e) return getEffectsContainsSchool(e.effects, tes3.magicSchool.alteration) end,
+	callback = function(e)
+		return getEffectsContainsSchool(e.effects, tes3.magicSchool.alteration)
+	end,
 	tooltip = {
 		text = common.dictionary.filterAlterationHelpDescription,
 		helpText = common.dictionary.filterAlterationHelpText,
@@ -120,7 +124,9 @@ magicFilters:addFilter({
 
 magicFilters:addFilter({
 	key = "conjuration",
-	callback = function(e) return getEffectsContainsSchool(e.effects, tes3.magicSchool.conjuration) end,
+	callback = function(e)
+		return getEffectsContainsSchool(e.effects, tes3.magicSchool.conjuration)
+	end,
 	tooltip = {
 		text = common.dictionary.filterConjurationHelpDescription,
 		helpText = common.dictionary.filterConjurationHelpText,
@@ -130,7 +136,9 @@ magicFilters:addFilter({
 
 magicFilters:addFilter({
 	key = "destruction",
-	callback = function(e) return getEffectsContainsSchool(e.effects, tes3.magicSchool.destruction) end,
+	callback = function(e)
+		return getEffectsContainsSchool(e.effects, tes3.magicSchool.destruction)
+	end,
 	tooltip = {
 		text = common.dictionary.filterDestructionHelpDescription,
 		helpText = common.dictionary.filterDestructionHelpText,
@@ -140,17 +148,19 @@ magicFilters:addFilter({
 
 magicFilters:addFilter({
 	key = "illusion",
-	callback = function(e) return getEffectsContainsSchool(e.effects, tes3.magicSchool.illusion) end,
-	tooltip = {
-		text = common.dictionary.filterIllusionHelpDescription,
-		helpText = common.dictionary.filterIllusionHelpText,
-	},
+	callback = function(e)
+		return getEffectsContainsSchool(e.effects, tes3.magicSchool.illusion)
+	end,
+	tooltip = { text = common.dictionary.filterIllusionHelpDescription,
+             helpText = common.dictionary.filterIllusionHelpText },
 	icon = "icons/ui_exp/magic_illusion.tga",
 })
 
 magicFilters:addFilter({
 	key = "mysticism",
-	callback = function(e) return getEffectsContainsSchool(e.effects, tes3.magicSchool.mysticism) end,
+	callback = function(e)
+		return getEffectsContainsSchool(e.effects, tes3.magicSchool.mysticism)
+	end,
 	tooltip = {
 		text = common.dictionary.filterMysticismHelpDescription,
 		helpText = common.dictionary.filterMysticismHelpText,
@@ -160,7 +170,9 @@ magicFilters:addFilter({
 
 magicFilters:addFilter({
 	key = "restoration",
-	callback = function(e) return getEffectsContainsSchool(e.effects, tes3.magicSchool.restoration) end,
+	callback = function(e)
+		return getEffectsContainsSchool(e.effects, tes3.magicSchool.restoration)
+	end,
 	tooltip = {
 		text = common.dictionary.filterRestorationHelpDescription,
 		helpText = common.dictionary.filterRestorationHelpText,
@@ -173,7 +185,8 @@ local function addSpellIcons(spellsList, guiIdPrefix, namesBlockId, isSpell)
 
 	-- Create icons column.
 	local columnsBlock = namesBlock.parent
-	local iconsColumn = columnsBlock:createBlock({ id = string.format("UIEXP:MagicMenu:SpellsList:%s:Icons", guiIdPrefix) })
+	local iconsColumn =
+	columnsBlock:createBlock({ id = string.format("UIEXP:MagicMenu:SpellsList:%s:Icons", guiIdPrefix) })
 	iconsColumn.flowDirection = "top_to_bottom"
 	iconsColumn.autoWidth = true
 	iconsColumn.autoHeight = true
@@ -185,11 +198,15 @@ local function addSpellIcons(spellsList, guiIdPrefix, namesBlockId, isSpell)
 	if (isSpell) then
 		for _, nameElement in ipairs(namesBlock.children) do
 			local spell = nameElement:getPropertyObject("MagicMenu_Spell")
-			local icon = iconsColumn:createImage({ path = string.format("icons\\%s", spell.effects[1].object.icon)  })
+			local icon = iconsColumn:createImage({ path = string.format("icons\\%s", spell.effects[1].object.icon) })
 			icon.borderTop = 2
 			icon:setPropertyObject("MagicMenu_Spell", spell)
-			icon:register("mouseClick", function() nameElement:triggerEvent("mouseClick") end)
-			icon:register("help", function() nameElement:triggerEvent("help") end)
+			icon:register("mouseClick", function()
+				nameElement:triggerEvent("mouseClick")
+			end)
+			icon:register("help", function()
+				nameElement:triggerEvent("help")
+			end)
 			icon.visible = nameElement.visible
 		end
 	else
@@ -198,8 +215,12 @@ local function addSpellIcons(spellsList, guiIdPrefix, namesBlockId, isSpell)
 			local icon = iconsColumn:createImage({ path = string.format("icons\\%s", object.enchantment.effects[1].object.icon)  })
 			icon.borderTop = 2
 			icon:setPropertyObject("MagicMenu_object", object)
-			icon:register("mouseClick", function() nameElement:triggerEvent("mouseClick") end)
-			icon:register("help", function() nameElement:triggerEvent("help") end)
+			icon:register("mouseClick", function()
+				nameElement:triggerEvent("mouseClick")
+			end)
+			icon:register("help", function()
+				nameElement:triggerEvent("help")
+			end)
 			icon.visible = nameElement.visible
 		end
 	end
@@ -285,7 +306,7 @@ local function onMenuMagicActivated(e)
 	-- Listen for future pre-updates to refresh spell icons.
 	e.element:registerAfter("preUpdate", updateMagicMenu)
 end
-event.register("uiActivated", onMenuMagicActivated, { filter = "MenuMagic" } )
+event.register("uiActivated", onMenuMagicActivated, { filter = "MenuMagic" })
 
 local function onEnterMenuMode()
 	if (common.config.alwaysClearFiltersOnOpen) then

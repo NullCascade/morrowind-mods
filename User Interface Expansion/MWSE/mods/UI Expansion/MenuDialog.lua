@@ -1,4 +1,3 @@
-
 local common = require("UI Expansion.common")
 
 local GUI_ID_MenuDialog = tes3ui.registerID("MenuDialog")
@@ -150,7 +149,7 @@ local function update()
 					local oldText = node.text
 					node:register("mouseClick", updateTopicsList)
 					answerIndex = answerIndex + 1
-					if not string.match(oldText,"^%d+") then
+					if not string.match(oldText, "^%d+") then
 						node.text = string.format("%d. %s", answerIndex, oldText)
 						answers[answerIndex] = node
 					end

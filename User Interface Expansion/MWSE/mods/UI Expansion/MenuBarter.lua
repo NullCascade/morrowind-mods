@@ -1,4 +1,3 @@
-
 local GUI_ID_MenuBarter_bucket = tes3ui.registerID("MenuBarter_bucket")
 
 local common = require("UI Expansion.common")
@@ -23,7 +22,7 @@ local function onFilterBarterMenu(e)
 	e.text = e.item.name
 	e.filter = barterFilters:triggerFilter(e)
 end
-event.register("filterBarterMenu", onFilterBarterMenu )
+event.register("filterBarterMenu", onFilterBarterMenu)
 
 local function onMenuBarterActivated(e)
 	if (not e.newlyCreated) then
@@ -48,4 +47,4 @@ local function onMenuBarterActivated(e)
 	-- Focus the filter search bar.
 	barterFilters:focusSearchBar()
 end
-event.register("uiActivated", onMenuBarterActivated, { filter = "MenuBarter" } )
+event.register("uiActivated", onMenuBarterActivated, { filter = "MenuBarter" })

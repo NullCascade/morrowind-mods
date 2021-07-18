@@ -1,4 +1,3 @@
-
 local function onUIActivated(e)
 	-- We only care if this is the node time it was activated.
 	if (not e.newlyCreated) then

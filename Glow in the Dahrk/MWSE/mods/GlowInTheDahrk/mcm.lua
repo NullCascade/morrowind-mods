@@ -1,4 +1,3 @@
-
 local config = require("GlowInTheDahrk.config")
 
 -- Setup MCM.
@@ -8,7 +7,7 @@ local function registerModConfig()
 
 	local preferences = template:createSideBarPage({ label = "Preferences" })
 	preferences.sidebar:createInfo({
-		text = "Glow in the Dahrk\n\nModels and textures by Melchior Dahrk\nScripting by NullCascade.\n\nMouse over a feature for more info."
+		text = "Glow in the Dahrk\n\nModels and textures by Melchior Dahrk\nScripting by NullCascade.\n\nMouse over a feature for more info.",
 	})
 
 	preferences:createOnOffButton({
@@ -38,7 +37,7 @@ local function registerModConfig()
 		description = "When enabled, light will be added around windows when they are lit from the outside.\n\nDefault: On",
 		variable = mwse.mcm:createTableVariable({ id = "addInteriorLights", table = config }),
 	})
-	
+
 	-- Finish up.
 	template:register()
 end

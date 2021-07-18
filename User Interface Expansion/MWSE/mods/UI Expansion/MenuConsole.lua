@@ -1,4 +1,3 @@
-
 local GUI_ID_MenuConsole = tes3ui.registerID("MenuConsole")
 local GUI_ID_MenuConsole_text_input = tes3ui.registerID("MenuConsole_text_input")
 local GUI_ID_MenuConsole_scroll_pane = tes3ui.registerID("MenuConsole_scroll_pane")
@@ -198,4 +197,4 @@ local function onMenuConsoleActivated(e)
 end
 
 sandboxInit()
-event.register("uiActivated", onMenuConsoleActivated, { filter = "MenuConsole" } )
+event.register("uiActivated", onMenuConsoleActivated, { filter = "MenuConsole" })

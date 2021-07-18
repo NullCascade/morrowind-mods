@@ -1,4 +1,3 @@
-
 local common = require("UI Expansion.common")
 
 common.version = 1.5
@@ -22,18 +21,16 @@ local defaultConfig = {
 	maxWait = 1,
 	keybindClose = { keyCode = tes3.scanCode.space, isShiftDown = false, isControlDown = false, isAltDown = false },
 	keybindTakeAll = { keyCode = tes3.scanCode.space, isShiftDown = false, isControlDown = true, isAltDown = false },
-	keybindShowAdditionalInfo = { keyCode = tes3.scanCode.leftAlt, isShiftDown = false, isControlDown = false, isAltDown = true },
+	keybindShowAdditionalInfo = {
+		keyCode = tes3.scanCode.leftAlt,
+		isShiftDown = false,
+		isControlDown = false,
+		isAltDown = true,
+	},
 	keybindMapSwitch = { keyCode = tes3.scanCode.rightAlt, isShiftDown = false, isControlDown = false, isAltDown = true }, -- don't use a standard key to avoid conflicts with filters
 	dialogueTopicSeenColor = "journal_finished_quest_color",
 	dialogueTopicUniqueColor = "link_color",
-	mapConfig = {
-		autoExpand = true,
-		cellResolution = 9,
-		minX = -142,
-		maxX = 70,
-		minY = -59,
-		maxY = 29,
-	},
+	mapConfig = { autoExpand = true, cellResolution = 9, minX = -142, maxX = 70, minY = -59, maxY = 29 },
 	components = {
 		barter = true,
 		console = true,
@@ -62,7 +59,12 @@ local function convertKeyBind(keyArray)
 	-- Don't convert already converted bindings.
 	if (keyArray.keyCode) then
 		-- But do make sure no botched config merges make it through.
-		return { keyCode = keyArray.keyCode, isShiftDown = keyArray.isShiftDown, isControlDown = keyArray.isControlDown, isAltDown = keyArray.isAltDown }
+		return {
+			keyCode = keyArray.keyCode,
+			isShiftDown = keyArray.isShiftDown,
+			isControlDown = keyArray.isControlDown,
+			isAltDown = keyArray.isAltDown,
+		}
 	end
 
 	-- Actually convert.

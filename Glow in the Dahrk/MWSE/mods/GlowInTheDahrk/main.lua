@@ -1,4 +1,3 @@
-
 local config = require("GlowInTheDahrk.config")
 local interop = require("GlowInTheDahrk.interop")
 
@@ -66,7 +65,7 @@ local function getRegion()
 	if (cacheHit) then
 		return cacheHit
 	end
-	
+
 	-- Look to see if anywhere exits to a place with a region.
 	for ref in playerCell:iterateReferences(tes3.objectType.door) do
 		local destination = ref.destination
@@ -95,7 +94,6 @@ local function getRegion()
 		return lastExterior.region
 	end
 end
-
 
 --
 -- Our actual reference updating code
@@ -210,7 +208,7 @@ local function updateReferences(now)
 						if (light and currentRegionSunColor) then
 							cachedLight = cachedLight or interop.getLightForMesh("meshes\\" .. reference.object.mesh)
 							lerpedColor = cachedLight.diffuse:lerp(currentRegionSunColor, 0.5)
-	
+
 							light.diffuse = lerpedColor
 							light.dimmer = currentDimmer
 						end
@@ -250,7 +248,6 @@ local function updateReferences(now)
 	end
 end
 
-
 --
 -- Custom light management
 --
@@ -283,7 +280,6 @@ local function onMeshLoaded(e)
 end
 event.register("meshLoaded", onMeshLoaded)
 
-
 --
 -- Keep track of when we need to update references.
 --
@@ -297,7 +293,6 @@ local function onSimulate(e)
 end
 event.register("simulate", onSimulate)
 
-
 --
 -- Create our Mod Config Menu
 -- 
@@ -305,7 +300,6 @@ event.register("simulate", onSimulate)
 --
 
 dofile("GlowInTheDahrk.mcm")
-
 
 --
 -- Expose some useful info for debugging.

@@ -59,7 +59,7 @@ local function menuRestWait(e)
 		-- +3 offset, since the 16th of Last Seed (starting day) should be Thurdas.
 		local day = common.dictionary.weekDays[(tes3.worldController.daysPassed.value + 3) % 7 + 1]
 		local userFriendlyTimestampElement = e.element.children[2].children[1]
-		userFriendlyTimestampElement.text =  day .. ", " .. userFriendlyTimestampElement.text
+		userFriendlyTimestampElement.text = day .. ", " .. userFriendlyTimestampElement.text
 	end
 
 	-- Show rest target hour.
@@ -68,4 +68,4 @@ local function menuRestWait(e)
 		updateDesiredHourText()
 	end
 end
-event.register("uiActivated", menuRestWait, { filter = "MenuRestWait"})
+event.register("uiActivated", menuRestWait, { filter = "MenuRestWait" })

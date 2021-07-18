@@ -40,7 +40,7 @@ local function onKeyInput()
 		if (MenuMap == nil) then
 			return
 		end
-		
+
 		local MenuMap_switch = MenuMap:findChild(GUIID_MenuMap_switch)
 		if MenuMap_switch then
 			MenuMap_switch:triggerEvent("mouseClick")

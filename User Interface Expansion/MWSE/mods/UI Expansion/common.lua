@@ -303,7 +303,7 @@ function common.createSearchBar(params)
 	icon.absolutePosAlignY = 0.5
 	icon.borderRight = 4
 	icon:register("mouseClick", function(e)
-		input.text = '' --"Search by name..."
+		input.text = '' -- "Search by name..."
 		input:forwardEvent(e)
 		input.color = params.textColor or tes3ui.getPalette("normal_color")
 		params.onUpdate(e)
@@ -522,13 +522,20 @@ function filter_functions:onTooltip(filter)
 end
 
 function filter_functions:createFilterIcon(filter)
-	local icon = self.iconFiltersBlock:createImage({ id = string.format("UIEXP:FilterIcon:%s", filter.key), path = filter.icon })
+	local icon = self.iconFiltersBlock:createImage({
+		id = string.format("UIEXP:FilterIcon:%s", filter.key),
+		path = filter.icon,
+	})
 	icon.imageScaleX = 0.6
 	icon.imageScaleY = 0.6
 	icon.borderLeft = 2
 	icon.visible = not filter.hidden
-	icon:register("mouseClick", function() self:onClickFilter(filter) end)
-	icon:register("help", function() self:onTooltip(filter) end)
+	icon:register("mouseClick", function()
+		self:onClickFilter(filter)
+	end)
+	icon:register("help", function()
+		self:onTooltip(filter)
+	end)
 	filter.iconElement = icon
 	return icon
 end
@@ -542,8 +549,12 @@ function filter_functions:createFilterButton(filter)
 	button.borderBottom = 0
 	button.borderAllSides = 0
 	button.visible = not filter.hidden
-	button:register("mouseClick", function() self:onClickFilter(filter) end)
-	button:register("help", function() self:onTooltip(filter) end)
+	button:register("mouseClick", function()
+		self:onClickFilter(filter)
+	end)
+	button:register("help", function()
+		self:onTooltip(filter)
+	end)
 	filter.buttonElement = button
 	return button
 end
@@ -563,7 +574,7 @@ function filter_functions:createElements(parent)
 		useSearch = self.useSearch,
 		onUpdate = function(e)
 			self:setFilterText(string.lower(e.source.text))
-		end
+		end,
 	}
 	if (self.onSearchTextPreUpdate) then
 		searchBarParams.onPreUpdate = self.onSearchTextPreUpdate
@@ -665,10 +676,7 @@ function common.createStandardInventoryFilters(filterInterface)
 			local objectType = e.item.objectType
 			return (objectType == tes3.objectType.weapon or objectType == tes3.objectType.ammunition)
 		end,
-		tooltip = {
-			text = common.dictionary.filterWeaponsHelpDescription,
-			helpText = common.dictionary.filterWeaponsHelpText,
-		},
+		tooltip = { text = common.dictionary.filterWeaponsHelpDescription, helpText = common.dictionary.filterWeaponsHelpText },
 		icon = "icons/ui_exp/inventory_weapons.tga",
 		buttonText = common.dictionary.filterWeaponsButtonName,
 	})
@@ -679,10 +687,7 @@ function common.createStandardInventoryFilters(filterInterface)
 			local objectType = e.item.objectType
 			return (objectType == tes3.objectType.armor or objectType == tes3.objectType.clothing)
 		end,
-		tooltip = {
-			text = common.dictionary.filterApparelHelpDescription,
-			helpText = common.dictionary.filterApparelHelpText,
-		},
+		tooltip = { text = common.dictionary.filterApparelHelpDescription, helpText = common.dictionary.filterApparelHelpText },
 		icon = "icons/ui_exp/inventory_apparel.tga",
 		buttonText = common.dictionary.filterApparelButtonName,
 	})
@@ -730,10 +735,7 @@ function common.createStandardInventoryFilters(filterInterface)
 				(e.item.isSoulGem and e.itemData and e.itemData.soul)
 			)
 		end,
-		tooltip = {
-			text = common.dictionary.filterToolsHelpDescription,
-			helpText = common.dictionary.filterToolsHelpText,
-		},
+		tooltip = { text = common.dictionary.filterToolsHelpDescription, helpText = common.dictionary.filterToolsHelpText },
 		icon = "icons/ui_exp/inventory_tools.tga",
 		buttonText = common.dictionary.filterToolsButtonName,
 	})
@@ -749,10 +751,7 @@ function common.createStandardInventoryFilters(filterInterface)
 				(e.item.objectType == tes3.objectType.miscItem and not (e.item.isSoulGem and e.itemData and e.itemData.soul))
 			)
 		end,
-		tooltip = {
-			text = common.dictionary.filterOtherHelpDescription,
-			helpText = common.dictionary.filterOtherHelpText,
-		},
+		tooltip = { text = common.dictionary.filterOtherHelpDescription, helpText = common.dictionary.filterOtherHelpText },
 		icon = "icons/ui_exp/inventory_other.tga",
 		buttonText = common.dictionary.filterOtherButtonName,
 	})

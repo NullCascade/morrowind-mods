@@ -55,7 +55,7 @@ end
 
 local function TrySave(saveName, saveFilename)
 	if (CanSave(saveName)) then
-		if(SaveExists(saveName, saveFilename)) then
+		if (SaveExists(saveName, saveFilename)) then
 			tes3.messageBox({
 				message = tes3.findGMST(tes3.gmst.sMessage4).value,
 				buttons = { tes3.findGMST(tes3.gmst.sYes).value, tes3.findGMST(tes3.gmst.sNo).value },
@@ -63,7 +63,7 @@ local function TrySave(saveName, saveFilename)
 					if (e.button == 0) then
 						Save(saveName, saveFilename)
 					end
-				end
+				end,
 			})
 		else
 			Save(saveName)
@@ -78,7 +78,7 @@ local function filterGameFiles(scrollElement, characterName)
 	local foundMatchingSave = false
 	for i = 1, #scrollKids do
 		local save = scrollKids[i]:getPropertyObject("MenuLoad_file", "tes3gameFile") or
-		scrollKids[i]:getPropertyObject("MenuSave_file", "tes3gameFile")
+		             scrollKids[i]:getPropertyObject("MenuSave_file", "tes3gameFile")
 
 		-- Save game button will not have a game save property.
 		if (save) then
@@ -86,8 +86,7 @@ local function filterGameFiles(scrollElement, characterName)
 				scrollKids[i].visible = false
 			else
 				scrollKids[i].visible = true
-				scrollKids[i].text = string.format("%s, Day %u: %s",
-				save.playerName, save.daysPassed, save.description)
+				scrollKids[i].text = string.format("%s, Day %u: %s", save.playerName, save.daysPassed, save.description)
 				foundMatchingSave = true
 			end
 		end
@@ -159,7 +158,7 @@ local function SetSaveGameEventHandlers(scrollElement, characterSelectElement)
 
 	for i = 1, #scrollKids do
 		local save = scrollKids[i]:getPropertyObject("MenuLoad_file", "tes3gameFile") or
-		scrollKids[i]:getPropertyObject("MenuSave_file", "tes3gameFile")
+		             scrollKids[i]:getPropertyObject("MenuSave_file", "tes3gameFile")
 
 		-- Save game button will not have a game save property.
 		if (save) then
@@ -179,7 +178,7 @@ local function SetSaveGameEventHandlers(scrollElement, characterSelectElement)
 									MakeCharacterList(scrollElement, characterSelectElement)
 								end
 							end
-						end
+						end,
 					})
 				-- Reimplement saving/loading instead of forwarding the event.
 				elseif (characterSelectElement) then
@@ -197,7 +196,7 @@ local function SetSaveGameEventHandlers(scrollElement, characterSelectElement)
 				local tip = tes3ui.findHelpLayerMenu("HelpMenu")
 				if (tip) then
 					local m = scrollElement:getTopLevelMenu()
-					
+
 					-- Set image aspect to match screen aspect.
 					local image = tip:findChild("image")
 					image.width = 180 * m.maxWidth / m.maxHeight
@@ -257,14 +256,14 @@ local function menuLoad(e)
 	SetSaveGameEventHandlers(scroll, charSelect)
 	MakeCharacterList(scroll, charSelect)
 
-	if( tes3.mobilePlayer ~= nil ) then
+	if (tes3.mobilePlayer ~= nil) then
 		filterGameFiles(scroll, tes3.mobilePlayer.object.name)
 		SetActive(charSelect, tes3.mobilePlayer.object.name)
 	else
 		filterGameFiles(scroll)
 	end
 end
-event.register("uiActivated", menuLoad, { filter = "MenuLoad"})
+event.register("uiActivated", menuLoad, { filter = "MenuLoad" })
 
 local function menuSave(e)
 	if (e.newlyCreated) then

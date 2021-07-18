@@ -1,4 +1,3 @@
-
 local common = require("UI Expansion.common")
 
 local function saveConfig()
@@ -10,20 +9,20 @@ local function registerModConfig()
 	local template = mwse.mcm.createTemplate({ name = "UI Expansion" })
 	template:saveOnClose("UI Expansion", common.config)
 
-	local creditsText = common.dictionary.modName .. " " .. common.dictionary.versionString
-		.. "\n\n" .. common.dictionary.configCredits
-		.. "\n  Programming: NullCascade, Hrnchamd, Petethegoat, Jiopsi, Remiros, Mort, Wix, abot, Necrolesian"
-		.. "\n  Translations: Daichix, Fesswood, Monsterzeichner, and Google Translate"
-		.. "\n  Concepts and Testing: Morrowind Modding Community Discord"
-		.. "\n  Colored Magic School Icons: R-Zero"
-		.. "\n  Inventory Filter Icons: Remiros"
-		.. "\n  Training Skill Icons: RedFurryDemon"
-		.. "\n  Value/Weight Ratio Icon: Necrolesian"
-	
+	local creditsText = common.dictionary.modName .. " " .. common.dictionary.versionString .. "\n\n" ..
+	                    common.dictionary.configCredits ..
+	                    "\n  Programming: NullCascade, Hrnchamd, Petethegoat, Jiopsi, Remiros, Mort, Wix, abot, Necrolesian" ..
+	                    "\n  Translations: Daichix, Fesswood, Monsterzeichner, and Google Translate" ..
+	                    "\n  Concepts and Testing: Morrowind Modding Community Discord" ..
+	                    "\n  Colored Magic School Icons: R-Zero" .. "\n  Inventory Filter Icons: Remiros" ..
+	                    "\n  Training Skill Icons: RedFurryDemon" .. "\n  Value/Weight Ratio Icon: Necrolesian"
+
 	-- Components section
 	do
 		local pageComponents = template:createSideBarPage({ label = common.dictionary.configTabComponent })
-		pageComponents.sidebar:createInfo({ text = creditsText .. "\n\nThe settings in this tab will not take affect until the next restart." })
+		pageComponents.sidebar:createInfo({
+			text = creditsText .. "\n\nThe settings in this tab will not take affect until the next restart.",
+		})
 
 		local components = {
 			barter = "configComponentBarter",
@@ -103,21 +102,21 @@ local function registerModConfig()
 				},
 				variable = mwse.mcm.createTableVariable({ id = "autoSelectInput", table = common.config }),
 			})
-	
+
 			-- Auto-equip spells
 			category:createOnOffButton({
 				label = common.dictionary.configAutoSelectSpells,
 				description = common.dictionary.configAutoSelectSpellsDescription,
 				variable = mwse.mcm.createTableVariable({ id = "selectSpellsOnSearch", table = common.config }),
 			})
-	
+
 			-- Auto-filter to barterable items
 			category:createOnOffButton({
 				label = common.dictionary.configAutoFilterToTradable,
 				description = common.dictionary.configAutoFilterToTradableDescription,
 				variable = mwse.mcm.createTableVariable({ id = "autoFilterToTradable", table = common.config }),
 			})
-	
+
 			-- Auto-clear filters
 			category:createOnOffButton({
 				label = common.dictionary.configAlwaysClearFiltersOnOpen,
@@ -155,20 +154,20 @@ local function registerModConfig()
 				description = common.dictionary.configShowWeekDayDescription,
 				variable = mwse.mcm.createTableVariable({ id = "displayWeekday", table = common.config }),
 			})
-	
+
 			-- Display target rest hour
 			category:createOnOffButton({
 				label = common.dictionary.configDisplayRestTargetHour,
 				description = common.dictionary.configDisplayRestTargetHourDescription,
 				variable = mwse.mcm.createTableVariable({ id = "displayRestTargetHour", table = common.config }),
 			})
-	
+
 			-- Max number of days to wait/rest
 			category:createTextField({
 				label = common.dictionary.configMaxWaitDays,
 				description = common.dictionary.configMaxWaitDaysDescription,
 				variable = mwse.mcm.createTableVariable({ id = "maxWait", converter = tonumber, table = common.config }),
-				numbersOnly = true
+				numbersOnly = true,
 			})
 		end
 
@@ -183,7 +182,7 @@ local function registerModConfig()
 				allowCombinations = true,
 				variable = mwse.mcm.createTableVariable({ id = "keybindClose", table = common.config }),
 			})
-	
+
 			-- Key binding: take all/filtered
 			category:createKeyBinder({
 				label = common.dictionary.configTakeAllKey,
@@ -191,7 +190,7 @@ local function registerModConfig()
 				allowCombinations = true,
 				variable = mwse.mcm.createTableVariable({ id = "keybindTakeAll", table = common.config }),
 			})
-	
+
 			-- Key binding: map switch
 			category:createKeyBinder({
 				label = common.dictionary.configMapSwitchKey,
@@ -199,7 +198,7 @@ local function registerModConfig()
 				allowCombinations = true,
 				variable = mwse.mcm.createTableVariable({ id = "keybindMapSwitch", table = common.config }),
 			})
-	
+
 			-- Key binding: show additional info
 			category:createKeyBinder({
 				label = common.dictionary.configShowAdditionalInfoKey,
@@ -209,7 +208,7 @@ local function registerModConfig()
 			})
 		end
 	end
-	
+
 	-- Finish up.
 	template:register()
 end

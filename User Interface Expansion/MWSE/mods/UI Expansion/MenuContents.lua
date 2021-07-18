@@ -1,4 +1,3 @@
-
 local GUI_ID_CursorIcon = tes3ui.registerID("CursorIcon")
 local GUI_ID_MenuContents = tes3ui.registerID("MenuContents")
 local GUI_ID_MenuContents_bucket = tes3ui.registerID("MenuContents_bucket")
@@ -23,7 +22,7 @@ local function onKeyInput()
 			takeAllButton:triggerEvent("mouseClick")
 		end
 		return false
-	-- Space (when no text) closes.
+		-- Space (when no text) closes.
 	elseif (common.allFilters.contents:getSearchText() == nil and common.complexKeybindTest(common.config.keybindClose)) then
 		tes3ui.leaveMenuMode()
 		return false
@@ -128,7 +127,7 @@ local function onMenuContentsActivated(e)
 	end
 
 end
-event.register("uiActivated", onMenuContentsActivated, { filter = "MenuContents" } )
+event.register("uiActivated", onMenuContentsActivated, { filter = "MenuContents" })
 
 local function onContentTileClicked(e)
 	-- Fire off an event when the tile is clicked for other modules to hook into.
@@ -185,13 +184,7 @@ local function onInventoryTileClicked(e)
 
 		-- Transfer over the item(s).
 		local containerRef = contentsMenu:getPropertyObject("MenuContents_ObjectRefr")
-		tes3.transferItem({
-			from = tes3.player,
-			to = containerRef,
-			item = e.item,
-			itemData = e.itemData,
-			count = count,
-		})
+		tes3.transferItem({ from = tes3.player, to = containerRef, item = e.item, itemData = e.itemData, count = count })
 
 		-- Trigger a crime if applicable.
 		if (not tes3.hasOwnershipAccess({ target = containerRef })) then
@@ -229,13 +222,7 @@ local function onContentsTileClicked(e)
 		-- Transfer over the item(s).
 		local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
 		local containerRef = contentsMenu:getPropertyObject("MenuContents_ObjectRefr")
-		tes3.transferItem({
-			from = containerRef,
-			to = tes3.player,
-			item = e.item,
-			itemData = e.itemData,
-			count = count,
-		})
+		tes3.transferItem({ from = containerRef, to = tes3.player, item = e.item, itemData = e.itemData, count = count })
 
 		-- Trigger a crime if applicable.
 		if (not tes3.hasOwnershipAccess({ target = containerRef })) then

@@ -1,4 +1,3 @@
-
 local function resizeContainer(parent, id)
 	local button = parent:findChild(id)
 	if (button) then

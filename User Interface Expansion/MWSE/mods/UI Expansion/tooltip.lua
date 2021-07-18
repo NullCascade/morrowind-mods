@@ -1,14 +1,14 @@
-local GUI_ID_TooltipIconBar				= tes3ui.registerID("UIEXP_Tooltip_IconBar")
-local GUI_ID_TooltipIconGoldBlock		= tes3ui.registerID("UIEXP_Tooltip_IconGoldBlock")
-local GUI_ID_TooltipIconWeightBlock		= tes3ui.registerID("UIEXP_Tooltip_IconWeightBlock")
-local GUI_ID_TooltipIconRatioBlock      = tes3ui.registerID("UIEXP_Tooltip_IconRatioBlock")
-local GUI_ID_TooltipExtraDivider		= tes3ui.registerID("UIEXP_Tooltip_ExtraDivider")
-local GUI_ID_TooltipEnchantmentDivider	= tes3ui.registerID("UIEXP_Tooltip_EnchantmentDivider")
-local GUI_ID_TooltipEnchantCapacity		= tes3ui.registerID("UIEXP_Tooltip_EnchantCapacity")
-local GUI_ID_TooltipSpeed				= tes3ui.registerID("UIEXP_Tooltip_Speed")
-local GUI_ID_TooltipReach				= tes3ui.registerID("UIEXP_Tooltip_Reach")
-local GUI_ID_TooltipWeightClass			= tes3ui.registerID("UIEXP_Tooltip_WeightClass")
-local GUI_ID_TooltipStolenLabel			= tes3ui.registerID("UIEXP_Tooltip_StolenLabel")
+local GUI_ID_TooltipIconBar = tes3ui.registerID("UIEXP_Tooltip_IconBar")
+local GUI_ID_TooltipIconGoldBlock = tes3ui.registerID("UIEXP_Tooltip_IconGoldBlock")
+local GUI_ID_TooltipIconWeightBlock = tes3ui.registerID("UIEXP_Tooltip_IconWeightBlock")
+local GUI_ID_TooltipIconRatioBlock = tes3ui.registerID("UIEXP_Tooltip_IconRatioBlock")
+local GUI_ID_TooltipExtraDivider = tes3ui.registerID("UIEXP_Tooltip_ExtraDivider")
+local GUI_ID_TooltipEnchantmentDivider = tes3ui.registerID("UIEXP_Tooltip_EnchantmentDivider")
+local GUI_ID_TooltipEnchantCapacity = tes3ui.registerID("UIEXP_Tooltip_EnchantCapacity")
+local GUI_ID_TooltipSpeed = tes3ui.registerID("UIEXP_Tooltip_Speed")
+local GUI_ID_TooltipReach = tes3ui.registerID("UIEXP_Tooltip_Reach")
+local GUI_ID_TooltipWeightClass = tes3ui.registerID("UIEXP_Tooltip_WeightClass")
+local GUI_ID_TooltipStolenLabel = tes3ui.registerID("UIEXP_Tooltip_StolenLabel")
 
 local common = require("UI Expansion.common")
 
@@ -60,7 +60,8 @@ end
 
 local function enchantConditionBlock(tooltip, object, itemData)
 	if object.enchantment == nil and math.floor(object.enchantCapacity * 0.1) > 0 then
-		labelFormatted(tooltip, string.format("%s: %u", common.dictionary.enchantCapacity, object.enchantCapacity / 10), GUI_ID_TooltipEnchantCapacity)
+		labelFormatted(tooltip, string.format("%s: %u", common.dictionary.enchantCapacity, object.enchantCapacity / 10),
+		               GUI_ID_TooltipEnchantCapacity)
 	end
 
 	if object.maxCondition ~= nil and object.hasDurability ~= false then
@@ -74,7 +75,7 @@ local function enchantConditionBlock(tooltip, object, itemData)
 		block.paddingLeft = 2
 		block.paddingRight = 2
 
-		block:createFillBar{current = itemData and itemData.condition or object.maxCondition, max = object.maxCondition}
+		block:createFillBar{ current = itemData and itemData.condition or object.maxCondition, max = object.maxCondition }
 	end
 
 	if object.enchantment then
@@ -107,17 +108,23 @@ local function enchantConditionBlock(tooltip, object, itemData)
 				block.widthProportional = 1.0
 				block.borderAllSides = 1
 
-				local icon = block:createImage{ path = string.format("icons\\%s", object.enchantment.effects[i].object.icon), id = "image" }
+				local icon = block:createImage{
+					path = string.format("icons\\%s", object.enchantment.effects[i].object.icon),
+					id = "image",
+				}
 				icon.borderTop = 1
 				icon.borderRight = 6
-				local label = block:createLabel{ text = string.format("%s", object.enchantment.effects[i]), id = "HelpMenu_enchantEffectLabel" }
+				local label = block:createLabel{
+					text = string.format("%s", object.enchantment.effects[i]),
+					id = "HelpMenu_enchantEffectLabel",
+				}
 				label.wrapText = false
 			end
 		end
 
 		-- Constant effect and Cast Once enchantments don't have a charge!
-		if object.enchantment.castType ~= tes3.enchantmentType.constant
-		and object.enchantment.castType ~= tes3.enchantmentType.castOnce then
+		if object.enchantment.castType ~= tes3.enchantmentType.constant and object.enchantment.castType ~=
+		tes3.enchantmentType.castOnce then
 			local block = tooltip:createBlock{ id = "HelpMenu_chargeBlock" }
 			block.autoWidth = true
 			block.autoHeight = true
@@ -125,7 +132,10 @@ local function enchantConditionBlock(tooltip, object, itemData)
 			block.paddingLeft = 2
 			block.paddingRight = 2
 
-			local fillBar = block:createFillBar{current = itemData and itemData.charge or object.enchantment.maxCharge, max = object.enchantment.maxCharge}
+			local fillBar = block:createFillBar{
+				current = itemData and itemData.charge or object.enchantment.maxCharge,
+				max = object.enchantment.maxCharge,
+			}
 			fillBar.widget.fillColor = tes3ui.getPalette("magic_color")
 		end
 	end
@@ -147,19 +157,29 @@ local function replaceWeaponTooltip(tooltip, weapon, itemData)
 			local chopAvg = (weapon.chopMin + weapon.chopMax) / 2
 
 			if slashAvg >= chopAvg and slashAvg >= thrustAvg then
-				labelFormatted(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sSlash).value, weapon.slashMin, weapon.slashMax), "HelpMenu_slash")
+				labelFormatted(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sSlash).value, weapon.slashMin,
+				                                      weapon.slashMax), "HelpMenu_slash")
 			elseif thrustAvg >= chopAvg and thrustAvg >= slashAvg then
-				labelFormatted(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sThrust).value, weapon.thrustMin, weapon.thrustMax), "HelpMenu_thrust")
+				labelFormatted(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sThrust).value, weapon.thrustMin,
+				                                      weapon.thrustMax), "HelpMenu_thrust")
 			else
-				labelFormatted(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sChop).value, weapon.chopMin, weapon.chopMax), "HelpMenu_chop")
+				labelFormatted(tooltip,
+				               string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sChop).value, weapon.chopMin, weapon.chopMax),
+				               "HelpMenu_chop")
 			end
 		else
-			labelFormatted(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sSlash).value, weapon.slashMin, weapon.slashMax), "HelpMenu_slash")
-			labelFormatted(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sThrust).value, weapon.thrustMin, weapon.thrustMax), "HelpMenu_thrust")
-			labelFormatted(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sChop).value, weapon.chopMin, weapon.chopMax), "HelpMenu_chop")
+			labelFormatted(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sSlash).value, weapon.slashMin,
+			                                      weapon.slashMax), "HelpMenu_slash")
+			labelFormatted(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sThrust).value, weapon.thrustMin,
+			                                      weapon.thrustMax), "HelpMenu_thrust")
+			labelFormatted(tooltip,
+			               string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sChop).value, weapon.chopMin, weapon.chopMax),
+			               "HelpMenu_chop")
 		end
 	else
-		labelFormatted(tooltip, string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sAttack).value, weapon.chopMin, weapon.chopMax), "HelpMenu_thrust")
+		labelFormatted(tooltip,
+		               string.format("%s: %u - %u", tes3.findGMST(tes3.gmst.sAttack).value, weapon.chopMin, weapon.chopMax),
+		               "HelpMenu_thrust")
 	end
 
 	if not weapon.isAmmo then
@@ -178,7 +198,11 @@ local function replaceArmorTooltip(tooltip, armor, itemData)
 	tryDestroyAllID(tooltip, "HelpMenu_armorRating")
 
 	tooltip:createLabel{ text = common.dictionary.weightClasses[armor.weightClass + 1], id = GUI_ID_TooltipWeightClass }
-	tooltip:createLabel{ text = string.format("%s: %u", tes3.findGMST(tes3.gmst.sArmorRating).value, armor:calculateArmorRating(tes3.mobilePlayer)), id = "HelpMenu_armorRating" }
+	tooltip:createLabel{
+		text = string.format("%s: %u", tes3.findGMST(tes3.gmst.sArmorRating).value,
+		                     armor:calculateArmorRating(tes3.mobilePlayer)),
+		id = "HelpMenu_armorRating",
+	}
 
 	enchantConditionBlock(tooltip, armor, itemData)
 end
@@ -221,7 +245,10 @@ local function replaceAlchemyTooltip(tooltip, alchemy)
 			block.borderLeft = 7
 			block.borderRight = 7
 
-			local icon = block:createImage{ path = string.format("icons\\%s", alchemy.effects[i].object.icon), id = "HelpMenu_effectIcon" }
+			local icon = block:createImage{
+				path = string.format("icons\\%s", alchemy.effects[i].object.icon),
+				id = "HelpMenu_effectIcon",
+			}
 			icon.borderTop = 1
 			icon.borderRight = 6
 			local label = block:createLabel{ text = string.format("%s", alchemy.effects[i]), id = "HelpMenu_effectLabel" }
@@ -260,7 +287,7 @@ local function extraTooltipEarly(e)
 		elseif e.object.objectType == tes3.objectType.alchemy then
 			replaceAlchemyTooltip(e.tooltip, e.object)
 
-		-- Light duration
+			-- Light duration
 		elseif e.object.objectType == tes3.objectType.light then
 			if e.object.time > 0 then
 				local blockDurationBar = e.tooltip:createBlock()
@@ -271,14 +298,18 @@ local function extraTooltipEarly(e)
 				blockDurationBar.paddingRight = 2
 				blockDurationBar:createLabel{ text = string.format("%s:", common.dictionary.lightDuration) }
 
-				local labelDurationBar = blockDurationBar:createFillBar{ current = e.itemData and e.itemData.timeLeft or e.object.time, max = e.object.time }
+				local labelDurationBar = blockDurationBar:createFillBar{
+					current = e.itemData and e.itemData.timeLeft or e.object.time,
+					max = e.object.time,
+				}
 				labelDurationBar.borderLeft = 4
 			end
-		-- Soul gem capacity
+			-- Soul gem capacity
 		elseif e.object.isSoulGem then
 			if (e.itemData and e.itemData.soul) then
 				local soulValue = e.itemData.soul.soul
-				labelFormatted(e.tooltip, string.format("%s: %u / %u", common.dictionary.soulCapacity, soulValue, e.object.soulGemCapacity))
+				labelFormatted(e.tooltip,
+				               string.format("%s: %u / %u", common.dictionary.soulCapacity, soulValue, e.object.soulGemCapacity))
 
 				-- Fixup item value based on MCP feature state.
 				if (useMCPSoulgemValueRebalance) then
@@ -392,7 +423,7 @@ local function extraTooltipLate(e)
 	end
 
 	-- Now, we'll make sure our icon bar is in the position we want (currently the very bottom).
-	--TODO: add MCM option to set the position of the iconbar. Top, above enchants, above flavortext, bottom.
+	-- TODO: add MCM option to set the position of the iconbar. Top, above enchants, above flavortext, bottom.
 	for i = #children, 1, -1 do
 		if children[i].id == GUI_ID_TooltipIconBar then
 			element:reorderChildren(#children, i - 1, 1)
@@ -402,8 +433,8 @@ local function extraTooltipLate(e)
 end
 
 -- Register our events, one early, and one late.
-event.register("uiObjectTooltip", extraTooltipEarly, {priority = 100})
-event.register("uiObjectTooltip", extraTooltipLate, {priority = -100})
+event.register("uiObjectTooltip", extraTooltipEarly, { priority = 100 })
+event.register("uiObjectTooltip", extraTooltipLate, { priority = -100 })
 
 local function onItemTileUpdated(e)
 	-- Show an indicator for stolen goods!
@@ -423,7 +454,7 @@ local function onItemTileUpdated(e)
 		end
 	end
 end
-event.register("itemTileUpdated", onItemTileUpdated, {filter = "MenuInventory"})
+event.register("itemTileUpdated", onItemTileUpdated, { filter = "MenuInventory" })
 
 -- Improve layout of spell tooltip.
 
@@ -434,7 +465,7 @@ local function extraSpellTooltipEarly(e)
 	if (not main) then
 		return
 	end
-	
+
 	local effectContainer = main:findChild(GUI_ID_effect)
 	if (not effectContainer) then
 		return
@@ -445,7 +476,7 @@ local function extraSpellTooltipEarly(e)
 		-- Spell title block.
 		helptext.borderAllSides = 4
 	end
-	
+
 	effectContainer.childAlignX = 0.5
 	effectContainer.borderLeft = 6
 	effectContainer.borderRight = 6
@@ -478,7 +509,10 @@ local function extraSpellTooltipLate(e)
 		local castTimestamp = tes3.mobilePlayer:getPowerUseTimestamp(e.spell)
 		if (castTimestamp) then
 			local timeToRecharge = math.abs(24 - (tes3.getSimulationTimestamp() - castTimestamp))
-			local label = e.tooltip:createLabel({ id = "UIEXP:PowerRechargeCooldown", text = string.format(common.dictionary.powerRechargeCooldown, timeToRecharge) })
+			local label = e.tooltip:createLabel({
+				id = "UIEXP:PowerRechargeCooldown",
+				text = string.format(common.dictionary.powerRechargeCooldown, timeToRecharge),
+			})
 			label.borderBottom = 4
 			label.color = tes3ui.getPalette("disabled_color")
 		end

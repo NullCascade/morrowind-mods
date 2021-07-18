@@ -1,4 +1,3 @@
-
 local GUI_ID_MenuAlchemy = tes3ui.registerID("MenuAlchemy")
 local GUI_ID_MenuInventorySelect = tes3ui.registerID("MenuInventorySelect")
 local GUI_ID_MenuInventorySelect_item_brick = tes3ui.registerID("MenuInventorySelect_item_brick")
@@ -61,11 +60,11 @@ local function updateIngredientList()
 		if (maxShownEffect == 0) then
 			return
 		end
-		
+
 		-- Build a list of effects that work.
 		local effects = {}
 		for _, v in ipairs({ "one", "two", "three", "four" }) do
-			local block = MenuAlchemy:findChild("MenuAlchemy_ingredient_".. v)
+			local block = MenuAlchemy:findChild("MenuAlchemy_ingredient_" .. v)
 			local ingredient = block:getPropertyObject("MenuAlchemy_object")
 			if (ingredient) then
 				for i = 1, maxShownEffect do
@@ -74,7 +73,7 @@ local function updateIngredientList()
 						local r = effects[ingredient.effects[i]] or {}
 						r.attribute = r.attribute or {}
 						r.skill = r.skill or {}
-						
+
 						r.attribute[common.getIngredientEffectAttributeId(ingredient, i)] = true
 						r.skill[common.getIngredientEffectSkillId(ingredient, i)] = true
 						effects[ingredient.effects[i]] = r
@@ -127,7 +126,6 @@ local ingredientFilterNoIcons = common.createFilterInterface({
 	onFilterChanged = updateIngredientSelectTiles,
 })
 
-
 ----------------------------------------------------------------------------------------------------
 -- Custom filter for handling soulgems.
 ----------------------------------------------------------------------------------------------------
@@ -179,7 +177,7 @@ local function updateSoulGemList()
 
 			child:updateLayout()
 		end
-		
+
 	end
 end
 
@@ -213,7 +211,7 @@ local function onFilterInventorySelect(e)
 		end
 	end
 end
-event.register("filterInventorySelect", onFilterInventorySelect )
+event.register("filterInventorySelect", onFilterInventorySelect)
 
 local inventorySelectTypeFilterMap = {
 	["alembic"] = genericFilterNoIcons,
@@ -241,7 +239,9 @@ local function onMenuInventorySelectActivated(e)
 	inventorySelectPane:reorderChildren(1, -1, 1)
 
 	-- Don't carry the filter over between sessions.
-	filterBlock:register("destroy", function() currentFilter = nil end)
+	filterBlock:register("destroy", function()
+		currentFilter = nil
+	end)
 
 	-- Change filtering options based on what menu we're specifically looking at.
 	local inventorySelectType = tes3ui.getInventorySelectType()
@@ -249,4 +249,4 @@ local function onMenuInventorySelectActivated(e)
 	currentFilter:createElements(filterBlock)
 	currentFilter:focusSearchBar()
 end
-event.register("uiActivated", onMenuInventorySelectActivated, { filter = "MenuInventorySelect" } )
+event.register("uiActivated", onMenuInventorySelectActivated, { filter = "MenuInventorySelect" })

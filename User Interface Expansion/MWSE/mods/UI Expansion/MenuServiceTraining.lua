@@ -25,16 +25,15 @@ local function menuTraining(e)
 	menu.visible = false
 end
 
-event.register("uiActivated", menuTraining, { filter = "MenuServiceTraining"})
+event.register("uiActivated", menuTraining, { filter = "MenuServiceTraining" })
 
 local function expertiseText(skill)
 	for i = 4, 0, -1 do
 		if (skill >= 25 * i) then
-			return common.dictionary.expertiseLevels[i+1]
+			return common.dictionary.expertiseLevels[i + 1]
 		end
 	end
 end
-
 
 local ImageButton = {}
 
@@ -73,7 +72,6 @@ function ImageButton.release(e)
 	e.widget:triggerEvent(e)
 end
 
-
 function ImageButton.create(parent, imagePath, w, h)
 	local background = parent:createRect{}
 	background.width = w
@@ -104,12 +102,12 @@ local function onClickTrainSkill(e)
 	local i = e.widget:getPropertyInt("UIEXP_ListIndex")
 	local s = list:findChild(id_pane).children[i].children[1]
 	s:triggerEvent(e)
-	
+
 	timer.start({ duration = 1, callback = onAfterTrainTimer })
 end
 
 local function createTrainSkillElement(parent, id, data)
-	local train = parent:createBlock{id = id}
+	local train = parent:createBlock{ id = id }
 	train.width = 180
 	train.autoHeight = true
 	train.flowDirection = "top_to_bottom"
@@ -124,10 +122,11 @@ local function createTrainSkillElement(parent, id, data)
 		skillIconPath = data.skill.iconPath
 	end
 
-	local button = ImageButton.create(border, string.format("icons/ui_exp/skillbg_%s.dds", tes3.specializationName[data.skill.specialization]), 128, 128)
+	local button = ImageButton.create(border, string.format("icons/ui_exp/skillbg_%s.dds",
+	                                                        tes3.specializationName[data.skill.specialization]), 128, 128)
 	button:setPropertyInt("UIEXP_ListIndex", data.forward)
 	button:register("mouseClick", onClickTrainSkill)
-	local skillIcon = border:createImage{path = skillIconPath}
+	local skillIcon = border:createImage{ path = skillIconPath }
 	skillIcon.consumeMouseEvents = false
 	skillIcon.absolutePosAlignX = 0.5
 	skillIcon.absolutePosAlignY = 0.5
@@ -136,11 +135,12 @@ local function createTrainSkillElement(parent, id, data)
 	border.height = 136
 
 	local canAfford = data.cost <= tes3.getPlayerGold()
-	local level = tes3.mobilePlayer.skills[data.skill.id+1]
-	local attr = tes3.mobilePlayer.attributes[data.skill.attribute+1]
-	local trainerLevel = trainer.skills[data.skill.id+1]
+	local level = tes3.mobilePlayer.skills[data.skill.id + 1]
+	local attr = tes3.mobilePlayer.attributes[data.skill.attribute + 1]
+	local trainerLevel = trainer.skills[data.skill.id + 1]
 
-	local textColor = (canAfford and level.base < attr.base and level.base < trainerLevel.base) and tes3ui.getPalette("normal_color") or tes3ui.getPalette("disabled_color")
+	local textColor = (canAfford and level.base < attr.base and level.base < trainerLevel.base) and
+	                  tes3ui.getPalette("normal_color") or tes3ui.getPalette("disabled_color")
 
 	local temp
 	temp = train:createLabel{ text = data.skill.name }
@@ -196,7 +196,6 @@ local function createTrainSkillElement(parent, id, data)
 	end
 end
 
-
 local function onCancel(e)
 	local menu = e.source:getTopLevelParent()
 	local ok = menu:findChild("MenuServiceTraining_Okbutton")
@@ -222,7 +221,7 @@ local function modifyWindow(menu)
 	-- Scrape data
 	trainer = menu:getPropertyObject("MenuServiceTraining_Actor")
 	training = {}
-	for i,v in ipairs(list:findChild(id_pane).children) do
+	for i, v in ipairs(list:findChild(id_pane).children) do
 		training[i] = {}
 		training[i].skill = tes3.getSkill(v:getPropertyInt("MenuServiceTraining_ListNumber"))
 		training[i].cost = tonumber(string.match(v.children[1].text, " - (%d+)"))
@@ -236,7 +235,7 @@ local function modifyWindow(menu)
 	local title = menu:createLabel{ text = tes3.findGMST("sTrainingServiceTitle").value }
 	title.parent.paddingLeft = 24
 	title.parent.paddingRight = 24
-	title.parent.childAlignX = 0.5  -- centre content alignment
+	title.parent.childAlignX = 0.5 -- centre content alignment
 	title.borderTop = 15
 	title.borderBottom = 45
 	title.color = tes3ui.getPalette("header_color")
@@ -252,13 +251,14 @@ local function modifyWindow(menu)
 
 	local button_block = menu:createBlock{}
 	button_block.borderTop = 75
-	button_block.layoutWidthFraction = 1.0  -- width is 100% parent width
+	button_block.layoutWidthFraction = 1.0 -- width is 100% parent width
 	button_block.autoHeight = true
 
-	local temp = button_block:createLabel{id = id_gold}
-	temp.text = string.format("%s: %d %s",tes3.findGMST(tes3.gmst.sGold).value, tes3.getPlayerGold(), common.dictionary.goldAbbr)
+	local temp = button_block:createLabel{ id = id_gold }
+	temp.text = string.format("%s: %d %s", tes3.findGMST(tes3.gmst.sGold).value, tes3.getPlayerGold(),
+	                          common.dictionary.goldAbbr)
 
-	local button_cancel = button_block:createButton{id = id_cancel, text = tes3.findGMST("sDone").value}
+	local button_cancel = button_block:createButton{ id = id_cancel, text = tes3.findGMST("sDone").value }
 	button_cancel.layoutOriginFractionX = 1.0
 	button_cancel:register("mouseClick", onCancel)
 

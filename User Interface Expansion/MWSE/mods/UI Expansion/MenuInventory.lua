@@ -1,9 +1,7 @@
-
 local GUI_ID_MenuBarter = tes3ui.registerID("MenuBarter")
 local GUI_ID_MenuInventory_button_layout = tes3ui.registerID("MenuInventory_button_layout")
 
 local common = require("UI Expansion.common")
-
 
 ----------------------------------------------------------------------------------------------------
 -- Inventory: Searching and filtering.
@@ -85,12 +83,12 @@ local function onMenuInventoryActivated(e)
 		currentMerchant = nil
 	end
 end
-event.register("uiActivated", onMenuInventoryActivated, { filter = "MenuInventory" } )
+event.register("uiActivated", onMenuInventoryActivated, { filter = "MenuInventory" })
 
 local function onMenuBarterActivated()
 	currentMerchant = tes3ui.getServiceActor()
 end
-event.register("uiActivated", onMenuBarterActivated, { filter = "MenuBarter" } )
+event.register("uiActivated", onMenuBarterActivated, { filter = "MenuBarter" })
 
 local function onEnterMenuMode()
 	inventoryFilters:setFilterHidden("tradable", true)
