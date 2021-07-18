@@ -125,8 +125,8 @@ local function updateReferences(now)
 	local weatherController = worldController.weatherController
 	local gameHour = worldController.hour.value
 	local dawnStart, dawnStop, duskStart, duskStop = interop.getDawnDuskHours()
-	local dawnMidPoint = (dawnStop + dawnStart) / 2
-	local duskMidPoint = (duskStop + duskStart) / 2
+	local dawnMidPoint = (dawnStart + dawnStop) / 2
+	local duskMidPoint = (duskStart + duskStop) / 2
 	local useVariance = config.useVariance
 	local varianceScalar = config.varianceInMinutes / 60
 	local addInteriorLights = config.addInteriorLights
@@ -145,7 +145,7 @@ local function updateReferences(now)
 	elseif (dawnStart <= gameHour and gameHour <= dawnMidPoint) then
 		currentDimmer = currentWeatherBrightness * math.remap(gameHour, dawnStart, dawnMidPoint, 0.0, 1.0)
 	elseif (duskMidPoint <= gameHour and gameHour <= duskStop) then
-		currentDimmer = currentWeatherBrightness * (1.0 - math.remap(gameHour, duskMidPoint, duskStop, 0.0, 1.0))
+		currentDimmer = currentWeatherBrightness * math.remap(gameHour, duskStop, duskMidPoint, 0.0, 1.0)
 	end
 
 	-- Go through and update all our references.
@@ -187,7 +187,8 @@ local function updateReferences(now)
 						-- Add light.
 						if (addInteriorLights) then
 							cachedLight = interop.getLightForMesh("meshes\\" .. reference.object.mesh)
-							light = reference:getOrCreateAttachedDynamicLight(cachedLight)
+							local attachment = reference:getOrCreateAttachedDynamicLight(cachedLight)
+							light = attachment and attachment.light
 						end
 
 						-- Setup sunrays
@@ -206,7 +207,7 @@ local function updateReferences(now)
 						-- Update lighting data.
 						local lerpedColor = currentRegionSunColor
 						light = light or reference.light
-						if (light and light.RTTI and currentRegionSunColor) then
+						if (light and currentRegionSunColor) then
 							cachedLight = cachedLight or interop.getLightForMesh("meshes\\" .. reference.object.mesh)
 							lerpedColor = cachedLight.diffuse:lerp(currentRegionSunColor, 0.5)
 	
