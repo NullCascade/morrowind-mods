@@ -39,9 +39,9 @@ local function registerModConfig()
 			rest = "configComponentRest",
 			saveLoad = "configComponentSaveLoad",
 			serviceSpells = "configComponentServiceSpells",
-			serviceTraining = "configComponentServiceTraining",
+			training = "configComponentServiceTraining",
 		}
-		for _, k in ipairs(table.keys(components)) do
+		for _, k in ipairs(table.keys(components, true)) do
 			pageComponents:createOnOffButton({
 				label = common.dictionary[components[k]],
 				description = common.dictionary[components[k] .. "Description"],
