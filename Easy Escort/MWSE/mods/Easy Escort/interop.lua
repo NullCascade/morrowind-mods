@@ -1,4 +1,3 @@
-
 --[[
 
 	Interop library for Easy Escort.
@@ -13,7 +12,5 @@
 ]]--
 
 local this = {}
-
-
 
 return this

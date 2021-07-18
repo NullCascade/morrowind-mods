@@ -27,22 +27,12 @@ local function createBlackListRow(container, id)
 	return row
 end
 
-local function caseInsensitiveSorter(a, b)
-	return string.lower(a) < string.lower(b)
-end
-
 local function refreshBlackList()
 	if (blackListActualPane) then
 		blackListActualPane:destroyChildren()
 	end
 
-	local sortedBlacklist = {}
-	for id, _ in pairs(this.config.ignoreList) do
-		table.insert(sortedBlacklist, id)
-	end
-	table.sort(sortedBlacklist, caseInsensitiveSorter)
-
-	for _, id in ipairs(sortedBlacklist) do
+	for _, id in ipairs(table.keys(this.config.ignoreList, true)) do
 		createBlackListRow(blackListPane, id)
 	end
 end
@@ -101,7 +91,7 @@ local function createConfigSliderPackage(params)
 	local config = params.config
 	local key = params.key
 	local value = config[key] or params.default or 0
-	
+
 	local sliderLabel = horizontalBlock:createLabel({ text = tostring(value) })
 	sliderLabel.layoutOriginFractionX = 1.0
 	sliderLabel.layoutOriginFractionY = 0.5
@@ -109,7 +99,12 @@ local function createConfigSliderPackage(params)
 
 	local range = params.max - params.min
 
-	local slider = horizontalBlock:createSlider({ current = value - params.min, max = range, step = params.step, jump = params.jump })
+	local slider = horizontalBlock:createSlider({
+		current = value - params.min,
+		max = range,
+		step = params.step,
+		jump = params.jump,
+	})
 	slider.layoutOriginFractionX = 1.0
 	slider.layoutOriginFractionY = 0.5
 	slider.width = 300
@@ -136,9 +131,13 @@ function this.onCreate(parent)
 
 	local descriptionLabel
 	if (tes3.mobilePlayer) then
-		descriptionLabel = container:createLabel({ text = "Easy Escort teleports friendly actors to the player when they far enough away, or in a different cell. Using the information below, you can view the current blacklist, as well as the current actors that are considered friendly. To prevent an actor ID from joining you in combat, click the blacklist button. You may also remove actors from the blacklist." })
+		descriptionLabel = container:createLabel({
+			text = "Easy Escort teleports friendly actors to the player when they far enough away, or in a different cell. Using the information below, you can view the current blacklist, as well as the current actors that are considered friendly. To prevent an actor ID from joining you in combat, click the blacklist button. You may also remove actors from the blacklist.",
+		})
 	else
-		descriptionLabel = container:createLabel({ text = "Easy Escort teleports friendly actors to the player when they far enough away, or in a different cell. Using the information below, you can view and modify the current blacklist. To view and blacklist currently friendly actors, load a save game." })
+		descriptionLabel = container:createLabel({
+			text = "Easy Escort teleports friendly actors to the player when they far enough away, or in a different cell. Using the information below, you can view and modify the current blacklist. To view and blacklist currently friendly actors, load a save game.",
+		})
 	end
 	descriptionLabel.layoutWidthFraction = 1.0
 	descriptionLabel.wrapText = true
@@ -155,7 +154,7 @@ function this.onCreate(parent)
 		step = 1,
 		jump = 5,
 	})
-	
+
 	createConfigSliderPackage({
 		parent = container,
 		label = "Distance before same-cell teleport:",
@@ -178,7 +177,7 @@ function this.onCreate(parent)
 		blackListBox.flowDirection = "top_to_bottom"
 		blackListBox.layoutWidthFraction = 1.0
 		blackListBox.layoutHeightFraction = 1.0
-	
+
 		local label = blackListBox:createLabel({ text = "Blacklist:" })
 		label.borderBottom = 6
 
@@ -196,7 +195,7 @@ function this.onCreate(parent)
 		activeListBox.layoutWidthFraction = 1.0
 		activeListBox.layoutHeightFraction = 1.0
 		activeListBox.borderLeft = 6
-	
+
 		local label = activeListBox:createLabel({ text = "Friendly Actors:" })
 		label.borderBottom = 6
 
@@ -204,10 +203,10 @@ function this.onCreate(parent)
 		activeListPane.layoutWidthFraction = 1.0
 		activeListPane.layoutHeightFraction = 1.0
 		activeListPane.paddingAllSides = 6
-		
+
 		refreshActiveList()
 	end
-	
+
 	container:getTopLevelParent():updateLayout()
 end
 
