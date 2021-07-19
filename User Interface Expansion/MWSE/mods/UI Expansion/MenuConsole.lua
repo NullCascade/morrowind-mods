@@ -95,18 +95,21 @@ local function onSubmitCommand()
 	tes3ui.acquireTextInput(inputBox)
 
 	if (text ~= "") then
-		table.insert(previousConsoleEntries, { text = text, lua = luaMode })
-		currentHistoryIndex = 1
+		local lastEntry = previousConsoleEntries[#previousConsoleEntries]
+		if (not lastEntry or lastEntry.text ~= text or lastEntry.lua ~= luaMode) then
+			table.insert(previousConsoleEntries, { text = text, lua = luaMode })
+			currentHistoryIndex = 1
 
-		-- Save a selection of the history.
-		local savedEntries = {}
-		local previousConsoleEntriesCount = #previousConsoleEntries
-		for i = math.max(1, previousConsoleEntriesCount - config.consoleHistoryLimit), previousConsoleEntriesCount do
-			table.insert(savedEntries, previousConsoleEntries[i])
+			-- Save a selection of the history.
+			local savedEntries = {}
+			local previousConsoleEntriesCount = #previousConsoleEntries
+			for i = math.max(1, previousConsoleEntriesCount - config.consoleHistoryLimit), previousConsoleEntriesCount do
+				table.insert(savedEntries, previousConsoleEntries[i])
+			end
+			savedEntries[1] = { text = "", lua = false }
+			config.previousConsoleEntries = savedEntries
+			mwse.saveConfig("UI Expansion", config)
 		end
-		savedEntries[1] = { text = "", lua = false }
-		config.previousConsoleEntries = savedEntries
-		mwse.saveConfig("UI Expansion", config)
 	end
 end
 
