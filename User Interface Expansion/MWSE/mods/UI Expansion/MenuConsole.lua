@@ -4,9 +4,16 @@ local GUI_ID_MenuConsole_scroll_pane = tes3ui.registerID("MenuConsole_scroll_pan
 
 local GUI_ID_UIEXP_ConsoleInputBox = tes3ui.registerID("UIEXP:ConsoleInputBox")
 
+local common = require("UI Expansion.common")
+local config = common.config
+
 local luaMode = false
 local currentHistoryIndex = 1
-local previousEntries = { { text = "", lua = false } }
+local previousConsoleEntries = config.previousConsoleEntries
+if (previousConsoleEntries == nil) then
+	previousConsoleEntries = { { text = "", lua = false } }
+end
+
 local sandbox = {}
 
 local function updateScriptButton(button)
@@ -88,8 +95,18 @@ local function onSubmitCommand()
 	tes3ui.acquireTextInput(inputBox)
 
 	if (text ~= "") then
-		table.insert(previousEntries, { text = text, lua = luaMode })
+		table.insert(previousConsoleEntries, { text = text, lua = luaMode })
 		currentHistoryIndex = 1
+
+		-- Save a selection of the history.
+		local savedEntries = {}
+		local previousConsoleEntriesCount = #previousConsoleEntries
+		for i = math.max(1, previousConsoleEntriesCount - config.consoleHistoryLimit), previousConsoleEntriesCount do
+			table.insert(savedEntries, previousConsoleEntries[i])
+		end
+		savedEntries[1] = { text = "", lua = false }
+		config.previousConsoleEntries = savedEntries
+		mwse.saveConfig("UI Expansion", config)
 	end
 end
 
@@ -157,12 +174,12 @@ local function onMenuConsoleActivated(e)
 			-- Pressing up goes to the previous entry in the history.
 			currentHistoryIndex = currentHistoryIndex - 1
 			if (currentHistoryIndex < 1) then
-				currentHistoryIndex = #previousEntries
+				currentHistoryIndex = #previousConsoleEntries
 			end
 
 			-- Add caret to allow immediate editing.
-			input.text = previousEntries[currentHistoryIndex].text .. "|"
-			luaMode = previousEntries[currentHistoryIndex].lua
+			input.text = previousConsoleEntries[currentHistoryIndex].text .. "|"
+			luaMode = previousConsoleEntries[currentHistoryIndex].lua
 
 			updateScriptButton(scriptToggleButton)
 			menuConsole:updateLayout()
@@ -170,13 +187,13 @@ local function onMenuConsoleActivated(e)
 		elseif (key == -0x7FFFFFFC) then
 			-- Pressing down goes to the next entry in the history.
 			currentHistoryIndex = currentHistoryIndex + 1
-			if (currentHistoryIndex > #previousEntries) then
+			if (currentHistoryIndex > #previousConsoleEntries) then
 				currentHistoryIndex = 1
 			end
 
 			-- Add caret to allow immediate editing.
-			input.text = previousEntries[currentHistoryIndex].text .. "|"
-			luaMode = previousEntries[currentHistoryIndex].lua
+			input.text = previousConsoleEntries[currentHistoryIndex].text .. "|"
+			luaMode = previousConsoleEntries[currentHistoryIndex].lua
 
 			updateScriptButton(scriptToggleButton)
 			menuConsole:updateLayout()

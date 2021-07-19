@@ -132,6 +132,19 @@ local function registerModConfig()
 			})
 		end
 
+		-- Category: Console
+		do
+			local category = pageFeatures:createCategory({ label = common.dictionary.configCategoryConsole })
+
+			-- Help tooltips
+			category:createTextField({
+				label = common.dictionary.configConsoleHistoryLimit,
+				description = common.dictionary.configConsoleHistoryLimitDescription,
+				variable = mwse.mcm.createTableVariable({ id = "consoleHistoryLimit", converter = tonumber, table = common.config }),
+				numbersOnly = true,
+			})
+		end
+
 		-- Category: Map Menu
 		do
 			local category = pageFeatures:createCategory({ label = common.dictionary.configCategoryMap })
