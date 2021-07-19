@@ -36,6 +36,7 @@ local defaultConfig = {
 		barter = true,
 		console = true,
 		contents = true,
+		copyPaste = true,
 		dialog = true,
 		inventory = true,
 		inventorySelect = true,
@@ -101,7 +102,7 @@ common.config = config
 common.loadTranslation()
 
 -- Make sure we have the latest MWSE version.
-if (mwse.buildDate < 20200926) then
+if (mwse.buildDate < 20210719) then
 	event.register("loaded", function()
 		tes3.messageBox(common.dictionary.updateRequired)
 	end)
@@ -163,6 +164,9 @@ local function onInitialized()
 	end
 	if (config.components.training) then
 		dofile("UI Expansion.MenuServiceTraining")
+	end
+	if (config.components.copyPaste) then
+		dofile("UI Expansion.copyPaste")
 	end
 end
 event.register("initialized", onInitialized)

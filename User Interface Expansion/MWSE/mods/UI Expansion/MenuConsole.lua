@@ -94,6 +94,7 @@ local function onSubmitCommand()
 	menuConsole:updateLayout()
 	tes3ui.acquireTextInput(inputBox)
 
+	-- Save last used console commands to the command history.
 	if (text ~= "") then
 		local lastEntry = previousConsoleEntries[#previousConsoleEntries]
 		if (not lastEntry or lastEntry.text ~= text or lastEntry.lua ~= luaMode) then

@@ -22,6 +22,8 @@ return {
 		configChangeMapModeOnCellChangeDescription = "If enabled, changing to an exterior cell will cause the map to switch to world mode, and changing to an interior will cause the map to switch to local mode.",
 		configCloseKey = "Keybind to close inventory.",
 		configCloseKeyDescription = "This key combination will close the current inventory.",
+		configComponentCopyPaste = "Enable copy and paste component?",
+		configComponentCopyPasteDescription = "Features:\n- Use Control+C to copy all text leading up to the input cursor (|) to the clipboard.\n- Use Control+Alt+C to copy all text after the text input cursor to the clipboard.\n- Use Control+V to insert the clipboard text at the position of the text input cursor.",
 		configComponentBarter = "Enable bartering menu component?",
 		configComponentBarterDescription = "Features:\n- Search by item name.\n- Improved item filtering.\n- A new filter that only shows items the merchant will buy.",
 		configComponentConsole = "Enable console menu component?",

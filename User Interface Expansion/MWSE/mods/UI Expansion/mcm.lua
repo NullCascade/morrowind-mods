@@ -28,6 +28,7 @@ local function registerModConfig()
 			barter = "configComponentBarter",
 			console = "configComponentConsole",
 			contents = "configComponentContents",
+			copyPaste = "configComponentCopyPaste",
 			dialog = "configComponentDialog",
 			inventory = "configComponentInventory",
 			inventorySelect = "configComponentInventorySelect",
