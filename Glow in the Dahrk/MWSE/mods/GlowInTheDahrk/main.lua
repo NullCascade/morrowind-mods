@@ -1,5 +1,6 @@
 local config = require("GlowInTheDahrk.config")
 local interop = require("GlowInTheDahrk.interop")
+local debug = require("GlowInTheDahrk.debug")
 
 --
 -- Keep track of references we care about.
@@ -14,8 +15,9 @@ local referenceUpdateQueue = {}
 -- Add tracked references.
 local function onReferenceActivated(e)
 	if (not trackedReferences[e.reference]) then
-		if (interop.checkSupport(e.reference)) then
-			trackedReferences[e.reference] = true
+		local supported, data = interop.checkSupport(e.reference)
+		if (supported) then
+			trackedReferences[e.reference] = data
 			table.insert(referenceUpdateQueue, e.reference)
 		else
 			trackedReferences[e.reference] = false
@@ -152,6 +154,8 @@ local function updateReferences(now)
 		local reference = referenceUpdateQueue[i]
 		local sceneNode = reference.sceneNode
 		if (sceneNode) then
+			local meshData = trackedReferences[reference]
+
 			local switchNode = sceneNode.children[1]
 			if (switchNode) then
 				-- Use hour variation if enabled.
@@ -183,19 +187,17 @@ local function updateReferences(now)
 					-- Perform state switches.
 					if (previousIndex == 0 and index == 2) then
 						-- Add light.
-						if (addInteriorLights) then
-							cachedLight = interop.getLightForMesh("meshes\\" .. reference.object.mesh)
-							local attachment = reference:getOrCreateAttachedDynamicLight(cachedLight)
+						if (addInteriorLights and meshData.supportsLight) then
+							cachedLight = meshData.light or interop.getDefaultLight()
+							local attachment = reference:getOrCreateAttachedDynamicLight(cachedLight:clone())
 							light = attachment and attachment.light
 						end
 
 						-- Setup sunrays
-						local currentActiveNode = switchNode.children[index + 1]
-						local maybeRays = currentActiveNode.children[1]
-						if (maybeRays and maybeRays.name == "rays") then
-							maybeRays.appCulled = not addInteriorSunrays
+						if (meshData.interiorRayIndex) then
+							switchNode.children[index + 1].children[meshData.interiorRayIndex].appCulled = not addInteriorSunrays
 						end
-					elseif (previousIndex == 2 and index == 0) then
+					elseif (previousIndex == 2 and index == 0 and meshData.supportsLight) then
 						-- Remove light.
 						reference:deleteDynamicLightAttachment(true)
 					end
@@ -204,33 +206,33 @@ local function updateReferences(now)
 					if (index == 2) then
 						-- Update lighting data.
 						local lerpedColor = currentRegionSunColor
-						light = light or reference.light
-						if (light and currentRegionSunColor) then
-							cachedLight = cachedLight or interop.getLightForMesh("meshes\\" .. reference.object.mesh)
-							lerpedColor = cachedLight.diffuse:lerp(currentRegionSunColor, 0.5)
+						if (meshData.supportsLight) then
+							light = light or reference.light
+							if (light and currentRegionSunColor) then
+								cachedLight = cachedLight or meshData.light or interop.getDefaultLight()
+								lerpedColor = cachedLight.diffuse:lerp(currentRegionSunColor, 0.5)
 
-							light.diffuse = lerpedColor
-							light.dimmer = currentDimmer
+								light.diffuse = lerpedColor
+								light.dimmer = currentDimmer
+							end
 						end
 
 						-- Update rays.
-						local currentActiveNode = switchNode.children[index + 1]
-						if (addInteriorSunrays) then
-							local maybeRays = currentActiveNode.children[1]
-							if (maybeRays and maybeRays.name == "rays") then
-								for ray in table.traverse({ maybeRays.children[1] }) do
-									local materialProperty = ray.materialProperty
-									if (materialProperty) then
-										materialProperty.alpha = currentDimmer
-									end
+						local interiorNode = switchNode.children[index + 1]
+						if (addInteriorSunrays and meshData.interiorRayIndex) then
+							local rays = interiorNode.children[meshData.interiorRayIndex]
+							for ray in table.traverse({ rays }) do
+								local materialProperty = ray.materialProperty
+								if (materialProperty) then
+									materialProperty.alpha = currentDimmer
 								end
 							end
 						end
 
 						-- Update window color.
-						for _, child in ipairs(currentActiveNode.children) do
-							if (child.name ~= "rays") then
-								local materialProperty = child.materialProperty
+						if (meshData.interiorWindowShapes) then
+							for _, index in ipairs(meshData.interiorWindowShapes) do
+								local materialProperty = interiorNode.children[index].materialProperty
 								if (materialProperty) then
 									materialProperty.ambient = lerpedColor
 									materialProperty.diffuse = lerpedColor
@@ -249,8 +251,19 @@ local function updateReferences(now)
 end
 
 --
--- Custom light management
+-- Handle initial loading of meshes.
+-- Here we will find out if this is a GitD-supporting mesh and store later data for use.
 --
+
+local meshesPathPrefixLength = string.len("meshes\\")
+
+local function getChildByName(collection, name)
+	for i, child in ipairs(collection) do
+		if (child.name:lower() == name) then
+			return i
+		end
+	end
+end
 
 local function onMeshLoaded(e)
 	local node = e.node
@@ -263,9 +276,15 @@ local function onMeshLoaded(e)
 		return
 	end
 
+	-- Remove the meshes\ prefix.
+	local path = string.sub(e.path, meshesPathPrefixLength + 1, string.len(e.path))
+	local data = interop.createMeshData(path)
+
 	-- Look to see if it has a custom light.
 	local attachLight = node:getObjectByName("AttachLight")
 	if (attachLight and attachLight:isInstanceOfType(tes3.niType.NiNode)) then
+		data.supportsLight = true
+
 		local light = attachLight.children[1]
 		if (light and light:isInstanceOfType(tes3.niType.NiLight)) then
 			-- Fixup some values for import. Namely the radius is stored as scale.
@@ -273,8 +292,72 @@ local function onMeshLoaded(e)
 			-- light.name = "GitD Mesh-Customized Interior Light"
 
 			-- Store the light for later cloning and detach it so no one else will get it added.
-			interop.setLightForMesh(e.path, light)
+			data.light = light
 			attachLight:detachChildAt(1)
+		end
+	end
+
+	-- Does the mesh have interior rays? We need to do some cleanup for backwards compatibility.
+	local interiorLightIndex = 2 + 1 -- Offset by one.
+	if (#dayNightSwitchNode.children >= interiorLightIndex) then
+		local interiorLights = dayNightSwitchNode.children[interiorLightIndex]
+		data.interiorRayIndex = getChildByName(interiorLights.children, "rays")
+
+		-- Make a guess at if this is a modern mesh.
+		if (not data.supportsLight and data.interiorRayIndex ~= 1) then
+			data.legacyMesh = true
+			mwse.log("[Glow In The Dahrk] Converting legacy mesh: %s", path)
+		end
+
+		-- If it is an old mesh try to fix up rays.
+		if (data.legacyMesh) then
+			-- Also look to see if we can do the same with rays.
+			local raysNode = dayNightSwitchNode.children[interiorLightIndex].children[data.interiorRayIndex]
+			for shape in table.traverse({ raysNode }) do
+				local materialProperty = shape.materialProperty
+				if (materialProperty and shape:isInstanceOfType(tes3.niType.NiTriShape)) then
+					-- Ensure unique materials.
+					if (materialProperty.refCount > 2) then
+						materialProperty = shape:detachProperty(2):clone()
+						shape:attachProperty(materialProperty)
+					end
+
+					-- Remove vertex coloring if we need to.
+					if (shape.data and shape.data.colors and #shape.data.colors > 0) then
+						shape.data = shape.data:copy({ colors = false })
+						shape.data:markAsChanged()
+						shape:update()
+					end
+				end
+			end
+		end
+
+		-- See if we can clear up vcol on the interior window mesh.
+		-- Also see what shapes we will later want to update when coloring windows.
+		local interiorWindowShapes = {}
+		for i, shape in ipairs(interiorLights.children) do
+			local materialProperty = shape.materialProperty
+			if (materialProperty and shape:isInstanceOfType(tes3.niType.NiTriShape)) then
+				table.insert(interiorWindowShapes, i)
+
+				-- If it is an old mesh try to fix up windows.
+				if (data.legacyMesh) then
+					-- Ensure unique materials.
+					if (materialProperty.refCount > 2) then
+						shape:attachProperty(shape:detachProperty(2):clone())
+					end
+
+					-- Remove vertex coloring if we need to.
+					if (shape.data and shape.data.colors and #shape.data.colors > 0) then
+						shape.data = shape.data:copy({ colors = false })
+						shape.data:markAsChanged()
+						shape:update()
+					end
+				end
+			end
+		end
+		if (#interiorWindowShapes > 0) then
+			data.interiorWindowShapes = interiorWindowShapes
 		end
 	end
 end
@@ -304,8 +387,6 @@ dofile("GlowInTheDahrk.mcm")
 --
 -- Expose some useful info for debugging.
 --
-
-local debug = require("GlowInTheDahrk.debug")
 
 debug.cellRegionCache = cellRegionCache
 debug.getRegion = getRegion

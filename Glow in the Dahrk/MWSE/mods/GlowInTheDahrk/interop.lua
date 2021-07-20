@@ -4,6 +4,9 @@ local interop = {}
 
 interop.enabled = true
 
+local debug = require("GlowInTheDahrk.debug")
+debug.interop = interop
+
 --
 -- Object support check. Lets us know if a given object cares about GitD.
 --
@@ -15,7 +18,21 @@ local supportedObjectTypes = {
 	[tes3.objectType.static] = true,
 }
 
-local objectSupportCache = {}
+local meshData = {}
+debug.meshData = meshData
+
+function interop.createMeshData(mesh)
+	local mesh = mesh:lower()
+
+	local hit = meshData[mesh]
+	if (hit) then
+		return hit
+	end
+
+	meshData[mesh] = {}
+	return meshData[mesh]
+end
+
 function interop.checkSupport(obj)
 	if (not obj) then
 		return false
@@ -23,7 +40,6 @@ function interop.checkSupport(obj)
 
 	-- Get basic info.
 	local object = obj.baseObject
-	-- local baseObjectID = baseObject.id:lower()
 	local mesh = object.mesh
 	if (not mesh) then
 		return false
@@ -32,35 +48,13 @@ function interop.checkSupport(obj)
 
 	-- Object type support check.
 	if (not supportedObjectTypes[object.objectType]) then
-		objectSupportCache[object] = false
+		-- We don't want to cache thie result, as a valid object type may want to try to use the same mesh.
 		return false
 	end
 
 	-- Was this object already checked?
-	local cacheHit = objectSupportCache[object]
-	if (cacheHit ~= nil) then
-		return cacheHit
-	end
-
-	-- Get the object's scene graph object.
-	local sceneNode = object.sceneNode
-	if (not sceneNode) then
-		objectSupportCache[object] = false
-		return false
-	end
-
-	-- Get the first child node.
-	local dayNightSwitchNode = (#sceneNode.children > 0) and sceneNode.children[1] or nil
-
-	-- Make sure the node has the name we care about.
-	if (not dayNightSwitchNode or dayNightSwitchNode.name ~= "NightDaySwitch") then
-		objectSupportCache[object] = false
-		return false
-	end
-
-	-- All checks passed.
-	objectSupportCache[object] = true
-	return true
+	local cacheHit = meshData[mesh]
+	return cacheHit ~= nil, cacheHit
 end
 
 --
@@ -185,30 +179,19 @@ end
 --
 -- Management of lights to add to interior windows.
 --
--- Note that meshLoaded and the .mesh properties may have different prefixes.
---
 
-local customLights = {}
+local defaultLight = nil
 
-function interop.setLightForMesh(mesh, light)
-	customLights[mesh:lower()] = light
-end
-
-function interop.getLightForMesh(mesh)
-	-- Look for custom light.
-	local light = customLights[mesh:lower()]
-	if (light ~= nil) then
-		return light:clone()
+function interop.getDefaultLight()
+	if (defaultLight == nil) then
+		defaultLight = niPointLight.new()
+		-- light.name = "GitD Standard Interior Light"
+		defaultLight.diffuse.r = 1.0
+		defaultLight.diffuse.g = 1.0
+		defaultLight.diffuse.b = 1.0
+		defaultLight:setRadius(200.0)
 	end
-
-	-- Otherwise make a new light.
-	light = niPointLight.new()
-	-- light.name = "GitD Standard Interior Light"
-	light.diffuse.r = 1
-	light.diffuse.g = 1
-	light.diffuse.b = 1
-	light:setRadius(200)
-	return light
+	return defaultLight
 end
 
 return interop

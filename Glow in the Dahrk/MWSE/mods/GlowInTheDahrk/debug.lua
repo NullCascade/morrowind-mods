@@ -1,7 +1,16 @@
 local debug = {}
 
-debug.interop = require("GlowInTheDahrk.interop")
 debug.config = require("GlowInTheDahrk.config")
+
+function debug.getParentChain(thing)
+	local result = thing.name
+	local parent = thing.parent
+	while (parent) do
+		result = (parent.name or "nil") .. " > " .. result
+		parent = parent.parent
+	end
+	return result
+end
 
 local function debugWeatherChangedImmediate(e)
 	mwse.log("Weather changed to %s.", table.find(tes3.weather, e.to.index))
