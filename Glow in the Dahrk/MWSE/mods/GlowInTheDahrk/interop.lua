@@ -183,6 +183,7 @@ end
 local defaultLight = nil
 
 function interop.getDefaultLight()
+	-- Lazy-create light if needed.
 	if (defaultLight == nil) then
 		defaultLight = niPointLight.new()
 		-- light.name = "GitD Standard Interior Light"
@@ -191,6 +192,7 @@ function interop.getDefaultLight()
 		defaultLight.diffuse.b = 1.0
 		defaultLight:setRadius(200.0)
 	end
+
 	return defaultLight
 end
 
