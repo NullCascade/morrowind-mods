@@ -170,9 +170,9 @@ function interop.calculateRegionSunColor(region)
 
 	-- Return the lerped value between current and next weather.
 	if (nextWeather) then
-		return currentWeatherColor:lerp(nextWeatherColor, weatherTransitionScalar)
+		return currentWeatherColor:lerp(nextWeatherColor, weatherTransitionScalar):toColor()
 	else
-		return currentWeatherColor
+		return currentWeatherColor:toColor()
 	end
 end
 
