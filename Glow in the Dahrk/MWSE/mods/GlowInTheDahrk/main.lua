@@ -129,6 +129,11 @@ local function updateReferences(now)
 	local isInterior = playerCell.isInterior
 	local useExteriorLogic = (not isInterior) or playerCell.behavesAsExterior
 
+	-- Allow forcing weather.
+	if (GitD_debug.forceWeather) then
+		playerRegion.weather = GitD_debug.forceWeather
+	end
+
 	-- Get faster access to some often-used variables.
 	local worldController = tes3.worldController
 	local weatherController = worldController.weatherController
@@ -257,7 +262,7 @@ local function updateReferences(now)
 						end
 					elseif (index == indexOff) then
 						local unlitInteriorNode = switchNode.children[indexOff]
-	
+
 						-- Update window color.
 						if (meshData.unlitInteriorWindowShapesIndexes) then
 							for _, index in ipairs(meshData.unlitInteriorWindowShapesIndexes) do
@@ -383,7 +388,7 @@ local function onMeshLoaded(e)
 				if (texturingProperty and materialProperty and shape:isInstanceOfType(tes3.niType.NiTriShape)) then
 					table.insert(litInteriorWindowShapesIndexes, i)
 					lastShape = shape
-	
+
 					-- If it is an old mesh try to fix up windows.
 					if (data.legacyMesh) then
 						-- Ensure unique materials.
@@ -391,18 +396,18 @@ local function onMeshLoaded(e)
 							materialProperty = materialProperty:clone()
 							shape.materialProperty = materialProperty
 						end
-	
+
 						-- Remove vertex coloring if we need to.
 						if (shape.data and shape.data.colors and #shape.data.colors > 0) then
 							shape.data = shape.data:copy({ colors = false })
 							shape.data:markAsChanged()
 						end
-	
+
 						-- Make sure we don't have a glow map.
 						if (texturingProperty.glowMap) then
 							texturingProperty.glowMap = nil
 						end
-	
+
 						shape:updateProperties()
 						shape:update()
 					end
@@ -432,7 +437,7 @@ local function onMeshLoaded(e)
 			end
 		end
 	end
-	
+
 	-- We also need to know about unlit interior windows.
 	if (#dayNightSwitchNode.children >= data.indexOff) then
 		-- See what shapes we will later want to update when coloring nighttime windows.
@@ -443,7 +448,7 @@ local function onMeshLoaded(e)
 				local materialProperty = shape.materialProperty
 				if (texturingProperty and materialProperty and shape:isInstanceOfType(tes3.niType.NiTriShape)) then
 					table.insert(unlitInteriorWindowShapesIndexes, i)
-	
+
 					-- If it is an old mesh try to fix up windows.
 					if (data.legacyMesh) then
 						-- Ensure unique materials.
@@ -451,18 +456,18 @@ local function onMeshLoaded(e)
 							materialProperty = materialProperty:clone()
 							shape.materialProperty = materialProperty
 						end
-	
+
 						-- Remove vertex coloring if we need to.
 						if (shape.data and shape.data.colors and #shape.data.colors > 0) then
 							shape.data = shape.data:copy({ colors = false })
 							shape.data:markAsChanged()
 						end
-	
+
 						-- Make sure we don't have a glow map.
 						if (texturingProperty.glowMap) then
 							texturingProperty.glowMap = nil
 						end
-	
+
 						shape:updateProperties()
 						shape:update()
 					end
