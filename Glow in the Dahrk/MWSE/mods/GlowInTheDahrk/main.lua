@@ -2,6 +2,13 @@ local config = require("GlowInTheDahrk.config")
 local interop = require("GlowInTheDahrk.interop")
 local debug = require("GlowInTheDahrk.debug")
 
+--[[
+	Todo list:
+		- Correctly toggle sunrays when using the MCM.
+		- Figure out how to cull objects from dynamic effects to prevent bleed between walls/floors.
+		- Figure out what to do with plazas.
+--]]
+
 --
 -- Keep track of references we care about.
 --
@@ -155,6 +162,9 @@ local function updateReferences(now)
 		local sceneNode = reference.sceneNode
 		if (sceneNode) then
 			local meshData = trackedReferences[reference]
+			local indexOff = meshData.indexOff
+			local indexOn = meshData.indexOn
+			local indexInDay = meshData.indexInDay
 
 			local switchNode = sceneNode.children[meshData.switchChildIndex]
 			if (switchNode) then
@@ -166,18 +176,18 @@ local function updateReferences(now)
 				end
 
 				-- Determine which new index to assign.
-				local previousIndex = switchNode.switchIndex
-				local index = 0
+				local previousIndex = switchNode.switchIndex + 1
+				local index = indexOff
 				if (useExteriorLogic) then
 					if (hour < dawnMidPoint or hour > duskMidPoint) then
-						index = 1
+						index = indexOn
 					end
 				else
 					if (isOutsideLit) then
-						index = 2
+						index = indexInDay
 					end
 				end
-				switchNode.switchIndex = index
+				switchNode.switchIndex = index - 1
 
 				-- Do we need to add a light to an interior?
 				if (not useExteriorLogic) then
@@ -185,7 +195,7 @@ local function updateReferences(now)
 					local light = nil
 
 					-- Perform state switches.
-					if (previousIndex == 0 and index == 2) then
+					if (previousIndex == indexOff and index == indexInDay) then
 						-- Add light.
 						if (addInteriorLights and meshData.supportsLight) then
 							cachedLight = meshData.light or interop.getDefaultLight()
@@ -195,15 +205,15 @@ local function updateReferences(now)
 
 						-- Setup sunrays
 						if (meshData.interiorRayIndex) then
-							switchNode.children[index + 1].children[meshData.interiorRayIndex].appCulled = not addInteriorSunrays
+							switchNode.children[index].children[meshData.interiorRayIndex].appCulled = not addInteriorSunrays
 						end
-					elseif (previousIndex == 2 and index == 0 and meshData.supportsLight) then
+					elseif (previousIndex == indexInDay and index == indexOff and meshData.supportsLight) then
 						-- Remove light.
 						reference:deleteDynamicLightAttachment(true)
 					end
 
 					-- Update interior windows.
-					if (index == 2) then
+					if (index == indexInDay) then
 						-- Update lighting data.
 						local lerpedColor = currentRegionSunColor
 						if (meshData.supportsLight) then
@@ -218,7 +228,7 @@ local function updateReferences(now)
 						end
 
 						-- Update rays.
-						local interiorNode = switchNode.children[index + 1]
+						local interiorNode = switchNode.children[index]
 						if (addInteriorSunrays and meshData.interiorRayIndex) then
 							local rays = interiorNode.children[meshData.interiorRayIndex]
 							for ray in table.traverse({ rays }) do
@@ -230,13 +240,28 @@ local function updateReferences(now)
 						end
 
 						-- Update window color.
-						if (meshData.interiorWindowShapes) then
-							for _, index in ipairs(meshData.interiorWindowShapes) do
+						if (meshData.litInteriorWindowShapesIndexes) then
+							for _, index in ipairs(meshData.litInteriorWindowShapesIndexes) do
 								local materialProperty = interiorNode.children[index].materialProperty
 								if (materialProperty) then
 									materialProperty.ambient = lerpedColor
 									materialProperty.diffuse = lerpedColor
 									materialProperty.emissive = lerpedColor * currentDimmer
+								end
+							end
+						end
+					elseif (index == indexOff) then
+						local unlitInteriorNode = switchNode.children[indexOff]
+	
+						-- Update window color.
+						if (meshData.unlitInteriorWindowShapesIndexes) then
+							local nightColor = interop.getDefaultLight().diffuse:lerp(currentRegionSunColor, 0.5)
+							for _, index in ipairs(meshData.unlitInteriorWindowShapesIndexes) do
+								local materialProperty = unlitInteriorNode.children[index].materialProperty
+								if (materialProperty) then
+									materialProperty.ambient = nightColor
+									materialProperty.diffuse = nightColor
+									materialProperty.emissive = nightColor * 0.0
 								end
 							end
 						end
@@ -281,10 +306,12 @@ local function onMeshLoaded(e)
 
 	-- Get the first child node.
 	local dayNightSwitchNode = node.children[data.switchChildIndex]
+	data.indexOff = getChildByName(dayNightSwitchNode.children, "off") or 1
+	data.indexOn = getChildByName(dayNightSwitchNode.children, "on") or 2
+	data.indexInDay = getChildByName(dayNightSwitchNode.children, "int-day") or 3
 
 	-- Does the mesh have interior light capabilities?
-	local interiorLightIndex = 2 + 1 -- Offset by one.
-	if (#dayNightSwitchNode.children >= interiorLightIndex) then
+	if (#dayNightSwitchNode.children >= data.indexInDay) then
 		-- Look to see if it has a custom light.
 		local attachLight = node:getObjectByName("AttachLight")
 		if (attachLight) then
@@ -302,7 +329,7 @@ local function onMeshLoaded(e)
 			end
 		end
 
-		local interiorLights = dayNightSwitchNode.children[interiorLightIndex]
+		local interiorLights = dayNightSwitchNode.children[data.indexInDay]
 		data.interiorRayIndex = getChildByName(interiorLights.children, "rays")
 
 		-- Make a guess at if this is a modern mesh.
@@ -313,7 +340,7 @@ local function onMeshLoaded(e)
 
 		-- If it is an old mesh try to fix up rays.
 		if (data.legacyMesh and data.interiorRayIndex) then
-			local raysNode = dayNightSwitchNode.children[interiorLightIndex].children[data.interiorRayIndex]
+			local raysNode = dayNightSwitchNode.children[data.indexInDay].children[data.interiorRayIndex]
 			for shape in table.traverse({ raysNode }) do
 				local materialProperty = shape.materialProperty
 				if (materialProperty and shape:isInstanceOfType(tes3.niType.NiTriShape)) then
@@ -343,77 +370,43 @@ local function onMeshLoaded(e)
 
 		-- See if we can clear up vcol on the interior window mesh.
 		-- Also see what shapes we will later want to update when coloring windows.
-		local interiorWindowShapes = {}
+		local litInteriorWindowShapesIndexes = {}
 		local lastShape = nil
 		for i, shape in ipairs(interiorLights.children) do
-			local texturingProperty = shape.texturingProperty
-			local materialProperty = shape.materialProperty
-			if (texturingProperty and materialProperty and shape:isInstanceOfType(tes3.niType.NiTriShape)) then
-				table.insert(interiorWindowShapes, i)
-				lastShape = shape
-
-				-- If it is an old mesh try to fix up windows.
-				if (data.legacyMesh) then
-					-- Ensure unique materials.
-					if (materialProperty.refCount > 2) then
-						materialProperty = materialProperty:clone()
-						shape.materialProperty = materialProperty
-					end
-
-					-- Remove vertex coloring if we need to.
-					if (shape.data and shape.data.colors and #shape.data.colors > 0) then
-						shape.data = shape.data:copy({ colors = false })
-						shape.data:markAsChanged()
-					end
-
-					-- Make sure we don't have a glow map.
-					if (texturingProperty.glowMap) then
-						texturingProperty.glowMap = nil
-					end
-
-					shape:updateProperties()
-					shape:update()
-				end
-			end
-		end
-		if (#interiorWindowShapes > 0) then
-			data.interiorWindowShapes = interiorWindowShapes
-		end
-
-		-- We also need to clear some data from legacy interior data.
-		if (data.legacyMesh) then
-			local defaultNightSkyColor = niColor.new(0.30, 0.36, 0.49)
-			local interiorUnlitNode = dayNightSwitchNode.children[1]
-			for i, shape in ipairs(interiorUnlitNode.children) do
+			if (shape) then
 				local texturingProperty = shape.texturingProperty
 				local materialProperty = shape.materialProperty
 				if (texturingProperty and materialProperty and shape:isInstanceOfType(tes3.niType.NiTriShape)) then
-					-- Ensure unique materials.
-					if (materialProperty.refCount > 2) then
-						materialProperty = materialProperty:clone()
-						shape.materialProperty = materialProperty
+					table.insert(litInteriorWindowShapesIndexes, i)
+					lastShape = shape
+	
+					-- If it is an old mesh try to fix up windows.
+					if (data.legacyMesh) then
+						-- Ensure unique materials.
+						if (materialProperty.refCount > 2) then
+							materialProperty = materialProperty:clone()
+							shape.materialProperty = materialProperty
+						end
+	
+						-- Remove vertex coloring if we need to.
+						if (shape.data and shape.data.colors and #shape.data.colors > 0) then
+							shape.data = shape.data:copy({ colors = false })
+							shape.data:markAsChanged()
+						end
+	
+						-- Make sure we don't have a glow map.
+						if (texturingProperty.glowMap) then
+							texturingProperty.glowMap = nil
+						end
+	
+						shape:updateProperties()
+						shape:update()
 					end
-
-					-- Darken windows.
-					materialProperty.ambient = defaultNightSkyColor
-					materialProperty.diffuse = defaultNightSkyColor
-					materialProperty.emissive = defaultNightSkyColor * 0.0
-
-					-- Remove vertex coloring if we need to.
-					if (shape.data and shape.data.colors and #shape.data.colors > 0) then
-						shape.data = shape.data:copy({ colors = false })
-						shape.data:markAsChanged()
-					end
-
-					-- Make sure we don't have a glow map.
-					if (texturingProperty.glowMap) then
-						texturingProperty.glowMap = nil
-					end
-
-					shape:updateProperties()
-					shape:update()
 				end
 			end
+		end
+		if (#litInteriorWindowShapesIndexes > 0) then
+			data.litInteriorWindowShapesIndexes = litInteriorWindowShapesIndexes
 		end
 
 		-- Do we have info to create a new light attachment point?
@@ -433,6 +426,48 @@ local function onMeshLoaded(e)
 				data.supportsLight = true
 				node:attachChild(attachLight)
 			end
+		end
+	end
+	
+	-- We also need to know about unlit interior windows.
+	if (#dayNightSwitchNode.children >= data.indexOff) then
+		-- 
+		local defaultNightSkyColor = niColor.new(0.30, 0.36, 0.49)
+		local unlitInteriorWindowShapesIndexes = {}
+		for i, shape in ipairs(dayNightSwitchNode.children[data.indexOff].children) do
+			if (shape) then
+				local texturingProperty = shape.texturingProperty
+				local materialProperty = shape.materialProperty
+				if (texturingProperty and materialProperty and shape:isInstanceOfType(tes3.niType.NiTriShape)) then
+					table.insert(unlitInteriorWindowShapesIndexes, i)
+	
+					-- If it is an old mesh try to fix up windows.
+					if (data.legacyMesh) then
+						-- Ensure unique materials.
+						if (materialProperty.refCount > 2) then
+							materialProperty = materialProperty:clone()
+							shape.materialProperty = materialProperty
+						end
+	
+						-- Remove vertex coloring if we need to.
+						if (shape.data and shape.data.colors and #shape.data.colors > 0) then
+							shape.data = shape.data:copy({ colors = false })
+							shape.data:markAsChanged()
+						end
+	
+						-- Make sure we don't have a glow map.
+						if (texturingProperty.glowMap) then
+							texturingProperty.glowMap = nil
+						end
+	
+						shape:updateProperties()
+						shape:update()
+					end
+				end
+			end
+		end
+		if (#unlitInteriorWindowShapesIndexes > 0) then
+			data.unlitInteriorWindowShapesIndexes = unlitInteriorWindowShapesIndexes
 		end
 	end
 end
