@@ -174,6 +174,3 @@ local function registerModConfig()
 	mwse.registerModConfig("Easy Escort", modConfig)
 end
 event.register("modConfigReady", registerModConfig)
-
--- Finally let the log know we're loaded.
-mwse.log("[Easy Escort] Initialized with configuration:\n%s", json.encode(config, { indent = true }))
