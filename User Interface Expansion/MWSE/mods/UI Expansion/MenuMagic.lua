@@ -334,7 +334,6 @@ local function getNameBlockForPower(power)
 
 	local powersList = magicMenu:findChild(GUI_ID_MagicMenu_spells_list):findChild("MagicMenu_power_names")
 	for _, nameElement in ipairs(powersList.children) do
-		local power = nameElement:getPropertyObject("MagicMenu_Spell")
 		if (nameElement:getPropertyObject("MagicMenu_Spell") == power) then
 			return nameElement
 		end

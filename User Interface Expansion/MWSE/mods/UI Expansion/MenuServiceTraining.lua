@@ -137,7 +137,7 @@ local function createTrainSkillElement(parent, id, data)
 	local canAfford = data.cost <= tes3.getPlayerGold()
 	local level = tes3.mobilePlayer.skills[data.skill.id + 1]
 	local attr = tes3.mobilePlayer.attributes[data.skill.attribute + 1]
-	local trainerLevel = trainer.skills[data.skill.id + 1]
+	local trainerLevel = parent:getTopLevelParent():getPropertyObject("MenuServiceTraining_Actor").skills[data.skill.id + 1]
 
 	local textColor = (canAfford and level.base < attr.base and level.base < trainerLevel.base) and
 	                  tes3ui.getPalette("normal_color") or tes3ui.getPalette("disabled_color")
@@ -219,8 +219,7 @@ local function modifyWindow(menu)
 	end
 
 	-- Scrape data
-	trainer = menu:getPropertyObject("MenuServiceTraining_Actor")
-	training = {}
+	local training = {}
 	for i, v in ipairs(list:findChild(id_pane).children) do
 		training[i] = {}
 		training[i].skill = tes3.getSkill(v:getPropertyInt("MenuServiceTraining_ListNumber"))
