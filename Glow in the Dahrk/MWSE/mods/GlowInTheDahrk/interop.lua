@@ -90,20 +90,20 @@ function interop.getDawnDuskHours()
 	local gameHour = worldController.hour.value
 
 	-- Figure out when our important sunrise times are.
-	local sunriseStartTime = weatherController.sunriseHour - weatherController.skyPreSunriseTime
+	local sunriseStart = weatherController.sunriseHour - weatherController.skyPreSunriseTime
 	local sunriseTotalDuration = weatherController.skyPostSunriseTime + weatherController.sunriseDuration +
 	                             weatherController.skyPreSunriseTime
-	local sunriseMidPoint = sunriseStartTime + (sunriseTotalDuration / 2)
-	local sunriseStopTime = sunriseStartTime + sunriseTotalDuration
+	local sunriseMidPoint = sunriseStart + (sunriseTotalDuration / 2)
+	local sunriseStop = sunriseStart + sunriseTotalDuration
 
 	-- Figure out when our important sunset times are.
-	local sunsetStartTime = weatherController.sunsetHour - weatherController.skyPreSunsetTime
+	local sunsetStart = weatherController.sunsetHour - weatherController.skyPreSunsetTime
 	local sunsetTotalDuration = weatherController.skyPostSunsetTime + weatherController.sunsetDuration +
 	                            weatherController.skyPreSunsetTime
-	local sunsetMidPoint = sunsetStartTime + (sunsetTotalDuration / 2)
-	local sunsetStopTime = sunsetStartTime + sunsetTotalDuration
+	local sunsetMidPoint = sunsetStart + (sunsetTotalDuration / 2)
+	local sunsetStop = sunsetStart + sunsetTotalDuration
 
-	return sunriseStartTime, sunriseStopTime, sunsetStartTime, sunsetStopTime
+	return sunriseStart, sunriseMidPoint, sunriseStop, sunsetStart, sunsetMidPoint, sunsetStop
 end
 
 function interop.calculateRegionSunColor(region)
@@ -112,19 +112,10 @@ function interop.calculateRegionSunColor(region)
 	local weatherController = worldController.weatherController
 	local gameHour = worldController.hour.value
 
-	-- Figure out when our important sunrise times are.
-	local sunriseStartTime = weatherController.sunriseHour - weatherController.skyPreSunriseTime
-	local sunriseTotalDuration = weatherController.skyPostSunriseTime + weatherController.sunriseDuration +
-	                             weatherController.skyPreSunriseTime
-	local sunriseMidPoint = sunriseStartTime + (sunriseTotalDuration / 2)
-	local sunriseStopTime = sunriseStartTime + sunriseTotalDuration
-
-	-- Figure out when our important sunset times are.
-	local sunsetStartTime = weatherController.sunsetHour - weatherController.skyPreSunsetTime
-	local sunsetTotalDuration = weatherController.skyPostSunsetTime + weatherController.sunsetDuration +
-	                            weatherController.skyPreSunsetTime
-	local sunsetMidPoint = sunsetStartTime + (sunsetTotalDuration / 2)
-	local sunsetStopTime = sunsetStartTime + sunsetTotalDuration
+	-- Figure out when our important times are.
+	local sunriseStart, sunriseMidPoint, sunriseStop, sunsetStart, sunsetMidPoint, sunsetStop = interop.getDawnDuskHours()
+	local sunriseTotalDuration = sunriseStop - sunriseStart
+	local sunsetTotalDuration = sunsetStop - sunsetStart
 
 	-- Figure out weather information.
 	local weather = region.weather
@@ -138,7 +129,7 @@ function interop.calculateRegionSunColor(region)
 	-- Figure out what our colors are.
 	local currentWeatherColor = nil
 	local nextWeatherColor = nil
-	if (gameHour < sunriseStartTime or gameHour > sunsetStopTime) then
+	if (gameHour < sunriseStart or gameHour > sunsetStop) then
 		-- Night time
 		currentWeatherColor = weather.sunNightColor
 		nextWeatherColor = nextWeather and nextWeather.sunNightColor
@@ -147,12 +138,12 @@ function interop.calculateRegionSunColor(region)
 		local timeTransitionScalar = (gameHour - sunsetMidPoint) / (sunsetTotalDuration / 2)
 		currentWeatherColor = weather.sunSunsetColor:lerp(weather.sunNightColor, timeTransitionScalar)
 		nextWeatherColor = nextWeather and nextWeather.sunSunsetColor:lerp(nextWeather.sunNightColor, timeTransitionScalar)
-	elseif (gameHour >= sunsetStartTime) then
+	elseif (gameHour >= sunsetStart) then
 		-- Transition from day to sunset
-		local timeTransitionScalar = (gameHour - sunsetStartTime) / (sunsetTotalDuration / 2)
+		local timeTransitionScalar = (gameHour - sunsetStart) / (sunsetTotalDuration / 2)
 		currentWeatherColor = weather.sunDayColor:lerp(weather.sunSunsetColor, timeTransitionScalar)
 		nextWeatherColor = nextWeather and nextWeather.sunDayColor:lerp(nextWeather.sunSunsetColor, timeTransitionScalar)
-	elseif (gameHour >= sunriseStopTime) then
+	elseif (gameHour >= sunriseStop) then
 		-- Day time
 		currentWeatherColor = weather.sunDayColor
 		nextWeatherColor = nextWeather and nextWeather.sunDayColor
@@ -161,9 +152,9 @@ function interop.calculateRegionSunColor(region)
 		local timeTransitionScalar = (gameHour - sunriseMidPoint) / (sunriseTotalDuration / 2)
 		currentWeatherColor = weather.sunSunriseColor:lerp(weather.sunDayColor, timeTransitionScalar)
 		nextWeatherColor = nextWeather and nextWeather.sunSunriseColor:lerp(nextWeather.sunDayColor, timeTransitionScalar)
-	elseif (gameHour >= sunriseStartTime) then
+	elseif (gameHour >= sunriseStart) then
 		-- Transition from night to sunrise
-		local timeTransitionScalar = (gameHour - sunriseStartTime) / (sunriseTotalDuration / 2)
+		local timeTransitionScalar = (gameHour - sunriseStart) / (sunriseTotalDuration / 2)
 		currentWeatherColor = weather.sunNightColor:lerp(weather.sunSunriseColor, timeTransitionScalar)
 		nextWeatherColor = nextWeather and nextWeather.sunNightColor:lerp(nextWeather.sunSunriseColor, timeTransitionScalar)
 	end

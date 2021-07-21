@@ -138,9 +138,9 @@ local function updateReferences(now)
 	local worldController = tes3.worldController
 	local weatherController = worldController.weatherController
 	local gameHour = worldController.hour.value
-	local dawnStart, dawnStop, duskStart, duskStop = interop.getDawnDuskHours()
-	local dawnMidPoint = (dawnStart + dawnStop) / 2
-	local duskMidPoint = (duskStart + duskStop) / 2
+	local sunriseStart, sunriseMidPoint, sunriseStop, sunsetStart, sunsetMidPoint, sunsetStop = interop.getDawnDuskHours()
+	local sunriseMidPoint = (sunriseStart + sunriseStop) / 2
+	local sunsetMidPoint = (sunsetStart + sunsetStop) / 2
 	local useVariance = config.useVariance
 	local varianceScalar = config.varianceInMinutes / 60
 	local addInteriorLights = config.addInteriorLights
@@ -149,17 +149,17 @@ local function updateReferences(now)
 
 	-- Calculate some of our lighting values.
 	local currentWeatherBrightness = interop.getCurrentWeatherBrightness()
-	local isOutsideLit = gameHour >= dawnStart and gameHour <= duskStop
+	local isOutsideLit = gameHour >= sunriseStart and gameHour <= sunsetStop
 	local currentRegionSunColor = playerRegion and interop.calculateRegionSunColor(playerRegion)
 
 	-- Fade light in/out at dawn/dusk.
 	local currentDimmer = 0.0
-	if (dawnMidPoint < gameHour and gameHour < duskMidPoint) then
+	if (sunriseMidPoint < gameHour and gameHour < sunsetMidPoint) then
 		currentDimmer = currentWeatherBrightness
-	elseif (dawnStart <= gameHour and gameHour <= dawnMidPoint) then
-		currentDimmer = currentWeatherBrightness * math.remap(gameHour, dawnStart, dawnMidPoint, 0.0, 1.0)
-	elseif (duskMidPoint <= gameHour and gameHour <= duskStop) then
-		currentDimmer = currentWeatherBrightness * math.remap(gameHour, duskStop, duskMidPoint, 0.0, 1.0)
+	elseif (sunriseStart <= gameHour and gameHour <= sunriseMidPoint) then
+		currentDimmer = currentWeatherBrightness * math.remap(gameHour, sunriseStart, sunriseMidPoint, 0.0, 1.0)
+	elseif (sunsetMidPoint <= gameHour and gameHour <= sunsetStop) then
+		currentDimmer = currentWeatherBrightness * math.remap(gameHour, sunsetStop, sunsetMidPoint, 0.0, 1.0)
 	end
 
 	-- Go through and update all our references.
@@ -186,7 +186,7 @@ local function updateReferences(now)
 				local previousIndex = switchNode.switchIndex + 1
 				local index = indexOff
 				if (useExteriorLogic) then
-					if (hour < dawnMidPoint or hour > duskMidPoint) then
+					if (hour < sunriseMidPoint or hour > sunsetMidPoint) then
 						index = indexOn
 					end
 				else
