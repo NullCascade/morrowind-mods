@@ -514,5 +514,7 @@ GitD_debug.trackedReferences = trackedReferences
 local function addGitD_DebugCommands(e)
 	e.sandbox.GlowInTheDahrk = GitD_debug
 	e.sandbox.GitD = GitD_debug
+	e.sandbox.gitd = GitD_debug
+	e.sandbox.GITD = GitD_debug
 end
 event.register("UIEXP:sandboxConsole", addGitD_DebugCommands)
