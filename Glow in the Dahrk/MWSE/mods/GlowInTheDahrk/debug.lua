@@ -1,8 +1,8 @@
-local debug = {}
+local GitD_debug = {}
 
-debug.config = require("GlowInTheDahrk.config")
+GitD_debug.config = require("GlowInTheDahrk.config")
 
-function debug.getParentChain(thing)
+function GitD_debug.getParentChain(thing)
 	local result = thing.name
 	local parent = thing.parent
 	while (parent) do
@@ -25,19 +25,19 @@ local function debugWeatherTransitionFinished(e)
 	mwse.log("Weather transition to %s finished.", table.find(tes3.weather, e.to.index))
 end
 
-function debug.startWeatherTracking()
+function GitD_debug.startWeatherTracking()
 	event.register("weatherChangedImmediate", debugWeatherChangedImmediate)
 	event.register("weatherTransitionStarted", debugWeatherTransitionStarted)
 	event.register("weatherTransitionFinished", debugWeatherTransitionFinished)
 end
 
-function debug.stopWeatherTracking()
+function GitD_debug.stopWeatherTracking()
 	event.unregister("weatherChangedImmediate", debugWeatherChangedImmediate)
 	event.unregister("weatherTransitionStarted", debugWeatherTransitionStarted)
 	event.unregister("weatherTransitionFinished", debugWeatherTransitionFinished)
 end
 
-function debug.printColorTimings()
+function GitD_debug.logColorTimings()
 	local weatherController = tes3.worldController.weatherController
 	local fields = {
 		"skyPostSunriseTime",
@@ -50,8 +50,9 @@ function debug.printColorTimings()
 		"sunsetHour",
 	}
 	mwse.log("[Glow in the Dahrk] tes3weatherController timings:")
+	mwse.log("  INI values:")
 	for _, field in ipairs(fields) do
-		mwse.log("  %s = %.2f", field, weatherController[field])
+		mwse.log("    %s = %.2f", field, weatherController[field])
 	end
 
 	-- Figure out when our important sunrise times are.
@@ -60,10 +61,11 @@ function debug.printColorTimings()
 	                             weatherController.skyPreSunriseTime
 	local sunriseMidPoint = sunriseStartTime + (sunriseTotalDuration / 2)
 	local sunriseStopTime = sunriseStartTime + sunriseTotalDuration
-	mwse.log("  sunriseStartTime = %.2f", sunriseStartTime)
-	mwse.log("  sunriseTotalDuration = %.2f", sunriseTotalDuration)
-	mwse.log("  sunriseMidPoint = %.2f", sunriseMidPoint)
-	mwse.log("  sunriseStopTime = %.2f", sunriseStopTime)
+	mwse.log("  Calculated values:")
+	mwse.log("    sunriseStartTime = %.2f", sunriseStartTime)
+	mwse.log("    sunriseMidPoint = %.2f", sunriseMidPoint)
+	mwse.log("    sunriseStopTime = %.2f", sunriseStopTime)
+	mwse.log("    sunriseTotalDuration = %.2f", sunriseTotalDuration)
 
 	-- Figure out when our important sunset times are.
 	local sunsetStartTime = weatherController.sunsetHour - weatherController.skyPreSunsetTime
@@ -71,10 +73,11 @@ function debug.printColorTimings()
 	                            weatherController.skyPreSunsetTime
 	local sunsetMidPoint = sunsetStartTime + (sunsetTotalDuration / 2)
 	local sunsetStopTime = sunsetStartTime + sunsetTotalDuration
-	mwse.log("  sunsetStartTime = %.2f", sunsetStartTime)
-	mwse.log("  sunsetTotalDuration = %.2f", sunsetTotalDuration)
-	mwse.log("  sunsetMidPoint = %.2f", sunsetMidPoint)
-	mwse.log("  sunsetStopTime = %.2f", sunsetStopTime)
+	mwse.log("    sunsetStartTime = %.2f", sunsetStartTime)
+	mwse.log("    sunsetMidPoint = %.2f", sunsetMidPoint)
+	mwse.log("    sunsetStopTime = %.2f", sunsetStopTime)
+	mwse.log("    sunsetTotalDuration = %.2f", sunsetTotalDuration)
 end
+GitD_debug.printColorTimings = GitD_debug.logColorTimings
 
-return debug
+return GitD_debug
