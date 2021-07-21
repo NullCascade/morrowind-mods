@@ -156,7 +156,7 @@ local function updateReferences(now)
 		if (sceneNode) then
 			local meshData = trackedReferences[reference]
 
-			local switchNode = sceneNode.children[1]
+			local switchNode = sceneNode.children[meshData.switchChildIndex]
 			if (switchNode) then
 				-- Use hour variation if enabled.
 				local hour = gameHour
@@ -259,7 +259,7 @@ local meshesPathPrefixLength = string.len("meshes\\")
 
 local function getChildByName(collection, name)
 	for i, child in ipairs(collection) do
-		if (child.name:lower() == name) then
+		if (child and child.name and child.name:lower() == name) then
 			return i
 		end
 	end
@@ -268,19 +268,21 @@ end
 local function onMeshLoaded(e)
 	local node = e.node
 
-	-- Get the first child node.
-	local dayNightSwitchNode = (#node.children > 0) and node.children[1] or nil
-
 	-- Make sure the node has the name we care about.
-	if (not dayNightSwitchNode or dayNightSwitchNode.name ~= "NightDaySwitch") then
+	local switchChildIndex = getChildByName(node.children, "nightdayswitch")
+	if (not switchChildIndex) then
 		return
 	end
 
 	-- Remove the meshes\ prefix.
 	local path = string.sub(e.path, meshesPathPrefixLength + 1, string.len(e.path))
 	local data = interop.createMeshData(path)
+	data.switchChildIndex = switchChildIndex
 
-	-- Does the mesh have interior capabilities?
+	-- Get the first child node.
+	local dayNightSwitchNode = node.children[data.switchChildIndex]
+
+	-- Does the mesh have interior light capabilities?
 	local interiorLightIndex = 2 + 1 -- Offset by one.
 	if (#dayNightSwitchNode.children >= interiorLightIndex) then
 		-- Look to see if it has a custom light.
