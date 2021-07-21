@@ -380,6 +380,42 @@ local function onMeshLoaded(e)
 			data.interiorWindowShapes = interiorWindowShapes
 		end
 
+		-- We also need to clear some data from legacy interior data.
+		if (data.legacyMesh) then
+			local defaultNightSkyColor = niColor.new(0.30, 0.36, 0.49)
+			local interiorUnlitNode = dayNightSwitchNode.children[1]
+			for i, shape in ipairs(interiorUnlitNode.children) do
+				local texturingProperty = shape.texturingProperty
+				local materialProperty = shape.materialProperty
+				if (texturingProperty and materialProperty and shape:isInstanceOfType(tes3.niType.NiTriShape)) then
+					-- Ensure unique materials.
+					if (materialProperty.refCount > 2) then
+						materialProperty = materialProperty:clone()
+						shape.materialProperty = materialProperty
+					end
+
+					-- Darken windows.
+					materialProperty.ambient = defaultNightSkyColor
+					materialProperty.diffuse = defaultNightSkyColor
+					materialProperty.emissive = defaultNightSkyColor * 0.0
+
+					-- Remove vertex coloring if we need to.
+					if (shape.data and shape.data.colors and #shape.data.colors > 0) then
+						shape.data = shape.data:copy({ colors = false })
+						shape.data:markAsChanged()
+					end
+
+					-- Make sure we don't have a glow map.
+					if (texturingProperty.glowMap) then
+						texturingProperty.glowMap = nil
+					end
+
+					shape:updateProperties()
+					shape:update()
+				end
+			end
+		end
+
 		-- Do we have info to create a new light attachment point?
 		if (not attachLight and lastShape) then
 			-- Try to make one that is positioned reasonably.
