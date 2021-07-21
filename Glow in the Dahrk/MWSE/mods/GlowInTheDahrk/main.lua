@@ -386,7 +386,12 @@ local function onMeshLoaded(e)
 			if (nodeBoundingBox and shapeBoundingBox) then
 				attachLight = niNode.new()
 				attachLight.name = "AttachLight"
-				attachLight.translation = (nodeBoundingBox.max + nodeBoundingBox.min) * 0.5
+
+				-- Get a point 25% of the way from the tile's center towards the window.
+				local nodeBoundingBoxCenter = (nodeBoundingBox.max + nodeBoundingBox.min) * 0.5
+				local shapeBoundingBoxCenter = (shapeBoundingBox.max + shapeBoundingBox.min) * 0.5
+				attachLight.translation = nodeBoundingBoxCenter:lerp(shapeBoundingBoxCenter, 0.25)
+
 				data.supportsLight = true
 				node:attachChild(attachLight)
 			end
