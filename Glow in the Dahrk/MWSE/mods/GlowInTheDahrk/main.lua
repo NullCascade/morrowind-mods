@@ -1,6 +1,6 @@
 local config = require("GlowInTheDahrk.config")
 local interop = require("GlowInTheDahrk.interop")
-local debug = require("GlowInTheDahrk.debug")
+local GitD_debug = require("GlowInTheDahrk.debug")
 
 --[[
 	Todo list:
@@ -109,6 +109,8 @@ end
 --
 
 local maxUpdatesPerFrame = 10
+
+local colorBlack = niColor.new(0.0, 0.0, 0.0)
 
 local function updateReferences(now)
 	-- Bail if we have nothing to update.
@@ -220,7 +222,7 @@ local function updateReferences(now)
 							light = light or reference.light
 							if (light and currentRegionSunColor) then
 								cachedLight = cachedLight or meshData.light or interop.getDefaultLight()
-								lerpedColor = cachedLight.diffuse:lerp(currentRegionSunColor, 0.5)
+								lerpedColor = cachedLight.diffuse * currentRegionSunColor
 
 								light.diffuse = lerpedColor
 								light.dimmer = currentDimmer
@@ -234,6 +236,9 @@ local function updateReferences(now)
 							for ray in table.traverse({ rays }) do
 								local materialProperty = ray.materialProperty
 								if (materialProperty) then
+									materialProperty.ambient = lerpedColor
+									materialProperty.diffuse = lerpedColor
+									materialProperty.emissive = lerpedColor * currentDimmer
 									materialProperty.alpha = currentDimmer
 								end
 							end
@@ -255,13 +260,12 @@ local function updateReferences(now)
 	
 						-- Update window color.
 						if (meshData.unlitInteriorWindowShapesIndexes) then
-							local nightColor = interop.getDefaultLight().diffuse:lerp(currentRegionSunColor, 0.5)
 							for _, index in ipairs(meshData.unlitInteriorWindowShapesIndexes) do
 								local materialProperty = unlitInteriorNode.children[index].materialProperty
 								if (materialProperty) then
-									materialProperty.ambient = nightColor
-									materialProperty.diffuse = nightColor
-									materialProperty.emissive = nightColor * 0.0
+									materialProperty.ambient = currentRegionSunColor
+									materialProperty.diffuse = currentRegionSunColor
+									materialProperty.emissive = colorBlack
 								end
 							end
 						end
@@ -431,8 +435,7 @@ local function onMeshLoaded(e)
 	
 	-- We also need to know about unlit interior windows.
 	if (#dayNightSwitchNode.children >= data.indexOff) then
-		-- 
-		local defaultNightSkyColor = niColor.new(0.30, 0.36, 0.49)
+		-- See what shapes we will later want to update when coloring nighttime windows.
 		local unlitInteriorWindowShapesIndexes = {}
 		for i, shape in ipairs(dayNightSwitchNode.children[data.indexOff].children) do
 			if (shape) then
@@ -495,16 +498,16 @@ event.register("simulate", onSimulate)
 dofile("GlowInTheDahrk.mcm")
 
 --
--- Expose some useful info for debugging.
+-- Expose some useful info for GitD_debugging.
 --
 
-debug.cellRegionCache = cellRegionCache
-debug.getRegion = getRegion
-debug.referenceUpdateQueue = referenceUpdateQueue
-debug.trackedReferences = trackedReferences
+GitD_debug.cellRegionCache = cellRegionCache
+GitD_debug.getRegion = getRegion
+GitD_debug.referenceUpdateQueue = referenceUpdateQueue
+GitD_debug.trackedReferences = trackedReferences
 
-local function addDebugCommands(e)
-	e.sandbox.GlowInTheDahrk = debug
-	e.sandbox.GitD = debug
+local function addGitD_DebugCommands(e)
+	e.sandbox.GlowInTheDahrk = GitD_debug
+	e.sandbox.GitD = GitD_debug
 end
-event.register("UIEXP:sandboxConsole", addDebugCommands)
+event.register("UIEXP:sandboxConsole", addGitD_DebugCommands)
