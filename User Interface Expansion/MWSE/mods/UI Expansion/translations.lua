@@ -61,7 +61,6 @@ return {
 		configFilterButtonsDescription = "When enabled, the vanilla-style filters are given on the inventory menus. When disabled, compact icons will be used instead. This can be useful when playing with narrower menu windows.",
 		configMapSwitchKey = "Keybind for map mode switching.",
 		configMapSwitchKeyDescription = "This key combination will switch from map between world and local modes.",
-		configMaxWaitDays = "Maximum number of days to wait or rest?",
 		configMaxWaitDays = "Maximum wait days:",
 		configMaxWaitDaysDescription = "This can be set to higher than 1 to allow waiting or resting for more than 24 hours at a time.",
 		configRatioDisplay = "Display value/weight ratio?",

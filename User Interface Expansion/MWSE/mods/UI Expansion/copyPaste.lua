@@ -1,4 +1,4 @@
-local function onKeyDownC(e)
+local function onKeyDownCopyCut(e)
 	if (not e.isControlDown or e.isShiftDown or e.isSuperDown) then
 		return
 	end
@@ -21,14 +21,22 @@ local function onKeyDownC(e)
 	local copyStart = e.isAltDown and (cursorPosition + 1) or 1
 	local copyEnd = e.isAltDown and #inputFocusText or (cursorPosition - 1)
 
-	-- Finally copy our text.
+	-- Copy our text.
 	local copyText = string.sub(inputFocusText, copyStart, copyEnd)
 	if (not copyText or copyText == "") then
 		return
 	end
 	os.setClipboardText(copyText)
+
+	-- If we are cutting, clear the text.
+	if (e.keyCode == tes3.scanCode.x) then
+		local cutText = string.sub(inputFocusText, copyEnd + 1, #inputFocusText)
+		inputFocus.rawText = cutText
+		inputFocus:getTopLevelParent():updateLayout()
+	end
 end
-event.register("keyDown", onKeyDownC, { filter = tes3.scanCode.c })
+event.register("keyDown", onKeyDownCopyCut, { filter = tes3.scanCode.c })
+event.register("keyDown", onKeyDownCopyCut, { filter = tes3.scanCode.x })
 
 local function onKeyDownV(e)
 	if (not e.isControlDown or e.isShiftDown or e.isAltDown or e.isSuperDown) then
