@@ -62,13 +62,19 @@ local function onSubmitCommand()
 
 			-- Run command and show output in console.
 			if (f) then
-				local status, errorOrResult = sandboxScript(f)
+				local results = { sandboxScript(f) }
+				local status = results[1]
 				if (status) then
-					if (errorOrResult ~= nil) then
-						tes3ui.logToConsole(string.format("> %s", errorOrResult))
+					if (#results > 1) then
+						-- Get all of our return values to print, but we have to conver them to strings first.
+						local values = {}
+						for i = 2, #results do
+							values[i - 1] = tostring(results[i])
+						end
+						tes3ui.logToConsole(string.format("> %s", table.concat(values, ", ")))
 					end
 				else
-					tes3ui.logToConsole(errorOrResult)
+					tes3ui.logToConsole(results[2])
 				end
 			else
 				tes3ui.logToConsole(message)
