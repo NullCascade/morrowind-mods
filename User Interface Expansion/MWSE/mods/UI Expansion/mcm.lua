@@ -72,6 +72,27 @@ local function registerModConfig()
 				description = common.dictionary.configRatioDisplayDescription,
 				variable = mwse.mcm.createTableVariable({ id = "displayRatio", table = common.config }),
 			})
+
+			-- Center-align icon bar
+			category:createOnOffButton({
+				label = common.dictionary.configIconBarCenterAlign,
+				description = common.dictionary.configIconBarCenterAlignDescription,
+				variable = mwse.mcm.createTableVariable({ id = "iconBarCenterAlign", table = common.config })
+			})
+
+			-- Icon bar location
+			category:createDropdown({
+				label = common.dictionary.configIconBarLocation,
+				description = common.dictionary.configIconBarLocationDescription,
+				options = {
+					{ label = common.dictionary.configIconBarLocationOptions[1], value = "Top" },
+					{ label = common.dictionary.configIconBarLocationOptions[2], value = "Below item name" },
+					{ label = common.dictionary.configIconBarLocationOptions[3], value = "Above enchantments" },
+					{ label = common.dictionary.configIconBarLocationOptions[4], value = "Above flavor text" },
+					{ label = common.dictionary.configIconBarLocationOptions[5], value = "Bottom" },
+				},
+				variable = mwse.mcm.createTableVariable({ id = "iconBarLocation", table = common.config }),
+			})
 		end
 
 		-- Category: Search & Filtering

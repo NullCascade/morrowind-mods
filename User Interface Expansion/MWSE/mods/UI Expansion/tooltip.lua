@@ -330,7 +330,12 @@ local function extraTooltipEarly(e)
 			container.autoHeight = true
 			container.paddingAllSides = 2
 			container.paddingTop = 4
-			container.childAlignX = 1.0
+
+			if common.config.iconBarCenterAlign then
+				container.childAlignX = 0.5
+			else
+				container.childAlignX = 1.0
+			end
 
 			-- Value
 			local valueBlock = container:createBlock{ id = GUI_ID_TooltipIconGoldBlock }
@@ -422,11 +427,32 @@ local function extraTooltipLate(e)
 		end
 	end
 
-	-- Now, we'll make sure our icon bar is in the position we want (currently the very bottom).
-	-- TODO: add MCM option to set the position of the iconbar. Top, above enchants, above flavortext, bottom.
+	-- Now, we'll make sure our icon bar is in the position we want.
 	for i = #children, 1, -1 do
 		if children[i].id == GUI_ID_TooltipIconBar then
-			element:reorderChildren(#children, i - 1, 1)
+			if common.config.iconBarLocation == "Top" then
+				element:reorderChildren(0, i - 1, 1)
+
+			elseif common.config.iconBarLocation == "Below item name" then
+				element:reorderChildren(1, i - 1, 1)
+
+			elseif common.config.iconBarLocation == "Above enchantments" then
+				local enchantmentDivider = element:findChild(GUI_ID_TooltipEnchantmentDivider)
+
+				if enchantmentDivider == nil then
+					enchantmentDivider = element:findChild("HelpMenu_castType")
+				end
+
+				element:reorderChildren(enchantmentDivider, i - 1, 1)
+
+			elseif common.config.iconBarLocation == "Above flavor text" then
+				local extraDivider = element:findChild(GUI_ID_TooltipExtraDivider)
+				element:reorderChildren(extraDivider, i - 1, 1)
+
+			elseif common.config.iconBarLocation == "Bottom" then
+				element:reorderChildren(#children, i - 1, 1)
+			end
+
 			break
 		end
 	end

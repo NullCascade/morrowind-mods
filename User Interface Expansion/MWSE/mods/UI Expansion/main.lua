@@ -53,6 +53,8 @@ local defaultConfig = {
 		tooltip = true,
 		training = true,
 	},
+	iconBarLocation = "Bottom",
+	iconBarCenterAlign = false,
 }
 local config = mwse.loadConfig("UI Expansion", defaultConfig)
 
