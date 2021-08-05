@@ -30,7 +30,7 @@ local function registerModConfig()
 			label = "Preserve soul used?",
 			description = "If enabled, the lowercased ID of the soul used to make the newly enchanted item is stored in the new item's lua data. It can be accessed using the ncceEnchantedSoul field.\n\nThis allows other mods to access this data if it is available.\n\nIt is not advised that you disable this.",
 			variable = mwse.mcm:createTableVariable({
-				id = "storeBaseObject",
+				id = "storeSoulUsed",
 				table = config,
 			}),
 		})
