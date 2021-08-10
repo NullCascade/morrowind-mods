@@ -163,9 +163,22 @@ event.register("saved", onSaved)
 
 -- Checks to make sure that both the game can accept a save from this context and that we are ready to save.
 function interop.canPerformSave()
-	return not tes3.dataHandler.backgroundThreadRunning -- Prevent saving when there's something in the background thread.
-		and tes3.worldController.charGenState.value == -1 -- We don't want to save before chargen is over.
-		and (os.clock() - saveThrottler > config.minimumTimeBetweenAutoSaves * 60) -- Prevent saves from happening too often.
+	-- Prevent saving when there's something in the background thread.
+	if (tes3.dataHandler.backgroundThreadRunning) then
+		return false
+	end
+
+	-- We don't want to save before chargen is over.
+	if (tes3.worldController.charGenState.value ~= -1) then
+		return false
+	end
+
+	-- Prevent saves from happening too often.
+	if (os.clock() - saveThrottler <= config.minimumTimeBetweenAutoSaves * 60) then
+		return false
+	end
+
+	return true
 end
 
 -- Autosave on combat start.
