@@ -54,30 +54,34 @@ local function onSubmitCommand()
 
 	if (not e or not e.block) then
 		if (luaMode) then
-			-- Try compiling command as an expression first.
-			local f, message = loadstring("return " .. text)
-			if (not f) then
-				f, message = loadstring(text)
-			end
+			-- Break the text into multiple separate lines and run each one independently.
+			local lineBrokenText = string.split(string.gsub(text, "\r", ""), "\n")
+			for _, line in ipairs(lineBrokenText) do
+				-- Try compiling command as an expression first.
+				local f, message = loadstring("return " .. line)
+				if (not f) then
+					f, message = loadstring(line)
+				end
 
-			-- Run command and show output in console.
-			if (f) then
-				local results = { sandboxScript(f) }
-				local status = results[1]
-				if (status) then
-					if (#results > 1) then
-						-- Get all of our return values to print, but we have to conver them to strings first.
-						local values = {}
-						for i = 2, #results do
-							values[i - 1] = tostring(results[i])
+				-- Run command and show output in console.
+				if (f) then
+					local results = { sandboxScript(f) }
+					local status = results[1]
+					if (status) then
+						if (#results > 1) then
+							-- Get all of our return values to print, but we have to conver them to strings first.
+							local values = {}
+							for i = 2, #results do
+								values[i - 1] = tostring(results[i])
+							end
+							tes3ui.logToConsole(string.format("> %s", table.concat(values, ", ")))
 						end
-						tes3ui.logToConsole(string.format("> %s", table.concat(values, ", ")))
+					else
+						tes3ui.logToConsole(results[2])
 					end
 				else
-					tes3ui.logToConsole(results[2])
+					tes3ui.logToConsole(message)
 				end
-			else
-				tes3ui.logToConsole(message)
 			end
 		else
 			-- Any of the togglestats reporting outputs will destroy the text input,
