@@ -15,7 +15,7 @@ local function onKeyDownCopyCut(e)
 
 	-- Figure out where our cursor is.
 	local inputFocusText = inputFocus.rawText
-	local cursorPosition = inputFocusText and string.find(inputFocusText, "|", 1, true)
+	local cursorPosition = inputFocusText and string.find(inputFocusText, "|", 1, true) or 0
 
 	-- Figure out where we want to start copying. If we are holding alt, copy after the cursor. Otherwise copy up to it.
 	local copyStart = e.isAltDown and (cursorPosition + 1) or 1
@@ -62,7 +62,7 @@ local function onKeyDownV(e)
 
 	-- Insert our clipboard text at the cursor position.
 	local inputFocusText = inputFocus.rawText
-	local cursorPosition = inputFocusText and string.find(inputFocusText, "|", 1, true)
+	local cursorPosition = inputFocusText and string.find(inputFocusText, "|", 1, true) or 1
 	inputFocus.text = string.insert(inputFocusText, clipboardText, cursorPosition - 1)
 	inputFocus:getTopLevelParent():updateLayout()
 end
