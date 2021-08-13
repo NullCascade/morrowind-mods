@@ -149,7 +149,7 @@ return {
 		trainTo = "Train to Level %d\n",
 		unknown = "unknown",
 		updateRequired = "UI Extensions requires the latest version of MWSE. Please run MWSE-Updater.exe.",
-		versionString = "v1.5.0",
+		versionString = "v1.5.2",
 		weaponReach = "Reach",
 		weaponSpeed = "Speed",
 		weekDays = { "Sundas", "Morndas", "Tirdas", "Middas", "Turdas", "Fredas", "Loredas" },
