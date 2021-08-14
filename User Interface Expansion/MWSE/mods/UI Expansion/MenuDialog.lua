@@ -62,7 +62,7 @@ end
 event.register("keyDown", checkForAnswerHotkey)
 
 --- Updates colors on topic lists, and registers to let us know when they are needed.
---- @param e table
+--- @param e tes3uiEventData
 local function updateTopicsList(e)
 	-- If the function lacks context to the dialogue menu, look it up.
 	local menuDialogue = tes3ui.findMenu(GUI_ID_MenuDialog)

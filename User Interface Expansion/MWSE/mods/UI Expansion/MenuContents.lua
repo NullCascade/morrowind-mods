@@ -137,7 +137,7 @@ end
 event.register("uiActivated", onMenuContentsActivated, { filter = "MenuContents" })
 
 --- Called when any MenuContents item tile is clicked.
---- @param e table
+--- @param e tes3uiEventData
 local function onContentTileClicked(e)
 	-- Fire off an event when the tile is clicked for other modules to hook into.
 	local tileData = e.source:getPropertyObject("MenuContents_Thing", "tes3inventoryTile") --- @type tes3inventoryTile
@@ -162,7 +162,7 @@ end
 event.register("itemTileUpdated", onContentTileUpdated, { filter = "MenuContents" })
 
 --- Enable alt-clicking inventory items to transfer it to the contents menu.
---- @param e table
+--- @param e tes3uiEventData
 --- @return boolean
 local function onInventoryTileClicked(e)
 	local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
@@ -206,7 +206,7 @@ end
 event.register("UIEX:InventoryTileClicked", onInventoryTileClicked)
 
 --- Enable alt-clicking contents items to transfer it to the inventory menu.
---- @param e table
+--- @param e tes3uiEventData
 --- @return boolean
 local function onContentsTileClicked(e)
 	-- If the player is holding the alt key, transfer the item directly.

@@ -45,10 +45,10 @@ end
 event.register("filterInventory", onFilterInventory)
 
 --- Called when any MenuInventory item tile is clicked.
---- @param e table
+--- @param e tes3uiEventData
 local function onInventoryTileClicked(e)
 	-- Fire off an event when the tile is clicked for other modules to hook into.
-	local tileData = e.source:getPropertyObject("MenuInventory_Thing", "tes3inventoryTile")
+	local tileData = e.source:getPropertyObject("MenuInventory_Thing", "tes3inventoryTile") --- @type tes3inventoryTile
 	local eventData = {
 		element = tileData.element,
 		tile = tileData,

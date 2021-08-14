@@ -46,7 +46,7 @@ function ImageButton.over(e)
 	if (not e.widget.disabled) then
 		e.widget.color = { 1.0, 1.0, 1.0 }
 		e.widget.children[1].alpha = 0.85
-		e.widget:getTopLevelParent():updateLayout()
+		e.widget:getTopLevelMenu():updateLayout()
 	end
 end
 
@@ -54,7 +54,7 @@ function ImageButton.leave(e)
 	if (not e.widget.disabled) then
 		e.widget.color = { 0, 0, 0 }
 		e.widget.children[1].alpha = 1.0
-		e.widget:getTopLevelParent():updateLayout()
+		e.widget:getTopLevelMenu():updateLayout()
 	end
 end
 
@@ -62,7 +62,7 @@ function ImageButton.press(e)
 	if (not e.widget.disabled) then
 		e.widget.color = { 1.0, 1.0, 0.7 }
 		e.widget.children[1].alpha = 0.8
-		e.widget:getTopLevelParent():updateLayout()
+		e.widget:getTopLevelMenu():updateLayout()
 		tes3.worldController.menuClickSound:play()
 	end
 end
@@ -71,7 +71,7 @@ function ImageButton.release(e)
 	if (not e.widget.disabled) then
 		e.widget.color = { 0, 0, 0 }
 		e.widget.children[1].alpha = 1.0
-		e.widget:getTopLevelParent():updateLayout()
+		e.widget:getTopLevelMenu():updateLayout()
 	end
 
 	e.widget:triggerEvent(e)
@@ -98,13 +98,13 @@ function ImageButton.create(parent, imagePath, w, h)
 end
 
 --- Called when a skill train button is clicked.
---- @param e table
+--- @param e tes3uiEventData
 local function onClickTrainSkill(e)
 	if (e.source.disabled) then
 		return
 	end
 
-	local menu = e.widget:getTopLevelParent()
+	local menu = e.widget:getTopLevelMenu()
 	local list = menu:findChild(id_serviceList)
 	local i = e.widget:getPropertyInt("UIEXP_ListIndex")
 	local s = list:findChild(id_pane).children[i].children[1]
@@ -208,9 +208,9 @@ local function createTrainSkillElement(parent, id, data)
 end
 
 --- Called when the cancel button is clicked.
---- @param e table
+--- @param e tes3uiEventData
 local function onCancel(e)
-	local menu = e.source:getTopLevelParent()
+	local menu = e.source:getTopLevelMenu()
 	local ok = menu:findChild("MenuServiceTraining_Okbutton")
 	ok:triggerEvent(e)
 end

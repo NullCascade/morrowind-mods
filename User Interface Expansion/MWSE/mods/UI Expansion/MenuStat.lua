@@ -102,19 +102,19 @@ local function OnMenuStatTooltip(source, effectFilter, idProperty, fortifyEffect
 end
 
 --- Update attribute tooltips.
---- @param e table
+--- @param e tes3uiEventData
 local function onMenuStatAttributeTooltip(e)
 	OnMenuStatTooltip(e.source, "targetsAttributes", "MenuStat_attribute_strength", tes3.effect.fortifyAttribute, "attributes")
 end
 
 --- Update skill tooltips.
---- @param e table
+--- @param e tes3uiEventData
 local function onMenuStatSkillTooltip(e)
 	OnMenuStatTooltip(e.source, "targetsSkills", "MenuStat_message", tes3.effect.fortifySkill, "skills")
 end
 
 --- Update faction tooltips.
---- @param e table
+--- @param e tes3uiEventData
 local function onMenuStatFactionTooltip(e)
 	-- Get the associated faction.
 	local faction = e.source:getPropertyObject("MenuStat_message")
