@@ -4,7 +4,9 @@ local common = {}
 -- Generic helper functions.
 ----------------------------------------------------------------------------------------------------
 
--- Performs a test on one or more keys.
+--- Performs a test on one or more keys.
+--- @param keybind table<string,any>|number|string Keybind to test.
+--- @return boolean
 function common.complexKeybindTest(keybind)
 	local keybindType = type(keybind)
 	local inputController = tes3.worldController.inputController
@@ -28,7 +30,9 @@ function common.complexKeybindTest(keybind)
 	return false
 end
 
--- Parses a color from either a table or a string.
+--- Parses a color from either a table or a string.
+--- @param color string|table
+--- @return number[]
 function common.getColor(color)
 	local colorType = type(color)
 	if (colorType == "table" and #color == 3) then
@@ -46,6 +50,11 @@ common.effectsWithAttributes = {
 	[tes3.effect.restoreAttribute] = true,
 }
 
+--- Perhaps now-useless function to safely get the attribute at a given index. This should no longer be needed due to a
+--- fix MWSE-side. We'll keep it here though out of pure laziness.
+--- @param ingredient tes3ingredient
+--- @param index number
+--- @return number
 function common.getIngredientEffectAttributeId(ingredient, index)
 	if (common.effectsWithAttributes[ingredient.effects[index]]) then
 		return ingredient.effectAttributeIds[index]
@@ -62,6 +71,11 @@ common.effectsWithSkills = {
 	[tes3.effect.restoreSkill] = true,
 }
 
+--- Perhaps now-useless function to safely get the skill at a given index. This should no longer be needed due to a fix
+--- MWSE-side. We'll keep it here though out of pure laziness.
+--- @param ingredient tes3ingredient
+--- @param index number
+--- @return number
 function common.getIngredientEffectSkillId(ingredient, index)
 	if (common.effectsWithSkills[ingredient.effects[index]]) then
 		return ingredient.effectSkillIds[index]
@@ -78,6 +92,8 @@ local currentKeyboardBoundScrollBar = nil
 local keyboardScrollBarParams = nil
 local keyboardScrollBarNumberInput = nil
 
+--- Key handling for when a scroll bar is in focus.
+--- @param e keyDownEventData
 local function onKeyDownForScrollBar(e)
 	-- Allow enter to fire a submit event.
 	if (keyboardScrollBarParams.onSubmit and (e.keyCode == tes3.scanCode.enter or e.keyCode == tes3.scanCode.numpadEnter)) then
@@ -141,6 +157,8 @@ local function onKeyDownForScrollBar(e)
 	end
 end
 
+--- Mouse wheel handling for scroll bars.
+--- @param e mouseWheelEventData
 local function onMouseWheelForScrollBar(e)
 	local widget = currentKeyboardBoundScrollBar.widget
 	local previousValue = widget.current
@@ -163,6 +181,7 @@ local function onMouseWheelForScrollBar(e)
 	end
 end
 
+--- Removes bindings to manage scrollbars.
 function common.unbindScrollBarFromKeyboard()
 	if (currentKeyboardBoundScrollBar == nil) then
 		return
@@ -178,7 +197,7 @@ function common.unbindScrollBarFromKeyboard()
 	keyboardScrollBarNumberInput = nil
 end
 
--- Binds a slider to respect keyboard input. Only one slider can be hooked at a time.
+--- Binds a slider to respect keyboard input. Only one slider can be hooked at a time.
 function common.bindScrollBarToKeyboard(params)
 	-- Get rid of any current binding if applicable.
 	common.unbindScrollBarFromKeyboard()
@@ -198,6 +217,7 @@ end
 -- Expose function to (re)load translations.
 ----------------------------------------------------------------------------------------------------
 
+--- Loads translation data from translations.lua. Keys fall back to English.
 function common.loadTranslation()
 	-- Get the ISO language code.
 	local language = tes3.getLanguage()
@@ -236,6 +256,9 @@ end
 -- UI Functions
 ----------------------------------------------------------------------------------------------------
 
+--- Creates a search bar in a parent menu.
+--- @param params table
+--- @return table
 function common.createSearchBar(params)
 	local border = params.parent:createThinBorder({})
 	border.autoWidth = true
@@ -321,11 +344,24 @@ end
 -- Generic Filtering Module
 ----------------------------------------------------------------------------------------------------
 
-local filter_functions = {}
-local filter_metatable = { __index = filter_functions }
+--- @class uiExFilterFunction
+--- @field buttonFiltersBlock tes3uiElement
+--- @field createButtons boolean
+--- @field createIcons boolean
+--- @field createSearchBar boolean
+--- @field filters table
+--- @field filtersOrdered table
+--- @field onFilterChanged function
+--- @field onSearchTextPreUpdate function
+--- @field searchTextColor number[]
+--- @field searchTextPlaceholder tes3uiElement
+--- @field searchTextPlaceholderColor number[]
+local uiExFilterFunction = {}
+local uiExFilterFunctionMT = { __index = uiExFilterFunction }
 
--- Adds a filter and all its associated data to the interface.
-function filter_functions:addFilter(params)
+--- Adds a filter and all its associated data to the interface.
+--- @param params table
+function uiExFilterFunction:addFilter(params)
 	assert(params)
 	assert(params.key)
 
@@ -338,14 +374,19 @@ function filter_functions:addFilter(params)
 	table.insert(self.activeFilters, params.key)
 end
 
-function filter_functions:setFilterHidden(key, hidden)
+--- Sets a filter as (un)hidden for a given key.
+--- @param key string
+--- @param hidden boolean
+function uiExFilterFunction:setFilterHidden(key, hidden)
 	self.filters[key].hidden = hidden
 	if (hidden) then
 		table.removevalue(self.activeFilters, key)
 	end
 end
 
-function filter_functions:setSearchBarUsage(state)
+--- Enables or disables search bars.
+--- @param state boolean
+function uiExFilterFunction:setSearchBarUsage(state)
 	self.useSearch = state
 	if (self.searchBlock) then
 		self.searchBlock.border.visible = state
@@ -353,7 +394,9 @@ function filter_functions:setSearchBarUsage(state)
 	end
 end
 
-function filter_functions:setIconUsage(state)
+---	Enables or disables compact icons.
+---	@param state boolean
+function uiExFilterFunction:setIconUsage(state)
 	self.useIcons = state
 	if (self.iconFiltersBlock) then
 		self.iconFiltersBlock.visible = state
@@ -363,8 +406,9 @@ function filter_functions:setIconUsage(state)
 	end
 end
 
--- Sets both search text and filters.
-function filter_functions:setFiltersExact(params)
+--- Sets both search text and filters.
+--- @param params table
+function uiExFilterFunction:setFiltersExact(params)
 	local params = params or {}
 
 	self.searchText = params.text
@@ -397,16 +441,21 @@ function filter_functions:setFiltersExact(params)
 	end
 end
 
--- Sets search text, but retains current filters.
-function filter_functions:setFilterText(text)
+--- Sets search text, but retains current filters.
+--- @param text string
+function uiExFilterFunction:setFilterText(text)
 	self:setFiltersExact({ text = text, filters = self.activeFilters })
 end
 
-function filter_functions:setFilter(key)
+--- Sets the current filter.
+--- @param key string
+function uiExFilterFunction:setFilter(key)
 	self:setFiltersExact({ text = self.searchText, filter = key })
 end
 
-function filter_functions:toggleFilter(key)
+--- Toggles a filter.
+--- @param key string
+function uiExFilterFunction:toggleFilter(key)
 	local filters = self.activeFilters
 	if (table.find(filters, key)) then
 		table.removevalue(filters, key)
@@ -417,12 +466,15 @@ function filter_functions:toggleFilter(key)
 	self:setFiltersExact({ text = self.searchText, filters = filters })
 end
 
--- Clears any current search text and filters.
-function filter_functions:clearFilter()
+--- Clears any current search text and filters.
+function uiExFilterFunction:clearFilter()
 	self:setFiltersExact()
 end
 
-function filter_functions:triggerFilter(params)
+--- Provides a filter with information and allows it to return if the filter allows the given information.
+--- @param params table
+--- @return boolean
+function uiExFilterFunction:triggerFilter(params)
 	-- Search by name.
 	if (self.searchText and params.text and not string.find(string.lower(params.text), self.searchText, 1, true)) then
 		return false
@@ -444,13 +496,16 @@ function filter_functions:triggerFilter(params)
 	return false
 end
 
-function filter_functions:focusSearchBar()
+--- Forces focus onto the search box.
+function uiExFilterFunction:focusSearchBar()
 	if (self.searchBlock) then
 		tes3ui.acquireTextInput(self.searchBlock.input)
 	end
 end
 
-function filter_functions:getSearchText()
+--- Returns the current search text.
+--- @return string|nil
+function uiExFilterFunction:getSearchText()
 	if (self.searchBlock) then
 		local text = self.searchBlock.input.text
 		if (text ~= "" and text ~= self.searchTextPlaceholder) then
@@ -459,7 +514,8 @@ function filter_functions:getSearchText()
 	end
 end
 
-function filter_functions:updateFilterIcons()
+--- Updates filter icons, showing/hiding and setting alphas as needed.
+function uiExFilterFunction:updateFilterIcons()
 	for key, filter in pairs(self.filters) do
 		if (table.find(self.activeFilters, key)) then
 			if (filter.iconElement) then
@@ -487,7 +543,9 @@ function filter_functions:updateFilterIcons()
 	end
 end
 
-function filter_functions:onClickFilter(filter)
+--- Callback for when a filter is clicked.
+--- @param filter table
+function uiExFilterFunction:onClickFilter(filter)
 	if (#self.activeFilters == 1 and self.activeFilters[1] == filter.key) then
 		self:setFilter(nil)
 	elseif (tes3.worldController.inputController:isKeyDown(42)) then
@@ -497,7 +555,9 @@ function filter_functions:onClickFilter(filter)
 	end
 end
 
-function filter_functions:onTooltip(filter)
+--- Shows a tooltip for a given filter.
+--- @param filter table
+function uiExFilterFunction:onTooltip(filter)
 	local tooltip = tes3ui.createTooltipMenu()
 
 	local tooltipBlock = tooltip:createBlock({})
@@ -521,7 +581,10 @@ function filter_functions:onTooltip(filter)
 	end
 end
 
-function filter_functions:createFilterIcon(filter)
+--- Creates a filter icon for a filter.
+--- @param filter table
+--- @return tes3uiElement
+function uiExFilterFunction:createFilterIcon(filter)
 	local icon = self.iconFiltersBlock:createImage({
 		id = string.format("UIEXP:FilterIcon:%s", filter.key),
 		path = filter.icon,
@@ -540,7 +603,10 @@ function filter_functions:createFilterIcon(filter)
 	return icon
 end
 
-function filter_functions:createFilterButton(filter)
+--- Creates a button for a filter.
+--- @param filter table
+--- @return tes3uiElement
+function uiExFilterFunction:createFilterButton(filter)
 	local button = self.buttonFiltersBlock:createButton({ id = string.format("UIEXP:FilterButton:%s", filter.key) })
 	button.text = filter.buttonText
 	button.borderLeft = 0
@@ -559,7 +625,9 @@ function filter_functions:createFilterButton(filter)
 	return button
 end
 
-function filter_functions:createElements(parent)
+--- Creates elements for a given parent block.
+--- @param parent tes3uiElement
+function uiExFilterFunction:createElements(parent)
 	self.parentElement = parent
 
 	parent:destroyChildren()
@@ -629,9 +697,15 @@ function filter_functions:createElements(parent)
 	self:clearFilter()
 end
 
+--- A list of all filters.
+--- @type table<string, uiExFilterFunction>
 common.allFilters = {}
 
+--- Creates a filter interface.
+--- @param params table
+--- @return uiExFilterFunction
 function common.createFilterInterface(params)
+	--- @type uiExFilterFunction
 	local filterData = {}
 
 	filterData.createSearchBar = params.createSearchBar
@@ -653,11 +727,13 @@ function common.createFilterInterface(params)
 	filterData.onFilterChanged = params.onFilterChanged
 	filterData.extraData = params.extraData
 
-	local filterInterface = setmetatable(filterData, filter_metatable)
+	local filterInterface = setmetatable(filterData, uiExFilterFunctionMT)
 	common.allFilters[params.filterName] = filterInterface
 	return filterInterface
 end
 
+--- Sets the visibility for all filters.
+--- @param visible boolean
 function common.setAllFiltersVisibility(visible)
 	for _, filter in pairs(common.allFilters) do
 		filter:setSearchBarUsage(visible)
@@ -669,6 +745,8 @@ end
 -- Shared code for often-used filters.
 ----------------------------------------------------------------------------------------------------
 
+--- Creates standard filters common for inventory menus (inventory, barter, contents).
+--- @param filterInterface uiExFilterFunction
 function common.createStandardInventoryFilters(filterInterface)
 	filterInterface:addFilter({
 		key = "weapon",

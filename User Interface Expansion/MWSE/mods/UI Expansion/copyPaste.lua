@@ -1,3 +1,5 @@
+--- Handles copy/cut functionality.
+--- @param e keyDownEventData
 local function onKeyDownCopyCut(e)
 	if (not e.isControlDown or e.isShiftDown or e.isSuperDown) then
 		return
@@ -38,6 +40,8 @@ end
 event.register("keyDown", onKeyDownCopyCut, { filter = tes3.scanCode.c })
 event.register("keyDown", onKeyDownCopyCut, { filter = tes3.scanCode.x })
 
+--- Handles paste functionality.
+--- @param e keyDownEventData
 local function onKeyDownV(e)
 	if (not e.isControlDown or e.isShiftDown or e.isAltDown or e.isSuperDown) then
 		return

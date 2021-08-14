@@ -7,8 +7,14 @@ local common = require("UI Expansion.common")
 -- Spell List: Filtering and Searching
 ----------------------------------------------------------------------------------------------------
 
+--- @type tes3uiElement
 local firstSearchResult = nil
 
+--- Helper function to search element text.
+--- @param titleElement tes3uiElement
+--- @param listElement tes3uiElement
+--- @param isSpellFilter boolean
+--- @return boolean
 local function searchSubList(titleElement, listElement, isSpellFilter)
 	-- Gather a list of all the columns/rows so we don't have to keep creating tables later.
 	local columnElements = {}
@@ -54,6 +60,7 @@ local function searchSubList(titleElement, listElement, isSpellFilter)
 	end
 end
 
+--- Performs a search on the spells list.
 local function searchSpellsList()
 	-- Clear first search result hit.
 	firstSearchResult = nil
@@ -96,6 +103,10 @@ local magicFilters = common.createFilterInterface({
 	onFilterChanged = searchSpellsList,
 })
 
+--- Determines if an array of effects contains an effect with the given school.
+--- @param effects tes3effect[]
+--- @param school number
+--- @return boolean
 local function getEffectsContainsSchool(effects, school)
 	for i = 1, #effects do
 		local eff = effects[i]
@@ -180,6 +191,11 @@ magicFilters:addFilter({
 	icon = "icons/ui_exp/magic_restoration.tga",
 })
 
+--- Add spell icons to a list.
+--- @param spellsList tes3uiElement
+--- @param guiIdPrefix string
+--- @param namesBlockId string
+--- @param isSpell boolean
 local function addSpellIcons(spellsList, guiIdPrefix, namesBlockId, isSpell)
 	local namesBlock = spellsList:findChild(namesBlockId)
 
@@ -226,6 +242,10 @@ local function addSpellIcons(spellsList, guiIdPrefix, namesBlockId, isSpell)
 	end
 end
 
+--- Removes spell icons from a list.
+--- @param spellsList tes3uiElement
+--- @param guiIdPrefix string
+--- @param namesBlockId string
 local function removeSpellIcons(spellsList, guiIdPrefix, namesBlockId)
 	local namesBlock = spellsList:findChild(namesBlockId)
 	local iconColumn = namesBlock.parent:findChild(string.format("UIEXP:MagicMenu:SpellsList:%s:Icons", guiIdPrefix))
@@ -234,6 +254,7 @@ local function removeSpellIcons(spellsList, guiIdPrefix, namesBlockId)
 	end
 end
 
+-- Updates spell icons for powers, spells, and items.
 local function updateSpellIcons()
 	local magicMenu = tes3ui.findMenu(GUI_ID_MenuMagic)
 	if (not magicMenu) then
@@ -253,6 +274,7 @@ local function updateSpellIcons()
 	addSpellIcons(spellsList, "Items", "MagicMenu_item_names", false)
 end
 
+--- Grays out or restores powers based on if they are available.
 local function updatePowerUsability()
 	local magicMenu = tes3ui.findMenu(GUI_ID_MenuMagic)
 	if (not magicMenu) then
@@ -270,12 +292,15 @@ local function updatePowerUsability()
 	end
 end
 
+--- Updates all magic menu features.
 local function updateMagicMenu()
 	updateSpellIcons()
 	updatePowerUsability()
 	event.trigger("UIEXP:magicMenuPreUpdate")
 end
 
+--- Create our changes for MenuMagic.
+--- @param e uiActivatedEventData
 local function onMenuMagicActivated(e)
 	if (not e.newlyCreated) then
 		return
@@ -308,6 +333,7 @@ local function onMenuMagicActivated(e)
 end
 event.register("uiActivated", onMenuMagicActivated, { filter = "MenuMagic" })
 
+--- Update filters when entering menu mode.
 local function onEnterMenuMode()
 	if (common.config.alwaysClearFiltersOnOpen) then
 		magicFilters:clearFilter()
@@ -326,6 +352,9 @@ event.register("menuEnter", onEnterMenuMode, { filter = "MenuStat" })
 -- Update power used colors on cast/when recharged.
 --
 
+--- Gets the element for a given power.
+--- @param power tes3spell
+--- @return tes3uiElement
 local function getNameBlockForPower(power)
 	local magicMenu = tes3ui.findMenu(GUI_ID_MenuMagic)
 	if (not magicMenu) then
@@ -340,6 +369,8 @@ local function getNameBlockForPower(power)
 	end
 end
 
+--- Gray out powers when they are cast.
+--- @param e spellCastedEventData
 local function onSpellCasted(e)
 	if (e.caster == tes3.player and e.source.castType == tes3.spellType.power) then
 		local nameElement = getNameBlockForPower(e.source)
@@ -350,6 +381,8 @@ local function onSpellCasted(e)
 end
 event.register("spellCasted", onSpellCasted)
 
+--- Restores power color when it is recharged.
+--- @param e powerRechargedEventData
 local function onPowerRecharged(e)
 	if (e.mobile == tes3.mobilePlayer) then
 		local nameElement = getNameBlockForPower(e.power)

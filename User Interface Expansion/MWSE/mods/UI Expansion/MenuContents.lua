@@ -7,12 +7,15 @@ local contents_capacity_id = tes3ui.registerID("UIEXP_MenuContents_capacity")
 
 local common = require("UI Expansion.common")
 
+--- @type tes3inputController
 local inputController = tes3.worldController.inputController
 
 ----------------------------------------------------------------------------------------------------
 -- Contents: Searching and filtering.
 ----------------------------------------------------------------------------------------------------
 
+--- Allow "take all" keybinding.
+--- @return boolean
 local function onKeyInput()
 	-- Ctrl+Space (default) takes all.
 	if (common.complexKeybindTest(common.config.keybindTakeAll)) then
@@ -29,6 +32,7 @@ local function onKeyInput()
 	end
 end
 
+--- Invoked when a filter changes. Updates take all button to take filtered.
 local function onFilterChanged()
 	if (common.config.takeFilteredItems) then
 		local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
@@ -60,12 +64,15 @@ local contentsFilters = common.createFilterInterface({
 
 common.createStandardInventoryFilters(contentsFilters)
 
+--- Allow our filters to hide tiles in the contents menu.
+--- @param e filterContentsMenuEventData
 local function onFilterContentsMenu(e)
 	e.text = e.item.name
 	e.filter = contentsFilters:triggerFilter(e)
 end
 event.register("filterContentsMenu", onFilterContentsMenu)
 
+--- Recalculates the inventory's weight and updates the GUI.
 local function calculateCapacity()
 	local menu = tes3ui.findMenu(GUI_ID_MenuContents)
 	local maxCapacity = menu:getPropertyFloat("MenuContents_containerweight")
@@ -80,6 +87,8 @@ local function calculateCapacity()
 	end
 end
 
+--- Create our changes for MenuContents.
+--- @param e uiActivatedEventData
 local function onMenuContentsActivated(e)
 	if (not e.newlyCreated) then
 		return
@@ -109,7 +118,7 @@ local function onMenuContentsActivated(e)
 	contentsFilters:focusSearchBar()
 
 	-- Create capacity fillbar for containers.
-	local container = contentsMenu:getPropertyObject("MenuContents_ObjectContainer")
+	local container = contentsMenu:getPropertyObject("MenuContents_ObjectContainer") --- @type tes3actor
 	if (container.objectType == tes3.objectType.container) then
 		local buttonBlock = contentsMenu:findChild(GUI_ID_MenuContents_buttonContainer).children[2]
 		local capacityBar = buttonBlock:createFillBar{ id = contents_capacity_id }
@@ -129,9 +138,11 @@ local function onMenuContentsActivated(e)
 end
 event.register("uiActivated", onMenuContentsActivated, { filter = "MenuContents" })
 
+--- Called when any MenuContents item tile is clicked.
+--- @param e table
 local function onContentTileClicked(e)
 	-- Fire off an event when the tile is clicked for other modules to hook into.
-	local tileData = e.source:getPropertyObject("MenuContents_Thing", "tes3inventoryTile")
+	local tileData = e.source:getPropertyObject("MenuContents_Thing", "tes3inventoryTile") --- @type tes3inventoryTile
 	local eventData = {
 		element = tileData.element,
 		tile = tileData,
@@ -148,13 +159,16 @@ local function onContentTileClicked(e)
 	e.source:forwardEvent(e)
 end
 
--- Claim mouse click events on item tiles.
+--- Claim mouse click events on item tiles.
+--- @param e itemTileUpdatedEventData
 local function onContentTileUpdated(e)
 	e.element:register("mouseClick", onContentTileClicked)
 end
 event.register("itemTileUpdated", onContentTileUpdated, { filter = "MenuContents" })
 
--- Enable alt-clicking inventory items to transfer it to the contents menu.
+--- Enable alt-clicking inventory items to transfer it to the contents menu.
+--- @param e table
+--- @return boolean
 local function onInventoryTileClicked(e)
 	local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
 	if (contentsMenu == nil) then
@@ -196,7 +210,9 @@ local function onInventoryTileClicked(e)
 end
 event.register("UIEX:InventoryTileClicked", onInventoryTileClicked)
 
--- Enable alt-clicking contents items to transfer it to the inventory menu.
+--- Enable alt-clicking contents items to transfer it to the inventory menu.
+--- @param e table
+--- @return boolean
 local function onContentsTileClicked(e)
 	-- If the player is holding the alt key, transfer the item directly.
 	local isAltDown = inputController:isKeyDown(tes3.scanCode.lAlt) or inputController:isKeyDown(tes3.scanCode.rAlt)

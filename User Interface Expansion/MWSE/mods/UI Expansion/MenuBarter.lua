@@ -18,12 +18,16 @@ local barterFilters = common.createFilterInterface({
 
 common.createStandardInventoryFilters(barterFilters)
 
+--- Allow our filters to hide tiles in the barter menu.
+--- @param e filterBarterMenuEventData
 local function onFilterBarterMenu(e)
 	e.text = e.item.name
 	e.filter = barterFilters:triggerFilter(e)
 end
 event.register("filterBarterMenu", onFilterBarterMenu)
 
+--- Create our changes for MenuBarter.
+--- @param e uiActivatedEventData
 local function onMenuBarterActivated(e)
 	if (not e.newlyCreated) then
 		return

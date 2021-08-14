@@ -54,9 +54,11 @@ local defaultConfig = {
 		training = true,
 	},
 }
-local config = mwse.loadConfig("UI Expansion", defaultConfig)
+local config = mwse.loadConfig("UI Expansion", defaultConfig) --- @type table<string, any>
 
--- Convert keybinds from previous to new version.
+--- Convert keybinds from previous to new version.
+--- @param keyArray number[]
+--- @return table
 local function convertKeyBind(keyArray)
 	-- Don't convert already converted bindings.
 	if (keyArray.keyCode) then

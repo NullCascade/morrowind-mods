@@ -1,3 +1,6 @@
+--- Resizes the button width to match the given texture, so it aligns right and doesn't clip.
+--- @param parent tes3uiElement
+--- @param id string
 local function resizeContainer(parent, id)
 	local button = parent:findChild(id)
 	if (button) then
@@ -8,6 +11,8 @@ local function resizeContainer(parent, id)
 	end
 end
 
+--- Create our changes for MenuOptions.
+--- @param e uiActivatedEventData
 local function onCreatedMenuOptions(e)
 	-- Only interested in menu creation, not updates
 	if (not e.newlyCreated) then

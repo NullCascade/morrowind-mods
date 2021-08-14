@@ -1,5 +1,9 @@
 local common = require("UI Expansion.common")
 
+--- Calculates the hour and the AM/PM state for a given 24-hour number.
+--- @param hour number
+--- @return number
+--- @return string
 local function format12HourTime(hour)
 	local hour = math.floor(hour)
 	while (hour > 24) do
@@ -19,6 +23,7 @@ local function format12HourTime(hour)
 	return hour, tes3.findGMST(isAM and tes3.gmst.sSaveMenuHelp04 or tes3.gmst.sSaveMenuHelp05).value
 end
 
+--- Update text showing when we will finish resting/waiting.
 local function updateDesiredHourText()
 	local menuRestWait = tes3ui.findMenu("MenuRestWait")
 	if (not menuRestWait) then
@@ -31,6 +36,8 @@ local function updateDesiredHourText()
 	hoursElement.text = string.format("%s (%s %s)", tes3.findGMST(tes3.gmst.sRestMenu2).value, hour, suffix)
 end
 
+--- Create our changes for MenuRestWait.
+--- @param e uiActivatedEventData
 local function menuRestWait(e)
 	if (not e.newlyCreated) then
 		return

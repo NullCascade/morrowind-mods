@@ -1,10 +1,6 @@
 local common = require("UI Expansion.common")
 
-local function saveConfig()
-	mwse.saveConfig("UI Expansion", common.config)
-end
-
--- Setup MCM.
+--- Setup MCM.
 local function registerModConfig()
 	local template = mwse.mcm.createTemplate({ name = "UI Expansion" })
 	template:saveOnClose("UI Expansion", common.config)

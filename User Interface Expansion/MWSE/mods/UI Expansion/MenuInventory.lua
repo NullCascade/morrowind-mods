@@ -19,7 +19,8 @@ local inventoryFilters = common.createFilterInterface({
 
 common.createStandardInventoryFilters(inventoryFilters)
 
-local currentMerchant
+--- The current merchant we are bartering with.
+local currentMerchant = nil
 
 inventoryFilters:addFilter({
 	key = "tradable",
@@ -35,12 +36,16 @@ inventoryFilters:addFilter({
 	hidden = true,
 })
 
+--- Allow our filters to hide tiles in the inventory menu.
+--- @param e filterInventoryEventData
 local function onFilterInventory(e)
 	e.text = e.item.name
 	e.filter = inventoryFilters:triggerFilter(e)
 end
 event.register("filterInventory", onFilterInventory)
 
+--- Called when any MenuInventory item tile is clicked.
+--- @param e table
 local function onInventoryTileClicked(e)
 	-- Fire off an event when the tile is clicked for other modules to hook into.
 	local tileData = e.source:getPropertyObject("MenuInventory_Thing", "tes3inventoryTile")
@@ -60,11 +65,15 @@ local function onInventoryTileClicked(e)
 	e.source:forwardEvent(e)
 end
 
+--- Claim mouse click events on item tiles.
+--- @param e itemTileUpdatedEventData
 local function onInventoryTileUpdated(e)
 	e.element:register("mouseClick", onInventoryTileClicked)
 end
 event.register("itemTileUpdated", onInventoryTileUpdated, { filter = "MenuInventory" })
 
+--- Create our changes for MenuInventory.
+--- @param e uiActivatedEventData
 local function onMenuInventoryActivated(e)
 	if (not e.newlyCreated) then
 		return
@@ -85,11 +94,13 @@ local function onMenuInventoryActivated(e)
 end
 event.register("uiActivated", onMenuInventoryActivated, { filter = "MenuInventory" })
 
+--- Create our changes for MenuBarter.
 local function onMenuBarterActivated()
 	currentMerchant = tes3ui.getServiceActor()
 end
 event.register("uiActivated", onMenuBarterActivated, { filter = "MenuBarter" })
 
+--- Update filters when entering menu mode.
 local function onEnterMenuMode()
 	inventoryFilters:setFilterHidden("tradable", true)
 

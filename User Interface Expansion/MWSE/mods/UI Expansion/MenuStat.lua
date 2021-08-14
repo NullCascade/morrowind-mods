@@ -19,6 +19,12 @@ local attributeModifyingEffects = {
 }
 local skillModifyingEffects = { tes3.effect.drainSkill, tes3.effect.damageSkill, tes3.effect.fortifySkill }
 
+--- Adds more information to tooltips for attributes/skills.
+--- @param e table
+--- @param effectFilter string
+--- @param idProperty string
+--- @param fortifyEffect number
+--- @param statsArray string
 local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect, statsArray)
 	-- Allow the tooltip to be made per usual.
 	e.source:forwardEvent(e)
@@ -109,15 +115,21 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect, sta
 	end
 end
 
+--- Update attribute tooltips.
+--- @param e table
 local function onMenuStatAttributeTooltip(e)
 	OnMenuStatTooltip(e, attributeModifyingEffects, "MenuStat_attribute_strength", tes3.effect.fortifyAttribute,
 	                  "attributes")
 end
 
+--- Update skill tooltips.
+--- @param e table
 local function onMenuStatSkillTooltip(e)
 	OnMenuStatTooltip(e, skillModifyingEffects, "MenuStat_message", tes3.effect.fortifySkill, "skills")
 end
 
+--- Update faction tooltips.
+--- @param e table
 local function onMenuStatFactionTooltip(e)
 	-- Allow the tooltip to be made per usual.
 	e.source:forwardEvent(e)
@@ -150,6 +162,8 @@ local function onMenuStatFactionTooltip(e)
 	end
 end
 
+--- Create our changes for MenuStat.
+--- @param e uiActivatedEventData
 local function onMenuStatActivated(e)
 	local idParts = { "agility", "endurance", "intellegence", "luck", "personality", "speed", "strength", "willpower" }
 	for _, idPart in pairs(idParts) do
@@ -171,6 +185,8 @@ local attributeTooltipElements = {
 	tes3ui.registerID("MenuStat_major_layout"),
 }
 
+--- Called when the stats menu is refreshed.
+--- @param e uiRefreshedEventData
 local function onStatsMenuRefreshed(e)
 	local scrollPaneChildren = e.element:findChild(GUI_ID_PartScrollPane_pane).children
 	for _, element in pairs(scrollPaneChildren) do

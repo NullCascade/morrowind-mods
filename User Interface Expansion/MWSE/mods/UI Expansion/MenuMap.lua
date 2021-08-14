@@ -3,6 +3,8 @@ local common = require("UI Expansion.common")
 local GUIID_MenuMap = tes3ui.registerID("MenuMap")
 local GUIID_MenuMap_switch = tes3ui.registerID("MenuMap_switch")
 
+--- Update the map type on cell change.
+--- @param e cellChangedEventData
 local function changeCell(e)
 	if (not common.config.changeMapModeOnCellChange) then
 		return
@@ -34,6 +36,7 @@ else
 	event.register("cellChanged", changeCell)
 end
 
+--- Allow map mode switching with a key.
 local function onKeyInput()
 	if (common.complexKeybindTest(common.config.keybindMapSwitch)) then
 		local MenuMap = tes3ui.findMenu(GUIID_MenuMap)

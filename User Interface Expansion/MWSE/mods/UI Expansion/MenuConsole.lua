@@ -16,6 +16,8 @@ end
 
 local sandbox = {}
 
+--- Updates the script button for lua/mwscript mode.
+--- @param button tes3uiElement
 local function updateScriptButton(button)
 	if (luaMode) then
 		button.text = "lua"
@@ -24,18 +26,25 @@ local function updateScriptButton(button)
 	end
 end
 
+--- Initializes the lua sandbox.
 local function sandboxInit()
 	setmetatable(sandbox, { __index = _G })
 	sandbox.print = tes3ui.logToConsole
 	event.trigger("UIEXP:sandboxConsole", { sandbox = sandbox })
 end
 
+--- Runs a given loaded function using the sandbox.
+---
+--- Also updates the currentRef sandbox variable with the current console reference.
+--- @param f function
+--- @return ...
 local function sandboxScript(f)
 	sandbox.currentRef = tes3ui.findMenu(GUI_ID_MenuConsole):getPropertyObject("MenuConsole_current_ref")
 	setfenv(f, sandbox)
 	return pcall(f)
 end
 
+--- Invoked when the command box is submitted.
 local function onSubmitCommand()
 	local menuConsole = tes3ui.findMenu(GUI_ID_MenuConsole)
 	local inputBox = menuConsole:findChild(GUI_ID_UIEXP_ConsoleInputBox)
@@ -124,6 +133,8 @@ local function onSubmitCommand()
 	end
 end
 
+--- Create our changes for MenuConsole.
+--- @param e uiActivatedEventData
 local function onMenuConsoleActivated(e)
 	if (not e.newlyCreated) then
 		tes3ui.acquireTextInput(e.element:findChild(GUI_ID_UIEXP_ConsoleInputBox))
@@ -226,6 +237,6 @@ local function onMenuConsoleActivated(e)
 	menuConsole:updateLayout()
 	tes3ui.acquireTextInput(input)
 end
+event.register("uiActivated", onMenuConsoleActivated, { filter = "MenuConsole" })
 
 sandboxInit()
-event.register("uiActivated", onMenuConsoleActivated, { filter = "MenuConsole" })

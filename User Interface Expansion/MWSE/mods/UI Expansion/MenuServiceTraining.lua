@@ -10,6 +10,7 @@ local id_skill_2 = tes3ui.registerID("UIEXP_MenuTraining_Skill2")
 local id_skill_3 = tes3ui.registerID("UIEXP_MenuTraining_Skill3")
 local id_gold = tes3ui.registerID("UIEXP_MenuTraining_Gold")
 
+--- Reopens the training menu after it is used.
 local function onAfterTrainTimer()
 	if (lastTarget ~= nil and tes3.getPlayerTarget() == lastTarget) then
 		tes3.player:activate(lastTarget)
@@ -19,14 +20,18 @@ local function onAfterTrainTimer()
 	end
 end
 
+--- Create our changes for MenuServiceTraining.
+--- @param e uiActivatedEventData
 local function menuTraining(e)
 	lastTarget = tes3ui.getServiceActor().reference
 	local menu = tes3ui.findMenu("MenuDialog")
 	menu.visible = false
 end
-
 event.register("uiActivated", menuTraining, { filter = "MenuServiceTraining" })
 
+--- Gets the expertise level string for a skill value.
+--- @param skill number
+--- @return string
 local function expertiseText(skill)
 	for i = 4, 0, -1 do
 		if (skill >= 25 * i) then
@@ -92,6 +97,8 @@ function ImageButton.create(parent, imagePath, w, h)
 	return background
 end
 
+--- Called when a skill train button is clicked.
+--- @param e table
 local function onClickTrainSkill(e)
 	if (e.source.disabled) then
 		return
@@ -106,6 +113,10 @@ local function onClickTrainSkill(e)
 	timer.start({ duration = 1, callback = onAfterTrainTimer })
 end
 
+--- Ceates an image button for a skill.
+--- @param parent tes3uiElement
+--- @param id number|string
+--- @param data table
 local function createTrainSkillElement(parent, id, data)
 	local train = parent:createBlock{ id = id }
 	train.width = 180
@@ -137,7 +148,7 @@ local function createTrainSkillElement(parent, id, data)
 	local canAfford = data.cost <= tes3.getPlayerGold()
 	local level = tes3.mobilePlayer.skills[data.skill.id + 1]
 	local attr = tes3.mobilePlayer.attributes[data.skill.attribute + 1]
-	local trainerLevel = parent:getTopLevelParent():getPropertyObject("MenuServiceTraining_Actor").skills[data.skill.id + 1]
+	local trainerLevel = parent:getTopLevelMenu():getPropertyObject("MenuServiceTraining_Actor").skills[data.skill.id + 1]
 
 	local textColor = (canAfford and level.base < attr.base and level.base < trainerLevel.base) and
 	                  tes3ui.getPalette("normal_color") or tes3ui.getPalette("disabled_color")
@@ -196,12 +207,16 @@ local function createTrainSkillElement(parent, id, data)
 	end
 end
 
+--- Called when the cancel button is clicked.
+--- @param e table
 local function onCancel(e)
 	local menu = e.source:getTopLevelParent()
 	local ok = menu:findChild("MenuServiceTraining_Okbutton")
 	ok:triggerEvent(e)
 end
 
+--- Called when the service training menu is newly created.
+--- @param menu tes3uiElement
 local function modifyWindow(menu)
 	local list = menu:findChild(id_serviceList)
 
@@ -262,9 +277,11 @@ local function modifyWindow(menu)
 	button_cancel:register("mouseClick", onCancel)
 
 	-- Final setup
-	menu:getTopLevelParent():updateLayout()
+	menu:getTopLevelMenu():updateLayout()
 end
 
+--- Create our changes for MenuServiceTraining.
+--- @param e uiActivatedEventData
 local function onTraining(e)
 	if (e.newlyCreated) then
 		modifyWindow(e.element)

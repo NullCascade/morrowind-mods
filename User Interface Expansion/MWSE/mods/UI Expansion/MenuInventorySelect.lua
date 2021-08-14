@@ -10,6 +10,7 @@ local common = require("UI Expansion.common")
 -- Generic filter cases
 ----------------------------------------------------------------------------------------------------
 
+--- Updates inventory select tiles.
 local function updateInventorySelectTiles()
 	tes3ui.updateInventorySelectTiles()
 	event.trigger("UIEXP:updatedInventorySelectTiles")
@@ -45,10 +46,13 @@ local genericFilterNoIcons = common.createFilterInterface({
 -- Custom filter for handling ingredients.
 ----------------------------------------------------------------------------------------------------
 
+--- Calculates the maximum number of shown ingredient effects.
+--- @return number
 local function getShownIngredientEffectCount()
 	return math.clamp(math.floor(tes3.mobilePlayer.alchemy.current / tes3.findGMST(tes3.gmst.fWortChanceValue).value), 0, 4)
 end
 
+--- Updater for ingredient lists.
 local function updateIngredientList()
 	local MenuAlchemy = tes3ui.findMenu(GUI_ID_MenuAlchemy)
 	local MenuInventorySelect = tes3ui.findMenu(GUI_ID_MenuInventorySelect)
@@ -110,6 +114,7 @@ local function updateIngredientList()
 	end
 end
 
+--- Filter updater for ingredients.
 local function updateIngredientSelectTiles()
 	tes3ui.updateInventorySelectTiles()
 	updateIngredientList()
@@ -130,6 +135,7 @@ local ingredientFilterNoIcons = common.createFilterInterface({
 -- Custom filter for handling soulgems.
 ----------------------------------------------------------------------------------------------------
 
+--- Main updater logic for soul gems.
 local function updateSoulGemList()
 	local MenuInventorySelect = tes3ui.findMenu(GUI_ID_MenuInventorySelect)
 	if (MenuInventorySelect) then
@@ -181,6 +187,7 @@ local function updateSoulGemList()
 	end
 end
 
+--- Filter updater for ingredients.
 local function updateSoulGemSelectTiles()
 	tes3ui.updateInventorySelectTiles()
 	updateSoulGemList()
@@ -203,6 +210,8 @@ local soulGemFilterNoIcons = common.createFilterInterface({
 
 local currentFilter = nil
 
+--- Filters out items in the inventory select window, based on our active filter.
+--- @param e filterInventorySelectEventData
 local function onFilterInventorySelect(e)
 	if (currentFilter) then
 		e.text = e.item.name
@@ -223,6 +232,8 @@ local inventorySelectTypeFilterMap = {
 }
 common.inventorySelectTypeFilterMap = inventorySelectTypeFilterMap
 
+--- Create our changes for MenuInventorySelect.
+--- @param e uiActivatedEventData
 local function onMenuInventorySelectActivated(e)
 	if (not e.newlyCreated) then
 		return

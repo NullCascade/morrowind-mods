@@ -13,11 +13,17 @@ local save_cancelButton_id = tes3ui.registerID("MenuSave_Cancelbutton")
 local save_showAll_id = tes3ui.registerID("UIEXP_MenuSave_ShowAll")
 local save_saveInput_id = tes3ui.registerID("UIEXP_MenuSave_SaveInput")
 
+--- Gets a file-friendly name for a given save.
+--- @param saveName string
+--- @return string
 local function SaveFileName(saveName)
 	-- Lowercase everything, strip non-alphanumeric characters.
 	return string.format("%s_%s", tes3.mobilePlayer.object.name:lower(), saveName:lower()):gsub("%W", "")
 end
 
+--- Returns if the name is a valid save name.
+--- @param saveName string
+--- @return boolean
 local function CanSave(saveName)
 	-- Don't have to check for max length, as it's limited by the text input.
 	if (#saveName > 0) then
@@ -27,6 +33,10 @@ local function CanSave(saveName)
 	return false
 end
 
+--- Determines if a save exists.
+--- @param saveName string
+--- @param saveFilename string
+--- @return boolean
 local function SaveExists(saveName, saveFilename)
 	for file in lfs.dir("saves") do
 		if (saveFilename) then
@@ -43,6 +53,9 @@ local function SaveExists(saveName, saveFilename)
 	return false
 end
 
+--- Performs a save, without validity checks.
+--- @param saveName string
+--- @param saveFilename string
 local function Save(saveName, saveFilename)
 	tes3ui.findMenu(save_menu_id):destroy()
 	tes3ui.leaveMenuMode()
@@ -53,6 +66,9 @@ local function Save(saveName, saveFilename)
 	end
 end
 
+--- Performs a save, with validity checks.
+--- @param saveName string
+--- @param saveFilename string
 local function TrySave(saveName, saveFilename)
 	if (CanSave(saveName)) then
 		if (SaveExists(saveName, saveFilename)) then
@@ -71,7 +87,10 @@ local function TrySave(saveName, saveFilename)
 	end
 end
 
--- Returns true if we filtered successfully, false if not.
+--- Updates menu to filter out saves for a character.
+--- @param scrollElement tes3uiElement
+--- @param characterName string
+--- @return boolean filtered Returns true if we filtered successfully, false if not.
 local function filterGameFiles(scrollElement, characterName)
 	local scrollKids = scrollElement:getContentElement().children
 
@@ -105,6 +124,9 @@ local function filterGameFiles(scrollElement, characterName)
 	return true
 end
 
+--- Sets the active character filter to a given character name or element.
+--- @param listBoxElement tes3uiElement
+--- @param selected string|tes3uiElement
 local function SetActive(listBoxElement, selected)
 	local listKids = listBoxElement:getContentElement().children
 	local foundStringMatch = false
@@ -129,7 +151,9 @@ local function SetActive(listBoxElement, selected)
 	end
 end
 
--- Used during loading only.
+--- Used during loading only.
+--- @param scrollElement tes3uiElement
+--- @param characterSelectElement tes3uiElement
 local function MakeCharacterList(scrollElement, characterSelectElement)
 	local scrollKids = scrollElement:getContentElement().children
 
@@ -153,6 +177,8 @@ local function MakeCharacterList(scrollElement, characterSelectElement)
 	end
 end
 
+--- @param scrollElement tes3uiElement
+--- @param characterSelectElement tes3uiElement
 local function SetSaveGameEventHandlers(scrollElement, characterSelectElement)
 	local scrollKids = scrollElement:getContentElement().children
 
@@ -221,6 +247,8 @@ local function SetSaveGameEventHandlers(scrollElement, characterSelectElement)
 	end
 end
 
+--- Create our changes for MenuLoad.
+--- @param e uiActivatedEventData
 local function menuLoad(e)
 	if (e.newlyCreated) then
 		e.element.width = 0.5 * e.element.maxWidth
@@ -265,6 +293,8 @@ local function menuLoad(e)
 end
 event.register("uiActivated", menuLoad, { filter = "MenuLoad" })
 
+--- Create our changes for MenuSave.
+--- @param e uiActivatedEventData
 local function menuSave(e)
 	if (e.newlyCreated) then
 		local scroll = e.element:findChild(save_scroll_id)

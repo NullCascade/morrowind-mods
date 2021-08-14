@@ -19,6 +19,8 @@ local GUI_Palette_TopicUnique = common.getColor(common.config.dialogueTopicUniqu
 -- Adds number prefix to Choice answers and makes them working pressing the number key.
 local answers = {}
 
+--- Check to see if the player has used a number key to select a response.
+--- @param e keyDownEventData
 local function checkForAnswerHotkey(e)
 	-- Make sure we're in the dialogue menu.
 	local topMenu = tes3.getTopMenu()
@@ -57,7 +59,10 @@ local function checkForAnswerHotkey(e)
 		answer:triggerEvent("mouseClick")
 	end
 end
+event.register("keyDown", checkForAnswerHotkey)
 
+--- Updates colors on topic lists, and registers to let us know when they are needed.
+--- @param e table
 local function updateTopicsList(e)
 	-- If the function lacks context to the dialogue menu, look it up.
 	local menuDialogue = tes3ui.findMenu(GUI_ID_MenuDialog)
@@ -94,8 +99,8 @@ local function updateTopicsList(e)
 	end
 
 	-- Get the actor that we're talking with.
-	local mobileActor = menuDialogue:getPropertyObject("PartHyperText_actor")
-	local actor = mobileActor.reference.object.baseObject
+	local mobileActor = menuDialogue:getPropertyObject("PartHyperText_actor") --- @type tes3mobileActor
+	local actor = mobileActor.reference.object.baseObject --- @type tes3actor
 
 	-- Go through and update all the topics.
 	for _, element in pairs(topicsPane.children) do
@@ -104,7 +109,7 @@ local function updateTopicsList(e)
 			element.widget.idleDisabled = GUI_Palette_TopicSeen
 
 			-- Get the info associated with this topic.
-			local dialogue = element:getPropertyObject("PartHyperText_dialog")
+			local dialogue = element:getPropertyObject("PartHyperText_dialog") --- @type tes3dialogue
 			local info = dialogue:getInfo({ actor = mobileActor })
 
 			-- Update color scheme on the topic.
@@ -129,6 +134,7 @@ local function updateTopicsList(e)
 	end
 end
 
+--- Updates the dialog menu.
 local function update()
 	local function traverse(element)
 		local path = {}
@@ -175,6 +181,8 @@ local function update()
 	end
 end
 
+--- Create our changes for MenuDialog.
+--- @param e uiActivatedEventData
 local function onDialogueMenuActivated(e)
 	-- We only care if this is the node time it was activated.
 	if (not e.newlyCreated) then

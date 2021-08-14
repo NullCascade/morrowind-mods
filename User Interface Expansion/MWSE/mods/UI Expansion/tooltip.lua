@@ -19,6 +19,10 @@ local enchantmentType = {
 	tes3.findGMST(tes3.gmst.sItemCastConstant).value,
 }
 
+--- Tries to destroy a child with a given UI ID.
+--- @param tooltip tes3uiElement
+--- @param uiid number|string
+--- @return boolean destroyed
 local function tryDestroyID(tooltip, uiid)
 	local element = tooltip:findChild(uiid)
 	if element ~= nil then
@@ -28,6 +32,9 @@ local function tryDestroyID(tooltip, uiid)
 	return false
 end
 
+--- Destroys all children with a given UI ID.
+--- @param tooltip tes3uiElement
+--- @param uiid number|string
 local function tryDestroyAllID(tooltip, uiid)
 	while true do
 		local element = tooltip:findChild(uiid)
@@ -39,6 +46,10 @@ local function tryDestroyAllID(tooltip, uiid)
 	end
 end
 
+--- Tries to hide an element with a given ID.
+--- @param tooltip tes3uiElement
+--- @param uiid number|string
+--- @return boolean
 local function tryHideID(tooltip, uiid)
 	local element = tooltip:findChild(uiid)
 	if element ~= nil then
@@ -48,6 +59,11 @@ local function tryHideID(tooltip, uiid)
 	return false
 end
 
+--- Creates a label with a specific size.
+--- @param tooltip tes3uiElement
+--- @param label string
+--- @param uiid number|string
+--- @return tes3uiElement
 local function labelFormatted(tooltip, label, uiid)
 	local block = tooltip:createLabel{ text = label, id = uiid }
 	block.minWidth = 1
@@ -58,6 +74,10 @@ local function labelFormatted(tooltip, label, uiid)
 	return block
 end
 
+--- Creates blocks for enchantment and condition information.
+--- @param tooltip tes3uiElement
+--- @param object tes3item|tes3armor|tes3weapon
+--- @param itemData tes3itemData
 local function enchantConditionBlock(tooltip, object, itemData)
 	if object.enchantment == nil and math.floor(object.enchantCapacity * 0.1) > 0 then
 		labelFormatted(tooltip, string.format("%s: %u", common.dictionary.enchantCapacity, object.enchantCapacity / 10),
@@ -141,6 +161,10 @@ local function enchantConditionBlock(tooltip, object, itemData)
 	end
 end
 
+--- Replaces information on a weapon's displayed stats.
+--- @param tooltip tes3uiElement
+--- @param weapon tes3weapon
+--- @param itemData tes3itemData
 local function replaceWeaponTooltip(tooltip, weapon, itemData)
 	tryDestroyID(tooltip, "HelpMenu_slash")
 	tryDestroyID(tooltip, "HelpMenu_chop")
@@ -194,6 +218,10 @@ local function replaceWeaponTooltip(tooltip, weapon, itemData)
 	enchantConditionBlock(tooltip, weapon, itemData)
 end
 
+--- Replaces information on an armor's displayed stats.
+--- @param tooltip tes3uiElement
+--- @param armor tes3armor
+--- @param itemData tes3itemData
 local function replaceArmorTooltip(tooltip, armor, itemData)
 	tryDestroyAllID(tooltip, "HelpMenu_armorRating")
 
@@ -208,6 +236,10 @@ local function replaceArmorTooltip(tooltip, armor, itemData)
 end
 
 local useMCPShowAllStandardPotionEffects = tes3.hasCodePatchFeature(162)
+
+--- Calculates the number of alchemy effects to show.
+--- @param alchemy tes3alchemy
+--- @return number
 local function getAlchemyEffectsShown(alchemy)
 	-- Check for MCP patch to show all standard effects.
 	if (useMCPShowAllStandardPotionEffects and not alchemy.modified and not alchemy.blocked) then
@@ -219,6 +251,9 @@ local function getAlchemyEffectsShown(alchemy)
 	return math.floor(alchemySkill / fWortChanceValue) * 2
 end
 
+--- Modifies a potion's tooltip.
+--- @param tooltip tes3uiElement
+--- @param alchemy tes3alchemy
 local function replaceAlchemyTooltip(tooltip, alchemy)
 	tryDestroyAllID(tooltip, "HelpMenu_effectBlock")
 
@@ -263,6 +298,9 @@ local function replaceAlchemyTooltip(tooltip, alchemy)
 end
 
 local useMCPSoulgemValueRebalance = tes3.hasCodePatchFeature(65)
+
+--- Early pass at updating tooltip information.
+--- @param e uiObjectTooltipEventData
 local function extraTooltipEarly(e)
 	-- I believe this is hardcoded in engine, so we'll just do this too.
 	if not e.object.id:find("Gold_") and not e.object.isKey then
@@ -410,6 +448,8 @@ local function extraTooltipEarly(e)
 	divide.visible = false
 end
 
+--- Late pass at updating tooltip information.
+--- @param e uiObjectTooltipEventData
 local function extraTooltipLate(e)
 	local element = e.tooltip:getContentElement()
 	local children = element.children
@@ -436,6 +476,8 @@ end
 event.register("uiObjectTooltip", extraTooltipEarly, { priority = 100 })
 event.register("uiObjectTooltip", extraTooltipLate, { priority = -100 })
 
+--- Displays a stolen indicator when bartering with a merchant you've stolen from.
+--- @param e itemTileUpdatedEventData
 local function onItemTileUpdated(e)
 	-- Show an indicator for stolen goods!
 	local merchant = tes3ui.getServiceActor()
@@ -456,8 +498,8 @@ local function onItemTileUpdated(e)
 end
 event.register("itemTileUpdated", onItemTileUpdated, { filter = "MenuInventory" })
 
--- Improve layout of spell tooltip.
-
+--- Improve layout of spell tooltip.
+--- @param e uiSpellTooltipEventData
 local function extraSpellTooltipEarly(e)
 	local GUI_ID_effect = tes3ui.registerID("effect")
 
@@ -500,8 +542,8 @@ local function extraSpellTooltipEarly(e)
 	e.tooltip:updateLayout()
 end
 
--- Show how long is left to recharge a power.
-
+--- Show how long is left to recharge a power.
+--- @param e uiSpellTooltipEventData
 local function extraSpellTooltipLate(e)
 	-- We have no way of knowing this is hovering over the player's power, but...
 	-- where the hell else would you find powers?
