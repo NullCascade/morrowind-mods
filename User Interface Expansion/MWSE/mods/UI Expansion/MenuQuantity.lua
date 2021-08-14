@@ -19,8 +19,7 @@ local function menuQuantity(e)
 	-- sent to the contents menu.
 	local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
 	if (contentsMenu) then
-		submitButton:register("mouseClick", function(e2)
-			e2.source:forwardEvent(e2)
+		submitButton:registerAfter("mouseClick", function()
 			contentsMenu:triggerEvent("update")
 		end)
 	end

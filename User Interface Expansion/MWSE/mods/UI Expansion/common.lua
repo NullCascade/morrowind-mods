@@ -16,7 +16,7 @@ function common.complexKeybindTest(keybind)
 		if (keybind.keyCode) then
 			return mwse.mcm.testKeyBind(keybind)
 		else
-			for _, k in pairs(keybind) do
+			for _, k in ipairs(keybind) do
 				if (not common.complexKeybindTest(k)) then
 					return false
 				end
@@ -42,34 +42,19 @@ function common.getColor(color)
 	end
 end
 
-common.effectsWithAttributes = {
-	[tes3.effect.absorbAttribute] = true,
-	[tes3.effect.damageAttribute] = true,
-	[tes3.effect.drainAttribute] = true,
-	[tes3.effect.fortifyAttribute] = true,
-	[tes3.effect.restoreAttribute] = true,
-}
-
 --- Perhaps now-useless function to safely get the attribute at a given index. This should no longer be needed due to a
 --- fix MWSE-side. We'll keep it here though out of pure laziness.
 --- @param ingredient tes3ingredient
 --- @param index number
 --- @return number
 function common.getIngredientEffectAttributeId(ingredient, index)
-	if (common.effectsWithAttributes[ingredient.effects[index]]) then
+	local magicEffect = tes3.getMagicEffect(ingredient.effects[index])
+	if (magicEffect.targetsAttributes) then
 		return ingredient.effectAttributeIds[index]
 	else
 		return -1
 	end
 end
-
-common.effectsWithSkills = {
-	[tes3.effect.absorbSkill] = true,
-	[tes3.effect.damageSkill] = true,
-	[tes3.effect.drainSkill] = true,
-	[tes3.effect.fortifySkill] = true,
-	[tes3.effect.restoreSkill] = true,
-}
 
 --- Perhaps now-useless function to safely get the skill at a given index. This should no longer be needed due to a fix
 --- MWSE-side. We'll keep it here though out of pure laziness.
@@ -77,7 +62,8 @@ common.effectsWithSkills = {
 --- @param index number
 --- @return number
 function common.getIngredientEffectSkillId(ingredient, index)
-	if (common.effectsWithSkills[ingredient.effects[index]]) then
+	local magicEffect = tes3.getMagicEffect(ingredient.effects[index])
+	if (magicEffect.targetsSkills) then
 		return ingredient.effectSkillIds[index]
 	else
 		return -1
@@ -203,7 +189,7 @@ function common.bindScrollBarToKeyboard(params)
 	common.unbindScrollBarFromKeyboard()
 
 	-- When this element is destroyed, clean up.
-	params.element:register("destroy", common.unbindScrollBarFromKeyboard)
+	params.element:registerBefore("destroy", common.unbindScrollBarFromKeyboard)
 
 	-- Set up the events and variables we'll need later.
 	event.register("keyDown", onKeyDownForScrollBar)
@@ -280,12 +266,12 @@ function common.createSearchBar(params)
 
 	-- Set up the events to control text input control.
 	input.consumeMouseEvents = false
-	input:register("keyEnter", function(e)
+	input:registerAfter("keyEnter", function(e)
 		if (params.onSubmit) then
 			params.onSubmit(e)
 		end
 	end)
-	input:register("keyPress", function(e)
+	input:registerBefore("keyPress", function(e)
 		local inputController = tes3.worldController.inputController
 		if (inputController:isKeyDown(tes3.scanCode.tab)) then
 			-- Prevent alt-tabbing from creating spacing.
@@ -308,9 +294,8 @@ function common.createSearchBar(params)
 				return
 			end
 		end
-
-		input:forwardEvent(e)
-
+	end)
+	input:registerAfter("keyPress", function(e)
 		input.color = params.textColor or tes3ui.getPalette("normal_color")
 		if (params.onUpdate) then
 			params.onUpdate(e)
@@ -325,15 +310,16 @@ function common.createSearchBar(params)
 	icon.absolutePosAlignX = 1.0
 	icon.absolutePosAlignY = 0.5
 	icon.borderRight = 4
-	icon:register("mouseClick", function(e)
+	icon:registerAfter("mouseClick", function(e)
 		input.text = '' -- "Search by name..."
-		input:forwardEvent(e)
+	end)
+	icon:registerAfter("mouseClick", function(e)
 		input.color = params.textColor or tes3ui.getPalette("normal_color")
 		params.onUpdate(e)
 		input:updateLayout()
 	end)
 
-	border:register("mouseClick", function()
+	border:registerAfter("mouseClick", function()
 		tes3ui.acquireTextInput(input)
 	end)
 
@@ -661,7 +647,7 @@ function uiExFilterFunction:createElements(parent)
 		block.paddingRight = 3
 
 		self.iconFiltersBlock = block
-		block:register("destroy", function()
+		block:registerBefore("destroy", function()
 			self.iconFiltersBlock = nil
 		end)
 
@@ -683,7 +669,7 @@ function uiExFilterFunction:createElements(parent)
 		block.borderTop = 1
 
 		self.buttonFiltersBlock = block
-		block:register("destroy", function()
+		block:registerBefore("destroy", function()
 			self.buttonFiltersBlock = nil
 		end)
 

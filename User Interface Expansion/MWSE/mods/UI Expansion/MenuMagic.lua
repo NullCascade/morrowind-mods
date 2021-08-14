@@ -111,10 +111,9 @@ local function getEffectsContainsSchool(effects, school)
 	for i = 1, #effects do
 		local eff = effects[i]
 		if eff then
-			if eff.object then
-				if eff.object.school == school then
-					return true
-				end
+			local magicEffect = eff.object
+			if magicEffect and eff.object.school == school then
+				return true
 			end
 		end
 	end

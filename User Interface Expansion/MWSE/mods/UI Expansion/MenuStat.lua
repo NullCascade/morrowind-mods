@@ -12,25 +12,15 @@ local common = require("UI Expansion.common")
 -- Stats Menu: Display active modifiers.
 ----------------------------------------------------------------------------------------------------
 
-local attributeModifyingEffects = {
-	tes3.effect.drainAttribute,
-	tes3.effect.damageAttribute,
-	tes3.effect.fortifyAttribute,
-}
-local skillModifyingEffects = { tes3.effect.drainSkill, tes3.effect.damageSkill, tes3.effect.fortifySkill }
-
 --- Adds more information to tooltips for attributes/skills.
---- @param e table
+--- @param source tes3uiElement
 --- @param effectFilter string
 --- @param idProperty string
 --- @param fortifyEffect number
 --- @param statsArray string
-local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect, statsArray)
-	-- Allow the tooltip to be made per usual.
-	e.source:forwardEvent(e)
-
+local function OnMenuStatTooltip(source, effectFilter, idProperty, fortifyEffect, statsArray)
 	-- Get the associated attribute.
-	local attribute = e.source:getPropertyInt(idProperty)
+	local attribute = source:getPropertyInt(idProperty)
 
 	-- Create a new tooltip block.
 	local tooltip = tes3ui.findHelpLayerMenu(GUI_ID_HelpMenu)
@@ -57,14 +47,12 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect, sta
 
 	-- Display any modifiers.
 	adjustmentsBlock:createLabel({ text = common.dictionary.statModifiers })
-	local modifierCount = 0
-	local activeEffect = tes3.mobilePlayer.activeMagicEffects
-	local magicEffects = tes3.dataHandler.nonDynamicData.magicEffects
-	for _ = 1, tes3.mobilePlayer.activeMagicEffectCount do
-		activeEffect = activeEffect.next
-
-		if (activeEffect.attributeId == attribute and table.find(effectFilter, activeEffect.effectId)) then
-			local block = adjustmentsBlock:createBlock({})
+	local foundModifiers = false
+	local activeEffects = tes3.mobilePlayer:getActiveMagicEffects() --- @type tes3activeMagicEffect[]
+	for _, activeEffect in ipairs(activeEffects) do
+		local effect = tes3.getMagicEffect(activeEffect.effectId)
+		if (effect[effectFilter] and activeEffect.attributeId == attribute) then
+			local block = adjustmentsBlock:createBlock()
 			block.flowDirection = "left_to_right"
 			block.widthProportional = 1.0
 			block.autoWidth = true
@@ -72,8 +60,6 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect, sta
 			block.borderLeft = 10
 			block.borderRight = 10
 			block.borderTop = 4
-
-			local effect = magicEffects[activeEffect.effectId + 1]
 
 			local icon = block:createImage({ path = string.format("icons/%s", effect.icon) })
 			icon.borderRight = 6
@@ -92,7 +78,7 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect, sta
 				magnitudeLabel.absolutePosAlignX = 1.0
 			end
 
-			modifierCount = modifierCount + 1
+			foundModifiers = true
 		end
 	end
 
@@ -110,7 +96,7 @@ local function OnMenuStatTooltip(e, effectFilter, idProperty, fortifyEffect, sta
 		helpText.borderTop = 6
 	end
 
-	if (modifierCount < 1) then
+	if (not foundModifiers) then
 		adjustmentsBlock.visible = false
 	end
 end
@@ -118,22 +104,18 @@ end
 --- Update attribute tooltips.
 --- @param e table
 local function onMenuStatAttributeTooltip(e)
-	OnMenuStatTooltip(e, attributeModifyingEffects, "MenuStat_attribute_strength", tes3.effect.fortifyAttribute,
-	                  "attributes")
+	OnMenuStatTooltip(e.source, "targetsAttributes", "MenuStat_attribute_strength", tes3.effect.fortifyAttribute, "attributes")
 end
 
 --- Update skill tooltips.
 --- @param e table
 local function onMenuStatSkillTooltip(e)
-	OnMenuStatTooltip(e, skillModifyingEffects, "MenuStat_message", tes3.effect.fortifySkill, "skills")
+	OnMenuStatTooltip(e.source, "targetsSkills", "MenuStat_message", tes3.effect.fortifySkill, "skills")
 end
 
 --- Update faction tooltips.
 --- @param e table
 local function onMenuStatFactionTooltip(e)
-	-- Allow the tooltip to be made per usual.
-	e.source:forwardEvent(e)
-
 	-- Get the associated faction.
 	local faction = e.source:getPropertyObject("MenuStat_message")
 
@@ -165,10 +147,14 @@ end
 --- Create our changes for MenuStat.
 --- @param e uiActivatedEventData
 local function onMenuStatActivated(e)
+	if (not e.newlyCreated) then
+		return
+	end
+
 	local idParts = { "agility", "endurance", "intellegence", "luck", "personality", "speed", "strength", "willpower" }
 	for _, idPart in pairs(idParts) do
 		local MenuStat_attribute_layout = e.element:findChild(string.format("MenuStat_attribute_layout_%s", idPart))
-		MenuStat_attribute_layout:register("help", onMenuStatAttributeTooltip)
+		MenuStat_attribute_layout:registerAfter("help", onMenuStatAttributeTooltip)
 
 		-- Prevent children from using their own events.
 		local children = MenuStat_attribute_layout.children
@@ -180,9 +166,9 @@ end
 event.register("uiActivated", onMenuStatActivated, { filter = "MenuStat" })
 
 local attributeTooltipElements = {
-	tes3ui.registerID("MenuStat_misc_layout"),
-	tes3ui.registerID("MenuStat_minor_layout"),
-	tes3ui.registerID("MenuStat_major_layout"),
+	[tes3ui.registerID("MenuStat_misc_layout")] = true,
+	[tes3ui.registerID("MenuStat_minor_layout")] = true,
+	[tes3ui.registerID("MenuStat_major_layout")] = true,
 }
 
 --- Called when the stats menu is refreshed.
@@ -190,9 +176,9 @@ local attributeTooltipElements = {
 local function onStatsMenuRefreshed(e)
 	local scrollPaneChildren = e.element:findChild(GUI_ID_PartScrollPane_pane).children
 	for _, element in pairs(scrollPaneChildren) do
-		if (table.find(attributeTooltipElements, element.id)) then
+		if (attributeTooltipElements[element.id]) then
 			-- Show enhanced statistics tooltips on attributes/skills.
-			element:register("help", onMenuStatSkillTooltip)
+			element:registerAfter("help", onMenuStatSkillTooltip)
 
 			local children = element.children
 			for _, child in pairs(children) do
@@ -200,7 +186,7 @@ local function onStatsMenuRefreshed(e)
 			end
 		elseif (element.id == GUI_ID_MenuStat_faction_layout) then
 			-- Show increased faction information.
-			element:register("help", onMenuStatFactionTooltip)
+			element:registerAfter("help", onMenuStatFactionTooltip)
 
 			local children = element.children
 			for _, child in pairs(children) do

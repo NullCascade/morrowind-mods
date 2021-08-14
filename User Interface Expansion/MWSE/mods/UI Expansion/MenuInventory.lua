@@ -58,17 +58,14 @@ local function onInventoryTileClicked(e)
 	}
 	local response = event.trigger("UIEX:InventoryTileClicked", eventData, { filter = eventData.item })
 	if (response.block) then
-		return
+		return false
 	end
-
-	-- Perform any normal logic.
-	e.source:forwardEvent(e)
 end
 
 --- Claim mouse click events on item tiles.
 --- @param e itemTileUpdatedEventData
 local function onInventoryTileUpdated(e)
-	e.element:register("mouseClick", onInventoryTileClicked)
+	e.element:registerBefore("mouseClick", onInventoryTileClicked)
 end
 event.register("itemTileUpdated", onInventoryTileUpdated, { filter = "MenuInventory" })
 

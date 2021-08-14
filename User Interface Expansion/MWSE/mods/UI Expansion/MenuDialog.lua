@@ -69,10 +69,11 @@ local function updateTopicsList(e)
 	local textPane = menuDialogue:findChild(GUI_ID_MenuDialog_scroll_pane):findChild(GUI_ID_PartScrollPane_pane)
 	local topicsPane = menuDialogue:findChild(GUI_ID_MenuDialog_topics_pane):findChild(GUI_ID_PartScrollPane_pane)
 
+	e.info = e.source:getPropertyObject("MenuDialog_UIEXP_info")
+	e.actor = e.source:getPropertyObject("MenuDialog_UIEXP_actor")
+
 	-- Forward along click events to trigger dialogue as usual.
 	if (e.source) then
-		e.source:forwardEvent(e)
-
 		-- Were we forced out of dialogue?
 		if (tes3ui.findMenu(GUI_ID_MenuDialog) == nil) then
 			answers = {}
@@ -94,7 +95,7 @@ local function updateTopicsList(e)
 	-- Catch events from hyperlinks.
 	for _, element in pairs(textPane.children) do
 		if (element.id == GUI_ID_MenuDialog_hyper) then
-			element:register("mouseClick", updateTopicsList)
+			element:registerAfter("mouseClick", updateTopicsList)
 		end
 	end
 
@@ -110,7 +111,7 @@ local function updateTopicsList(e)
 
 			-- Get the info associated with this topic.
 			local dialogue = element:getPropertyObject("PartHyperText_dialog") --- @type tes3dialogue
-			local info = dialogue:getInfo({ actor = mobileActor })
+			local info = element:getPropertyObject("") or dialogue:getInfo({ actor = mobileActor })
 
 			-- Update color scheme on the topic.
 			if (info == nil or info.firstHeardFrom) then
@@ -124,12 +125,12 @@ local function updateTopicsList(e)
 			end
 			element:triggerEvent("mouseLeave")
 
+			-- Store objects on the element for quick reference later.
+			element:setPropertyObject("MenuDialog_UIEXP_info", info)
+			element:setPropertyObject("MenuDialog_UIEXP_actor", actor)
+
 			-- Register an event so that we update when any topic is clicked.
-			element:register("mouseClick", function(mouseClickEventData)
-				mouseClickEventData.info = info
-				mouseClickEventData.actor = actor
-				updateTopicsList(mouseClickEventData)
-			end)
+			element:registerAfter("mouseClick", updateTopicsList)
 		end
 	end
 end
@@ -153,7 +154,7 @@ local function update()
 				end
 				if node.id == GUI_ID_MenuDialog_answer_block then
 					local oldText = node.text
-					node:register("mouseClick", updateTopicsList)
+					node:registerAfter("mouseClick", updateTopicsList)
 					answerIndex = answerIndex + 1
 					if not string.match(oldText, "^%d+") then
 						node.text = string.format("%d. %s", answerIndex, oldText)
@@ -190,11 +191,12 @@ local function onDialogueMenuActivated(e)
 	end
 
 	-- Set the pre-update event to update the topic list.
-	e.element:register("preUpdate", function(preUpdateEventData)
-		-- We only want this event to fire once. We'll manually track changes above to be more efficient.
+	-- We only want this event to fire once. We'll manually track changes above to be more efficient.
+	local function firstPreUpdate(preUpdateEventData)
+		assert(e.element:unregisterAfter("preUpdate", firstPreUpdate))
 		updateTopicsList(preUpdateEventData)
-		e.element:unregister("preUpdate")
-	end)
+	end
+	e.element:registerAfter("preUpdate", firstPreUpdate)
 
 	-- special as I am not able to find GUI_ID_MenuDialog_answer_block in pairs(children) on greetings /abot
 	answers = {}
@@ -202,4 +204,3 @@ local function onDialogueMenuActivated(e)
 
 end
 event.register("uiActivated", onDialogueMenuActivated, { filter = "MenuDialog" })
-event.register("keyDown", checkForAnswerHotkey)

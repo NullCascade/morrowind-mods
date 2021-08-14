@@ -483,7 +483,7 @@ local function onItemTileUpdated(e)
 	local merchant = tes3ui.getServiceActor()
 	if merchant ~= nil and e.item.stolenList ~= nil then
 		for _, v in pairs(e.item.stolenList) do
-			if merchant.object.name == v.name then
+			if merchant.reference.baseObject == v then
 				local icon = e.element:createImage({ path = "icons/ui_exp/ownership_indicator.dds" })
 				icon.consumeMouseEvents = false
 				icon.width = 16

@@ -97,7 +97,7 @@ local function onMenuContentsActivated(e)
 	-- Register a key event for take all and container closing.
 	event.register("keyDown", onKeyInput)
 	event.register("menuExit", function()
-		event.unregister("keyDown", onKeyInput, { doOnce = true })
+		event.unregister("keyDown", onKeyInput)
 	end)
 
 	-- Add a new block in the right place.
@@ -127,10 +127,8 @@ local function onMenuContentsActivated(e)
 		capacityBar.borderAllSides = 4
 		buttonBlock:reorderChildren(0, -1, 1)
 
-		contentsMenu:register("update", function(ed)
-			calculateCapacity()
-			ed.source:forwardEvent(ed)
-		end)
+		contentsMenu:registerBefore("update", calculateCapacity)
+
 		-- Necessary as otherwise the fillbar is hidden for some reason.
 		contentsMenu:triggerEvent("update")
 	end
@@ -152,17 +150,14 @@ local function onContentTileClicked(e)
 	}
 	local response = event.trigger("UIEX:ContentsTileClicked", eventData, { filter = eventData.item })
 	if (response.block) then
-		return
+		return false
 	end
-
-	-- Perform any normal logic.
-	e.source:forwardEvent(e)
 end
 
 --- Claim mouse click events on item tiles.
 --- @param e itemTileUpdatedEventData
 local function onContentTileUpdated(e)
-	e.element:register("mouseClick", onContentTileClicked)
+	e.element:registerBefore("mouseClick", onContentTileClicked)
 end
 event.register("itemTileUpdated", onContentTileUpdated, { filter = "MenuContents" })
 

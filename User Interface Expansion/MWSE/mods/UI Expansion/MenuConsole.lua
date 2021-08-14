@@ -131,6 +131,9 @@ local function onSubmitCommand()
 			mwse.saveConfig("UI Expansion", config)
 		end
 	end
+
+	-- Make sure the original execution doesn't happen.
+	return false
 end
 
 --- Create our changes for MenuConsole.
@@ -172,7 +175,7 @@ local function onMenuConsoleActivated(e)
 	input.font = 1
 	input.widget.lengthLimit = nil
 	input.widget.eraseOnFirstKey = true
-	input:register("keyEnter", onSubmitCommand)
+	input:registerBefore("keyEnter", onSubmitCommand)
 
 	-- Create toggle button.
 	local scriptToggleButton = inputBlock:createButton{ text = "mwscript" }
@@ -180,7 +183,7 @@ local function onMenuConsoleActivated(e)
 	scriptToggleButton.borderLeft = 4
 	scriptToggleButton.minWidth = 90
 	scriptToggleButton.width = 90
-	scriptToggleButton:register("mouseClick", function()
+	scriptToggleButton:registerAfter("mouseClick", function()
 		luaMode = not luaMode
 		updateScriptButton(scriptToggleButton)
 		menuConsole:updateLayout()
@@ -189,7 +192,7 @@ local function onMenuConsoleActivated(e)
 	toggleText.wrapText = true
 	toggleText.justifyText = "center"
 
-	input:register("keyPress", function(e)
+	input:registerBefore("keyPress", function(e)
 		local key = e.data0
 
 		if (key == 9) then
@@ -224,13 +227,11 @@ local function onMenuConsoleActivated(e)
 			menuConsole:updateLayout()
 			return
 		end
-
-		input:forwardEvent(e)
 	end)
 
 	-- Make it so clicking on the border focuses the input box.
 	input.consumeMouseEvents = false
-	border:register("mouseClick", function()
+	border:registerAfter("mouseClick", function()
 		tes3ui.acquireTextInput(input)
 	end)
 
