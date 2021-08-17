@@ -96,7 +96,7 @@ local function onMenuContentsActivated(e)
 
 	-- Register a key event for take all and container closing.
 	event.register("keyDown", onKeyInput)
-	event.register("menuExit", function()
+	e.element:registerBefore("destroy", function()
 		event.unregister("keyDown", onKeyInput)
 	end)
 
