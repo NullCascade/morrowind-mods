@@ -26,10 +26,18 @@ local function updateScriptButton(button)
 	end
 end
 
+--- Clear the console's output.
+local function clearConsole()
+	local MenuConsole = tes3ui.findMenu("MenuConsole")
+	if (not MenuConsole) then return end
+	MenuConsole:findChild("MenuConsole_scroll_pane"):findChild("PartScrollPane_pane"):destroyChildren()
+end
+
 --- Initializes the lua sandbox.
 local function sandboxInit()
 	setmetatable(sandbox, { __index = _G })
 	sandbox.print = tes3ui.logToConsole
+	sandbox.cls = clearConsole
 	event.trigger("UIEXP:sandboxConsole", { sandbox = sandbox })
 end
 
