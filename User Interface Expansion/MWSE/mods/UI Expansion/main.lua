@@ -36,7 +36,6 @@ local defaultConfig = {
 		barter = true,
 		console = true,
 		contents = true,
-		copyPaste = true,
 		dialog = true,
 		inventory = true,
 		inventorySelect = true,
@@ -50,6 +49,7 @@ local defaultConfig = {
 		saveLoad = true,
 		serviceSpells = true,
 		stat = true,
+		textInput = true,
 		tooltip = true,
 		training = true,
 	},
@@ -167,8 +167,8 @@ local function onInitialized()
 	if (config.components.training) then
 		dofile("UI Expansion.MenuServiceTraining")
 	end
-	if (config.components.copyPaste) then
-		dofile("UI Expansion.copyPaste")
+	if (config.components.textInput) then
+		dofile("UI Expansion.textInput")
 	end
 end
 event.register("initialized", onInitialized)

@@ -24,7 +24,6 @@ local function registerModConfig()
 			barter = "configComponentBarter",
 			console = "configComponentConsole",
 			contents = "configComponentContents",
-			copyPaste = "configComponentCopyPaste",
 			dialog = "configComponentDialog",
 			inventory = "configComponentInventory",
 			inventorySelect = "configComponentInventorySelect",
@@ -35,6 +34,7 @@ local function registerModConfig()
 			rest = "configComponentRest",
 			saveLoad = "configComponentSaveLoad",
 			serviceSpells = "configComponentServiceSpells",
+			textInput = "configComponentTextInput",
 			training = "configComponentServiceTraining",
 		}
 		for _, k in ipairs(table.keys(components, true)) do
