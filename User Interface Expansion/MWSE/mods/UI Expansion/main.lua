@@ -100,13 +100,10 @@ config.keybindMapSwitch = convertKeyBind(config.keybindMapSwitch)
 -- Make config available to the common module.
 common.config = config
 
--- Load translation data.
-common.loadTranslation()
-
 -- Make sure we have the latest MWSE version.
 if (mwse.buildDate < 20210813) then
 	event.register("loaded", function()
-		tes3.messageBox(common.dictionary.updateRequired)
+		tes3.messageBox(common.i18n("core.updateRequired"))
 	end)
 	return
 end

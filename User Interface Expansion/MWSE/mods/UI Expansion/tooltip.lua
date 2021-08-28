@@ -80,7 +80,7 @@ end
 --- @param itemData tes3itemData
 local function enchantConditionBlock(tooltip, object, itemData)
 	if object.enchantment == nil and math.floor(object.enchantCapacity * 0.1) > 0 then
-		labelFormatted(tooltip, string.format("%s: %u", common.dictionary.enchantCapacity, object.enchantCapacity / 10),
+		labelFormatted(tooltip, string.format("%s: %u", common.i18n("tooltip.enchantCapacity"), object.enchantCapacity / 10),
 		               GUI_ID_TooltipEnchantCapacity)
 	end
 
@@ -208,10 +208,10 @@ local function replaceWeaponTooltip(tooltip, weapon, itemData)
 
 	if not weapon.isAmmo then
 		if weapon.speed ~= 1.0 then
-			labelFormatted(tooltip, string.format("%s: %.2f", common.dictionary.weaponSpeed, weapon.speed), GUI_ID_TooltipSpeed)
+			labelFormatted(tooltip, string.format("%s: %.2f", common.i18n("tooltip.weaponSpeed"), weapon.speed), GUI_ID_TooltipSpeed)
 		end
 		if weapon.reach ~= 1.0 then
-			labelFormatted(tooltip, string.format("%s: %.2f", common.dictionary.weaponReach, weapon.reach), GUI_ID_TooltipReach)
+			labelFormatted(tooltip, string.format("%s: %.2f", common.i18n("tooltip.weaponReach"), weapon.reach), GUI_ID_TooltipReach)
 		end
 	end
 
@@ -225,7 +225,7 @@ end
 local function replaceArmorTooltip(tooltip, armor, itemData)
 	tryDestroyAllID(tooltip, "HelpMenu_armorRating")
 
-	tooltip:createLabel{ text = common.dictionary.weightClasses[armor.weightClass + 1], id = GUI_ID_TooltipWeightClass }
+	tooltip:createLabel{ text = common.i18n("tooltip.weightClass" .. armor.weightClass + 1), id = GUI_ID_TooltipWeightClass }
 	tooltip:createLabel{
 		text = string.format("%s: %u", tes3.findGMST(tes3.gmst.sArmorRating).value,
 		                     armor:calculateArmorRating(tes3.mobilePlayer)),
@@ -334,7 +334,7 @@ local function extraTooltipEarly(e)
 				blockDurationBar.paddingAllSides = 4
 				blockDurationBar.paddingLeft = 2
 				blockDurationBar.paddingRight = 2
-				blockDurationBar:createLabel{ text = string.format("%s:", common.dictionary.lightDuration) }
+				blockDurationBar:createLabel{ text = string.format("%s:", common.i18n("tooltip.lightDuration")) }
 
 				local labelDurationBar = blockDurationBar:createFillBar{
 					current = e.itemData and e.itemData.timeLeft or e.object.time,
@@ -347,7 +347,7 @@ local function extraTooltipEarly(e)
 			if (e.itemData and e.itemData.soul) then
 				local soulValue = e.itemData.soul.soul
 				labelFormatted(e.tooltip,
-				               string.format("%s: %u / %u", common.dictionary.soulCapacity, soulValue, e.object.soulGemCapacity))
+				               string.format("%s: %u / %u", common.i18n("tooltip.soulCapacity"), soulValue, e.object.soulGemCapacity))
 
 				-- Fixup item value based on MCP feature state.
 				if (useMCPSoulgemValueRebalance) then
@@ -356,7 +356,7 @@ local function extraTooltipEarly(e)
 					objectValue = objectValue * soulValue
 				end
 			else
-				labelFormatted(e.tooltip, string.format("%s: %u", common.dictionary.soulCapacity, e.object.soulGemCapacity))
+				labelFormatted(e.tooltip, string.format("%s: %u", common.i18n("tooltip.soulCapacity"), e.object.soulGemCapacity))
 			end
 		end
 
@@ -431,7 +431,7 @@ local function extraTooltipEarly(e)
 					labelBlock.autoWidth = true
 					labelBlock.autoHeight = true
 					labelBlock.paddingAllSides = 1
-					local label = labelBlock:createLabel{ text = common.dictionary.stolenFromMerchant }
+					local label = labelBlock:createLabel{ text = common.i18n("tooltip.stolenFromMerchant") }
 					label.wrapText = true
 					label.borderAllSides = 6
 					label.justifyText = "center"
@@ -553,7 +553,7 @@ local function extraSpellTooltipLate(e)
 			local timeToRecharge = math.abs(24 - (tes3.getSimulationTimestamp() - castTimestamp))
 			local label = e.tooltip:createLabel({
 				id = "UIEXP:PowerRechargeCooldown",
-				text = string.format(common.dictionary.powerRechargeCooldown, timeToRecharge),
+				text = common.i18n("tooltip.powerRechargeCooldown", { timeToRecharge }),
 			})
 			label.borderBottom = 4
 			label.color = tes3ui.getPalette("disabled_color")

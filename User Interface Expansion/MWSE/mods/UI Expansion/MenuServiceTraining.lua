@@ -35,7 +35,7 @@ event.register("uiActivated", menuTraining, { filter = "MenuServiceTraining" })
 local function expertiseText(skill)
 	for i = 4, 0, -1 do
 		if (skill >= 25 * i) then
-			return common.dictionary.expertiseLevels[i + 1]
+			return common.i18n(string.format("tooltip.expertiseLevel.%d", i + 1))
 		end
 	end
 end
@@ -166,20 +166,20 @@ local function createTrainSkillElement(parent, id, data)
 	end)
 	]]
 
-	temp = train:createLabel{ text = string.format("%s %s", expertiseText(trainerLevel.base), common.dictionary.trainer) }
+	temp = train:createLabel{ text = string.format("%s %s", expertiseText(trainerLevel.base), common.i18n("training.trainer")) }
 	temp.borderTop = 6
 	temp.color = textColor
 	temp.absolutePosAlignX = 0.5
 
 	local text
 	if (level.base < attr.base and level.base < trainerLevel.base) then
-		text = string.format(common.dictionary.trainTo, level.base + 1)
+		text = common.i18n("training.trainTo", { level.base + 1 })
 	else
 		if (level.base >= trainerLevel.base) then
-			text = common.dictionary.trainerLimit
+			text = common.i18n("training.trainerLimit")
 		else
 			text = tes3.findGMST(tes3.gmst.sAttributeStrength + data.skill.attribute).value
-			text = string.format(common.dictionary.attributeLimit, text, level.base)
+			text = common.i18n("training.attributeLimit", { text, level.base })
 		end
 		textColor = tes3ui.getPalette("negative_color")
 		button.disabled = true
@@ -194,7 +194,7 @@ local function createTrainSkillElement(parent, id, data)
 	temp.justifyText = tes3.justifyText.center
 
 	if (level.base < trainerLevel.base) then
-		temp = train:createLabel{ text = string.format("%d %s", data.cost, common.dictionary.goldAbbr) }
+		temp = train:createLabel{ text = string.format("%d %s", data.cost, common.i18n("training.goldAbbr")) }
 		temp.borderTop = 8
 		temp.color = canAfford and tes3ui.getPalette("normal_color") or tes3ui.getPalette("negative_color")
 		temp.absolutePosAlignX = 0.5
@@ -270,7 +270,7 @@ local function modifyWindow(menu)
 
 	local temp = button_block:createLabel{ id = id_gold }
 	temp.text = string.format("%s: %d %s", tes3.findGMST(tes3.gmst.sGold).value, tes3.getPlayerGold(),
-	                          common.dictionary.goldAbbr)
+	                          common.i18n("training.goldAbbr"))
 
 	local button_cancel = button_block:createButton{ id = id_cancel, text = tes3.findGMST("sDone").value }
 	button_cancel.layoutOriginFractionX = 1.0

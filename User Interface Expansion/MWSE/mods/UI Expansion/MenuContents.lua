@@ -43,9 +43,9 @@ local function onFilterChanged()
 		if takeAllButton then --- it may be nil /abot
 			local contentsFilter = common.allFilters.contents
 			if (contentsFilter.searchText ~= nil or #contentsFilter.filtersOrdered ~= #contentsFilter.activeFilters) then
-				takeAllButton.text = common.dictionary.takeFiltered
+				takeAllButton.text = common.i18n("inventory.takeFiltered")
 			else
-				takeAllButton.text = common.dictionary.takeAll
+				takeAllButton.text = common.i18n("inventory.takeAll")
 			end
 		end
 	end

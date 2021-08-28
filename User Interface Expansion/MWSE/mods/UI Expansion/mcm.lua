@@ -5,8 +5,8 @@ local function registerModConfig()
 	local template = mwse.mcm.createTemplate({ name = "UI Expansion" })
 	template:saveOnClose("UI Expansion", common.config)
 
-	local creditsText = common.dictionary.modName .. " " .. common.dictionary.versionString .. "\n\n" ..
-	                    common.dictionary.configCredits ..
+	local creditsText = common.i18n("core.modName") .. " " .. common.i18n("core.versionString") .. "\n\n" ..
+	                    common.i18n("mcm.credits") ..
 	                    "\n  Programming: NullCascade, Hrnchamd, Petethegoat, Jiopsi, Remiros, Mort, Wix, abot, Necrolesian" ..
 	                    "\n  Translations: Daichix, Fesswood, Monsterzeichner, and Google Translate" ..
 	                    "\n  Concepts and Testing: Morrowind Modding Community Discord" ..
@@ -15,32 +15,16 @@ local function registerModConfig()
 
 	-- Components section
 	do
-		local pageComponents = template:createSideBarPage({ label = common.dictionary.configTabComponent })
+		local pageComponents = template:createSideBarPage({ label = common.i18n("mcm.tab.component") })
 		pageComponents.sidebar:createInfo({
 			text = creditsText .. "\n\nThe settings in this tab will not take affect until the next restart.",
 		})
 
-		local components = {
-			barter = "configComponentBarter",
-			console = "configComponentConsole",
-			contents = "configComponentContents",
-			dialog = "configComponentDialog",
-			inventory = "configComponentInventory",
-			inventorySelect = "configComponentInventorySelect",
-			magic = "configComponentMagic",
-			map = "configComponentMap",
-			options = "configComponentOptions",
-			quantity = "configComponentQuantity",
-			rest = "configComponentRest",
-			saveLoad = "configComponentSaveLoad",
-			serviceSpells = "configComponentServiceSpells",
-			textInput = "configComponentTextInput",
-			training = "configComponentServiceTraining",
-		}
-		for _, k in ipairs(table.keys(components, true)) do
+		local components = { "barter", "console", "contents", "dialog", "inventory", "inventorySelect", "magic", "map", "options", "quantity", "rest", "saveLoad", "serviceSpells", "stat", "textInput", "training" }
+		for _, k in ipairs(components) do
 			pageComponents:createOnOffButton({
-				label = common.dictionary[components[k]],
-				description = common.dictionary[components[k] .. "Description"],
+				label = common.i18n(string.format("mcm.component.%s.label", k)),
+				description = common.i18n(string.format("mcm.component.%s.description", k)),
 				variable = mwse.mcm.createTableVariable({ id = k, table = common.config.components }),
 			})
 		end
@@ -48,95 +32,95 @@ local function registerModConfig()
 
 	-- Features setting
 	do
-		local pageFeatures = template:createSideBarPage({ label = common.dictionary.configTabFeature })
+		local pageFeatures = template:createSideBarPage({ label = common.i18n("mcm.tab.feature") })
 		pageFeatures.sidebar:createInfo({ text = creditsText })
 
 		-- Category: Tooltips
 		do
-			local category = pageFeatures:createCategory({ label = common.dictionary.configCategoryTooltips })
+			local category = pageFeatures:createCategory({ label = common.i18n("mcm.category.tooltips") })
 
 			-- Help tooltips
 			category:createOnOffButton({
-				label = common.dictionary.configShowHelpTips,
-				description = common.dictionary.configShowHelpTipsDescription,
+				label = common.i18n("mcm.showHelpTips.label"),
+				description = common.i18n("mcm.showHelpTips.description"),
 				variable = mwse.mcm.createTableVariable({ id = "showHelpText", table = common.config }),
 			})
 
 			-- Display value/weight ratio
 			category:createOnOffButton({
-				label = common.dictionary.configRatioDisplay,
-				description = common.dictionary.configRatioDisplayDescription,
+				label = common.i18n("mcm.ratioDisplay.label"),
+				description = common.i18n("mcm.ratioDisplay.description"),
 				variable = mwse.mcm.createTableVariable({ id = "displayRatio", table = common.config }),
 			})
 		end
 
 		-- Category: Search & Filtering
 		do
-			local category = pageFeatures:createCategory({ label = common.dictionary.configCategorySearchFilter })
+			local category = pageFeatures:createCategory({ label = common.i18n("mcm.category.searchFilter") })
 
 			-- Use text search?
 			category:createOnOffButton({
-				label = common.dictionary.configUseSearchBars,
-				description = common.dictionary.configUseSearchBarsDescription,
+				label = common.i18n("mcm.useSearchBars.label"),
+				description = common.i18n("mcm.useSearchBars.description"),
 				variable = mwse.mcm.createTableVariable({ id = "useSearch", table = common.config }),
 			})
 
 			-- Use buttons or icons?
 			category:createOnOffButton({
-				label = common.dictionary.configFilterButtons,
-				description = common.dictionary.configFilterButtonsDescription,
+				label = common.i18n("mcm.filterButtons.label"),
+				description = common.i18n("mcm.filterButtons.description"),
 				variable = mwse.mcm.createTableVariable({ id = "useInventoryTextButtons", table = common.config }),
 			})
 
 			-- Auto-selection
 			category:createDropdown({
-				label = common.dictionary.configAutoSelectSearch,
-				description = common.dictionary.configAutoSelectSearchDescription,
+				label = common.i18n("mcm.autoSelectSearch.label"),
+				description = common.i18n("mcm.autoSelectSearch.description"),
 				options = {
-					{ label = common.dictionary.configAutoSelectSearchOptions[1], value = "Inventory" },
-					{ label = common.dictionary.configAutoSelectSearchOptions[2], value = "Magic" },
-					{ label = common.dictionary.configAutoSelectSearchOptions[3], value = "None" },
+					{ label = common.i18n("mcm.autoSelectSearch.option.inventory"), value = "Inventory" },
+					{ label = common.i18n("mcm.autoSelectSearch.option.magic"), value = "Magic" },
+					{ label = common.i18n("mcm.autoSelectSearch.option.none"), value = "None" },
 				},
 				variable = mwse.mcm.createTableVariable({ id = "autoSelectInput", table = common.config }),
 			})
 
 			-- Auto-equip spells
 			category:createOnOffButton({
-				label = common.dictionary.configAutoSelectSpells,
-				description = common.dictionary.configAutoSelectSpellsDescription,
+				label = common.i18n("mcm.autoSelectSpells.label"),
+				description = common.i18n("mcm.autoSelectSpells.description"),
 				variable = mwse.mcm.createTableVariable({ id = "selectSpellsOnSearch", table = common.config }),
 			})
 
 			-- Auto-filter to barterable items
 			category:createOnOffButton({
-				label = common.dictionary.configAutoFilterToTradable,
-				description = common.dictionary.configAutoFilterToTradableDescription,
+				label = common.i18n("mcm.autoFilterToTradable.label"),
+				description = common.i18n("mcm.autoFilterToTradable.description"),
 				variable = mwse.mcm.createTableVariable({ id = "autoFilterToTradable", table = common.config }),
 			})
 
 			-- Auto-clear filters
 			category:createOnOffButton({
-				label = common.dictionary.configAlwaysClearFiltersOnOpen,
-				description = common.dictionary.configAlwaysClearFiltersOnOpenDescription,
+				label = common.i18n("mcm.alwaysClearFiltersOnOpen.label"),
+				description = common.i18n("mcm.alwaysClearFiltersOnOpen.description"),
 				variable = mwse.mcm.createTableVariable({ id = "alwaysClearFiltersOnOpen", table = common.config }),
 			})
 
 			-- Quick-transfer items without having to hold alt
 			category:createOnOffButton({
-				label = common.dictionary.configTransferStackByDefault,
-				description = common.dictionary.configTransferStackByDefaultDescription,
+				label = common.i18n("mcm.transferStackByDefault.label"),
+				description = common.i18n("mcm.transferStackByDefault.description"),
 				variable = mwse.mcm.createTableVariable({ id = "transferItemsByDefault", table = common.config }),
 			})
 		end
 
 		-- Category: Console
 		do
-			local category = pageFeatures:createCategory({ label = common.dictionary.configCategoryConsole })
+			local category = pageFeatures:createCategory({ label = common.i18n("mcm.category.console") })
 
 			-- Help tooltips
 			category:createTextField({
-				label = common.dictionary.configConsoleHistoryLimit,
-				description = common.dictionary.configConsoleHistoryLimitDescription,
+				label = common.i18n("mcm.consoleHistoryLimit.label"),
+				description = common.i18n("mcm.consoleHistoryLimit.description"),
 				variable = mwse.mcm.createTableVariable({ id = "consoleHistoryLimit", converter = tonumber, table = common.config }),
 				numbersOnly = true,
 			})
@@ -144,38 +128,38 @@ local function registerModConfig()
 
 		-- Category: Map Menu
 		do
-			local category = pageFeatures:createCategory({ label = common.dictionary.configCategoryMap })
+			local category = pageFeatures:createCategory({ label = common.i18n("mcm.category.map") })
 
 			-- Change map mode on cell change
 			category:createOnOffButton({
-				label = common.dictionary.configChangeMapModeOnCellChange,
-				description = common.dictionary.configChangeMapModeOnCellChangeDescription,
+				label = common.i18n("mcm.changeMapModeOnCellChange.label"),
+				description = common.i18n("mcm.changeMapModeOnCellChange.description"),
 				variable = mwse.mcm.createTableVariable({ id = "changeMapModeOnCellChange", table = common.config }),
 			})
 		end
 
 		-- Category: Rest & Wait Menu
 		do
-			local category = pageFeatures:createCategory({ label = common.dictionary.configCategoryRestWait })
+			local category = pageFeatures:createCategory({ label = common.i18n("mcm.category.restWait") })
 
 			-- Display day of week in rest menu
 			category:createOnOffButton({
-				label = common.dictionary.configShowWeekDay,
-				description = common.dictionary.configShowWeekDayDescription,
+				label = common.i18n("mcm.showWeekDay.label"),
+				description = common.i18n("mcm.showWeekDay.description"),
 				variable = mwse.mcm.createTableVariable({ id = "displayWeekday", table = common.config }),
 			})
 
 			-- Display target rest hour
 			category:createOnOffButton({
-				label = common.dictionary.configDisplayRestTargetHour,
-				description = common.dictionary.configDisplayRestTargetHourDescription,
+				label = common.i18n("mcm.displayRestTargetHour.label"),
+				description = common.i18n("mcm.displayRestTargetHour.description"),
 				variable = mwse.mcm.createTableVariable({ id = "displayRestTargetHour", table = common.config }),
 			})
 
 			-- Max number of days to wait/rest
 			category:createTextField({
-				label = common.dictionary.configMaxWaitDays,
-				description = common.dictionary.configMaxWaitDaysDescription,
+				label = common.i18n("mcm.maxWaitDays.label"),
+				description = common.i18n("mcm.maxWaitDays.description"),
 				variable = mwse.mcm.createTableVariable({ id = "maxWait", converter = tonumber, table = common.config }),
 				numbersOnly = true,
 			})
@@ -183,36 +167,36 @@ local function registerModConfig()
 
 		-- Category: Key Configuration
 		do
-			local category = pageFeatures:createCategory({ label = common.dictionary.configCategoryKeyConfig })
+			local category = pageFeatures:createCategory({ label = common.i18n("mcm.category.keyConfig") })
 
 			-- Key binding: close inventory
 			category:createKeyBinder({
-				label = common.dictionary.configCloseKey,
-				description = common.dictionary.configCloseKeyDescription,
+				label = common.i18n("mcm.closeKey.label"),
+				description = common.i18n("mcm.closeKey.description"),
 				allowCombinations = true,
 				variable = mwse.mcm.createTableVariable({ id = "keybindClose", table = common.config }),
 			})
 
 			-- Key binding: take all/filtered
 			category:createKeyBinder({
-				label = common.dictionary.configTakeAllKey,
-				description = common.dictionary.configTakeAllKeyDescription,
+				label = common.i18n("mcm.takeAllKey.label"),
+				description = common.i18n("mcm.takeAllKey.description"),
 				allowCombinations = true,
 				variable = mwse.mcm.createTableVariable({ id = "keybindTakeAll", table = common.config }),
 			})
 
 			-- Key binding: map switch
 			category:createKeyBinder({
-				label = common.dictionary.configMapSwitchKey,
-				description = common.dictionary.configMapSwitchKeyDescription,
+				label = common.i18n("mcm.mapSwitchKey.label"),
+				description = common.i18n("mcm.mapSwitchKey.description"),
 				allowCombinations = true,
 				variable = mwse.mcm.createTableVariable({ id = "keybindMapSwitch", table = common.config }),
 			})
 
 			-- Key binding: show additional info
 			category:createKeyBinder({
-				label = common.dictionary.configShowAdditionalInfoKey,
-				description = common.dictionary.configShowAdditionalInfoKeyDescription,
+				label = common.i18n("mcm.showAdditionalInfoKey.label"),
+				description = common.i18n("mcm.showAdditionalInfoKey.description"),
 				allowCombinations = true,
 				variable = mwse.mcm.createTableVariable({ id = "keybindShowAdditionalInfo", table = common.config }),
 			})

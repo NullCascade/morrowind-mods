@@ -147,7 +147,7 @@ local function SetActive(listBoxElement, selected)
 	if (type(selected) ~= "string") then
 		selected.widget.state = 4 -- Active
 	elseif (not foundStringMatch) then
-		SetActive(listBoxElement, common.dictionary.allCharacters)
+		SetActive(listBoxElement, common.i18n("saveLoad.allCharacters"))
 	end
 end
 
@@ -235,7 +235,7 @@ local function SetSaveGameEventHandlers(scrollElement, characterSelectElement)
 
 	if (characterSelectElement) then
 		characterSelectElement:getContentElement():destroyChildren()
-		local allChars = characterSelectElement:createTextSelect({ text = common.dictionary.allCharacters })
+		local allChars = characterSelectElement:createTextSelect({ text = common.i18n("saveLoad.allCharacters") })
 		allChars:register("mouseClick", function()
 			filterGameFiles(scrollElement)
 			SetActive(characterSelectElement, allChars)
@@ -243,7 +243,7 @@ local function SetSaveGameEventHandlers(scrollElement, characterSelectElement)
 		characterSelectElement:createDivider()
 
 		characterSelectElement.widget:contentsChanged()
-		SetActive(characterSelectElement, common.dictionary.allCharacters)
+		SetActive(characterSelectElement, common.i18n("saveLoad.allCharacters"))
 	end
 end
 
@@ -326,7 +326,7 @@ local function menuSave(e)
 		local oldSaveButton = scroll.parent:findChild(save_saveButton_id)
 		oldSaveButton:destroy()
 		-- Reuse the existing save button ID.
-		local saveButton = buttonPanel:createButton({ id = save_saveButton_id, text = common.dictionary.save })
+		local saveButton = buttonPanel:createButton({ id = save_saveButton_id, text = common.i18n("saveLoad.save") })
 		saveButton:register("mouseClick", function()
 			TrySave(saveInput.text)
 		end)
@@ -357,14 +357,14 @@ local function menuSave(e)
 			tes3ui.acquireTextInput(saveInput)
 		end)
 
-		local showAll = buttonPanel:createButton({ id = save_showAll_id, text = common.dictionary.allCharacters })
+		local showAll = buttonPanel:createButton({ id = save_showAll_id, text = common.i18n("saveLoad.allCharacters") })
 		showAll:register("mouseClick", function()
-			if (showAll.text == common.dictionary.allCharacters) then
+			if (showAll.text == common.i18n("saveLoad.allCharacters")) then
 				filterGameFiles(scroll)
-				showAll.text = common.dictionary.currentCharacter
+				showAll.text = common.i18n("saveLoad.currentCharacter")
 			else
 				filterGameFiles(scroll, tes3.mobilePlayer.object.name)
-				showAll.text = common.dictionary.allCharacters
+				showAll.text = common.i18n("saveLoad.allCharacters")
 			end
 		end)
 		showAll.borderAllSides = 0
@@ -383,7 +383,7 @@ local function menuSave(e)
 		if (not filterGameFiles(scroll, tes3.mobilePlayer.object.name)) then
 			-- Account for a new character with no saves:
 			local showAll = e.element:findChild(save_showAll_id)
-			showAll.text = common.dictionary.currentCharacter
+			showAll.text = common.i18n("saveLoad.currentCharacter")
 			showAll.widget.state = 2 -- Disabled
 			showAll.disabled = true
 		end

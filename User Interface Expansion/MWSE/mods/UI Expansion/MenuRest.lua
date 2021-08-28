@@ -64,7 +64,7 @@ local function menuRestWait(e)
 	-- Show day of week.
 	if (common.config.displayWeekday) then
 		-- +3 offset, since the 16th of Last Seed (starting day) should be Thurdas.
-		local day = common.dictionary.weekDays[(tes3.worldController.daysPassed.value + 3) % 7 + 1]
+		local day = common.i18n(string.format("restWait.weekDay.%d", (tes3.worldController.daysPassed.value + 3) % 7 + 1))
 		local userFriendlyTimestampElement = e.element.children[2].children[1]
 		userFriendlyTimestampElement.text = day .. ", " .. userFriendlyTimestampElement.text
 	end

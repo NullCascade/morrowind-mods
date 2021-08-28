@@ -126,8 +126,8 @@ magicFilters:addFilter({
 		return getEffectsContainsSchool(e.effects, tes3.magicSchool.alteration)
 	end,
 	tooltip = {
-		text = common.dictionary.filterAlterationHelpDescription,
-		helpText = common.dictionary.filterAlterationHelpText,
+		text = common.i18n("filter.alteration.text"),
+		helpText = common.i18n("filter.alteration.helpText"),
 	},
 	icon = "icons/ui_exp/magic_alteration.tga",
 })
@@ -138,8 +138,8 @@ magicFilters:addFilter({
 		return getEffectsContainsSchool(e.effects, tes3.magicSchool.conjuration)
 	end,
 	tooltip = {
-		text = common.dictionary.filterConjurationHelpDescription,
-		helpText = common.dictionary.filterConjurationHelpText,
+		text = common.i18n("filter.conjuration.text"),
+		helpText = common.i18n("filter.conjuration.helpText"),
 	},
 	icon = "icons/ui_exp/magic_conjuration.tga",
 })
@@ -150,8 +150,8 @@ magicFilters:addFilter({
 		return getEffectsContainsSchool(e.effects, tes3.magicSchool.destruction)
 	end,
 	tooltip = {
-		text = common.dictionary.filterDestructionHelpDescription,
-		helpText = common.dictionary.filterDestructionHelpText,
+		text = common.i18n("filter.destruction.text"),
+		helpText = common.i18n("filter.destruction.helpText"),
 	},
 	icon = "icons/ui_exp/magic_destruction.tga",
 })
@@ -161,8 +161,8 @@ magicFilters:addFilter({
 	callback = function(e)
 		return getEffectsContainsSchool(e.effects, tes3.magicSchool.illusion)
 	end,
-	tooltip = { text = common.dictionary.filterIllusionHelpDescription,
-             helpText = common.dictionary.filterIllusionHelpText },
+	tooltip = { text = common.i18n("filter.illusion.text"),
+             helpText = common.i18n("filter.illusionHelpText") },
 	icon = "icons/ui_exp/magic_illusion.tga",
 })
 
@@ -172,8 +172,8 @@ magicFilters:addFilter({
 		return getEffectsContainsSchool(e.effects, tes3.magicSchool.mysticism)
 	end,
 	tooltip = {
-		text = common.dictionary.filterMysticismHelpDescription,
-		helpText = common.dictionary.filterMysticismHelpText,
+		text = common.i18n("filter.mysticism.text"),
+		helpText = common.i18n("filter.mysticism.helpText"),
 	},
 	icon = "icons/ui_exp/magic_mysticism.tga",
 })
@@ -184,8 +184,8 @@ magicFilters:addFilter({
 		return getEffectsContainsSchool(e.effects, tes3.magicSchool.restoration)
 	end,
 	tooltip = {
-		text = common.dictionary.filterRestorationHelpDescription,
-		helpText = common.dictionary.filterRestorationHelpText,
+		text = common.i18n("filter.restoration.text"),
+		helpText = common.i18n("filter.restoration.helpText"),
 	},
 	icon = "icons/ui_exp/magic_restoration.tga",
 })
