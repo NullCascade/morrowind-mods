@@ -70,6 +70,14 @@ function common.getIngredientEffectSkillId(ingredient, index)
 	end
 end
 
+function common.isTextInputActive()
+	local wc = tes3.worldController
+	if (not wc) then
+		return false
+	end
+	return wc.menuController.inputController.textInputFocus ~= nil
+end
+
 ----------------------------------------------------------------------------------------------------
 -- Keyboard-to-UI binding helpers.
 ----------------------------------------------------------------------------------------------------
@@ -81,6 +89,11 @@ local keyboardScrollBarNumberInput = nil
 --- Key handling for when a scroll bar is in focus.
 --- @param e keyDownEventData
 local function onKeyDownForScrollBar(e)
+	-- Don't do anything if we have an input focused.
+	if (common.isTextInputActive()) then
+		return
+	end
+
 	-- Allow enter to fire a submit event.
 	if (keyboardScrollBarParams.onSubmit and (e.keyCode == tes3.scanCode.enter or e.keyCode == tes3.scanCode.numpadEnter)) then
 		keyboardScrollBarParams.onSubmit()
@@ -362,7 +375,7 @@ end
 --- Sets both search text and filters.
 --- @param params table
 function uiExFilterFunction:setFiltersExact(params)
-	local params = params or {}
+	params = params or {}
 
 	self.searchText = params.text
 	self.activeFilters = params.filters or {}

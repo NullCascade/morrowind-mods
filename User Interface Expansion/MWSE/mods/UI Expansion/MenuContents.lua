@@ -17,6 +17,10 @@ local inputController = tes3.worldController.inputController
 --- Allow "take all" keybinding.
 --- @return boolean
 local function onKeyInput()
+	if (common.isTextInputActive()) then
+		return
+	end
+
 	-- Ctrl+Space (default) takes all.
 	if (common.complexKeybindTest(common.config.keybindTakeAll)) then
 		local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)

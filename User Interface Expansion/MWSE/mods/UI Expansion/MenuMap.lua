@@ -38,7 +38,7 @@ end
 
 --- Allow map mode switching with a key.
 local function onKeyInput()
-	if (common.complexKeybindTest(common.config.keybindMapSwitch)) then
+	if (not common.isTextInputActive() and common.complexKeybindTest(common.config.keybindMapSwitch)) then
 		local MenuMap = tes3ui.findMenu(GUIID_MenuMap)
 		if (MenuMap == nil) then
 			return

@@ -31,6 +31,11 @@ local function checkForAnswerHotkey(e)
 		return
 	end
 
+	-- Make sure we're not doing text input.
+	if (common.isTextInputActive()) then
+		return
+	end
+
 	-- Make sure we have answers.
 	if not answers then
 		return
