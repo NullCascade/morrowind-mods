@@ -56,7 +56,7 @@ function GitD_debug.logColorTimings()
 	end
 
 	-- Figure out when our important times are.
-	local sunriseStart, sunriseMidPoint, sunriseStop, sunsetStart, sunsetMidPoint, sunsetStop = GitD_debug.interop.getDawnDuskHours()
+	local sunriseStart, sunriseMidPoint, sunriseStop, sunsetStart, sunsetMidPoint, sunsetStop = GitD_debug.interop.getSunHours()
 	mwse.log("  Calculated values:")
 	mwse.log("    sunriseStart = %.2f", sunriseStart)
 	mwse.log("    sunriseMidPoint = %.2f", sunriseMidPoint)

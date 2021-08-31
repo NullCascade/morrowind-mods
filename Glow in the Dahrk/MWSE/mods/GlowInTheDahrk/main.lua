@@ -13,10 +13,12 @@ local GitD_debug = require("GlowInTheDahrk.debug")
 -- Keep track of references we care about.
 --
 
--- A true-valued, reference-keyed dictionary of our currently active references.
+--- A reference-keyed dictionary of our currently active references, mapping them to its mesh data.
+--- @type table<tes3reference,table>
 local trackedReferences = {}
 
--- A list of references currently needing updates.
+--- A list of references currently needing updates.
+--- @type table<number,tes3reference>
 local referenceUpdateQueue = {}
 
 -- Add tracked references.
@@ -138,7 +140,7 @@ local function updateReferences(now)
 	local worldController = tes3.worldController
 	local weatherController = worldController.weatherController
 	local gameHour = worldController.hour.value
-	local sunriseStart, sunriseMidPoint, sunriseStop, sunsetStart, sunsetMidPoint, sunsetStop = interop.getDawnDuskHours()
+	local sunriseStart, sunriseMidPoint, sunriseStop, sunsetStart, sunsetMidPoint, sunsetStop = interop.getSunHours()
 	local sunriseMidPoint = (sunriseStart + sunriseStop) / 2
 	local sunsetMidPoint = (sunsetStart + sunsetStop) / 2
 	local useVariance = config.useVariance
@@ -186,7 +188,7 @@ local function updateReferences(now)
 				local previousIndex = switchNode.switchIndex + 1
 				local index = indexOff
 				if (useExteriorLogic) then
-					if (hour < sunriseMidPoint or hour > sunsetMidPoint) then
+					if (hour < sunriseStart or hour > sunsetStop) then
 						index = indexOn
 					end
 				else
@@ -300,6 +302,7 @@ local function getChildByName(collection, name)
 end
 
 local function onMeshLoaded(e)
+	---@type niNode
 	local node = e.node
 
 	-- Make sure the node has the name we care about.
@@ -496,7 +499,7 @@ event.register("simulate", onSimulate)
 
 --
 -- Create our Mod Config Menu
--- 
+--
 -- We do this in another file to cut down on the complexity of this file.
 --
 

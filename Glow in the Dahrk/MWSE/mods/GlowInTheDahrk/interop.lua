@@ -18,9 +18,19 @@ local supportedObjectTypes = {
 	[tes3.objectType.static] = true,
 }
 
+--- Information about a mesh.
+--- @class table.GitD.meshData
+--- @field switchChildIndex number The asdf
+
+--- @type table<string, table.GitD.meshData>
 local meshData = {}
 debug.meshData = meshData
 
+--- Creates data for a given mesh.
+---
+--- **This should not be called without knowing what you are doing.**
+--- @param mesh string Path to the mesh. Must not be prefixed with meshes\\
+--- @return table.GitD.meshData data An empty table to provide mesh data for.
 function interop.createMeshData(mesh)
 	local mesh = mesh:lower()
 
@@ -83,23 +93,21 @@ function interop.getCurrentWeatherBrightness()
 	return weatherBrightness[currentWeather.index]
 end
 
-function interop.getDawnDuskHours()
+function interop.getSunHours()
 	-- Base data.
-	local worldController = tes3.worldController
-	local weatherController = worldController.weatherController
-	local gameHour = worldController.hour.value
+	local weatherController = tes3.worldController.weatherController
 
 	-- Figure out when our important sunrise times are.
-	local sunriseStart = weatherController.sunriseHour - weatherController.skyPreSunriseTime
-	local sunriseTotalDuration = weatherController.skyPostSunriseTime + weatherController.sunriseDuration +
-	                             weatherController.skyPreSunriseTime
+	local sunriseStart = weatherController.sunriseHour - weatherController.sunPreSunriseTime
+	local sunriseTotalDuration = weatherController.sunPostSunriseTime + weatherController.sunriseDuration +
+	                             weatherController.sunPreSunriseTime
 	local sunriseMidPoint = sunriseStart + (sunriseTotalDuration / 2)
 	local sunriseStop = sunriseStart + sunriseTotalDuration
 
 	-- Figure out when our important sunset times are.
-	local sunsetStart = weatherController.sunsetHour - weatherController.skyPreSunsetTime
-	local sunsetTotalDuration = weatherController.skyPostSunsetTime + weatherController.sunsetDuration +
-	                            weatherController.skyPreSunsetTime
+	local sunsetStart = weatherController.sunsetHour - weatherController.sunPreSunsetTime
+	local sunsetTotalDuration = weatherController.sunPostSunsetTime + weatherController.sunsetDuration +
+	                            weatherController.sunPreSunsetTime
 	local sunsetMidPoint = sunsetStart + (sunsetTotalDuration / 2)
 	local sunsetStop = sunsetStart + sunsetTotalDuration
 
@@ -113,7 +121,7 @@ function interop.calculateRegionSunColor(region)
 	local gameHour = worldController.hour.value
 
 	-- Figure out when our important times are.
-	local sunriseStart, sunriseMidPoint, sunriseStop, sunsetStart, sunsetMidPoint, sunsetStop = interop.getDawnDuskHours()
+	local sunriseStart, sunriseMidPoint, sunriseStop, sunsetStart, sunsetMidPoint, sunsetStop = interop.getSunHours()
 	local sunriseTotalDuration = sunriseStop - sunriseStart
 	local sunsetTotalDuration = sunsetStop - sunsetStart
 
