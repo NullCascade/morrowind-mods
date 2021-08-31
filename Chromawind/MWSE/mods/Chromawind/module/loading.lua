@@ -2,8 +2,9 @@ local interop = require("Chromawind.interop")
 
 local module = {}
 
+module.name = "loading"
 module.gameInitialized = false
-module.startCount = 0
+module.secondPass = true
 
 local loadingFillColor = interop.razerSDK.color(0, 0.8, 0.8)
 
@@ -29,7 +30,7 @@ module.clearKeyboardData()
 
 function module.onStart()
 	lastColumn = 0
-	module.startCount = module.startCount + 1
+	module.secondPass = not module.secondPass
 end
 
 function module.onStop()
@@ -51,7 +52,7 @@ local function onMenuLoadingUpdate(e)
 	end
 
 	local color = loadingFillColor
-	if (module.startCount == 2) then
+	if (module.secondPass) then
 		color = 0
 	end
 
@@ -72,7 +73,7 @@ end
 
 ---@param e uiActivatedEventData
 local function onLoadingMenuActivated(e)
-	if (not e.newlyCreated) then
+	if (not e.newlyCreated or module.gameInitialized) then
 		return
 	end
 

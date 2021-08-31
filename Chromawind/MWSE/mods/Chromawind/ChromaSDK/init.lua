@@ -44,8 +44,10 @@ function sdk.sleep(seconds)
 	socket.sleep(seconds)
 end
 
+local lshift = bit.lshift
+
 function sdk.color(r, g, b)
-	return r * 255 + bit.lshift(g * 255, 8) + bit.lshift(b * 255, 16)
+	return r*255 + lshift(g*255, 8) + lshift(b*255, 16)
 end
 
 return sdk

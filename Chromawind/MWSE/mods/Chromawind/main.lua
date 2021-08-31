@@ -17,7 +17,7 @@ interop.razerInstance = interop.razerSDK.new({
 		-- "keypad",
 		-- "chromalink",
 	},
-	category = "application",
+	category = "game",
 })
 
 -- Initialize empty effect.
