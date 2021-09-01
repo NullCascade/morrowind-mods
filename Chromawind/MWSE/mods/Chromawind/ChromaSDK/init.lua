@@ -40,14 +40,40 @@ function sdk.new(params)
     return setmetatable({ session = response.sessionid, url = response.uri }, instance)
 end
 
-function sdk.sleep(seconds)
-	socket.sleep(seconds)
-end
-
-local lshift = bit.lshift
+local lshift, floor = bit.lshift, math.floor
 
 function sdk.color(r, g, b)
-	return r*255 + lshift(g*255, 8) + lshift(b*255, 16)
+	return floor(r*255) + lshift(floor(g*255), 8) + lshift(floor(b*255), 16)
+end
+
+function sdk.colorEffect(r, g, b)
+	return bit.bor(floor(r*255) + lshift(floor(g*255), 8) + lshift(floor(b*255), 16), 0x1000000)
+end
+
+sdk.keys = require("Chromawind.ChromaSDK.key")
+sdk.scanCodeMap = require("Chromawind.ChromaSDK.scanKeyMap")
+
+function sdk.scanCodeToKey(scanCode)
+	return sdk.scanCodeMap[scanCode]
+end
+
+function sdk.getRowColumnForKey(key)
+	local result = sdk.keys[key]
+	if (result) then
+		return unpack(result)
+	end
+end
+
+function sdk.getRowColumnForScanCode(scanCode)
+	local key = sdk.scanCodeToKey(scanCode)
+	if (not key) then
+		return
+	end
+
+	local result = sdk.keys[key]
+	if (result) then
+		return unpack(result)
+	end
 end
 
 return sdk

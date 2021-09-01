@@ -20,6 +20,19 @@ interop.razerInstance = interop.razerSDK.new({
 	category = "game",
 })
 
+local function assertColor(r, g, b, hex)
+	local color = interop.razerSDK.color(r, g, b)
+	local colorHex = string.format("%x", color)
+	assert(colorHex == hex, string.format("Incorrect hex value for <%.2f, %.2f, %.2f>: %s vs. %s", r, g, b, colorHex, hex))
+end
+
+assertColor(1.0, 0.0, 0.0, "ff")
+assertColor(0.0, 1.0, 0.0, "ff00")
+assertColor(0.0, 0.0, 1.0, "ff0000")
+assertColor(0.0, 0.0, 0.0, "0")
+assertColor(0.5, 0.5, 0.5, "7f7f7f")
+assertColor(1.0, 1.0, 1.0, "ffffff")
+
 -- Initialize empty effect.
 interop.effects.none = interop.razerInstance:preCreateKeyboardEffect("CHROMA_NONE")
 

@@ -7,6 +7,7 @@ module.gameInitialized = false
 module.secondPass = true
 
 local loadingFillColor = interop.razerSDK.color(0, 0.8, 0.8)
+local defaultColor = interop.razerSDK.color(0.1, 0.1, 0.1)
 
 function module.clearKeyboardData()
 	local data = module.keyboardData
@@ -53,7 +54,7 @@ local function onMenuLoadingUpdate(e)
 
 	local color = loadingFillColor
 	if (module.secondPass) then
-		color = 0
+		color = defaultColor
 	end
 
 	if (column > lastColumn) then
