@@ -208,10 +208,10 @@ local function replaceWeaponTooltip(tooltip, weapon, itemData)
 
 	if not weapon.isAmmo then
 		if weapon.speed ~= 1.0 then
-			labelFormatted(tooltip, string.format("%s: %.2f", common.i18n("tooltip.weaponSpeed"), weapon.speed), GUI_ID_TooltipSpeed)
+			labelFormatted(tooltip, string.format("%s: %.2f", common.i18n("tooltip.weapon.speed"), weapon.speed), GUI_ID_TooltipSpeed)
 		end
 		if weapon.reach ~= 1.0 then
-			labelFormatted(tooltip, string.format("%s: %.2f", common.i18n("tooltip.weaponReach"), weapon.reach), GUI_ID_TooltipReach)
+			labelFormatted(tooltip, string.format("%s: %.2f", common.i18n("tooltip.weapon.reach"), weapon.reach), GUI_ID_TooltipReach)
 		end
 	end
 
@@ -225,7 +225,7 @@ end
 local function replaceArmorTooltip(tooltip, armor, itemData)
 	tryDestroyAllID(tooltip, "HelpMenu_armorRating")
 
-	tooltip:createLabel{ text = common.i18n("tooltip.weightClass" .. armor.weightClass + 1), id = GUI_ID_TooltipWeightClass }
+	tooltip:createLabel{ text = common.i18n("tooltip.armor.weightClass." .. armor.weightClass + 1), id = GUI_ID_TooltipWeightClass }
 	tooltip:createLabel{
 		text = string.format("%s: %u", tes3.findGMST(tes3.gmst.sArmorRating).value,
 		                     armor:calculateArmorRating(tes3.mobilePlayer)),
