@@ -83,7 +83,7 @@ end
 
 -- Create our menu with the main HUD.
 local function onMenuMultiActivated(e)
-	if (not e.newlyCreated) then
+	if (MemoryUsage) then
 		return
 	end
 
@@ -100,6 +100,10 @@ local function onMenuMultiActivated(e)
 	MemoryUsage.width= 65
 	MemoryUsage.height = 10
 	MemoryUsage:register("help", onMemoryUsageHelp)
+	MemoryUsage:registerAfter("destroy", function()
+		MemoryUsage = nil
+		MemoryUsageWidget = nil
+	end)
 	MemoryUsageWidget = MemoryUsage.widget
 	MemoryUsageWidget.showText = false
 
