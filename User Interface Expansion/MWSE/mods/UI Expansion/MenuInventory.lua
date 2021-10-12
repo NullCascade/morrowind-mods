@@ -28,8 +28,8 @@ inventoryFilters:addFilter({
 		return currentMerchant and tes3.checkMerchantTradesItem({ reference = currentMerchant, item = e.item })
 	end,
 	tooltip = {
-		text = common.i18n("filter.tradable.tooltip.text"),
-		helpText = common.i18n("filter.tradable.tooltip.helpText"),
+		text = common.i18n("filter.tradable.help.text"),
+		helpText = common.i18n("filter.tradable.help.helpText"),
 	},
 	icon = "icons/ui_exp/inventory_tradable.tga",
 	buttonText = common.i18n("filter.tradable.buttonName"),

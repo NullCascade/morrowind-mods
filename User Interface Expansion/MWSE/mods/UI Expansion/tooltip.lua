@@ -431,7 +431,7 @@ local function extraTooltipEarly(e)
 					labelBlock.autoWidth = true
 					labelBlock.autoHeight = true
 					labelBlock.paddingAllSides = 1
-					local label = labelBlock:createLabel{ text = common.i18n("tooltip.stolenFromMerchant") }
+					local label = labelBlock:createLabel{ text = common.i18n("inventory.stolenFromMerchant") }
 					label.wrapText = true
 					label.borderAllSides = 6
 					label.justifyText = "center"

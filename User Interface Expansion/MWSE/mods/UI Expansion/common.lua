@@ -721,8 +721,8 @@ function common.createStandardInventoryFilters(filterInterface)
 			return (objectType == tes3.objectType.weapon or objectType == tes3.objectType.ammunition)
 		end,
 		tooltip = {
-			text = common.i18n("filter.weapons.text"),
-			helpText = common.i18n("filter.weapons.helpText"),
+			text = common.i18n("filter.weapons.help.text"),
+			helpText = common.i18n("filter.weapons.help.helpText"),
 		},
 		icon = "icons/ui_exp/inventory_weapons.tga",
 		buttonText = common.i18n("filter.weapons.buttonName"),
@@ -735,7 +735,7 @@ function common.createStandardInventoryFilters(filterInterface)
 			return (objectType == tes3.objectType.armor or objectType == tes3.objectType.clothing)
 		end,
 		tooltip = {
-			text = common.i18n("filter.apparel.text"),
+			text = common.i18n("filter.apparel.helpDescription"),
 			helpText = common.i18n("filter.apparel.helpText"),
 		},
 		icon = "icons/ui_exp/inventory_apparel.tga",
@@ -753,8 +753,8 @@ function common.createStandardInventoryFilters(filterInterface)
 			)
 		end,
 		tooltip = {
-			text = common.i18n("filter.consumables.text"),
-			helpText = common.i18n("filter.consumables.helpText"),
+			text = common.i18n("filter.consumables.help.text"),
+			helpText = common.i18n("filter.consumables.help.helpText"),
 		},
 		icon = "icons/ui_exp/inventory_consumables.tga",
 		buttonText = common.i18n("filter.consumables.buttonName"),
@@ -766,8 +766,8 @@ function common.createStandardInventoryFilters(filterInterface)
 			return (e.item.objectType == tes3.objectType.ingredient)
 		end,
 		tooltip = {
-			text = common.i18n("filter.ingredients.text"),
-			helpText = common.i18n("filter.ingredients.helpText"),
+			text = common.i18n("filter.ingredients.help.text"),
+			helpText = common.i18n("filter.ingredients.help.helpText"),
 		},
 		icon = "icons/ui_exp/inventory_ingredients.tga",
 		buttonText = common.i18n("filter.ingredients.buttonName"),
@@ -786,8 +786,8 @@ function common.createStandardInventoryFilters(filterInterface)
 			)
 		end,
 		tooltip = {
-			text = common.i18n("filter.tools.text"),
-			helpText = common.i18n("filter.tools.helpText"),
+			text = common.i18n("filter.tools.help.text"),
+			helpText = common.i18n("filter.tools.help.helpText"),
 		},
 		icon = "icons/ui_exp/inventory_tools.tga",
 		buttonText = common.i18n("filter.tools.buttonName"),
@@ -805,8 +805,8 @@ function common.createStandardInventoryFilters(filterInterface)
 			)
 		end,
 		tooltip = {
-			text = common.i18n("filter.other.text"),
-			helpText = common.i18n("filter.other.helpText"),
+			text = common.i18n("filter.other.help.text"),
+			helpText = common.i18n("filter.other.help.helpText"),
 		},
 		icon = "icons/ui_exp/inventory_other.tga",
 		buttonText = common.i18n("filter.other.buttonName"),

@@ -9,7 +9,7 @@ return {
 	["filter.consumables.help.helpText"] = "Click to filter to:\n- Potions\n- Scrolls\n- On-use enchantments",
 	["filter.consumables.help.text"] = "Filter to consumables",
 	["filter.effect.help.helpText"] = "Click to filter to spells, powers, or items that use %s effects.",
-	["filter.effect.helpDescription"] = "Click to filter to spells, powers, or items that use %s effects.",
+	["filter.effect.helpDescription"] = "Filter to %s effects",
 	["filter.helpTextDisableTip"] = "Help text can be disabled in the Mod Config Menu.",
 	["filter.ingredients.buttonName"] = "Ingredients",
 	["filter.ingredients.help.helpText"] = "Click to filter to:\n- Ingredients",

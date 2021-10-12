@@ -35,7 +35,7 @@ event.register("uiActivated", menuTraining, { filter = "MenuServiceTraining" })
 local function expertiseText(skill)
 	for i = 4, 0, -1 do
 		if (skill >= 25 * i) then
-			return common.i18n(string.format("tooltip.expertiseLevel.%d", i + 1))
+			return common.i18n(string.format("training.expertiseLevel.%d", i + 1))
 		end
 	end
 end

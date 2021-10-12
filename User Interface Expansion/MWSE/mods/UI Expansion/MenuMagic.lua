@@ -126,8 +126,8 @@ magicFilters:addFilter({
 		return getEffectsContainsSchool(e.effects, tes3.magicSchool.alteration)
 	end,
 	tooltip = {
-		text = common.i18n("filter.alteration.text"),
-		helpText = common.i18n("filter.alteration.helpText"),
+		text = common.i18n("filter.effect.helpDescription", { "alteration" }),
+		helpText = common.i18n("filter.effect.help.helpText", { "alteration" }),
 	},
 	icon = "icons/ui_exp/magic_alteration.tga",
 })
@@ -138,8 +138,8 @@ magicFilters:addFilter({
 		return getEffectsContainsSchool(e.effects, tes3.magicSchool.conjuration)
 	end,
 	tooltip = {
-		text = common.i18n("filter.conjuration.text"),
-		helpText = common.i18n("filter.conjuration.helpText"),
+		text = common.i18n("filter.effect.helpDescription", { "conjuration" }),
+		helpText = common.i18n("filter.effect.help.helpText", { "conjuration" }),
 	},
 	icon = "icons/ui_exp/magic_conjuration.tga",
 })
@@ -150,8 +150,8 @@ magicFilters:addFilter({
 		return getEffectsContainsSchool(e.effects, tes3.magicSchool.destruction)
 	end,
 	tooltip = {
-		text = common.i18n("filter.destruction.text"),
-		helpText = common.i18n("filter.destruction.helpText"),
+		text = common.i18n("filter.effect.helpDescription", { "destruction" }),
+		helpText = common.i18n("filter.effect.help.helpText", { "destruction" }),
 	},
 	icon = "icons/ui_exp/magic_destruction.tga",
 })
@@ -161,8 +161,10 @@ magicFilters:addFilter({
 	callback = function(e)
 		return getEffectsContainsSchool(e.effects, tes3.magicSchool.illusion)
 	end,
-	tooltip = { text = common.i18n("filter.illusion.text"),
-             helpText = common.i18n("filter.illusionHelpText") },
+	tooltip = {
+		text = common.i18n("filter.effect.helpDescription", { "illusion" }),
+		helpText = common.i18n("filter.effect.help.helpText", { "illusion" }),
+    },
 	icon = "icons/ui_exp/magic_illusion.tga",
 })
 
@@ -172,8 +174,8 @@ magicFilters:addFilter({
 		return getEffectsContainsSchool(e.effects, tes3.magicSchool.mysticism)
 	end,
 	tooltip = {
-		text = common.i18n("filter.mysticism.text"),
-		helpText = common.i18n("filter.mysticism.helpText"),
+		text = common.i18n("filter.effect.helpDescription", { "mysticism" }),
+		helpText = common.i18n("filter.effect.help.helpText", { "mysticism" }),
 	},
 	icon = "icons/ui_exp/magic_mysticism.tga",
 })
@@ -184,8 +186,8 @@ magicFilters:addFilter({
 		return getEffectsContainsSchool(e.effects, tes3.magicSchool.restoration)
 	end,
 	tooltip = {
-		text = common.i18n("filter.restoration.text"),
-		helpText = common.i18n("filter.restoration.helpText"),
+		text = common.i18n("filter.effect.helpDescription", { "restoration" }),
+		helpText = common.i18n("filter.effect.help.helpText", { "restoration" }),
 	},
 	icon = "icons/ui_exp/magic_restoration.tga",
 })
