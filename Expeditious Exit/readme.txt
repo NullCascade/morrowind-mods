@@ -1,7 +1,7 @@
 =====================================================================================
                                   Expeditious  Exit                                  
                                  Author: NullCascade                                 
-                                    Version 1.2.1                                    
+                                    Version 1.3.0                                    
 =====================================================================================
 
  INDEX:
@@ -42,7 +42,6 @@
 
  Extract the archive into your Morrowind installation directory. The mod should
  contain the following files:
-    .\Data Files\MWSE\config\Expeditious Exit.json
     .\Data Files\MWSE\mods\Expeditious Exit\config.lua
     .\Data Files\MWSE\mods\Expeditious Exit\main.lua
     .\Data Files\MWSE\mods\Expeditious Exit\mcm.lua
@@ -67,6 +66,13 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.3.0 [2021-11-06]:
+    * New feature: Allow the use of alt-F4 for users that it didn't work for.
+    * New feature: Add alternate taskkill option for users that still hang when
+      using DXVK.
+    * Redid MCM menu.
+    * Removed initial config reporting in the log.
 
  1.2.1 [2019-04-09]:
     * Minor refactor for new MWSE folder structure.

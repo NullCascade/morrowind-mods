@@ -1,4 +1,3 @@
-
 --[[
 	Mod Initialization: Expeditious Exit
 	Author: NullCascade
@@ -11,8 +10,8 @@
 ]]--
 
 -- Ensure we have the features we need.
-if (mwse.buildDate == nil or mwse.buildDate < 20180726) then
-	mwse.log("[Expeditious Exit] Build date of %s does not meet minimum build date of 20180726.", mwse.buildDate)
+if (mwse.buildDate == nil or mwse.buildDate < 20210817) then
+	mwse.log("[Expeditious Exit] Build date of %s does not meet minimum build date of 20210817.", mwse.buildDate)
 	return
 end
 
@@ -34,11 +33,20 @@ end
 
 local config = require("Expeditious Exit.config")
 
+-- Our close the damn game function, depending on user config.
+local function shutItDown()
+	if (config.useTaskKill) then
+		os.createProcess({ command = [[taskkill /IM "Morrowind.exe" /F]] })
+	else
+		os.exit()
+	end
+end
+
 -- Callback used when confirming exit
 local function checkConfirmedCloseCallback(e)
 	if (e.button == 0) then
 		mwse.log("[Expeditious Exit] Forcing exit after confirmation!")
-		os.exit()
+		shutItDown()
 	end
 end
 
@@ -50,21 +58,13 @@ local function onExitButtonClicked(e)
 		tes3.messageBox({
 			message = tes3.findGMST(tes3.gmst.sMessage2).value,
 			buttons = { tes3.findGMST(tes3.gmst.sYes).value, tes3.findGMST(tes3.gmst.sNo).value },
-			callback = checkConfirmedCloseCallback
+			callback = checkConfirmedCloseCallback,
 		})
 	else
 		mwse.log("[Expeditious Exit] Forcing exit!")
-		os.exit()
+		shutItDown()
 	end
 end
-
--- Load the config to see if we care about message boxes.
-local function onInitialized()
-	-- Show initialization event in the log.
-	mwse.log("[Expeditious Exit] Mod initialized with configuration:")
-	mwse.log(json.encode(config, { indent = true }))
-end
-event.register("initialized", onInitialized)
 
 -- When the UI is created, change the exit button's behavior.
 local function rebindExitButton(e)
@@ -74,20 +74,22 @@ local function rebindExitButton(e)
 		mwse.log("[Expeditious Exit] Couldn't find exit button UI element!")
 		return
 	end
-	
+
 	-- Set our new event handler.
 	exitButton:register("mouseClick", onExitButtonClicked)
 end
 event.register("uiCreated", rebindExitButton, { filter = "MenuOptions" })
 
+-- Allow quitting with alt-F4
+local function onAltF4(e)
+	if (config.allowAltF4 and e.isAltDown) then
+		shutItDown()
+	end
+end
+event.register("keyDown", onAltF4, { filter = tes3.scanCode.F4 })
+
 --
 -- Handle mod config menu.
 --
 
-local function registerModConfig()
-	local easyMCM = include("easyMCM.modConfig")
-	if (easyMCM) then
-		easyMCM.registerMCM(require("Expeditious Exit.mcm"))
-	end
-end
-event.register("modConfigReady", registerModConfig)
+dofile("Expeditious Exit.mcm")

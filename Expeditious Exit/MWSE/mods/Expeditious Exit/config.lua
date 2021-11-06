@@ -1,9 +1,5 @@
-local config = mwse.loadConfig("Expeditious Exit")
-
-if (config == nil or config.showMenuOnExit == nil) then
-	config = {
-		showMenuOnExit = true,
-	}
-end
-
-return config
+return mwse.loadConfig("Expeditious Exit", {
+	showMenuOnExit = true,
+	allowAltF4 = false,
+	useTaskKill = false,
+})
