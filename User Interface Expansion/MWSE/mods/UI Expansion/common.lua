@@ -235,8 +235,9 @@ function common.createSearchBar(params)
 
 	-- Create the search input itself.
 	local input = border:createTextInput({ id = params.id })
-	input.color = params.placeholderTextColor or tes3ui.getPalette("disabled_color")
-	input.text = params.placeholderText or ""
+	input.color = params.searchTextPlaceholderColor or tes3ui.getPalette("disabled_color")
+	local placeholderText = params.searchTextPlaceholder or common.i18n("filter.searchByName")
+	input.text = placeholderText
 	input.borderLeft = 5
 	input.borderRight = 5 + 10
 	input.borderTop = 2
@@ -259,9 +260,9 @@ function common.createSearchBar(params)
 		elseif (inputController:isKeyDown(tes3.scanCode.backspace)) then
 			if (inputController:isKeyDown(tes3.scanCode.leftAlt)) then
 				input.text = '' -- Alt + Backspace = clearfilter /abot
-			elseif input.text == params.placeholderText then
+			elseif input.text == placeholderText then
 				-- Prevent backspacing into nothing.
-				return
+				return false
 			end
 		elseif (inputController:isKeyDown(tes3.scanCode.a)) then
 			if (inputController:isKeyDown(tes3.scanCode.leftAlt)) then
