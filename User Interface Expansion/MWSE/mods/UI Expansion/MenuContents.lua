@@ -72,6 +72,7 @@ common.createStandardInventoryFilters(contentsFilters)
 --- @param e filterContentsMenuEventData
 local function onFilterContentsMenu(e)
 	e.text = e.item.name
+	e.effects = e.item.enchantment and e.item.enchantment.effects
 	e.filter = contentsFilters:triggerFilter(e)
 end
 event.register("filterContentsMenu", onFilterContentsMenu)

@@ -40,6 +40,7 @@ inventoryFilters:addFilter({
 --- @param e filterInventoryEventData
 local function onFilterInventory(e)
 	e.text = e.item.name
+	e.effects = e.item.enchantment and e.item.enchantment.effects
 	e.filter = inventoryFilters:triggerFilter(e)
 end
 event.register("filterInventory", onFilterInventory)

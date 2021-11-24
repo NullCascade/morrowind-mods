@@ -378,11 +378,23 @@ end
 function uiExFilterFunction:setFiltersExact(params)
 	params = params or {}
 
+	local previousSearchText = self.searchText
 	self.searchText = params.text
 	self.activeFilters = params.filters or {}
 
 	if (self.searchText == "") then
 		self.searchText = nil
+	end
+
+	if (self.searchText and previousSearchText and string.startswith(self.searchText, previousSearchText)) then
+		-- Clear any passes so they get rechecked. Previous failures remain failures.
+		for k, v in pairs(self.cachedEffectResults) do
+			if (v == true) then
+				self.cachedEffectResults[k] = nil
+			end
+		end
+	else
+		self.cachedEffectResults = {}
 	end
 
 	if (params.filter) then
@@ -442,22 +454,71 @@ end
 --- @param params table
 --- @return boolean
 function uiExFilterFunction:triggerFilter(params)
-	-- Search by name.
-	if (self.searchText and params.text and not string.find(string.lower(params.text), self.searchText, 1, true)) then
-		return false
+	return self:checkText(params) and self:checkFilters(params)
+end
+
+--- Checks to see if either the given text or the given effects match a search.
+--- @param params table
+--- @return boolean
+function uiExFilterFunction:checkText(params)
+	local searchText = self.searchText
+	if (not searchText) then
+		return true
 	end
 
-	-- Otherwise go through active filters.
-	if (#self.filtersOrdered > 0) then
-		for key, filter in pairs(self.filters) do
-			if (filter.callback) then
-				if (table.find(self.activeFilters, key) and filter.callback(params)) then
+	-- Search by name.
+	if (params.text and string.find(string.lower(params.text), searchText, 1, true)) then
+		return true
+	end
+
+	-- Search effects.
+	for _, effect in ipairs(params.effects or {}) do
+		-- Figure out a unique key for the effect.
+		local effectObject = effect.object
+		if (effectObject) then
+			local cacheToken = effect.id
+			if (effectObject.targetsAttributes) then
+				cacheToken = cacheToken + (effect.attribute / 1000)
+			elseif (effectObject.targetsSkills) then
+				cacheToken = cacheToken + (effect.skill / 1000)
+			end
+
+			local cachedResult = self.cachedEffectResults[cacheToken];
+			if (cachedResult == true) then
+				return true
+			elseif (cachedResult == nil) then
+				local effectSearchResult = false
+				if (string.find(string.lower(effectObject.name), searchText, 1, true)
+					or (effectObject.targetsAttributes and string.find(string.lower(tes3.getAttributeName(effect.attribute)), searchText, 1, true))
+					or (effectObject.targetsSkills and string.find(string.lower(tes3.getSkillName(effect.skill)), searchText, 1, true))) then
+					effectSearchResult = true
+				end
+
+				self.cachedEffectResults[cacheToken] = effectSearchResult
+				if (effectSearchResult) then
 					return true
 				end
 			end
 		end
-	else
+	end
+
+	return false
+end
+
+--- Checks to see if any active filters (i.e. type buttons) reject our search.
+--- @param params table
+--- @return boolean
+function uiExFilterFunction:checkFilters(params)
+	if (#self.filtersOrdered == 0) then
 		return true
+	end
+
+	for key, filter in pairs(self.filters) do
+		if (filter.callback) then
+			if (table.find(self.activeFilters, key) and filter.callback(params)) then
+				return true
+			end
+		end
 	end
 
 	return false
