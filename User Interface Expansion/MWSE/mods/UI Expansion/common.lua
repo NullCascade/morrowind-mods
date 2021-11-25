@@ -505,9 +505,8 @@ function uiExFilterFunction:checkText(params)
 				return true
 			elseif (cachedResult == nil) then
 				local effectSearchResult = false
-				if (string.find(string.lower(effectObject.name), searchText, 1, true)
-					or (effectObject.targetsAttributes and string.find(string.lower(tes3.getAttributeName(effect.attribute)), searchText, 1, true))
-					or (effectObject.targetsSkills and string.find(string.lower(tes3.getSkillName(effect.skill)), searchText, 1, true))) then
+				local effectName = tes3.getMagicEffectName({ effect = effect.id, attribute = effect.attribute, skill = effect.skill })
+				if (string.find(string.lower(effectName), searchText, 1, true)) then
 					effectSearchResult = true
 				end
 
