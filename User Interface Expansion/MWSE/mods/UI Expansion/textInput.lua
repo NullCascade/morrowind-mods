@@ -6,13 +6,14 @@ local function onKeyDownCopyCut(e)
 	end
 
 	-- Get our input element.
-	local inputFocus = tes3.worldController.menuController.inputController.textInputFocus
+	local menuController = tes3.worldController.menuController
+	local inputFocus = menuController.inputController.textInputFocus
 	if (not inputFocus or not inputFocus.visible) then
 		return
 	end
 
 	-- Make sure the buffer gets cleared so no text makes it to the focused element.
-	tes3.worldController.menuController.inputController:flushBufferedTextEvents()
+	menuController.inputController:flushBufferedTextEvents()
 
 	-- Figure out where our cursor is.
 	local inputFocusText = inputFocus.rawText
@@ -48,13 +49,14 @@ local function onKeyDownV(e)
 	end
 
 	-- Get our input element.
-	local inputFocus = tes3.worldController.menuController.inputController.textInputFocus
+	local menuController = tes3.worldController.menuController
+	local inputFocus = menuController.inputController.textInputFocus
 	if (not inputFocus or not inputFocus.visible) then
 		return
 	end
 
 	-- Make sure the buffer gets cleared so no text makes it to the focused element.
-	tes3.worldController.menuController.inputController:flushBufferedTextEvents()
+	menuController.inputController:flushBufferedTextEvents()
 
 	-- Get clipboard text. Remove all instances of `|`. 
 	local clipboardText = os.getClipboardText()
@@ -92,7 +94,8 @@ event.register("keyDown", onKeyDownHome, { filter = tes3.scanCode.home })
 --- @param e keyDownEventData
 local function onKeyDownEnd(e)
 	-- Get our input element.
-	local inputFocus = tes3.worldController.menuController.inputController.textInputFocus
+	local menuController = tes3.worldController.menuController
+	local inputFocus = menuController.inputController.textInputFocus
 	if (not inputFocus or not inputFocus.visible) then
 		return
 	end
@@ -125,13 +128,14 @@ local function onKeyDownSubstitute(e)
 	local substitution = keySubstitutions[e.keyCode]
 
 	-- Get our input element.
-	local inputFocus = tes3.worldController.menuController.inputController.textInputFocus
+	local menuController = tes3.worldController.menuController
+	local inputFocus = menuController.inputController.textInputFocus
 	if (not inputFocus or not inputFocus.visible) then
 		return
 	end
 
 	-- Make sure the buffer gets cleared so no text makes it to the focused element.
-	tes3.worldController.menuController.inputController:flushBufferedTextEvents()
+	menuController.inputController:flushBufferedTextEvents()
 
 	-- Move cursor to the start.
 	inputFocus.rawText = inputFocus.rawText:gsub(substitution.pattern, substitution.repl)
