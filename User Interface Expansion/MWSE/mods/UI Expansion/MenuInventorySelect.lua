@@ -215,6 +215,7 @@ local currentFilter = nil
 local function onFilterInventorySelect(e)
 	if (currentFilter) then
 		e.text = e.item.name
+		e.effects = e.item.enchantment and e.item.enchantment.effects
 		if (not currentFilter:triggerFilter(e)) then
 			e.filter = false
 		end
