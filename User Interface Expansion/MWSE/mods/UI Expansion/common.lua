@@ -473,56 +473,60 @@ function uiExFilterFunction:checkText(params)
 
 	-- Search by slot or type name.
 	local item = params.item
-	if (item) then
-		local slotOrTypeName = item.typeName or item.slotName
-		if (slotOrTypeName) then
-			if (string.find(string.lower(slotOrTypeName), searchText, 1, true)) then
-				return true
-			end
-		end
-	end
-
-	-- Also handle ingredient effects.
-	local effects = params.effects or {}
-	if (item and item.objectType == tes3.objectType.ingredient) then
-		for index, effectId in ipairs(item.effects) do
-			if (effectId >= 0) then
-				local object = tes3.getMagicEffect(effectId)
-				effects[index] = {
-					id = effectId,
-					object = object,
-					attribute = item.effectAttributeIds[index],
-					skill = item.effectSkillIds[index],
-				}
+	if (common.config.useSearchTypes) then
+		if (item) then
+			local slotOrTypeName = item.typeName or item.slotName
+			if (slotOrTypeName) then
+				if (string.find(string.lower(slotOrTypeName), searchText, 1, true)) then
+					return true
+				end
 			end
 		end
 	end
 
 	-- Search effects.
-	for _, effect in ipairs(effects) do
-		-- Figure out a unique key for the effect.
-		local effectObject = effect.object
-		if (effectObject) then
-			local cacheToken = effect.id
-			if (effectObject.targetsAttributes) then
-				cacheToken = cacheToken + (effect.attribute / 1000)
-			elseif (effectObject.targetsSkills) then
-				cacheToken = cacheToken + (effect.skill / 1000)
+	if (common.config.useSearchEffects) then
+		-- Rebundle ingredient effects.
+		local effects = params.effects or {}
+		if (item and item.objectType == tes3.objectType.ingredient) then
+			for index, effectId in ipairs(item.effects) do
+				if (effectId >= 0) then
+					local object = tes3.getMagicEffect(effectId)
+					effects[index] = {
+						id = effectId,
+						object = object,
+						attribute = item.effectAttributeIds[index],
+						skill = item.effectSkillIds[index],
+					}
+				end
 			end
+		end
 
-			local cachedResult = self.cachedEffectResults[cacheToken];
-			if (cachedResult == true) then
-				return true
-			elseif (cachedResult == nil) then
-				local effectSearchResult = false
-				local effectName = tes3.getMagicEffectName({ effect = effect.id, attribute = effect.attribute, skill = effect.skill })
-				if (string.find(string.lower(effectName), searchText, 1, true)) then
-					effectSearchResult = true
+		for _, effect in ipairs(effects) do
+			-- Figure out a unique key for the effect.
+			local effectObject = effect.object
+			if (effectObject) then
+				local cacheToken = effect.id
+				if (effectObject.targetsAttributes) then
+					cacheToken = cacheToken + (effect.attribute / 1000)
+				elseif (effectObject.targetsSkills) then
+					cacheToken = cacheToken + (effect.skill / 1000)
 				end
 
-				self.cachedEffectResults[cacheToken] = effectSearchResult
-				if (effectSearchResult) then
+				local cachedResult = self.cachedEffectResults[cacheToken];
+				if (cachedResult == true) then
 					return true
+				elseif (cachedResult == nil) then
+					local effectSearchResult = false
+					local effectName = tes3.getMagicEffectName({ effect = effect.id, attribute = effect.attribute, skill = effect.skill })
+					if (string.find(string.lower(effectName), searchText, 1, true)) then
+						effectSearchResult = true
+					end
+
+					self.cachedEffectResults[cacheToken] = effectSearchResult
+					if (effectSearchResult) then
+						return true
+					end
 				end
 			end
 		end

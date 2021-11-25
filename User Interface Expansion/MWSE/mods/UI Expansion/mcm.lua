@@ -65,6 +65,20 @@ local function registerModConfig()
 				variable = mwse.mcm.createTableVariable({ id = "useSearch", table = common.config }),
 			})
 
+			-- Use effect text search?
+			category:createOnOffButton({
+				label = common.i18n("mcm.useSearchBars.searchEffects.label"),
+				description = common.i18n("mcm.useSearchBars.searchEffects.description"),
+				variable = mwse.mcm.createTableVariable({ id = "useSearchEffects", table = common.config }),
+			})
+
+			-- Use slot/type text search?
+			category:createOnOffButton({
+				label = common.i18n("mcm.useSearchBars.searchTypes.label"),
+				description = common.i18n("mcm.useSearchBars.searchTypes.description"),
+				variable = mwse.mcm.createTableVariable({ id = "useSearchTypes", table = common.config }),
+			})
+
 			-- Use buttons or icons?
 			category:createOnOffButton({
 				label = common.i18n("mcm.filterButtons.label"),
