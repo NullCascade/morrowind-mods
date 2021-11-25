@@ -471,8 +471,18 @@ function uiExFilterFunction:checkText(params)
 		return true
 	end
 
-	-- Also handle ingredient effects.
+	-- Search by slot or type name.
 	local item = params.item
+	if (item) then
+		local slotOrTypeName = item.typeName or item.slotName
+		if (slotOrTypeName) then
+			if (string.find(string.lower(slotOrTypeName), searchText, 1, true)) then
+				return true
+			end
+		end
+	end
+
+	-- Also handle ingredient effects.
 	local effects = params.effects or {}
 	if (item and item.objectType == tes3.objectType.ingredient) then
 		for index, effectId in ipairs(item.effects) do
