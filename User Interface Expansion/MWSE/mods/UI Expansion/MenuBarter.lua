@@ -22,6 +22,7 @@ common.createStandardInventoryFilters(barterFilters)
 --- @param e filterBarterMenuEventData
 local function onFilterBarterMenu(e)
 	e.text = e.item.name
+	e.effects = e.item.enchantment and e.item.enchantment.effects
 	e.filter = barterFilters:triggerFilter(e)
 end
 event.register("filterBarterMenu", onFilterBarterMenu)

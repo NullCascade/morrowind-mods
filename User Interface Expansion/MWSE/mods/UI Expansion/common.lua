@@ -471,8 +471,25 @@ function uiExFilterFunction:checkText(params)
 		return true
 	end
 
+	-- Also handle ingredient effects.
+	local item = params.item
+	local effects = params.effects or {}
+	if (item and item.objectType == tes3.objectType.ingredient) then
+		for index, effectId in ipairs(item.effects) do
+			if (effectId >= 0) then
+				local object = tes3.getMagicEffect(effectId)
+				effects[index] = {
+					id = effectId,
+					object = object,
+					attribute = item.effectAttributeIds[index],
+					skill = item.effectSkillIds[index],
+				}
+			end
+		end
+	end
+
 	-- Search effects.
-	for _, effect in ipairs(params.effects or {}) do
+	for _, effect in ipairs(effects) do
 		-- Figure out a unique key for the effect.
 		local effectObject = effect.object
 		if (effectObject) then
