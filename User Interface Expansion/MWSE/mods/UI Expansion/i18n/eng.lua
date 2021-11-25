@@ -112,6 +112,8 @@ return {
 	["mcm.useSearchBars.label"] = "Use search bars?",
 	["mcm.useSearchBars.searchEffects.description"] = "When enabled, using the search bar will find items and spells whose effects contain the searched for text.\n\nFor example, searching for \"fortify luck\" will show all items and spells that make use of that effect.",
 	["mcm.useSearchBars.searchEffects.label"] = "Search effect names?",
+	["mcm.useSearchBars.searchSouls.description"] = "When enabled, using the search bar will find soul gems whose contained soul match the searched for text.\n\nFor example, searching for \"golden\" will show all soul gems that contain a golden saint soul.",
+	["mcm.useSearchBars.searchSouls.label"] = "Search soul names?",
 	["mcm.useSearchBars.searchTypes.description"] = "When enabled, using the search bar will find items whose slot or type contain the searched for text.\n\nFor example, searching for \"blunt\" will show all blunt weapons. Searching for \"amulet\" will show all amulets.",
 	["mcm.useSearchBars.searchTypes.label"] = "Search slot and type names?",
 	["mcm.useTakeFiltered.description"] = "Normally the Take All button takes all items from an inventory. With this change, only items currently shown will be taken.\n\nFor example, searching for \"potion\" then using Take All will only take items that have that keyword in their name.",

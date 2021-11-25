@@ -10,6 +10,7 @@ local defaultConfig = {
 	alwaysClearFiltersOnOpen = true,
 	useSearch = true,
 	useSearchEffects = true,
+	useSearchSouls = true,
 	useSearchTypes = true,
 	useInventoryTextButtons = true,
 	selectSpellsOnSearch = true,

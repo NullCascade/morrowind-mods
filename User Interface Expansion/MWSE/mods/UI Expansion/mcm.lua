@@ -79,6 +79,13 @@ local function registerModConfig()
 				variable = mwse.mcm.createTableVariable({ id = "useSearchTypes", table = common.config }),
 			})
 
+			-- Use soul text search?
+			category:createOnOffButton({
+				label = common.i18n("mcm.useSearchBars.searchSouls.label"),
+				description = common.i18n("mcm.useSearchBars.searchSouls.description"),
+				variable = mwse.mcm.createTableVariable({ id = "useSearchSouls", table = common.config }),
+			})
+
 			-- Use buttons or icons?
 			category:createOnOffButton({
 				label = common.i18n("mcm.filterButtons.label"),

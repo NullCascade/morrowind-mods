@@ -484,6 +484,14 @@ function uiExFilterFunction:checkText(params)
 		end
 	end
 
+	-- Search for contained soul.
+	local itemData = params.itemData
+	if (common.config.useSearchSouls) then
+		if (item and item.isSoulGem and itemData and itemData.soul and string.find(string.lower(itemData.soul.name), searchText, 1, true)) then
+			return true
+		end
+	end
+
 	-- Search effects.
 	if (common.config.useSearchEffects) then
 		-- Rebundle ingredient effects.
