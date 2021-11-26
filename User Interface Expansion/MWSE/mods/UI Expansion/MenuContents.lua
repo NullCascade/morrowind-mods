@@ -17,18 +17,14 @@ local inputController = tes3.worldController.inputController
 --- Allow "take all" keybinding.
 --- @return boolean
 local function onKeyInput()
-	if (common.isTextInputActive()) then
-		return
-	end
-
 	-- Ctrl+Space (default) takes all.
 	if (common.complexKeybindTest(common.config.keybindTakeAll)) then
 		local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
 		local takeAllButton = contentsMenu:findChild(GUI_ID_MenuContents_takeallbutton)
-		if takeAllButton then --- it may be nil /abot
+		if takeAllButton then
 			takeAllButton:triggerEvent("mouseClick")
+			return false
 		end
-		return false
 	end
 end
 
