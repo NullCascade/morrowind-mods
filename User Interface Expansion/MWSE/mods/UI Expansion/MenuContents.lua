@@ -29,10 +29,6 @@ local function onKeyInput()
 			takeAllButton:triggerEvent("mouseClick")
 		end
 		return false
-		-- Space (when no text) closes.
-	elseif (common.allFilters.contents:getSearchText() == nil and common.complexKeybindTest(common.config.keybindClose)) then
-		tes3ui.leaveMenuMode()
-		return false
 	end
 end
 

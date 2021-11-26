@@ -49,8 +49,6 @@ return {
 	["mcm.category.tooltips"] = "Tooltips",
 	["mcm.changeMapModeOnCellChange.description"] = "If enabled, changing to an exterior cell will cause the map to switch to world mode, and changing to an interior will cause the map to switch to local mode.",
 	["mcm.changeMapModeOnCellChange.label"] = "Change map mode on cell change?",
-	["mcm.closeKey.description"] = "This key combination will close the current inventory.",
-	["mcm.closeKey.label"] = "Keybind to close inventory.",
 	["mcm.component.barter.description"] = "Features:\n- Search by item name.\n- Improved item filtering.\n- A new filter that only shows items the merchant will buy.",
 	["mcm.component.barter.label"] = "Enable bartering menu component?",
 	["mcm.component.console.description"] = "Features:\n- Allows the execution of arbitrary lua code through the console.\n- Allows mod developers to add or overwrite console commands.\n- Previously typed entries can be found using the up and down arrow keys.\n- A configurable amount of console commands are saved between sessions.",

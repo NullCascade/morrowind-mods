@@ -190,14 +190,6 @@ local function registerModConfig()
 		do
 			local category = pageFeatures:createCategory({ label = common.i18n("mcm.category.keyConfig") })
 
-			-- Key binding: close inventory
-			category:createKeyBinder({
-				label = common.i18n("mcm.closeKey.label"),
-				description = common.i18n("mcm.closeKey.description"),
-				allowCombinations = true,
-				variable = mwse.mcm.createTableVariable({ id = "keybindClose", table = common.config }),
-			})
-
 			-- Key binding: take all/filtered
 			category:createKeyBinder({
 				label = common.i18n("mcm.takeAllKey.label"),

@@ -23,7 +23,6 @@ local defaultConfig = {
 	changeMapModeOnCellChange = true,
 	maxWait = 1,
 	consoleHistoryLimit = 10,
-	keybindClose = { keyCode = tes3.scanCode.space, isShiftDown = false, isControlDown = false, isAltDown = false },
 	keybindTakeAll = { keyCode = tes3.scanCode.space, isShiftDown = false, isControlDown = true, isAltDown = false },
 	keybindShowAdditionalInfo = {
 		keyCode = tes3.scanCode.leftAlt,
@@ -95,7 +94,6 @@ local function convertKeyBind(keyArray)
 
 	return keyBind
 end
-config.keybindClose = convertKeyBind(config.keybindClose)
 config.keybindTakeAll = convertKeyBind(config.keybindTakeAll)
 config.keybindShowAdditionalInfo = convertKeyBind(config.keybindShowAdditionalInfo)
 config.keybindMapSwitch = convertKeyBind(config.keybindMapSwitch)
