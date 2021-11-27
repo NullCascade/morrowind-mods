@@ -1,4 +1,64 @@
 
+local common = require("UI Expansion.common")
+
+--- Fills out a known effects table, given a spell list.
+--- @param knownEffects table<number, boolean>
+--- @param spellList tes3spellList
+local function fillKnownEffectsTable(knownEffects, spellList)
+	-- Some pointers can be nil.
+	if (not spellList) then
+		return
+	end
+
+	-- Check the list's iterator. Filter anything that isn't a normal spell.
+	for _, spell in ipairs(spellList.iterator) do
+		if (spell.castType == tes3.spellType.spell) then
+			for _, effect in ipairs(spell.effects) do
+				knownEffects[effect.id] = true
+			end
+		end
+	end
+end
+
+--- Creates a known effects table for a given mobile. This table will use keys for effect ids, with a value of true if
+--- the effect is known.
+---
+--- Effects are gathered from primary known spells, racial abilities, and birthsigns.
+--- @param mobile tes3mobileActor
+--- @return table<number, boolean>
+local function getKnownEffectsTable(mobile)
+	local knownEffects = {} --- @type table<number, boolean>
+
+	fillKnownEffectsTable(knownEffects, mobile.object.spells)
+
+	local race = mobile.object.race
+	if (race) then
+		fillKnownEffectsTable(knownEffects, race.abilities)
+	end
+
+	local birthsign = mobile.birthsign
+	if (birthsign) then
+		fillKnownEffectsTable(knownEffects, birthsign.spells)
+	end
+
+	knownEffects[-1] = true
+
+	return knownEffects
+end
+
+--- Checks to see if all effects are known in a given spell. This is compared to a knownEffects table, created above.
+--- @param knownEffects table<number, boolean>
+--- @param spell tes3spell
+--- @return boolean
+local function getKnowsAllSpellEffects(knownEffects, spell)
+	for _, effect in ipairs(spell.effects) do
+		if (not knownEffects[effect.id]) then
+			return false
+		end
+	end
+	return true
+end
+
 --- Create our changes for MenuServiceSpells.
 --- @param e uiActivatedEventData
 local function onUIActivated(e)
@@ -18,6 +78,9 @@ local function onUIActivated(e)
 		table.insert(serviceSpells, child:getPropertyObject(MenuServiceSpells_Spell))
 	end
 	table.sort(serviceSpells, function(a, b) return a.name < b.name end)
+
+	-- Get a list of spell effects the player knows.
+	local knownEffects = getKnownEffectsTable(tes3.mobilePlayer)
 
 	-- Recreate the spells list menu with multiple columns.
 	MenuServiceSpells_ServiceList_PartScrollPane_pane:destroyChildren()
@@ -42,6 +105,7 @@ local function onUIActivated(e)
 	local MenuServiceSpells_Spell_Help = 0x616810
 	local GUI_ID_MenuServiceSpells_Icon = tes3ui.registerID("MenuServiceSpells_Icon")
 	local GUI_ID_MenuServiceSpells_Spell = tes3ui.registerID("MenuServiceSpells_Spell")
+	local GUI_Palette_TopicUnique = common.getColor(common.config.dialogueTopicUniqueColor)
 
 	-- Fill out the service list.
 	for _, spell in ipairs(serviceSpells) do
@@ -63,6 +127,10 @@ local function onUIActivated(e)
 		if (spellPrice > playerCurrentGold) then
 			label.disabled = true
 			label.widget.state = 2
+		elseif (not getKnowsAllSpellEffects(knownEffects, spell)) then
+			-- Known effect? Make it blue.
+			label.widget.state = 4
+			label.widget.idleActive = GUI_Palette_TopicUnique
 		end
 	end
 
