@@ -20,7 +20,7 @@ local function registerModConfig()
 			text = creditsText .. "\n\nThe settings in this tab will not take affect until the next restart.",
 		})
 
-		local components = { "barter", "console", "contents", "dialog", "inventory", "inventorySelect", "magic", "map", "options", "quantity", "rest", "saveLoad", "serviceSpells", "stat", "textInput", "training" }
+		local components = { "barter", "console", "contents", "dialog", "inventory", "inventorySelect", "magic", "magicSelect", "map", "options", "quantity", "rest", "saveLoad", "serviceSpells", "stat", "textInput", "training" }
 		for _, k in ipairs(components) do
 			pageComponents:createOnOffButton({
 				label = common.i18n(string.format("mcm.component.%s.label", k)),

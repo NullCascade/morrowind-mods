@@ -63,6 +63,8 @@ return {
 	["mcm.component.inventorySelect.label"] = "Enable inventory selection menu component?",
 	["mcm.component.magic.description"] = "Features:\n- Search by spell name.\n- Filter by effect schools.\nThe first matching searched for/filtered is automatically equipped for quick spell or item selection.\n- Spell icons are displayed for easy visual parsing of the spell list.\n- The search/filter can be preserved between menu opens.",
 	["mcm.component.magic.label"] = "Enable magic menu component?",
+	["mcm.component.magicSelect.description"] = "Features:\n- Search by spell name.\n- Filter by effect schools.\n- Spell icons are displayed for easy visual parsing of the spell list.",
+	["mcm.component.magicSelect.label"] = "Enable magic select menu component?",
 	["mcm.component.map.description"] = "Features:\n- The map can switch automatically to interior/exterior when entering the appropriate cell.\n- A hotkey can be used to quickly toggle the map mode.",
 	["mcm.component.map.label"] = "Enable map menu component?",
 	["mcm.component.options.description"] = "Features:\n- Elements are automatically resized based on the size of their texture, instead of using hardcoded values.",

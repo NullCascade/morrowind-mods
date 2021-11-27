@@ -43,6 +43,7 @@ local defaultConfig = {
 		inventorySelect = true,
 		journal = false,
 		magic = true,
+		magicSelect = true,
 		map = true,
 		mapPlugin = false,
 		options = true,
@@ -134,6 +135,9 @@ local function onInitialized()
 	end
 	if (config.components.magic) then
 		dofile("UI Expansion.MenuMagic")
+	end
+	if (config.components.magicSelect) then
+		dofile("UI Expansion.MenuMagicSelect")
 	end
 	if (config.components.map) then
 		dofile("UI Expansion.MenuMap")
