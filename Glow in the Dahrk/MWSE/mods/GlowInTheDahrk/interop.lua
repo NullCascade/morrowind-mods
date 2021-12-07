@@ -18,9 +18,18 @@ local supportedObjectTypes = {
 	[tes3.objectType.static] = true,
 }
 
---- Information about a mesh.
+--- Information about a mesh that GitD controls.
 --- @class table.GitD.meshData
---- @field switchChildIndex number The asdf
+--- @field indexInDay number The index to use when swapping to day in interiors.
+--- @field indexOff number The index to use to turn the source "off".
+--- @field indexOn number The index to use to turn the source "on".
+--- @field interiorRayIndex number The index of our GitD node that holds interior sunrays.
+--- @field light niLight The base light used by clones.
+--- @field litInteriorWindowShapesIndexes number[] A list of indicies that hold lit interior window shapes. We will use this list to update material properties.
+--- @field supportsLight boolean The mesh supports a light and GitD will try to attach one.
+--- @field switchChildIndex number The index that the nightdayswitch child can be found on.
+--- @field unlitInteriorWindowShapesIndexes table number[] A list of indicies that hold unlit interior window shapes. We will use this list to update material properties.
+
 
 --- @type table<string, table.GitD.meshData>
 local meshData = {}
@@ -39,17 +48,47 @@ function interop.createMeshData(mesh)
 		return hit
 	end
 
-	meshData[mesh] = {}
-	return meshData[mesh]
+	-- Initialize empty data.
+	local data = {}
+	meshData[mesh] = data
+
+	-- Load cell-specific data.
+	data.cellData = {}
+	for cell, profiles in pairs(config.cellOverrides.definitions) do
+		local cellData = {}
+		for _, profileKey in ipairs(profiles) do
+			local profileData = config.cellOverrides.profiles[profileKey]
+			if (profileData) then
+				for _, entry in ipairs(profileData) do
+					if (string.find(mesh, entry.mesh, entry.init, entry.plain)) then
+						for k, v in pairs(entry.data) do
+							cellData[k] = v
+						end
+					end
+				end
+			end
+		end
+
+		if (not table.empty(cellData)) then
+			data.cellData[cell] = cellData
+		end
+	end
+
+	-- Return what we have.
+	return data
 end
 
-function interop.checkSupport(obj)
-	if (not obj) then
+--- comment
+--- @param reference tes3reference
+--- @return boolean hasSupport Glow in the Dahrk will support this mesh.
+--- @return table.GitD.meshData meshData The mesh data that will be used for the object.
+function interop.checkSupport(reference)
+	if (not reference) then
 		return false
 	end
 
 	-- Get basic info.
-	local object = obj.baseObject
+	local object = reference.baseObject
 	local mesh = object.mesh
 	if (not mesh) then
 		return false

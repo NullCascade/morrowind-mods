@@ -4,8 +4,8 @@ local GitD_debug = require("GlowInTheDahrk.debug")
 
 --[[
 	Todo list:
-		- Correctly toggle sunrays when using the MCM.
-		- Figure out how to cull objects from dynamic effects to prevent bleed between walls/floors.
+		x Correctly toggle sunrays when using the MCM.
+		? Figure out how to cull objects from dynamic effects to prevent bleed between walls/floors.
 		- Figure out what to do with plazas.
 --]]
 
@@ -14,11 +14,13 @@ local GitD_debug = require("GlowInTheDahrk.debug")
 --
 
 --- A reference-keyed dictionary of our currently active references, mapping them to its mesh data.
---- @type table<tes3reference,table>
+---
+--- False values means that we have checked support for this object before, don't support it, and don't need to do deep checks in the future.
+--- @type table<tes3reference,table.GitD.meshData|boolean>
 local trackedReferences = {}
 
 --- A list of references currently needing updates.
---- @type table<number,tes3reference>
+--- @type tes3reference[]
 local referenceUpdateQueue = {}
 
 -- Add tracked references.
@@ -138,7 +140,6 @@ local function updateReferences(now)
 
 	-- Get faster access to some often-used variables.
 	local worldController = tes3.worldController
-	local weatherController = worldController.weatherController
 	local gameHour = worldController.hour.value
 	local sunriseStart, sunriseMidPoint, sunriseStop, sunsetStart, sunsetMidPoint, sunsetStop = interop.getSunHours()
 	local sunriseMidPoint = (sunriseStart + sunriseStop) / 2
@@ -147,30 +148,31 @@ local function updateReferences(now)
 	local varianceScalar = config.varianceInMinutes / 60
 	local addInteriorLights = config.addInteriorLights
 	local addInteriorSunrays = config.addInteriorSunrays
-	local weatherController = worldController.weatherController
 
 	-- Calculate some of our lighting values.
 	local currentWeatherBrightness = interop.getCurrentWeatherBrightness()
 	local isOutsideLit = gameHour >= sunriseStart and gameHour <= sunsetStop
 	local currentRegionSunColor = playerRegion and interop.calculateRegionSunColor(playerRegion)
-
+	
 	-- Fade light in/out at dawn/dusk.
-	local currentDimmer = 0.0
+	local dimmer = 0.0
 	if (sunriseMidPoint < gameHour and gameHour < sunsetMidPoint) then
-		currentDimmer = currentWeatherBrightness
+		dimmer = currentWeatherBrightness
 	elseif (sunriseStart <= gameHour and gameHour <= sunriseMidPoint) then
-		currentDimmer = currentWeatherBrightness * math.remap(gameHour, sunriseStart, sunriseMidPoint, 0.0, 1.0)
+		dimmer = currentWeatherBrightness * math.remap(gameHour, sunriseStart, sunriseMidPoint, 0.0, 1.0)
 	elseif (sunsetMidPoint <= gameHour and gameHour <= sunsetStop) then
-		currentDimmer = currentWeatherBrightness * math.remap(gameHour, sunsetStop, sunsetMidPoint, 0.0, 1.0)
+		dimmer = currentWeatherBrightness * math.remap(gameHour, sunsetStop, sunsetMidPoint, 0.0, 1.0)
 	end
-
+	
 	-- Go through and update all our references.
 	local queueLength = #referenceUpdateQueue
 	for i = queueLength, math.max(queueLength - maxUpdatesPerFrame, 1), -1 do
 		local reference = referenceUpdateQueue[i]
+		local meshData = trackedReferences[reference]
 		local sceneNode = reference.sceneNode
 		if (sceneNode) then
-			local meshData = trackedReferences[reference]
+			local cellData = meshData.cellData[playerCell.id] or {}
+
 			local indexOff = meshData.indexOff
 			local indexOn = meshData.indexOn
 			local indexInDay = meshData.indexInDay
@@ -182,6 +184,25 @@ local function updateReferences(now)
 				if (useExteriorLogic and useVariance) then
 					local position = reference.position
 					hour = hour + math.sin(position.x * 1.35 + position.y) * varianceScalar
+				end
+
+				-- If we want to flip the logic, offset the hours by 12.
+				local dimmer = dimmer
+				local isOutsideLit = isOutsideLit
+				if (cellData.flipDayNightRole) then
+					hour = (hour + 12) % 24
+
+					-- Recalculate isOutsideLit
+					isOutsideLit = hour >= sunriseStart and hour <= sunsetStop
+
+					-- Recalculate dimmer.
+					if (sunriseMidPoint < hour and hour < sunsetMidPoint) then
+						dimmer = currentWeatherBrightness
+					elseif (sunriseStart <= hour and hour <= sunriseMidPoint) then
+						dimmer = currentWeatherBrightness * math.remap(hour, sunriseStart, sunriseMidPoint, 0.0, 1.0)
+					elseif (sunsetMidPoint <= hour and hour <= sunsetStop) then
+						dimmer = currentWeatherBrightness * math.remap(hour, sunsetStop, sunsetMidPoint, 0.0, 1.0)
+					end
 				end
 
 				-- Determine which new index to assign.
@@ -232,7 +253,7 @@ local function updateReferences(now)
 								lerpedColor = cachedLight.diffuse * currentRegionSunColor
 
 								light.diffuse = lerpedColor
-								light.dimmer = currentDimmer
+								light.dimmer = dimmer
 							end
 						end
 
@@ -245,8 +266,8 @@ local function updateReferences(now)
 								if (materialProperty) then
 									materialProperty.ambient = lerpedColor
 									materialProperty.diffuse = lerpedColor
-									materialProperty.emissive = lerpedColor * currentDimmer
-									materialProperty.alpha = currentDimmer
+									materialProperty.emissive = lerpedColor * dimmer
+									materialProperty.alpha = dimmer
 								end
 							end
 						end
@@ -258,7 +279,7 @@ local function updateReferences(now)
 								if (materialProperty) then
 									materialProperty.ambient = lerpedColor
 									materialProperty.diffuse = lerpedColor
-									materialProperty.emissive = lerpedColor * currentDimmer
+									materialProperty.emissive = lerpedColor * dimmer
 								end
 							end
 						end
@@ -383,7 +404,7 @@ local function onMeshLoaded(e)
 		-- See if we can clear up vcol on the interior window mesh.
 		-- Also see what shapes we will later want to update when coloring windows.
 		local litInteriorWindowShapesIndexes = {}
-		local lastShape = nil
+		local lastShape = nil ---@type niTriShape
 		for i, shape in ipairs(interiorLights.children) do
 			if (shape) then
 				local texturingProperty = shape.texturingProperty
@@ -513,6 +534,16 @@ GitD_debug.cellRegionCache = cellRegionCache
 GitD_debug.getRegion = getRegion
 GitD_debug.referenceUpdateQueue = referenceUpdateQueue
 GitD_debug.trackedReferences = trackedReferences
+
+function GitD_debug.listActiveReferences()
+	local results = {}
+	for reference, data in pairs(trackedReferences) do
+		if (data) then
+			table.insert(results, reference.id)
+		end
+	end
+	tes3ui.log(table.concat(results, ", "))
+end
 
 local function addGitD_DebugCommands(e)
 	e.sandbox.GlowInTheDahrk = GitD_debug
