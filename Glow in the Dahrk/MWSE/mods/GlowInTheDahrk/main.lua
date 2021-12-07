@@ -4,13 +4,6 @@ local GitD_debug = require("GlowInTheDahrk.debug")
 local i18n = mwse.loadTranslations("GlowInTheDahrk")
 interop.i18n = i18n
 
---[[
-	Todo list:
-		x Correctly toggle sunrays when using the MCM.
-		? Figure out how to cull objects from dynamic effects to prevent bleed between walls/floors.
-		- Figure out what to do with plazas.
---]]
-
 --
 -- Keep track of references we care about.
 --

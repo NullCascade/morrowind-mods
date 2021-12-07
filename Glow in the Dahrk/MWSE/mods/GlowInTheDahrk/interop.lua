@@ -138,15 +138,13 @@ function interop.getSunHours()
 
 	-- Figure out when our important sunrise times are.
 	local sunriseStart = weatherController.sunriseHour - weatherController.sunPreSunriseTime
-	local sunriseTotalDuration = weatherController.sunPostSunriseTime + weatherController.sunriseDuration +
-	                             weatherController.sunPreSunriseTime
+	local sunriseTotalDuration = weatherController.sunPostSunriseTime + weatherController.sunriseDuration + weatherController.sunPreSunriseTime
 	local sunriseMidPoint = sunriseStart + (sunriseTotalDuration / 2)
 	local sunriseStop = sunriseStart + sunriseTotalDuration
 
 	-- Figure out when our important sunset times are.
 	local sunsetStart = weatherController.sunsetHour - weatherController.sunPreSunsetTime
-	local sunsetTotalDuration = weatherController.sunPostSunsetTime + weatherController.sunsetDuration +
-	                            weatherController.sunPreSunsetTime
+	local sunsetTotalDuration = weatherController.sunPostSunsetTime + weatherController.sunsetDuration + weatherController.sunPreSunsetTime
 	local sunsetMidPoint = sunsetStart + (sunsetTotalDuration / 2)
 	local sunsetStop = sunsetStart + sunsetTotalDuration
 
