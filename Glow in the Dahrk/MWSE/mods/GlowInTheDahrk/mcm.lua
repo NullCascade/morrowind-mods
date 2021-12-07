@@ -1,4 +1,6 @@
 local config = require("GlowInTheDahrk.config")
+local interop = require("GlowInTheDahrk.interop")
+local i18n = interop.i18n
 
 -- Setup MCM.
 local function registerModConfig()
@@ -7,18 +9,18 @@ local function registerModConfig()
 
 	local preferences = template:createSideBarPage({ label = "Preferences" })
 	preferences.sidebar:createInfo({
-		text = "Glow in the Dahrk\n\nModels and textures by Melchior Dahrk\nScripting by NullCascade.\n\nMouse over a feature for more info.",
+		text = i18n("mcm.info"),
 	})
 
 	preferences:createOnOffButton({
-		label = "Stagger exterior transitions?",
-		description = "This can look unnatural on small buildings with multiple windows. But with it turned off, all windows will light up/go dark at the same time.\n\nDefault: On",
+		label = i18n("mcm.useVariance.label"),
+		description = i18n("mcm.useVariance.description"),
 		variable = mwse.mcm:createTableVariable({ id = "useVariance", table = config }),
 	})
 
 	preferences:createSlider({
-		label = "Maximum stagger (in minutes)",
-		description = "The amount of time before or after dawn/dusk that an exterior object can have its lighting changed. A value of 30 means that windows can light up 30 minutes earlier or later than the norm.\n\nDefault: 30",
+		label = i18n("mcm.varianceInMinutes.label"),
+		description = i18n("mcm.varianceInMinutes.description"),
 		min = 1,
 		max = 240,
 		step = 5,
@@ -27,14 +29,14 @@ local function registerModConfig()
 	})
 
 	preferences:createOnOffButton({
-		label = "Add sunrays to interiors?",
-		description = "When enabled, sunrays will be added around windows when they are lit from the outside.\n\nDefault: On",
+		label = i18n("mcm.addInteriorSunrays.label"),
+		description = i18n("mcm.addInteriorSunrays.description"),
 		variable = mwse.mcm:createTableVariable({ id = "addInteriorSunrays", table = config }),
 	})
 
 	preferences:createOnOffButton({
-		label = "Add interior lights to windows?",
-		description = "When enabled, light will be added around windows when they are lit from the outside.\n\nDefault: On",
+		label = i18n("mcm.addInteriorLights.label"),
+		description = i18n("mcm.addInteriorLights.description"),
 		variable = mwse.mcm:createTableVariable({ id = "addInteriorLights", table = config }),
 	})
 

@@ -1,6 +1,8 @@
 local config = require("GlowInTheDahrk.config")
 local interop = require("GlowInTheDahrk.interop")
 local GitD_debug = require("GlowInTheDahrk.debug")
+local i18n = mwse.loadTranslations("GlowInTheDahrk")
+interop.i18n = i18n
 
 --[[
 	Todo list:
@@ -368,7 +370,7 @@ local function onMeshLoaded(e)
 		-- Make a guess at if this is a modern mesh.
 		if (not data.supportsLight and data.interiorRayIndex ~= 1) then
 			data.legacyMesh = true
-			mwse.log("[Glow In The Dahrk] Converting legacy mesh: %s", path)
+			mwse.log(i18n("logConvertingLegacyMesh", { path }))
 		end
 
 		-- If it is an old mesh try to fix up rays.
