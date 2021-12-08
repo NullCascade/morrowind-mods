@@ -14,6 +14,8 @@ return {
 		["Vivec, Foreign Quarter Plaza"] = { "Force Exterior Sources On" },
 		["Vivec, Hlaalu Plaza"] = { "Force Exterior Sources On" },
 		["Vivec, Redoran Plaza"] = { "Force Exterior Sources On" },
+		["Vivec, St. Delyn Plaza"] = { "Force Exterior Sources On" },
+		["Vivec, St. Olms Plaza"] = { "Force Exterior Sources On" },
 		["Vivec, Telvanni Plaza"] = { "Force Exterior Sources On" },
 	},
 }
