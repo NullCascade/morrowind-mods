@@ -181,25 +181,6 @@ local function updateReferences(now)
 					hour = hour + math.sin(position.x * 1.35 + position.y) * varianceScalar
 				end
 
-				-- If we want to flip the logic, offset the hours by 12.
-				local dimmer = dimmer
-				local isOutsideLit = isOutsideLit
-				if (cellData.flipDayNightRole) then
-					hour = (hour + 12) % 24
-
-					-- Recalculate isOutsideLit
-					isOutsideLit = hour >= sunriseStart and hour <= sunsetStop
-
-					-- Recalculate dimmer.
-					if (sunriseMidPoint < hour and hour < sunsetMidPoint) then
-						dimmer = currentWeatherBrightness
-					elseif (sunriseStart <= hour and hour <= sunriseMidPoint) then
-						dimmer = currentWeatherBrightness * math.remap(hour, sunriseStart, sunriseMidPoint, 0.0, 1.0)
-					elseif (sunsetMidPoint <= hour and hour <= sunsetStop) then
-						dimmer = currentWeatherBrightness * math.remap(hour, sunsetStop, sunsetMidPoint, 0.0, 1.0)
-					end
-				end
-
 				-- Determine which new index to assign.
 				local previousIndex = switchNode.switchIndex + 1
 				local index = indexOff
@@ -212,6 +193,13 @@ local function updateReferences(now)
 						index = indexInDay
 					end
 				end
+
+				-- If we want to flip the logic, offset the hours by 12.
+				if (cellData.forceIndexOn) then
+					index = indexOn
+				end
+
+				-- Finally assign the index.
 				switchNode.switchIndex = index - 1
 
 				-- Do we need to add a light to an interior?

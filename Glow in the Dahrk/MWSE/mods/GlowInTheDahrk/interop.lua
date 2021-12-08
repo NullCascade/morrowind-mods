@@ -7,6 +7,9 @@ interop.enabled = true
 local debug = require("GlowInTheDahrk.debug")
 debug.interop = interop
 
+local cellData = require("GlowInTheDahrk.cellData")
+interop.cellData = cellData
+
 --
 -- Object support check. Lets us know if a given object cares about GitD.
 --
@@ -54,10 +57,10 @@ function interop.createMeshData(mesh)
 
 	-- Load cell-specific data.
 	data.cellData = {}
-	for cell, profiles in pairs(config.cellOverrides.definitions) do
+	for cell, profiles in pairs(interop.cellData.definitions) do
 		local cellData = {}
 		for _, profileKey in ipairs(profiles) do
-			local profileData = config.cellOverrides.profiles[profileKey]
+			local profileData = interop.cellData.profiles[profileKey]
 			if (profileData) then
 				for _, entry in ipairs(profileData) do
 					if (string.find(mesh, entry.mesh, entry.init, entry.plain)) then
@@ -230,6 +233,50 @@ function interop.getDefaultLight()
 	end
 
 	return defaultLight
+end
+
+--
+-- Management of cell profiles.
+--
+
+function interop.addProfileToCell(cellName, profileName)
+	local definition = interop.cellData.definitions[cellName]
+	interop.cellData.definitions[cellName] = definition or {}
+
+	if (not table.find(definition, profileName)) then
+		table.insert(definition, profileName)
+	end
+end
+
+function interop.removeProfileFromCell(cellName, profileName)
+	local definition = interop.cellData.definitions[cellName]
+	if (definition) then
+		table.removevalue(definition, profileName)
+	end
+end
+
+function interop.getCellProfileDefinition(profileName)
+	return interop.cellData.profiles[profileName]
+end
+
+function interop.addCellProfileDefinition(profileName)
+	local existing = interop.cellData.profiles[profileName]
+	if (existing) then
+		return existing
+	end
+
+	local newDefinition = {}
+	interop.cellData.profiles[profileName] = newDefinition
+	return newDefinition
+end
+
+function interop.removeCellProfileDefinition(profileName)
+	interop.cellData.profiles[profileName] = nil
+
+	-- Remove from existing cell definitions.
+	for cellName, profiles in pairs(interop.cellData.definitions) do
+		table.removevalue(profiles, profileName)
+	end
 end
 
 return interop
