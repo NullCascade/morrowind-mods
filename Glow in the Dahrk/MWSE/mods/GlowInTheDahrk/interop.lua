@@ -139,9 +139,7 @@ function interop.resetConfigurableState(reference)
 		end
 
 		-- Reset light if needed.
-		_G.debug.log(meshData.supportsLight)
 		if (meshData.supportsLight) then
-			_G.debug.log(config.addInteriorLights)
 			if (config.addInteriorLights) then
 				local cachedLight = meshData.light or interop.getDefaultLight()
 				reference:getOrCreateAttachedDynamicLight(cachedLight:clone())
