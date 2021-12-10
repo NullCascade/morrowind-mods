@@ -78,13 +78,6 @@ local function getRegion()
 		return cacheHit
 	end
 
-	-- Did we already figure this out?
-	local autoRegion = tes3.getRegion()
-	if (autoRegion) then
-		cellRegionCache[playerCell] = autoRegion
-		return autoRegion
-	end
-
 	-- Look to see if anywhere exits to a place with a region.
 	for ref in playerCell:iterateReferences(tes3.objectType.door) do
 		local destination = ref.destination
