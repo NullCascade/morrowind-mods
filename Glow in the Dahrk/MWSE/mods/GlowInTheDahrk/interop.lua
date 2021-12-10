@@ -154,6 +154,10 @@ function interop.getSunHours()
 	return sunriseStart, sunriseMidPoint, sunriseStop, sunsetStart, sunsetMidPoint, sunsetStop
 end
 
+interop.minimumSunColorLength = 0.4
+
+--- @param region tes3region
+--- @return niColor
 function interop.calculateRegionSunColor(region)
 	-- Base data.
 	local worldController = tes3.worldController
@@ -207,12 +211,18 @@ function interop.calculateRegionSunColor(region)
 		nextWeatherColor = nextWeather and nextWeather.sunNightColor:lerp(nextWeather.sunSunriseColor, timeTransitionScalar)
 	end
 
-	-- Return the lerped value between current and next weather.
+	-- Lerp value between current and next weather.
+	local resultVector = currentWeatherColor
 	if (nextWeather) then
-		return currentWeatherColor:lerp(nextWeatherColor, weatherTransitionScalar):toColor()
-	else
-		return currentWeatherColor:toColor()
+		resultVector = currentWeatherColor:lerp(nextWeatherColor, weatherTransitionScalar)
 	end
+
+	-- Force a minimum brightness.
+	if (resultVector:length() < interop.minimumSunColorLength) then
+		resultVector = resultVector:normalized() * interop.minimumSunColorLength
+	end
+
+	return resultVector:toColor()
 end
 
 --
