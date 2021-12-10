@@ -142,7 +142,28 @@ function interop.resetConfigurableState(reference)
 		if (meshData.supportsLight) then
 			if (config.addInteriorLights) then
 				local cachedLight = meshData.light or interop.getDefaultLight()
-				reference:getOrCreateAttachedDynamicLight(cachedLight:clone())
+				local attachment = reference:getOrCreateAttachedDynamicLight(cachedLight:clone())
+				local light = attachment and attachment.light
+				local currentRegionSunColor = interop.calculateRegionSunColor(interop.getRegion())
+				if (light and currentRegionSunColor) then
+					local cachedLight = cachedLight or meshData.light or interop.getDefaultLight()
+					local lerpedColor = cachedLight.diffuse * currentRegionSunColor
+					light.diffuse = lerpedColor
+
+					-- Fade light in/out at dawn/dusk.
+					local sunriseStart, sunriseMidPoint, sunriseStop, sunsetStart, sunsetMidPoint, sunsetStop = interop.getSunHours()
+					local currentWeatherBrightness = interop.getCurrentWeatherBrightness()
+					local gameHour = tes3.worldController.hour.value
+					if (sunriseMidPoint < gameHour and gameHour < sunsetMidPoint) then
+						light.dimmer = currentWeatherBrightness
+					elseif (sunriseStart <= gameHour and gameHour <= sunriseMidPoint) then
+						light.dimmer = currentWeatherBrightness * math.remap(gameHour, sunriseStart, sunriseMidPoint, 0.0, 1.0)
+					elseif (sunsetMidPoint <= gameHour and gameHour <= sunsetStop) then
+						light.dimmer = currentWeatherBrightness * math.remap(gameHour, sunsetStop, sunsetMidPoint, 0.0, 1.0)
+					else
+						light.dimmer = 0.0
+					end
+				end
 			else
 				reference:deleteDynamicLightAttachment(true)
 			end

@@ -78,6 +78,13 @@ local function getRegion()
 		return cacheHit
 	end
 
+	-- Did we already figure this out?
+	local autoRegion = tes3.getRegion()
+	if (autoRegion) then
+		cellRegionCache[playerCell] = autoRegion
+		return autoRegion
+	end
+
 	-- Look to see if anywhere exits to a place with a region.
 	for ref in playerCell:iterateReferences(tes3.objectType.door) do
 		local destination = ref.destination
@@ -106,6 +113,8 @@ local function getRegion()
 		return lastExterior.region
 	end
 end
+
+interop.getRegion = getRegion
 
 --
 -- Our actual reference updating code
@@ -236,7 +245,7 @@ local function updateReferences(now)
 						local lerpedColor = currentRegionSunColor
 						if (meshData.supportsLight) then
 							light = light or reference.light
-							if (light) then
+							if (light and currentRegionSunColor) then
 								cachedLight = cachedLight or meshData.light or interop.getDefaultLight()
 								lerpedColor = cachedLight.diffuse * currentRegionSunColor
 
