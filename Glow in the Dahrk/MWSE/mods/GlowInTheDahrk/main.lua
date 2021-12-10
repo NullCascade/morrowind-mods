@@ -266,7 +266,7 @@ local function updateReferences(now)
 								end
 							end
 						end
-					elseif (index == indexOff) then
+					elseif (index == indexOff and previousIndex ~= indexOff) then
 						local unlitInteriorNode = switchNode.children[indexOff]
 
 						-- Update window color.
