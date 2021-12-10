@@ -17,8 +17,7 @@ local function debugWeatherChangedImmediate(e)
 end
 
 local function debugWeatherTransitionStarted(e)
-	mwse.log("Weather transition from %s to %s started.", table.find(tes3.weather, e.from.index),
-	         table.find(tes3.weather, e.to.index))
+	mwse.log("Weather transition from %s to %s started.", table.find(tes3.weather, e.from.index), table.find(tes3.weather, e.to.index))
 end
 
 local function debugWeatherTransitionFinished(e)

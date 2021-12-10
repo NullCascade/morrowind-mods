@@ -32,12 +32,14 @@ local function registerModConfig()
 		label = i18n("mcm.addInteriorSunrays.label"),
 		description = i18n("mcm.addInteriorSunrays.description"),
 		variable = mwse.mcm:createTableVariable({ id = "addInteriorSunrays", table = config }),
+		callback = interop.resetConfigurableStateForAllReferences,
 	})
 
 	preferences:createOnOffButton({
 		label = i18n("mcm.addInteriorLights.label"),
 		description = i18n("mcm.addInteriorLights.description"),
 		variable = mwse.mcm:createTableVariable({ id = "addInteriorLights", table = config }),
+		callback = interop.resetConfigurableStateForAllReferences,
 	})
 
 	-- Finish up.

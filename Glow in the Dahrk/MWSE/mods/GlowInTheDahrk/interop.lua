@@ -109,6 +109,49 @@ function interop.checkSupport(reference)
 	return cacheHit ~= nil, cacheHit
 end
 
+function interop.resetConfigurableStateForAllReferences()
+	for reference, _ in pairs(interop.trackedReferences) do
+		interop.resetConfigurableState(reference)
+	end
+end
+
+--- @param reference tes3reference
+function interop.resetConfigurableState(reference)
+	local sceneNode = reference.sceneNode
+	if (not sceneNode) then
+		return
+	end
+
+	local supported, meshData = interop.checkSupport(reference)
+	if (not supported or not meshData) then
+		return
+	end
+
+	local switchNode = sceneNode.children[meshData.switchChildIndex]
+	local currentNode = switchNode:getActiveChild()
+	local currentIndex = switchNode.switchIndex + 1
+
+	-- Reset for daylight.
+	if (currentIndex == meshData.indexInDay) then
+		-- Reset rays if needed.
+		if (meshData.interiorRayIndex) then
+			currentNode.children[meshData.interiorRayIndex].appCulled = not config.addInteriorSunrays
+		end
+
+		-- Reset light if needed.
+		_G.debug.log(meshData.supportsLight)
+		if (meshData.supportsLight) then
+			_G.debug.log(config.addInteriorLights)
+			if (config.addInteriorLights) then
+				local cachedLight = meshData.light or interop.getDefaultLight()
+				reference:getOrCreateAttachedDynamicLight(cachedLight:clone())
+			else
+				reference:deleteDynamicLightAttachment(true)
+			end
+		end
+	end
+end
+
 --
 -- Specific regional or weather data to care about.
 --
@@ -231,6 +274,7 @@ end
 
 local defaultLight = nil
 
+--- @return niPointLight
 function interop.getDefaultLight()
 	-- Lazy-create light if needed.
 	if (defaultLight == nil) then

@@ -13,6 +13,7 @@ interop.i18n = i18n
 --- False values means that we have checked support for this object before, don't support it, and don't need to do deep checks in the future.
 --- @type table<tes3reference,table.GitD.meshData|boolean>
 local trackedReferences = {}
+interop.trackedReferences = trackedReferences
 
 --- A list of references currently needing updates.
 --- @type tes3reference[]
@@ -25,6 +26,9 @@ local function onReferenceActivated(e)
 		if (supported) then
 			trackedReferences[e.reference] = data
 			table.insert(referenceUpdateQueue, e.reference)
+
+			-- Reset rays if needed.
+			interop.resetConfigurableState(e.reference)
 		else
 			trackedReferences[e.reference] = false
 		end
@@ -202,10 +206,11 @@ local function updateReferences(now)
 				-- Finally assign the index.
 				switchNode.switchIndex = index - 1
 
-				-- Do we need to add a light to an interior?
+				-- Perform any effects needed.
 				if (not useExteriorLogic) then
-					local cachedLight = nil
-					local light = nil
+					-- Do we need to add a light to an interior?
+					local cachedLight = nil --- @type niPointLight
+					local light = nil --- @type niPointLight
 
 					-- Perform state switches.
 					if (previousIndex == indexOff and index == indexInDay) then
@@ -231,7 +236,7 @@ local function updateReferences(now)
 						local lerpedColor = currentRegionSunColor
 						if (meshData.supportsLight) then
 							light = light or reference.light
-							if (light and currentRegionSunColor) then
+							if (light) then
 								cachedLight = cachedLight or meshData.light or interop.getDefaultLight()
 								lerpedColor = cachedLight.diffuse * currentRegionSunColor
 
