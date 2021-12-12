@@ -336,11 +336,19 @@ local function onMeshLoaded(e)
 
 	-- Remove the meshes\ prefix.
 	local path = string.sub(e.path, meshesPathPrefixLength + 1, string.len(e.path))
+
+	-- Make sure that the switch node is of the right type.
+	local dayNightSwitchNode = node.children[switchChildIndex] --- @type niSwitchNode
+	if (dayNightSwitchNode.switchIndex == nil) then
+		mwse.log(i18n("logMalformedAssetSwitchNodeIsNotCorrectType", { path, dayNightSwitchNode.runTimeTypeInformation.name }))
+		return
+	end
+
+	-- Create our starter data.
 	local data = interop.createMeshData(path)
 	data.switchChildIndex = switchChildIndex
 
 	-- Get the first child node.
-	local dayNightSwitchNode = node.children[data.switchChildIndex]
 	data.indexOff = getChildByName(dayNightSwitchNode.children, "off") or 1
 	data.indexOn = getChildByName(dayNightSwitchNode.children, "on") or 2
 	data.indexInDay = getChildByName(dayNightSwitchNode.children, "int-day") or 3

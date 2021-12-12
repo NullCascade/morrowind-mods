@@ -1,5 +1,6 @@
 return {
 	["logConvertingLegacyMesh"] = "[Glow In The Dahrk] Converting legacy mesh: %s",
+	["logMalformedAssetSwitchNodeIsNotCorrectType"] = "[Glow In The Dahrk] ERROR: Encountered malformed mesh '%s'. NightDaySwitch is of type '%s' and not 'NiSwichNode'.",
 	["mcm.addInteriorLights.description"] = "When enabled, light will be added around windows when they are lit from the outside.\n\nDefault: On",
 	["mcm.addInteriorLights.label"] = "Add interior lights to windows?",
 	["mcm.addInteriorSunrays.description"] = "When enabled, sunrays will be added around windows when they are lit from the outside.\n\nDefault: On",

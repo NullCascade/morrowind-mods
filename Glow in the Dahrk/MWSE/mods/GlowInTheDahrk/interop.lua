@@ -28,10 +28,11 @@ local supportedObjectTypes = {
 --- @field indexOn number The index to use to turn the source "on".
 --- @field interiorRayIndex number The index of our GitD node that holds interior sunrays.
 --- @field light niLight The base light used by clones.
+--- @field litInteriorWindowDefaultValues table<number, niMaterialProperty> A dictionary of indicies that hold default material information.
 --- @field litInteriorWindowShapesIndexes number[] A list of indicies that hold lit interior window shapes. We will use this list to update material properties.
---- @field litInteriorWindowShapesOffMaterials table<number, niMaterialProperty> A map to the lit interior shape index and its associated off-state material property.
 --- @field supportsLight boolean The mesh supports a light and GitD will try to attach one.
 --- @field switchChildIndex number The index that the nightdayswitch child can be found on.
+--- @field unlitInteriorWindowDefaultValues table<number, niMaterialProperty> A dictionary of indicies that hold default material information.
 --- @field unlitInteriorWindowShapesIndexes number[] A list of indicies that hold unlit interior window shapes. We will use this list to update material properties.
 
 
