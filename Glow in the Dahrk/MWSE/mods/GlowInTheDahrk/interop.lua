@@ -29,9 +29,10 @@ local supportedObjectTypes = {
 --- @field interiorRayIndex number The index of our GitD node that holds interior sunrays.
 --- @field light niLight The base light used by clones.
 --- @field litInteriorWindowShapesIndexes number[] A list of indicies that hold lit interior window shapes. We will use this list to update material properties.
+--- @field litInteriorWindowShapesOffMaterials table<number, niMaterialProperty> A map to the lit interior shape index and its associated off-state material property.
 --- @field supportsLight boolean The mesh supports a light and GitD will try to attach one.
 --- @field switchChildIndex number The index that the nightdayswitch child can be found on.
---- @field unlitInteriorWindowShapesIndexes table number[] A list of indicies that hold unlit interior window shapes. We will use this list to update material properties.
+--- @field unlitInteriorWindowShapesIndexes number[] A list of indicies that hold unlit interior window shapes. We will use this list to update material properties.
 
 
 --- @type table<string, table.GitD.meshData>

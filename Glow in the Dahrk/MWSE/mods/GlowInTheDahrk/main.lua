@@ -117,6 +117,12 @@ local maxUpdatesPerFrame = 10
 
 local colorBlack = niColor.new(0.0, 0.0, 0.0)
 
+local function setColorMinimum(materialProperty, property, color, storedMinimums)
+	local minimum = storedMinimums[property]
+	local floored = { r = math.max(color.r, minimum.r), g = math.max(color.g, minimum.g), b = math.max(color.b, minimum.b) }
+	materialProperty[property] = floored
+end
+
 local function updateReferences(now)
 	-- Bail if we have nothing to update.
 	if (table.empty(trackedReferences)) then
@@ -264,29 +270,35 @@ local function updateReferences(now)
 
 						-- Update window color.
 						if (meshData.litInteriorWindowShapesIndexes) then
-							for _, index in ipairs(meshData.litInteriorWindowShapesIndexes) do
-								local materialProperty = interiorNode.children[index].materialProperty
+							for _, shapeIndex in ipairs(meshData.litInteriorWindowShapesIndexes) do
+								local materialProperty = interiorNode.children[shapeIndex].materialProperty
 								if (materialProperty) then
-									materialProperty.ambient = lerpedColor
-									materialProperty.diffuse = lerpedColor
-									materialProperty.emissive = lerpedColor * dimmer
+									local offMaterialProperty = meshData.litInteriorWindowShapesOffMaterials[shapeIndex]
+									setColorMinimum(materialProperty, "ambient", lerpedColor, offMaterialProperty)
+									setColorMinimum(materialProperty, "diffuse", lerpedColor, offMaterialProperty)
+									setColorMinimum(materialProperty, "emissive", lerpedColor * dimmer, offMaterialProperty)
+									-- mwse.log("[on] Ambient: %s; Diffuse: %s; Emissive: %s", materialProperty.ambient, materialProperty.diffuse, materialProperty.emissive)
 								end
 							end
 						end
+					--[[
 					elseif (index == indexOff and previousIndex ~= indexOff) then
 						local unlitInteriorNode = switchNode.children[indexOff]
 
 						-- Update window color.
 						if (meshData.unlitInteriorWindowShapesIndexes) then
-							for _, index in ipairs(meshData.unlitInteriorWindowShapesIndexes) do
-								local materialProperty = unlitInteriorNode.children[index].materialProperty
+							for _, shapeIndex in ipairs(meshData.unlitInteriorWindowShapesIndexes) do
+								local materialProperty = unlitInteriorNode.children[shapeIndex].materialProperty
 								if (materialProperty) then
-									materialProperty.ambient = currentRegionSunColor
-									materialProperty.diffuse = currentRegionSunColor
-									materialProperty.emissive = colorBlack
+									-- mwse.log("[off-before] Ambient: %s; Diffuse: %s; Emissive: %s", materialProperty.ambient, materialProperty.diffuse, materialProperty.emissive)
+									-- materialProperty.ambient = currentRegionSunColor
+									-- materialProperty.diffuse = currentRegionSunColor
+									-- materialProperty.emissive = colorBlack
+									-- mwse.log("[off] Ambient: %s; Diffuse: %s; Emissive: %s", materialProperty.ambient, materialProperty.diffuse, materialProperty.emissive)
 								end
 							end
 						end
+					--]]
 					end
 				end
 			end
@@ -428,7 +440,7 @@ local function onMeshLoaded(e)
 				end
 			end
 		end
-		if (#litInteriorWindowShapesIndexes > 0) then
+		if (not table.empty(litInteriorWindowShapesIndexes)) then
 			data.litInteriorWindowShapesIndexes = litInteriorWindowShapesIndexes
 		end
 
@@ -454,14 +466,23 @@ local function onMeshLoaded(e)
 
 	-- We also need to know about unlit interior windows.
 	if (#dayNightSwitchNode.children >= data.indexOff) then
+		-- While we're at it, map texture paths to their material properties.
+		local textureMaterialPropertyMatch = {}
+
 		-- See what shapes we will later want to update when coloring nighttime windows.
 		local unlitInteriorWindowShapesIndexes = {}
 		for i, shape in ipairs(dayNightSwitchNode.children[data.indexOff].children) do
 			if (shape) then
-				local texturingProperty = shape.texturingProperty
-				local materialProperty = shape.materialProperty
+				local texturingProperty = shape.texturingProperty --- @type niTexturingProperty
+				local materialProperty = shape.materialProperty --- @type niMaterialProperty
 				if (texturingProperty and materialProperty and shape:isInstanceOfType(tes3.niType.NiTriShape)) then
 					table.insert(unlitInteriorWindowShapesIndexes, i)
+
+					-- Store the relationship between a texture and the material property.
+					local texture = texturingProperty.baseMap and texturingProperty.baseMap.texture --- @type niSourceTexture
+					if (texture and texture.fileName) then
+						textureMaterialPropertyMatch[texture.fileName:lower()] = materialProperty
+					end
 
 					-- If it is an old mesh try to fix up windows.
 					if (data.legacyMesh) then
@@ -488,10 +509,33 @@ local function onMeshLoaded(e)
 				end
 			end
 		end
-		if (#unlitInteriorWindowShapesIndexes > 0) then
+		if (not table.empty(unlitInteriorWindowShapesIndexes)) then
 			data.unlitInteriorWindowShapesIndexes = unlitInteriorWindowShapesIndexes
 		end
+
+		-- Go through and update lit indecies to store the default material property for each index.
+		if (data.litInteriorWindowShapesIndexes) then
+			local litInteriorWindowShapesOffMaterials = {}
+			local interiorLights = dayNightSwitchNode.children[data.indexInDay]
+			for i, shape in ipairs(interiorLights.children) do
+				if (shape) then
+					local texturingProperty = shape.texturingProperty --- @type niTexturingProperty
+					local materialProperty = shape.materialProperty --- @type niMaterialProperty
+					if (texturingProperty and materialProperty and shape:isInstanceOfType(tes3.niType.NiTriShape)) then
+						local texture = texturingProperty.baseMap and texturingProperty.baseMap.texture --- @type niSourceTexture
+						if (texture and texture.fileName) then
+							litInteriorWindowShapesOffMaterials[i] = textureMaterialPropertyMatch[texture.fileName:lower()]--:clone()
+						end
+					end
+				end
+			end
+			if (not table.empty(litInteriorWindowShapesOffMaterials)) then
+				data.litInteriorWindowShapesOffMaterials = litInteriorWindowShapesOffMaterials
+			end
+		end
 	end
+
+	-- mwse.log("%s = %s", path, json.encode(data, { indent = true }))
 end
 event.register("meshLoaded", onMeshLoaded)
 
