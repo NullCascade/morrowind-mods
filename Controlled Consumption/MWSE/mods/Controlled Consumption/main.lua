@@ -164,16 +164,16 @@ local function logUI(e)
 	local multiMenu = e.element
 
 	-- Find the UI element that holds the sneak icon indicator.
-	local bottomLeftBar = multiMenu:findChild(tes3ui.registerID("MenuMulti_sneak_icon")).parent
+	local bottomLeftBar = multiMenu:findChild("MenuMulti_sneak_icon").parent
 
 	-- Create an icon that matches the sneak icon's look.
-	local alchemyFrame = bottomLeftBar:createThinBorder({})
+	local alchemyFrame = bottomLeftBar:createThinBorder({ id = "MenuMulti_ControlledConsumption_frame" })
 	alchemyFrame.visible = false
 	alchemyFrame.autoHeight = true
 	alchemyFrame.autoWidth = true
 	alchemyFrame.paddingAllSides = 2
 	alchemyFrame.borderAllSides = 2
-	alchemyFrame:createImage({ path = "icons/nc/potions_blocked.tga" })
+	alchemyFrame:createImage({ id = "MenuMulti_ControlledConsumption_image", path = "icons/nc/potions_blocked.tga" })
 
 	-- Expose the frame for other mods to muck with.
 	shared.alchemyFrame = alchemyFrame
