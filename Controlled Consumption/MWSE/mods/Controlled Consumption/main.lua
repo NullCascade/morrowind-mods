@@ -181,7 +181,7 @@ local function logUI(e)
 		shared.alchemyFrame = nil
 	end)
 end
-event.register("uiCreated", logUI, { filter = "MenuMulti" })
+event.register("uiActivated", logUI, { filter = "MenuMulti" })
 
 -- 
 -- Handle mod config menu.

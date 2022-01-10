@@ -78,7 +78,7 @@ local function rebindExitButton(e)
 	-- Set our new event handler.
 	exitButton:register("mouseClick", onExitButtonClicked)
 end
-event.register("uiCreated", rebindExitButton, { filter = "MenuOptions" })
+event.register("uiActivated", rebindExitButton, { filter = "MenuOptions" })
 
 -- Allow quitting with alt-F4
 local function onAltF4(e)
