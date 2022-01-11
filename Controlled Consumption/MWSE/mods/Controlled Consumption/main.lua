@@ -171,17 +171,30 @@ local function logUI(e)
 	alchemyFrame.visible = false
 	alchemyFrame.autoHeight = true
 	alchemyFrame.autoWidth = true
-	alchemyFrame.paddingAllSides = 2
 	alchemyFrame.borderAllSides = 2
-	alchemyFrame:createImage({ id = "MenuMulti_ControlledConsumption_image", path = "icons/nc/potions_blocked.tga" })
+
+	local alchemyImage = alchemyFrame:createImage({ id = "MenuMulti_ControlledConsumption_image", path = "icons/nc/potions_blocked.tga" })
+	alchemyImage.borderAllSides = 2
+	alchemyImage.imageScaleX = 1.0
+	alchemyImage.imageScaleY = 1.0
+	alchemyImage.scaleMode = true
+	alchemyImage.imageFilter = true
 
 	-- Expose the frame for other mods to muck with.
 	shared.alchemyFrame = alchemyFrame
+	shared.alchemyImage = alchemyImage
 	alchemyFrame:register("destroy", function()
 		shared.alchemyFrame = nil
+		shared.alchemyImage = nil
 	end)
 end
 event.register("uiActivated", logUI, { filter = "MenuMulti" })
+
+--
+-- HUD Customizer compatibility
+--
+
+dofile("Controlled Consumption.hudCustomizer")
 
 -- 
 -- Handle mod config menu.
