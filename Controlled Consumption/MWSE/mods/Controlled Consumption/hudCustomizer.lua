@@ -28,8 +28,8 @@ local function onInitialized()
 		name = "Controlled Consumption",
 		id = "MenuMulti_ControlledConsumption_frame",
 		defaults = {
-			positionX = 0.5,
-			positionY = 0.5,
+			positionX = 0.108,
+			positionY = 0.994,
 			height = 32,
 			width = 32,
 			visible = false,
