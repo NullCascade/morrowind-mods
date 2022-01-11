@@ -28,7 +28,7 @@ local function onInitialized()
 		name = "Controlled Consumption",
 		id = "MenuMulti_ControlledConsumption_frame",
 		defaults = {
-			positionX = 0.108,
+			positionX = 0.135,
 			positionY = 0.994,
 			height = 32,
 			width = 32,
@@ -37,7 +37,7 @@ local function onInitialized()
 		options = {
 			position = true,
 			size = true,
-			visibility = true,
+			visibility = false,
 		},
 		sizeUpdated = function(e)
 			local frame = e.element
