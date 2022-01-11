@@ -1,7 +1,7 @@
 =====================================================================================
                                Controlled  Consumption                               
                                  Author: NullCascade                                 
-                                    Version 1.3.1                                    
+                                    Version 1.3.2                                    
 =====================================================================================
 
  INDEX:
@@ -73,6 +73,10 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.3.2
+    * Internal fixes and improvements. No functionality changes.
+	* Added support for Sephumbra's HUD Customizer.
 
  1.3.1
     * Fixed issue with legacy interop library.
