@@ -12,7 +12,7 @@ function this.onConfigCreate(container)
 	container:getTopLevelParent():updateLayout()
 
 	-- No real config. Just a description.
-	local description = container:createLabel({ text = "This module replicates the alchemy restrictions in Oblivion. The player may have 4 active potions at any one time." })
+	local description = container:createLabel({ text = "This module replicates the alchemy restrictions in Oblivion. The player may have 4 active potions or ingredients at any one time." })
 	description.layoutWidthFraction = 1.0
 	description.wrapText = true
 end
@@ -43,7 +43,7 @@ function this.onEquip(e)
 
 	-- Do we already have a potion active?
 	if (#cooldownTimers >= potionLimit) then
-		tes3.messageBox("You may not have more than %d potions active at once.", #cooldownTimers)
+		tes3.messageBox("You may not have more than %d potions or ingredients active at once.", #cooldownTimers)
 		return false
 	end
 

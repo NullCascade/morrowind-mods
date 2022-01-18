@@ -12,7 +12,7 @@ function this.onConfigCreate(container)
 	container:getTopLevelParent():updateLayout()
 
 	-- No real config. Just a description.
-	local description = container:createLabel({ text = "This module follows the same rules as vanilla NPCs follow. Only one potion can be consumed at a time, and five seconds must pass before another one can be consumed." })
+	local description = container:createLabel({ text = "This module follows the same rules as vanilla NPCs follow. Only one potion or ingredient can be consumed at a time, and five seconds must pass before another one can be consumed." })
 	description.layoutWidthFraction = 1.0
 	description.wrapText = true
 end
@@ -40,7 +40,7 @@ function this.onEquip(e)
 
 	-- Do we already have a potion active?
 	if (consumeCooldownTimer and consumeCooldownTimer.state == timer.active) then
-		tes3.messageBox("You must wait another %d seconds before drinking another potion.", consumeCooldownTimer.timeLeft * 3600 / tes3.getGlobal("timescale"))
+		tes3.messageBox("You must wait another %d seconds before consuming another potion or ingredient.", consumeCooldownTimer.timeLeft * 3600 / tes3.getGlobal("timescale"))
 		return false
 	end
 

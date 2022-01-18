@@ -23,13 +23,15 @@ function this.basicPotionChecks(equipEvent)
 	end
 
 	-- We only care about alchemy items.
-	if (potion.objectType ~= tes3.objectType.alchemy) then
+	if (potion.objectType ~= tes3.objectType.alchemy) and (potion.objectType ~= tes3.objectType.ingredient) then
 		return false
 	end
 
 	-- We only care if the potion is self-targetting.
-	if (this.isPotionSelfTargeting(potion) == false) then
-		return false
+	if potion.objectType == tes3.objectType.alchemy then
+		if (this.isPotionSelfTargeting(potion) == false) then
+			return false
+		end
 	end
 
 	-- Make sure we weren't told to ignore the next event.
