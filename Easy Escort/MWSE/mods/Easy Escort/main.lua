@@ -84,7 +84,7 @@ local function validCompanionCheck(actor)
 	local macp = tes3.mobilePlayer
 
 	-- The player shouldn't count as his own companion.
-	if (actor == tes3.mobilePlayer) then
+	if (actor == macp) then
 		return false
 	end
 
@@ -111,8 +111,22 @@ local function validCompanionCheck(actor)
 	end
 
 	-- Don't teleport companions above the ground if they can't fly.
-	if (macp.isUnderwater and not actor.waterBreathing > 0) then
+	if (macp.underwater and not actor.waterBreathing > 0) then
 		return false
+	end
+
+	-- Respect the StayOutside variable.
+	local playerCell = macp.reference.cell
+	local playerCellIsRealInterior = (playerCell.isInterior and not playerCell.behavesAsExterior)
+	if (playerCellIsRealInterior) then
+		local actorCell = actor.reference.cell
+		local actorCellIsRealInterior = (actorCell.isInterior and not actorCell.behavesAsExterior)
+		if (playerCellIsRealInterior ~= actorCellIsRealInterior) then
+			local context = actor.reference.context
+			if (context and (context.stayOutside or 0) == 1) then
+				return false
+			end
+		end
 	end
 
 	return true
@@ -131,12 +145,10 @@ local function forceFollowFriendlyActors()
 			if (currentCell.isInterior) then
 				if (reference.cell ~= currentCell or reference.position:distance(tes3.player.position) > config.followDistance) then
 					tes3.positionCell(positionParams)
-				else
 				end
 			else
 				if (reference.position:distance(tes3.player.position) > config.followDistance) then
 					tes3.positionCell(positionParams)
-				else
 				end
 			end
 		end
