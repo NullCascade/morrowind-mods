@@ -343,7 +343,7 @@ local function extraTooltipEarly(e)
 			end
 		-- Soul gem capacity
 		elseif e.object.isSoulGem then
-			if (e.itemData and e.itemData.soul) then
+			if (e.itemData and e.itemData.soul and e.itemData.soul.soul) then
 				local soulValue = e.itemData.soul.soul
 				labelFormatted(e.tooltip, string.format("%s: %u / %u", common.i18n("tooltip.soulCapacity"), soulValue, e.object.soulGemCapacity))
 
