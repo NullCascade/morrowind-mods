@@ -77,6 +77,8 @@ return {
 	["mcm.component.saveLoad.label"] = "Enable save/load menu component?",
 	["mcm.component.serviceSpells.description"] = "Features:\n- Spells are sorted alphabetically.",
 	["mcm.component.serviceSpells.label"] = "Enable spell services menu component?",
+	["mcm.component.spellmaking.description"] = "Features:\n- Effects in the magic list are given icons.",
+	["mcm.component.spellmaking.label"] = "Enable spellmaking menu component?",
 	["mcm.component.stat.description"] = "Features:\n- Tooltips display the sources causing benefits or penalties to attributes and abilities.\n- Tooltips display current faction reputation, as well as the value needed to advance.",
 	["mcm.component.stat.label"] = "Enable stat menu component?",
 	["mcm.component.textInput.description"] = "Features:\n- Use Control+C to copy all text leading up to the input cursor (|) to the clipboard.\n- Use Control+Alt+C to copy all text after the text input cursor to the clipboard.\n- Use Control+V to insert the clipboard text at the position of the text input cursor.\n- Use Home/End to move the cursor to the start/end of the input.\n- Use Control+Backspace to delete the word before the cursor.\n- Use Control+Delete to delete the word after the cursor.\n- Use the arrow keys while holding control to quickly jump to the previous/next words.",

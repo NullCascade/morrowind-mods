@@ -51,6 +51,7 @@ local defaultConfig = {
 		rest = true,
 		saveLoad = true,
 		serviceSpells = true,
+		spellmaking = true,
 		stat = true,
 		textInput = true,
 		tooltip = true,
@@ -159,6 +160,9 @@ local function onInitialized()
 	end
 	if (config.components.serviceSpells) then
 		dofile("UI Expansion.MenuServiceSpells")
+	end
+	if (config.components.spellmaking) then
+		dofile("UI Expansion.MenuSpellmaking")
 	end
 	if (config.components.stat) then
 		dofile("UI Expansion.MenuStat")
