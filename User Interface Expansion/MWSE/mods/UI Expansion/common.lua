@@ -75,7 +75,13 @@ function common.isTextInputActive()
 	if (not wc) then
 		return false
 	end
-	return wc.menuController.inputController.textInputFocus ~= nil
+
+	local focus = wc.menuController.inputController.textInputFocus
+	if (focus == nil) then
+		return false
+	end
+
+	return focus.type == "textInput"
 end
 
 ----------------------------------------------------------------------------------------------------
