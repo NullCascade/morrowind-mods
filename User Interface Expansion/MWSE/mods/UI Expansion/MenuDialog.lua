@@ -16,9 +16,6 @@ local GUI_Palette_TopicUnique = common.getColor(common.config.dialogueTopicUniqu
 -- Dialogue: Adds colorization to show what topics provide new and unique responses.
 ----------------------------------------------------------------------------------------------------
 
--- Adds number prefix to Choice answers and makes them working pressing the number key.
-local answers = {}
-
 --- Check to see if the player has used a number key to select a response.
 --- @param e keyDownEventData
 local function checkForAnswerHotkey(e)
@@ -36,31 +33,27 @@ local function checkForAnswerHotkey(e)
 		return
 	end
 
-	-- Make sure we have answers.
-	if not answers then
-		return
-	end
-	if #answers <= 0 then
-		return
-	end
-
 	local key = tes3.scanCodeToNumber[e.keyCode]
 	if not key then
 		return
 	end
 
-	local answer = answers[key]
-	if not answer then
+	-- Do we have any answers?
+	local firstAnswer = topMenu:findChild("MenuDialog_answer_block")
+	if not firstAnswer then
 		return
 	end
 
-	if answer then
-		local s = string.match(answer.text, "^%d+%. (.+)$")
-		if not s then
-			s = answer.txt
+	-- Get a lsit of answers.
+	local answers = {}
+	for _, child in ipairs(firstAnswer.parent.children) do
+		if (child.id == firstAnswer.id) then
+			table.insert(answers, child)
 		end
-		tes3.messageBox(s)
-		answers = {}
+	end
+
+	local answer = answers[key]
+	if answer then
 		answer:triggerEvent("mouseClick")
 	end
 end
@@ -81,7 +74,6 @@ local function updateTopicsList(e)
 	if (e.source) then
 		-- Were we forced out of dialogue?
 		if (tes3ui.findMenu(GUI_ID_MenuDialog) == nil) then
-			answers = {}
 			return
 		end
 
@@ -163,7 +155,6 @@ local function update()
 					answerIndex = answerIndex + 1
 					if not string.match(oldText, "^%d+") then
 						node.text = string.format("%d. %s", answerIndex, oldText)
-						answers[answerIndex] = node
 					end
 				end
 				i = i + 1
@@ -202,11 +193,7 @@ local function onDialogueMenuActivated(e)
 		updateTopicsList(preUpdateEventData)
 	end
 	e.element:registerAfter("preUpdate", firstPreUpdate)
-
-	-- special as I am not able to find GUI_ID_MenuDialog_answer_block in pairs(children) on greetings /abot
-	answers = {}
 	e.element:registerAfter("update", update)
-
 end
 event.register("uiActivated", onDialogueMenuActivated, { filter = "MenuDialog" })
 
