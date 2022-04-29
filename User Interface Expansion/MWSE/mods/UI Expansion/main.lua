@@ -21,6 +21,7 @@ local defaultConfig = {
 	displayWeekday = true,
 	displayRestTargetHour = true,
 	changeMapModeOnCellChange = true,
+	displayPlayerDialogueChoices = true,
 	maxWait = 1,
 	consoleHistoryLimit = 10,
 	keybindTakeAll = { keyCode = tes3.scanCode.space, isShiftDown = false, isControlDown = true, isAltDown = false },

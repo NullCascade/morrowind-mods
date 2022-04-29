@@ -209,3 +209,33 @@ local function onDialogueMenuActivated(e)
 
 end
 event.register("uiActivated", onDialogueMenuActivated, { filter = "MenuDialog" })
+
+local function displayPlayerChoices()
+	if (not common.config.displayPlayerDialogueChoices) then
+		return
+	end
+
+	local menu = tes3ui.findMenu("MenuDialog")
+	if not menu then
+		return
+	end
+
+	local block = menu:findChild("MenuDialog_answer_block")
+	if not block then
+		return
+	end
+
+	for _, child in pairs(block.parent.children) do
+		if child.name == "MenuDialog_answer_block" then
+			child:registerBefore("mouseClick", function(e)
+				tes3.messageBox("%s: %s", tes3.player.object.name, child.text)
+
+				-- Find our newly created element and recolor it.
+				local dialogueElements = block.parent.children
+				local createdElement = dialogueElements[#dialogueElements]
+				createdElement.color = tes3ui.getPalette("journal_finished_quest_over_color")
+			end)
+		end
+	end
+end
+event.register("postInfoResponse", displayPlayerChoices)

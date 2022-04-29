@@ -7,7 +7,7 @@ local function registerModConfig()
 
 	local creditsText = common.i18n("core.modName") .. " " .. common.i18n("core.versionString") .. "\n\n" ..
 	                    common.i18n("mcm.credits") ..
-	                    "\n  Programming: NullCascade, Hrnchamd, Petethegoat, Jiopsi, Remiros, Mort, Wix, abot, Necrolesian" ..
+	                    "\n  Programming: NullCascade, Hrnchamd, Petethegoat, Jiopsi, Remiros, Mort, Wix, abot, Necrolesian, Greatness7" ..
 	                    "\n  Translations: Daichix, Fesswood, Monsterzeichner, and Google Translate" ..
 	                    "\n  Concepts and Testing: Morrowind Modding Community Discord" ..
 	                    "\n  Colored Magic School Icons: R-Zero" .. "\n  Inventory Filter Icons: Remiros" ..
@@ -144,6 +144,18 @@ local function registerModConfig()
 				description = common.i18n("mcm.consoleHistoryLimit.description"),
 				variable = mwse.mcm.createTableVariable({ id = "consoleHistoryLimit", converter = tonumber, table = common.config }),
 				numbersOnly = true,
+			})
+		end
+
+		-- Category: Dialogue
+		do
+			local category = pageFeatures:createCategory({ label = common.i18n("mcm.category.dialogue") })
+
+			-- Display player dialogue choices.
+			category:createOnOffButton({
+				label = common.i18n("mcm.displayPlayerDialogueChoices.label"),
+				description = common.i18n("mcm.displayPlayerDialogueChoices.description"),
+				variable = mwse.mcm.createTableVariable({ id = "displayPlayerDialogueChoices", table = common.config }),
 			})
 		end
 
