@@ -452,8 +452,8 @@ local function extraTooltipLate(e)
 	local element = e.tooltip:getContentElement()
 	local children = element.children
 
-	-- If our divider isn't the last element, then something else was added, like flavor text.
-	if children[#children].id ~= GUI_ID_TooltipExtraDivider then
+	-- If neither divider nor icon bar isn't the last element, then something else was added, like flavor text.
+	if children[#children].id ~= GUI_ID_TooltipExtraDivider and children[#children].id ~= GUI_ID_TooltipIconBar then
 		local divide = element:findChild(GUI_ID_TooltipExtraDivider)
 		if (divide) then
 			divide.visible = true
