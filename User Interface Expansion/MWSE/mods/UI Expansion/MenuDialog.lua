@@ -215,7 +215,7 @@ local function displayPlayerChoices()
 	for _, child in pairs(block.parent.children) do
 		if child.name == "MenuDialog_answer_block" then
 			child:registerBefore("mouseClick", function(e)
-				tes3.messageBox("%s: %s", tes3.player.object.name, child.text)
+				tes3.messageBox(child.text)
 
 				-- Find our newly created element and recolor it.
 				local dialogueElements = block.parent.children
