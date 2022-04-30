@@ -38,14 +38,10 @@ local function onUIActivated(e)
 
 		local icon = effectBlock:createImage({ id = MenuSpellmaking_EffectIcon, path = string.format("icons\\%s", effect.icon) })
 		icon:setPropertyObject(effectProperty, effect)
-		-- icon:register("mouseClick", MenuSpellmaking_Effect_Click)
-		-- icon:register("help", MenuSpellmaking_Effect_Help)
 
 		local name = effectBlock:createTextSelect({ id = MenuSpellmaking_EffectName, text = effect.name })
 		name.borderLeft = 2
 		name:setPropertyObject(effectProperty, effect)
-		-- name:register("mouseClick", MenuSpellmaking_Effect_Click)
-		-- name:register("help", MenuSpellmaking_Effect_Help)
 	end
 
 	e.element:updateLayout()

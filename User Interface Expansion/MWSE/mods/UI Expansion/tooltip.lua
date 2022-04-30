@@ -62,7 +62,7 @@ end
 --- Creates a label with a specific size.
 --- @param tooltip tes3uiElement
 --- @param label string
---- @param uiid number|string
+--- @param uiid number|string?
 --- @return tes3uiElement
 local function labelFormatted(tooltip, label, uiid)
 	local block = tooltip:createLabel({ text = label, id = uiid })

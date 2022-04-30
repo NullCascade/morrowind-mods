@@ -69,8 +69,8 @@ function commonMagic.searchSubList(titleElement, listElement, isSpellFilter)
 	for _, element in ipairs(listElement.children) do
 		table.insert(columnElements, element.children)
 	end
-	
-	local filterName = titleElement:getTopLevelParent().name == "MenuMagic" and "magic" or "magicSelect"
+
+	local filterName = titleElement:getTopLevelMenu().name == "MenuMagic" and "magic" or "magicSelect"
 
 	-- Go through and compare each element in listElement to our filter.
 	local matchCount = 0
@@ -185,7 +185,7 @@ function commonMagic.createMagicFilterInterface(params)
 		},
 		icon = "icons/ui_exp/magic_alteration.tga",
 	})
-	
+
 	magicFilters:addFilter({
 		key = "conjuration",
 		callback = function(e)
@@ -197,7 +197,7 @@ function commonMagic.createMagicFilterInterface(params)
 		},
 		icon = "icons/ui_exp/magic_conjuration.tga",
 	})
-	
+
 	magicFilters:addFilter({
 		key = "destruction",
 		callback = function(e)
@@ -209,7 +209,7 @@ function commonMagic.createMagicFilterInterface(params)
 		},
 		icon = "icons/ui_exp/magic_destruction.tga",
 	})
-	
+
 	magicFilters:addFilter({
 		key = "illusion",
 		callback = function(e)
@@ -221,7 +221,7 @@ function commonMagic.createMagicFilterInterface(params)
 		},
 		icon = "icons/ui_exp/magic_illusion.tga",
 	})
-	
+
 	magicFilters:addFilter({
 		key = "mysticism",
 		callback = function(e)
@@ -233,7 +233,7 @@ function commonMagic.createMagicFilterInterface(params)
 		},
 		icon = "icons/ui_exp/magic_mysticism.tga",
 	})
-	
+
 	magicFilters:addFilter({
 		key = "restoration",
 		callback = function(e)

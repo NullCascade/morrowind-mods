@@ -55,7 +55,7 @@ end
 
 --- Performs a save, without validity checks.
 --- @param saveName string
---- @param saveFilename string
+--- @param saveFilename string?
 local function Save(saveName, saveFilename)
 	tes3ui.findMenu(save_menu_id):destroy()
 	tes3ui.leaveMenuMode()
@@ -68,7 +68,7 @@ end
 
 --- Performs a save, with validity checks.
 --- @param saveName string
---- @param saveFilename string
+--- @param saveFilename string?
 local function TrySave(saveName, saveFilename)
 	if (CanSave(saveName)) then
 		if (SaveExists(saveName, saveFilename)) then
@@ -89,13 +89,14 @@ end
 
 --- Updates menu to filter out saves for a character.
 --- @param scrollElement tes3uiElement
---- @param characterName string
+--- @param characterName string?
 --- @return boolean filtered Returns true if we filtered successfully, false if not.
 local function filterGameFiles(scrollElement, characterName)
 	local scrollKids = scrollElement:getContentElement().children
 
 	local foundMatchingSave = false
 	for i = 1, #scrollKids do
+		--- @type tes3gameFile
 		local save = scrollKids[i]:getPropertyObject("MenuLoad_file", "tes3gameFile") or
 		             scrollKids[i]:getPropertyObject("MenuSave_file", "tes3gameFile")
 
@@ -160,7 +161,7 @@ local function MakeCharacterList(scrollElement, characterSelectElement)
 	local characters = {}
 
 	for i = 1, #scrollKids do
-		local save = scrollKids[i]:getPropertyObject("MenuLoad_file", "tes3gameFile")
+		local save = scrollKids[i]:getPropertyObject("MenuLoad_file", "tes3gameFile") --- @type tes3gameFile
 
 		-- Save game button will not have a game save property.
 		if (save) then
@@ -178,11 +179,12 @@ local function MakeCharacterList(scrollElement, characterSelectElement)
 end
 
 --- @param scrollElement tes3uiElement
---- @param characterSelectElement tes3uiElement
+--- @param characterSelectElement tes3uiElement?
 local function SetSaveGameEventHandlers(scrollElement, characterSelectElement)
 	local scrollKids = scrollElement:getContentElement().children
 
 	for i = 1, #scrollKids do
+		--- @type tes3gameFile
 		local save = scrollKids[i]:getPropertyObject("MenuLoad_file", "tes3gameFile") or
 		             scrollKids[i]:getPropertyObject("MenuSave_file", "tes3gameFile")
 

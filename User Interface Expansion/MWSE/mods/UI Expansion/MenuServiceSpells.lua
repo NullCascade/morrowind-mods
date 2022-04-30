@@ -24,7 +24,7 @@ end
 --- the effect is known.
 ---
 --- Effects are gathered from primary known spells, racial abilities, and birthsigns.
---- @param mobile tes3mobileActor
+--- @param mobile tes3mobileCreature|tes3mobileNPC|tes3mobilePlayer
 --- @return table<number, boolean>
 local function getKnownEffectsTable(mobile)
 	local knownEffects = {} --- @type table<number, boolean>

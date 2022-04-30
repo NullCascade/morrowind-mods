@@ -34,7 +34,7 @@ local function onKeyDownCopyCut(e)
 	if (e.keyCode == tes3.scanCode.x) then
 		local cutText = string.sub(inputFocusText, copyEnd + 1, #inputFocusText)
 		inputFocus.rawText = cutText
-		inputFocus:getTopLevelParent():updateLayout()
+		inputFocus:getTopLevelMenu():updateLayout()
 	end
 end
 event.register("keyDown", onKeyDownCopyCut, { filter = tes3.scanCode.c })
@@ -58,8 +58,12 @@ local function onKeyDownV(e)
 	-- Make sure the buffer gets cleared so no text makes it to the focused element.
 	menuController.inputController:flushBufferedTextEvents()
 
-	-- Get clipboard text. Remove all instances of `|`. 
+	-- Get clipboard text. Remove all instances of `|`.
 	local clipboardText = os.getClipboardText()
+	if (clipboardText == nil) then
+		return
+	end
+
 	clipboardText = clipboardText and clipboardText:gsub("[|\r]", "")
 	if (not clipboardText or clipboardText == "") then
 		return
@@ -69,7 +73,7 @@ local function onKeyDownV(e)
 	local inputFocusText = inputFocus.rawText
 	local cursorPosition = inputFocusText and string.find(inputFocusText, "|", 1, true) or 1
 	inputFocus.text = string.insert(inputFocusText, clipboardText, cursorPosition - 1)
-	inputFocus:getTopLevelParent():updateLayout()
+	inputFocus:getTopLevelMenu():updateLayout()
 end
 event.register("keyDown", onKeyDownV, { filter = tes3.scanCode.v })
 
@@ -85,7 +89,7 @@ local function onKeyDownHome(e)
 
 	-- Move cursor to the start.
 	inputFocus.rawText = "|" .. inputFocus.rawText:gsub("|", "")
-	inputFocus:getTopLevelParent():updateLayout()
+	inputFocus:getTopLevelMenu():updateLayout()
 end
 event.register("keyDown", onKeyDownHome, { filter = tes3.scanCode.home })
 
@@ -102,7 +106,7 @@ local function onKeyDownEnd(e)
 
 	-- Move cursor to the start.
 	inputFocus.rawText = inputFocus.rawText:gsub("|", "") .. "|"
-	inputFocus:getTopLevelParent():updateLayout()
+	inputFocus:getTopLevelMenu():updateLayout()
 end
 event.register("keyDown", onKeyDownEnd, { filter = tes3.scanCode["end"] })
 
@@ -139,7 +143,7 @@ local function onKeyDownSubstitute(e)
 
 	-- Move cursor to the start.
 	inputFocus.rawText = inputFocus.rawText:gsub(substitution.pattern, substitution.repl)
-	inputFocus:getTopLevelParent():updateLayout()
+	inputFocus:getTopLevelMenu():updateLayout()
 end
 event.register("keyDown", onKeyDownSubstitute, { filter = tes3.scanCode.backspace })
 event.register("keyDown", onKeyDownSubstitute, { filter = tes3.scanCode.delete })

@@ -159,7 +159,7 @@ end
 event.register("itemTileUpdated", onContentTileUpdated, { filter = "MenuContents" })
 
 --- Enable alt-clicking inventory items to transfer it to the contents menu.
---- @param e tes3uiEventData
+--- @param e uiExpansionInventoryTileClickedEventData
 --- @return boolean
 local function onInventoryTileClicked(e)
 	local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
@@ -203,7 +203,7 @@ end
 event.register("UIEX:InventoryTileClicked", onInventoryTileClicked)
 
 --- Enable alt-clicking contents items to transfer it to the inventory menu.
---- @param e tes3uiEventData
+--- @param e uiExpansionInventoryTileClickedEventData
 --- @return boolean
 local function onContentsTileClicked(e)
 	-- If the player is holding the alt key, transfer the item directly.

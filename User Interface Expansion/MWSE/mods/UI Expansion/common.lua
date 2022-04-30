@@ -380,7 +380,7 @@ function uiExFilterFunction:setIconUsage(state)
 end
 
 --- Sets both search text and filters.
---- @param params table
+--- @param params table?
 function uiExFilterFunction:setFiltersExact(params)
 	params = params or {}
 
