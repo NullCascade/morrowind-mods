@@ -1,19 +1,23 @@
 
-if (mwse.buildDate == nil or mwse.buildDate < 20200423) then
+local config = require("Matching Manuscripts.config")
+local i18n = require("Matching Manuscripts.i18n")
+
+if (mwse.buildDate == nil or mwse.buildDate < 20220301) then
 	-- mwse.log("[Matching Manuscripts] Build date of %s does not meet minimum build date of 20200423.", mwse.buildDate)
-	event.register("initialized", function() tes3.messageBox("Matching Manuscripts: Please run mwse-updater.exe.") end)
+	event.register("initialized", function() tes3.messageBox(i18n("updateNeeded")) end)
 	return
 end
 
-local config = require("Matching Manuscripts.config")
-
+--- @type tes3book?
 local lastOpenedBook = nil
+
+--- @param e bookGetTextEventData
 local function saveLastOpenedBook(e)
 	if (not config.enabled) then
 		return
 	end
-	
-	if (e.book.type == 0) then
+
+	if (e.book.type == tes3.bookType.book) then
 		lastOpenedBook = e.book
 	else
 		lastOpenedBook = nil
@@ -21,7 +25,11 @@ local function saveLastOpenedBook(e)
 end
 event.register("bookGetText", saveLastOpenedBook)
 
+--- @type table<string, niSourceTexture>
 local meshPathBookCoverMap = {}
+
+--- @param book tes3book
+--- @return niSourceTexture
 local function getBookCoverTexture(book)
 	if (not config.enabled) then
 		return
@@ -39,7 +47,8 @@ local function getBookCoverTexture(book)
 
 	-- Look for a valid book texture.
 	for node in table.traverse({ book.sceneNode }) do
-		local success, texture = pcall(function() return node:getProperty(0x4).maps[1].texture end)
+		--- @cast node niAVObject
+		local success, texture = pcall(function() return node.texturingProperty.baseMap.texture end)
 		if (success and texture and not string.multifind(texture.fileName:lower(), config.textureBlacklist)) then
 			meshPathBookCoverMap[mesh] = texture
 			return texture
@@ -50,6 +59,7 @@ local function getBookCoverTexture(book)
 	meshPathBookCoverMap[mesh] = false
 end
 
+--- @param e uiActivatedEventData
 local function onShowBookMenu(e)
 	if (not config.enabled) then
 		return
@@ -59,12 +69,13 @@ local function onShowBookMenu(e)
 		local texture = getBookCoverTexture(lastOpenedBook)
 		if (texture) then
 			local bookNif = e.element:findChild("PartNonDragMenu_main").sceneNode
-			bookNif.children[1]:getProperty(4).maps[1].texture = texture
+			bookNif.children[1].texturingProperty.baseMap.texture = texture
 		end
 	end
 end
 event.register("uiActivated", onShowBookMenu, { filter = "MenuBook" })
 
+--- @param e uiActivatedEventData
 local function onShowJournalMenu(e)
 	if (not config.enabled) then
 		return
@@ -74,11 +85,8 @@ local function onShowJournalMenu(e)
 		local texture = tes3.loadSourceTexture(config.journalCover)
 		if (texture) then
 			local bookNif = e.element:findChild("PartNonDragMenu_main").sceneNode
-			bookNif.children[1]:getProperty(4).maps[1].texture = texture
+			bookNif.children[1].texturingProperty.baseMap.texture = texture
 		end
 	end
 end
 event.register("uiActivated", onShowJournalMenu, { filter = "MenuJournal" })
-
--- Handle MCM in another file.
-dofile("Matching Manuscripts.mcm")
