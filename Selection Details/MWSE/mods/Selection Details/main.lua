@@ -320,8 +320,8 @@ local function createInformationPane()
 	local menu = tes3ui.createMenu({ id = "MenuSelectionDetails", fixedFrame = true })
 	menu:destroyChildren()
 	menu.disabled = true
-    menu.absolutePosAlignX = 0
-    menu.absolutePosAlignY = 0
+    menu.absolutePosAlignX = config.anchorToRightSide and 1.0 or 0.0
+    menu.absolutePosAlignY = 0.0
 	menu.borderLeft = 40
 	menu.borderTop = 40
     menu.color = { 0, 0, 0 }

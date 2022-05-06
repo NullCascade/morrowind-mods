@@ -15,6 +15,18 @@ local function registerModConfig()
 		variable = mwse.mcm.createTableVariable({ id = "requireControlKey", table = config }),
 	})
 
+	page:createOnOffButton({
+		label = i18n("mcm.anchorToRightSide.label"),
+		description = i18n("mcm.anchorToRightSide.description"),
+		variable = mwse.mcm.createTableVariable({ id = "anchorToRightSide", table = config }),
+		callback = function()
+			local menu = tes3ui.findMenu("MenuSelectionDetails")
+			if (menu) then
+				menu.absolutePosAlignX = config.anchorToRightSide and 1.0 or 0.0
+			end
+		end
+	})
+
 	-- Finish up.
 	template:register()
 end
