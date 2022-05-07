@@ -158,6 +158,12 @@ end
 local function MakeCharacterList(scrollElement, characterSelectElement)
 	local scrollKids = scrollElement:getContentElement().children
 
+	-- Remove existing characters.
+	local charSelectContentElement = characterSelectElement:getContentElement()
+	while (#charSelectContentElement.children > 2) do
+		charSelectContentElement.children[3]:destroy()
+	end
+
 	local characters = {}
 
 	for i = 1, #scrollKids do
@@ -176,6 +182,8 @@ local function MakeCharacterList(scrollElement, characterSelectElement)
 			SetActive(characterSelectElement, select)
 		end)
 	end
+
+	characterSelectElement:getTopLevelMenu():updateLayout()
 end
 
 --- @param scrollElement tes3uiElement
@@ -193,7 +201,7 @@ local function SetSaveGameEventHandlers(scrollElement, characterSelectElement)
 			-- Add an event so we can delete saves.
 			scrollKids[i]:register("mouseClick", function()
 				local inputController = tes3.worldController.inputController
-				if (inputController:isKeyDown(tes3.scanCode.lShift) or inputController:isKeyDown(tes3.scanCode.rShift)) then
+				if (inputController:isShiftDown()) then
 					tes3.messageBox({
 						message = tes3.findGMST(tes3.gmst.sMessage3).value,
 						buttons = { tes3.findGMST(tes3.gmst.sYes).value, tes3.findGMST(tes3.gmst.sNo).value },
