@@ -1,4 +1,3 @@
-
 local config = require("Selection Details.config")
 local i18n = require("Selection Details.i18n")
 
@@ -192,13 +191,19 @@ local function updateInformationPane(reference)
 	createInfoLabel(scrollContents, i18n("label.cell"), reference.cell.editorName)
 
 	-- Show used meshes/textures.
-	local meshSource, meshPath, bsaFile = getFileSourceWithBSA("meshes\\", baseObject.mesh)
-	createInfoLabel(scrollContents, i18n("label.mesh"), string.format("%s (%s)", getPathRemoveDataFilesPrefix(meshPath), bsaFile or meshSource))
+	local meshSource, meshPath, meshBSAFile = getFileSourceWithBSA("meshes\\", baseObject.mesh)
+	createInfoLabel(scrollContents, i18n("label.mesh"), string.format("%s (%s)", getPathRemoveDataFilesPrefix(meshPath), meshBSAFile or meshSource))
 	for _, texture in ipairs(getAllTexturesUsed(reference.sceneNode)) do
 		indentationLevel = indentationLevel + 1
 		local textureSource, texturePath, bsaFile = getFileSourceWithBSA("textures\\", texture)
 		createInfoLabel(scrollContents, i18n("label.texture"), string.format("%s (%s)", getPathRemoveDataFilesPrefix(texturePath or texture), bsaFile or textureSource or i18n("unknown")))
 		indentationLevel = indentationLevel - 1
+	end
+
+	-- Show icon.
+	if (baseObject.icon) then
+		local iconSource, iconPath, iconBSAFile = getFileSourceWithBSA("icons\\", baseObject.icon)
+		createInfoLabel(scrollContents, i18n("label.icon"), string.format("%s (%s)", getPathRemoveDataFilesPrefix(iconPath), iconBSAFile or iconSource))
 	end
 
 	-- Ownership information
@@ -320,16 +325,16 @@ local function createInformationPane()
 	local menu = tes3ui.createMenu({ id = "MenuSelectionDetails", fixedFrame = true })
 	menu:destroyChildren()
 	menu.disabled = true
-    menu.absolutePosAlignX = config.anchorToRightSide and 1.0 or 0.0
-    menu.absolutePosAlignY = 0.0
+	menu.absolutePosAlignX = config.anchorToRightSide and 1.0 or 0.0
+	menu.absolutePosAlignY = 0.0
 	menu.borderLeft = 40
 	menu.borderTop = 40
-    menu.color = { 0, 0, 0 }
-    menu.alpha = 0.8
+	menu.color = { 0, 0, 0 }
+	menu.alpha = 0.8
 	menu.autoWidth = true
-    menu.autoHeight = true
+	menu.autoHeight = true
 	menu.maxWidth = viewportWidth / 3
-	menu.maxHeight = viewportHeight * (3/4)
+	menu.maxHeight = viewportHeight * (3 / 4)
 	menu.flowDirection = "top_to_bottom"
 
 	menu.visible = false
