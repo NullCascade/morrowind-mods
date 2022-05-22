@@ -300,10 +300,11 @@ local function onConsoleUpdated(e)
 	end
 
 	local console = e.source
-	menu.visible = console.visible
+	
+	local currentReference = console:getPropertyObject("MenuConsole_current_ref") --- @type tes3reference?
+	menu.visible = console.visible and currentReference ~= nil
 
 	if (menu.visible) then
-		local currentReference = console:getPropertyObject("MenuConsole_current_ref") --- @type tes3reference?
 		if (currentReference ~= previousSelectedReference) then
 			previousSelectedReference = currentReference
 			updateInformationPane(currentReference)
