@@ -344,7 +344,12 @@ local function createInformationPane()
 end
 event.register(tes3.event.initialized, createInformationPane)
 
-local function onConsoleActivated()
+--- @param e uiActivatedEventData
+local function onConsoleActivated(e)
+	if (not e.newlyCreated) then
+		return
+	end
+
 	local console = tes3ui.findMenu("MenuConsole")
 	console:registerAfter("update", onConsoleUpdated)
 end
