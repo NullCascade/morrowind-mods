@@ -291,29 +291,11 @@ local function updateInformationPane(reference)
 	menu.visible = true
 end
 
---- @type tes3reference?
-local previousSelectedReference = nil
-
---- @param e tes3uiEventData
-local function onConsoleUpdated(e)
-	local menu = tes3ui.findMenu("MenuSelectionDetails")
-	if (not menu) then
-		return
+local function focusConsole()
+	local console = tes3ui.findMenu("MenuConsole")
+	if (console) then
+		tes3ui.moveMenuToFront(console)
 	end
-
-	local console = e.source
-	
-	local currentReference = console:getPropertyObject("MenuConsole_current_ref") --- @type tes3reference?
-	menu.visible = console.visible and currentReference ~= nil
-
-	if (menu.visible) then
-		if (currentReference ~= previousSelectedReference) then
-			previousSelectedReference = currentReference
-			updateInformationPane(currentReference)
-		end
-	end
-
-	menu:updateLayout()
 end
 
 local function createInformationPane()
@@ -340,19 +322,66 @@ local function createInformationPane()
 	menu.maxHeight = viewportHeight * (3 / 4)
 	menu.flowDirection = "top_to_bottom"
 
+	-- When this menu is focused, force focus to the console.
+	-- It is already in focus so we need to call the function manually once.
+	menu:register("focus", focusConsole)
+	focusConsole()
+
 	menu.visible = false
+end
+
+local function destroySelectionPane()
+	local menu = tes3ui.findMenu("MenuSelectionDetails")
+	if (not menu) then
+		return
+	end
+
+	menu:destroy()
+	menu = nil
+end
+
+--- @param e consoleReferenceChangedEventData
+local function onConsoleReferenceChanged(e)
+	local console = tes3ui.findMenu("MenuConsole")
+	if (not console) then
+		return
+	end
+
+	local menu = tes3ui.findMenu("MenuSelectionDetails")
+	if (not menu) then
+		return
+	end
+
+	if (menu.visible) then
+		updateInformationPane(e.reference)
+	end
 
 	menu:updateLayout()
 end
-event.register(tes3.event.initialized, createInformationPane)
+event.register(tes3.event.consoleReferenceChanged, onConsoleReferenceChanged)
 
+--- @param e tes3uiEventData
+local function consoleMenuUpdated(e)
+	local menu = tes3ui.findMenu("MenuSelectionDetails")
+	if (not menu) then
+		return
+	end
+
+	-- Toggle visibility.
+	local console = e.source
+	local currentReference = tes3ui.getConsoleReference()
+	menu.visible = console.visible and currentReference ~= nil
+end
+
+--- Destroy our menu when the console is destroyed.
 --- @param e uiActivatedEventData
 local function onConsoleActivated(e)
 	if (not e.newlyCreated) then
 		return
 	end
 
-	local console = tes3ui.findMenu("MenuConsole")
-	console:registerAfter("update", onConsoleUpdated)
+	createInformationPane()
+	e.element:registerAfter("update", consoleMenuUpdated)
+	e.element:registerAfter("destroy", destroySelectionPane)
 end
 event.register(tes3.event.uiActivated, onConsoleActivated, { filter = "MenuConsole"})
