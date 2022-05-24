@@ -281,6 +281,8 @@ local function updateInformationPane(reference)
 		end)
 	end
 
+	event.trigger("selectionDetailsUpdated", { element = scrollContents, reference = reference })
+
 	-- Hide the scroll bar if it isn't needed.
 	local scrollBar = scrollPane:findChild("PartScrollPane_vert_scrollbar")
 	menu:updateLayout()
