@@ -9,13 +9,13 @@ local function registerModConfig()
 
 	page:createOnOffButton({
 		label = "Enable file monitoring?",
-		description = "...",
+		description = "If on, the mod will scan a given directory for new json packages to execute.",
 		variable = mwse.mcm.createTableVariable({ id = "enableFileMonitoring", table = config }),
 	})
 
 	page:createTextField({
-		label = "Dictory:",
-		description = "...",
+		label = "Directory:",
+		description = "The file to monitor for new json packages. After being read, a package will be automatically deleted.",
 		variable = mwse.mcm.createTableVariable({
 			id = "commandDir",
 			table = config,
@@ -24,7 +24,7 @@ local function registerModConfig()
 
 	page:createOnOffButton({
 		label = "Enable TCP connections?",
-		description = "...",
+		description = "If on, the mod will listen for json packages sent over TCP.",
 		variable = mwse.mcm.createTableVariable({ id = "enableNetworking", table = config }),
 	})
 
