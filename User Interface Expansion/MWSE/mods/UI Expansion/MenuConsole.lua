@@ -36,7 +36,7 @@ end
 --- Initializes the lua sandbox.
 local function sandboxInit()
 	setmetatable(sandbox, { __index = _G })
-	sandbox.print = tes3ui.logToConsole
+	sandbox.print = tes3ui.log
 	sandbox.cls = clearConsole
 	event.trigger("UIEXP:sandboxConsole", { sandbox = sandbox })
 end
@@ -60,7 +60,7 @@ local function onSubmitCommand()
 	inputBox.text = ""
 
 	if (luaMode) then
-		tes3ui.logToConsole(text, true)
+		tes3ui.log(text, true)
 	end
 
 	local context = (luaMode and "lua" or "mwscript")
@@ -91,13 +91,13 @@ local function onSubmitCommand()
 							for i = 2, #results do
 								values[i - 1] = tostring(results[i])
 							end
-							tes3ui.logToConsole(string.format("> %s", table.concat(values, ", ")))
+							tes3ui.log(string.format("> %s", table.concat(values, ", ")))
 						end
 					else
-						tes3ui.logToConsole(results[2])
+						tes3ui.log(results[2])
 					end
 				else
-					tes3ui.logToConsole(message)
+					tes3ui.log(message)
 				end
 			end
 		else
