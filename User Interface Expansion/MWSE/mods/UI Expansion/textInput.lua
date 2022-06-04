@@ -36,6 +36,9 @@ local function onKeyDownCopyCut(e)
 		inputFocus.rawText = cutText
 		inputFocus:getTopLevelMenu():updateLayout()
 	end
+
+	-- Trigger a key event for the input.
+	inputFocus:triggerEvent("keyPress")
 end
 event.register("keyDown", onKeyDownCopyCut, { filter = tes3.scanCode.c })
 event.register("keyDown", onKeyDownCopyCut, { filter = tes3.scanCode.x })
@@ -74,6 +77,9 @@ local function onKeyDownV(e)
 	local cursorPosition = inputFocusText and string.find(inputFocusText, "|", 1, true) or 1
 	inputFocus.text = string.insert(inputFocusText, clipboardText, cursorPosition - 1)
 	inputFocus:getTopLevelMenu():updateLayout()
+
+	-- Trigger a key event for the input.
+	inputFocus:triggerEvent("keyPress")
 end
 event.register("keyDown", onKeyDownV, { filter = tes3.scanCode.v })
 
@@ -90,6 +96,9 @@ local function onKeyDownHome(e)
 	-- Move cursor to the start.
 	inputFocus.rawText = "|" .. inputFocus.rawText:gsub("|", "")
 	inputFocus:getTopLevelMenu():updateLayout()
+
+	-- Trigger a key event for the input.
+	inputFocus:triggerEvent("keyPress")
 end
 event.register("keyDown", onKeyDownHome, { filter = tes3.scanCode.home })
 
@@ -107,6 +116,9 @@ local function onKeyDownEnd(e)
 	-- Move cursor to the start.
 	inputFocus.rawText = inputFocus.rawText:gsub("|", "") .. "|"
 	inputFocus:getTopLevelMenu():updateLayout()
+
+	-- Trigger a key event for the input.
+	inputFocus:triggerEvent("keyPress")
 end
 event.register("keyDown", onKeyDownEnd, { filter = tes3.scanCode["end"] })
 
@@ -144,6 +156,9 @@ local function onKeyDownSubstitute(e)
 	-- Move cursor to the start.
 	inputFocus.rawText = inputFocus.rawText:gsub(substitution.pattern, substitution.repl)
 	inputFocus:getTopLevelMenu():updateLayout()
+
+	-- Trigger a key event for the input.
+	inputFocus:triggerEvent("keyPress")
 end
 event.register("keyDown", onKeyDownSubstitute, { filter = tes3.scanCode.backspace })
 event.register("keyDown", onKeyDownSubstitute, { filter = tes3.scanCode.delete })
