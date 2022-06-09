@@ -23,6 +23,7 @@ local supportedObjectTypes = {
 
 --- Information about a mesh that GitD controls.
 --- @class table.GitD.meshData
+--- @field cellData table<string, table.GitD.cellData> Cell data for given cells for this mesh.
 --- @field indexInDay number The index to use when swapping to day in interiors.
 --- @field indexOff number The index to use to turn the source "off".
 --- @field indexOn number The index to use to turn the source "on".
@@ -30,11 +31,12 @@ local supportedObjectTypes = {
 --- @field light niLight The base light used by clones.
 --- @field litInteriorWindowDefaultValues table<number, niMaterialProperty> A dictionary of indicies that hold default material information.
 --- @field litInteriorWindowShapesIndexes number[] A list of indicies that hold lit interior window shapes. We will use this list to update material properties.
+--- @field litInteriorWindowShapesOffMaterials table<number, niMaterialProperty> A dictionary of indicies that hold the materials for lit material shapes when off.
 --- @field supportsLight boolean The mesh supports a light and GitD will try to attach one.
 --- @field switchChildIndex number The index that the nightdayswitch child can be found on.
 --- @field unlitInteriorWindowDefaultValues table<number, niMaterialProperty> A dictionary of indicies that hold default material information.
 --- @field unlitInteriorWindowShapesIndexes number[] A list of indicies that hold unlit interior window shapes. We will use this list to update material properties.
-
+--- @field valid boolean If true, the mesh data is valid and didn't encounter any errors when loading.
 
 --- @type table<string, table.GitD.meshData>
 local meshData = {}
@@ -79,6 +81,9 @@ function interop.createMeshData(mesh)
 		end
 	end
 
+	-- Default to an invalid state.
+	data.valid = false
+
 	-- Return what we have.
 	return data
 end
@@ -108,7 +113,7 @@ function interop.checkSupport(reference)
 
 	-- Was this object already checked?
 	local cacheHit = meshData[mesh]
-	return cacheHit ~= nil, cacheHit
+	return cacheHit ~= nil and cacheHit.valid, cacheHit
 end
 
 function interop.resetConfigurableStateForAllReferences()
@@ -299,7 +304,7 @@ local defaultLight = nil
 function interop.getDefaultLight()
 	-- Lazy-create light if needed.
 	if (defaultLight == nil) then
-		defaultLight = niPointLight.new()
+		defaultLight = niPointLight.new() --- @type niPointLight
 		-- light.name = "GitD Standard Interior Light"
 		defaultLight.diffuse.r = 1.0
 		defaultLight.diffuse.g = 1.0

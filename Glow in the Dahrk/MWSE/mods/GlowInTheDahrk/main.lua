@@ -1,8 +1,10 @@
 local config = require("GlowInTheDahrk.config")
 local interop = require("GlowInTheDahrk.interop")
+local common = require("GlowInTheDahrk.common")
 local GitD_debug = require("GlowInTheDahrk.debug")
-local i18n = mwse.loadTranslations("GlowInTheDahrk")
-interop.i18n = i18n
+
+local log = common.log
+local i18n = common.i18n
 
 --
 -- Keep track of references we care about.
@@ -115,8 +117,6 @@ interop.getRegion = getRegion
 
 local maxUpdatesPerFrame = 10
 
-local colorBlack = niColor.new(0.0, 0.0, 0.0)
-
 local function setColorMinimum(materialProperty, property, color, storedMinimums)
 	local minimum = storedMinimums[property]
 	local floored = { r = math.max(color.r, minimum.r), g = math.max(color.g, minimum.g), b = math.max(color.b, minimum.b) }
@@ -160,7 +160,7 @@ local function updateReferences(now)
 	local currentWeatherBrightness = interop.getCurrentWeatherBrightness()
 	local isOutsideLit = gameHour >= sunriseStart and gameHour <= sunsetStop
 	local currentRegionSunColor = playerRegion and interop.calculateRegionSunColor(playerRegion)
-	
+
 	-- Fade light in/out at dawn/dusk.
 	local dimmer = 0.0
 	if (sunriseMidPoint < gameHour and gameHour < sunsetMidPoint) then
@@ -170,7 +170,7 @@ local function updateReferences(now)
 	elseif (sunsetMidPoint <= gameHour and gameHour <= sunsetStop) then
 		dimmer = currentWeatherBrightness * math.remap(gameHour, sunsetStop, sunsetMidPoint, 0.0, 1.0)
 	end
-	
+
 	-- Go through and update all our references.
 	local queueLength = #referenceUpdateQueue
 	for i = queueLength, math.max(queueLength - maxUpdatesPerFrame, 1), -1 do
@@ -281,24 +281,6 @@ local function updateReferences(now)
 								end
 							end
 						end
-					--[[
-					elseif (index == indexOff and previousIndex ~= indexOff) then
-						local unlitInteriorNode = switchNode.children[indexOff]
-
-						-- Update window color.
-						if (meshData.unlitInteriorWindowShapesIndexes) then
-							for _, shapeIndex in ipairs(meshData.unlitInteriorWindowShapesIndexes) do
-								local materialProperty = unlitInteriorNode.children[shapeIndex].materialProperty
-								if (materialProperty) then
-									-- mwse.log("[off-before] Ambient: %s; Diffuse: %s; Emissive: %s", materialProperty.ambient, materialProperty.diffuse, materialProperty.emissive)
-									-- materialProperty.ambient = currentRegionSunColor
-									-- materialProperty.diffuse = currentRegionSunColor
-									-- materialProperty.emissive = colorBlack
-									-- mwse.log("[off] Ambient: %s; Diffuse: %s; Emissive: %s", materialProperty.ambient, materialProperty.diffuse, materialProperty.emissive)
-								end
-							end
-						end
-					--]]
 					end
 				end
 			end
@@ -316,6 +298,9 @@ end
 
 local meshesPathPrefixLength = string.len("meshes\\")
 
+--- @param collection niAVObject[]
+--- @param name string
+--- @return integer
 local function getChildByName(collection, name)
 	for i, child in ipairs(collection) do
 		if (child and child.name and child.name:lower() == name) then
@@ -324,6 +309,7 @@ local function getChildByName(collection, name)
 	end
 end
 
+---@param e meshLoadedEventData
 local function onMeshLoaded(e)
 	---@type niNode
 	local node = e.node
@@ -340,7 +326,7 @@ local function onMeshLoaded(e)
 	-- Make sure that the switch node is of the right type.
 	local dayNightSwitchNode = node.children[switchChildIndex] --- @type niSwitchNode
 	if (dayNightSwitchNode.switchIndex == nil) then
-		mwse.log(i18n("logMalformedAssetSwitchNodeIsNotCorrectType", { path, dayNightSwitchNode.runTimeTypeInformation.name }))
+		log:error(i18n("logMalformedAssetSwitchNodeIsNotCorrectType", { path, dayNightSwitchNode.runTimeTypeInformation.name }))
 		return
 	end
 
@@ -348,10 +334,16 @@ local function onMeshLoaded(e)
 	local data = interop.createMeshData(path)
 	data.switchChildIndex = switchChildIndex
 
+	-- Compile a list of problems encountered when parsing the mesh.
+	local errors = {} --- @type string[]
+
 	-- Get the first child node.
 	data.indexOff = getChildByName(dayNightSwitchNode.children, "off") or 1
 	data.indexOn = getChildByName(dayNightSwitchNode.children, "on") or 2
 	data.indexInDay = getChildByName(dayNightSwitchNode.children, "int-day") or 3
+
+	-- Map texture paths to their material properties.
+	local textureMaterialPropertyMatch = {} --- @type table<string, niMaterialProperty>
 
 	-- Does the mesh have interior light capabilities?
 	if (#dayNightSwitchNode.children >= data.indexInDay) then
@@ -364,7 +356,6 @@ local function onMeshLoaded(e)
 			if (light and light:isInstanceOfType(tes3.niType.NiLight)) then
 				-- Fixup some values for import. Namely the radius is stored as scale.
 				light:setRadius(light.scale)
-				-- light.name = "GitD Mesh-Customized Interior Light"
 
 				-- Store the light for later cloning and detach it so no one else will get it added.
 				data.light = light
@@ -378,7 +369,7 @@ local function onMeshLoaded(e)
 		-- Make a guess at if this is a modern mesh.
 		if (not data.supportsLight and data.interiorRayIndex ~= 1) then
 			data.legacyMesh = true
-			mwse.log(i18n("logConvertingLegacyMesh", { path }))
+			log:info(i18n("logConvertingLegacyMesh", { path }))
 		end
 
 		-- If it is an old mesh try to fix up rays.
@@ -413,7 +404,7 @@ local function onMeshLoaded(e)
 
 		-- See if we can clear up vcol on the interior window mesh.
 		-- Also see what shapes we will later want to update when coloring windows.
-		local litInteriorWindowShapesIndexes = {}
+		local litInteriorWindowShapesIndexes = {} --- @type number[]
 		local lastShape = nil ---@type niTriShape
 		for i, shape in ipairs(interiorLights.children) do
 			if (shape) then
@@ -422,6 +413,11 @@ local function onMeshLoaded(e)
 				if (texturingProperty and materialProperty and shape:isInstanceOfType(tes3.niType.NiTriShape)) then
 					table.insert(litInteriorWindowShapesIndexes, i)
 					lastShape = shape
+
+					local texture = texturingProperty.baseMap and texturingProperty.baseMap.texture --- @type niSourceTexture
+					if (texture and texture.fileName) then
+						textureMaterialPropertyMatch[texture.fileName:lower()] = materialProperty
+					end
 
 					-- If it is an old mesh try to fix up windows.
 					if (data.legacyMesh) then
@@ -474,11 +470,9 @@ local function onMeshLoaded(e)
 
 	-- We also need to know about unlit interior windows.
 	if (#dayNightSwitchNode.children >= data.indexOff) then
-		-- While we're at it, map texture paths to their material properties.
-		local textureMaterialPropertyMatch = {}
 
 		-- See what shapes we will later want to update when coloring nighttime windows.
-		local unlitInteriorWindowShapesIndexes = {}
+		local unlitInteriorWindowShapesIndexes = {} --- @type number[]
 		for i, shape in ipairs(dayNightSwitchNode.children[data.indexOff].children) do
 			if (shape) then
 				local texturingProperty = shape.texturingProperty --- @type niTexturingProperty
@@ -523,7 +517,7 @@ local function onMeshLoaded(e)
 
 		-- Go through and update lit indecies to store the default material property for each index.
 		if (data.litInteriorWindowShapesIndexes) then
-			local litInteriorWindowShapesOffMaterials = {}
+			local litInteriorWindowShapesOffMaterials = {} --- @type table<number, niMaterialProperty>
 			local interiorLights = dayNightSwitchNode.children[data.indexInDay]
 			for i, shape in ipairs(interiorLights.children) do
 				if (shape) then
@@ -532,7 +526,12 @@ local function onMeshLoaded(e)
 					if (texturingProperty and materialProperty and shape:isInstanceOfType(tes3.niType.NiTriShape)) then
 						local texture = texturingProperty.baseMap and texturingProperty.baseMap.texture --- @type niSourceTexture
 						if (texture and texture.fileName) then
-							litInteriorWindowShapesOffMaterials[i] = textureMaterialPropertyMatch[texture.fileName:lower()]--:clone()
+							local mappedTexture = textureMaterialPropertyMatch[texture.fileName:lower()]
+							if (mappedTexture) then
+								litInteriorWindowShapesOffMaterials[i] = mappedTexture
+							else
+								table.insert(errors, string.format("No unlit material property found associated with texture '%s'. It is likely that the unlit state uses a different texture.", texture.fileName))
+							end
 						end
 					end
 				end
@@ -543,7 +542,19 @@ local function onMeshLoaded(e)
 		end
 	end
 
-	-- mwse.log("%s = %s", path, json.encode(data, { indent = true }))
+	-- Validate.
+	data.valid = (#errors == 0)
+	if (data.valid) then
+		log:info(i18n("logMeshParsed", { path }))
+	else
+		local errorString = i18n("logLoadErrorHeader", { path })
+		for _, err in ipairs(errors) do
+			errorString = errorString .. "\n - " .. err
+		end
+		log:error(errorString)
+		log:info(i18n("logLoadErrorDebugTextureMaterialMap", { json.encode(table.keys(textureMaterialPropertyMatch, true)) }))
+		log:info(i18n("logLoadErrorDebugMeshData", { json.encode(data, { indent = true }) }))
+	end
 end
 event.register("meshLoaded", onMeshLoaded)
 

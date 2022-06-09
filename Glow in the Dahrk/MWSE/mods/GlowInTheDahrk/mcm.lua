@@ -1,6 +1,7 @@
 local config = require("GlowInTheDahrk.config")
 local interop = require("GlowInTheDahrk.interop")
-local i18n = interop.i18n
+local common = require("GlowInTheDahrk.common")
+local i18n = common.i18n
 
 -- Setup MCM.
 local function registerModConfig()
@@ -40,6 +41,22 @@ local function registerModConfig()
 		description = i18n("mcm.addInteriorLights.description"),
 		variable = mwse.mcm:createTableVariable({ id = "addInteriorLights", table = config }),
 		callback = interop.resetConfigurableStateForAllReferences,
+	})
+
+	preferences:createDropdown({
+		label = i18n("mcm.logLevel.label"),
+		description = i18n("mcm.logLevel.description"),
+		options = {
+			{ label = i18n("mcm.logLevel.TRACE"), value = "TRACE" },
+			{ label = i18n("mcm.logLevel.DEBUG"), value = "DEBUG" },
+			{ label = i18n("mcm.logLevel.INFO"), value = "INFO" },
+			{ label = i18n("mcm.logLevel.ERROR"), value = "ERROR" },
+			{ label = i18n("mcm.logLevel.NONE"), value = "NONE" },
+		},
+		variable = mwse.mcm.createTableVariable { id = "logLevel", table = config },
+		callback = function(self)
+			common.log:setLogLevel(self.variable.value)
+		end
 	})
 
 	-- Finish up.

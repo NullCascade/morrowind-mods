@@ -3,6 +3,7 @@ local config = mwse.loadConfig("Glow in the Dahrk", {
 	useVariance = false,
 	addInteriorLights = true,
 	addInteriorSunrays = true,
+	logLevel = "INFO",
 })
 
 -- Remove legacy values.
