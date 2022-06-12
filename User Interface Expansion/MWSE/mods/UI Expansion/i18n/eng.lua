@@ -147,7 +147,7 @@ return {
 	["tooltip.condition"] = "Condition",
 	["tooltip.enchantCapacity"] = "Enchant Capacity",
 	["tooltip.lightDuration"] = "Duration",
-	["tooltip.powerRechargeCooldown"] = "%.0f hours until recharge.",
+	["tooltip.powerRechargeCooldown"] = "%d hours until recharge.",
 	["tooltip.soulCapacity"] = "Soul Capacity",
 	["tooltip.weapon.reach"] = "Reach",
 	["tooltip.weapon.speed"] = "Speed",
