@@ -228,11 +228,31 @@ common.i18n = mwse.loadTranslations("UI Expansion")
 -- UI Functions
 ----------------------------------------------------------------------------------------------------
 
+--- Table parameters to `common.createSearchBar()`.
+--- @class uiExpansion.common.createSearchBar.params
+--- @field id string
+--- @field onPreUpdate function
+--- @field onSubmit function
+--- @field onUpdate function
+--- @field parent tes3uiElement
+--- @field searchTextPlaceholder string
+--- @field searchTextPlaceholderColor number[]
+--- @field textColor number[]
+--- @field useSearch boolean
+
+--- @param e tes3uiEventData
+local function onSearchBarPostKeyEnter(e)
+	local params = e.source:getLuaData("params") --- @type uiExpansion.common.createSearchBar.params
+	if (params.onSubmit) then
+		params.onSubmit(e)
+	end
+end
+
 --- Creates a search bar in a parent menu.
---- @param params table
+--- @param params uiExpansion.common.createSearchBar.params
 --- @return table
 function common.createSearchBar(params)
-	local border = params.parent:createThinBorder({})
+	local border = params.parent:createThinBorder()
 	border.autoWidth = true
 	border.autoHeight = true
 	border.widthProportional = 1.0
@@ -240,40 +260,26 @@ function common.createSearchBar(params)
 	border.visible = params.useSearch
 
 	-- Create the search input itself.
-	local input = border:createTextInput({ id = params.id })
-	input.color = params.searchTextPlaceholderColor or tes3ui.getPalette("disabled_color")
-	local placeholderText = params.searchTextPlaceholder or common.i18n("filter.searchByName")
-	input.text = placeholderText
+	local input = border:createTextInput({
+		id = params.id,
+		placeholderText = params.searchTextPlaceholder or common.i18n("filter.searchByName"),
+		placeholderTextColor = params.searchTextPlaceholderColor or tes3ui.getPalette("disabled_color"),
+	})
 	input.borderLeft = 5
 	input.borderRight = 5 + 10
 	input.borderTop = 2
 	input.borderBottom = 4
-	input.widget.eraseOnFirstKey = true
 	input.disabled = not params.useSearch
 
 	-- Set up the events to control text input control.
 	input.consumeMouseEvents = false
-	input:registerAfter("keyEnter", function(e)
-		if (params.onSubmit) then
-			params.onSubmit(e)
-		end
-	end)
+	input:registerAfter("keyEnter", onSearchBarPostKeyEnter)
 	input:registerBefore("keyPress", function(e)
 		local inputController = tes3.worldController.inputController
-		if (inputController:isKeyDown(tes3.scanCode.tab)) then
-			-- Prevent alt-tabbing from creating spacing.
-			return
-		elseif (inputController:isKeyDown(tes3.scanCode.backspace)) then
-			if (inputController:isKeyDown(tes3.scanCode.leftAlt)) then
-				input.text = '' -- Alt + Backspace = clearfilter /abot
-			elseif input.text == placeholderText then
-				-- Prevent backspacing into nothing.
-				return false
-			end
-		elseif (inputController:isKeyDown(tes3.scanCode.a)) then
-			if (inputController:isKeyDown(tes3.scanCode.leftAlt)) then
-				input.text = '' -- Alt + A = clearfilter /abot
-			end
+
+		-- Allow Alt+A to clear the filter.
+		if (inputController:isKeyDown(tes3.scanCode.a) and inputController:isAltDown()) then
+			input.text = ''
 		end
 
 		if (params.onPreUpdate) then
@@ -309,6 +315,13 @@ function common.createSearchBar(params)
 	border:registerAfter("mouseClick", function()
 		tes3ui.acquireTextInput(input)
 	end)
+
+	params.input = input
+	params.border = border
+	params.icon = icon
+	border:setLuaData("params", params)
+	input:setLuaData("params", params)
+	icon:setLuaData("params", params)
 
 	return { border = border, input = input }
 end
