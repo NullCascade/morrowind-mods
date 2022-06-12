@@ -60,7 +60,7 @@ local function onSubmitCommand()
 	inputBox.text = ""
 
 	if (luaMode) then
-		tes3ui.log(text, true)
+		tes3ui.logToConsole(text, true)
 	end
 
 	local context = (luaMode and "lua" or "mwscript")
@@ -126,7 +126,6 @@ local function onSubmitCommand()
 		local lastEntry = previousConsoleEntries[#previousConsoleEntries]
 		if (not lastEntry or lastEntry.text ~= text or lastEntry.lua ~= luaMode) then
 			table.insert(previousConsoleEntries, { text = text, lua = luaMode })
-			currentHistoryIndex = 1
 
 			-- Save a selection of the history.
 			local savedEntries = {}
@@ -139,6 +138,9 @@ local function onSubmitCommand()
 			mwse.saveConfig("UI Expansion", config)
 		end
 	end
+
+	-- Reset the history index.
+	currentHistoryIndex = 1
 
 	-- Make sure the original execution doesn't happen.
 	return false
