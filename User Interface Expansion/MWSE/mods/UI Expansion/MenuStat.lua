@@ -144,6 +144,38 @@ local function onMenuStatFactionTooltip(e)
 	end
 end
 
+--- Add image to the class tooltip.
+--- @param e tes3uiEventData
+local function onMenuStatClassTooltip(e)
+	local tooltip = tes3ui.findHelpLayerMenu(GUI_ID_HelpMenu)
+	if not tooltip then
+		return
+	end
+
+	-- We only care if the class has a custom image.
+	local class = tes3.player.baseObject.class
+	local classImage = class.image
+	if (classImage) then
+		local description = tooltip:findChild("description")
+
+		local imageContainer = description.parent:createThinBorder({
+			id = "image_container",
+		})
+		imageContainer.autoWidth = true
+		imageContainer.autoHeight = true
+		imageContainer.paddingAllSides = 2
+		imageContainer:createImage({
+			id = "image",
+			path = classImage,
+		})
+
+		-- Move it before the description.
+		description.parent:reorderChildren(description, imageContainer, 1)
+	end
+
+	tooltip:updateLayout()
+end
+
 --- Create our changes for MenuStat.
 --- @param e uiActivatedEventData
 local function onMenuStatActivated(e)
@@ -151,6 +183,16 @@ local function onMenuStatActivated(e)
 		return
 	end
 
+	-- Improve class tooltips.
+	local classLayout = e.element:findChild("MenuStat_class_layout")
+	if (classLayout) then
+		local label = classLayout:findChild("MenuStat_class_name")
+		label:registerAfter("help", onMenuStatClassTooltip)
+		local class = classLayout:findChild("MenuStat_class")
+		class:registerAfter("help", onMenuStatClassTooltip)
+	end
+
+	-- Add tooltips to attributes.
 	local idParts = { "agility", "endurance", "intellegence", "luck", "personality", "speed", "strength", "willpower" }
 	for _, idPart in pairs(idParts) do
 		local MenuStat_attribute_layout = e.element:findChild(string.format("MenuStat_attribute_layout_%s", idPart))
