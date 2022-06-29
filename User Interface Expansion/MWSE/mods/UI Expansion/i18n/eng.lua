@@ -1,7 +1,7 @@
 return {
 	["core.modName"] = "UI Expansion",
 	["core.updateRequired"] = "UI Extensions requires the latest version of MWSE. Please run MWSE-Updater.exe.",
-	["core.versionString"] = "v1.6.0",
+	["core.versionString"] = "v1.6.1",
 	["filter.apparel.buttonName"] = "Apparel",
 	["filter.apparel.helpDescription"] = "Filter to armor and clothing",
 	["filter.apparel.helpText"] = "Click to filter to:\n- Armor\n- Clothing",
