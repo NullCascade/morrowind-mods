@@ -331,7 +331,7 @@ local function menuSave(e)
 		inputBlock.childAlignY = 0.5
 		local saveInput = inputBlock:createTextInput({ id = save_saveInput_id })
 		saveInput.widget.lengthLimit = 31
-		saveInput.text = tes3.mobilePlayer.cell.name or tes3.mobilePlayer.cell.region.name
+		saveInput.text = tes3.mobilePlayer.cell.displayName
 
 		local oldSaveButton = scroll.parent:findChild(save_saveButton_id)
 		oldSaveButton:destroy()
