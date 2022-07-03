@@ -9,6 +9,8 @@ local GUI_ID_MenuDialog_topics_pane = tes3ui.registerID("MenuDialog_topics_pane"
 
 local GUI_ID_PartScrollPane_pane = tes3ui.registerID("PartScrollPane_pane")
 
+local GUI_PID_ChoiceNumbered = tes3ui.registerProperty("UIEx:ChoiceRegistered")
+
 local GUI_Palette_TopicSeen = common.getColor(common.config.dialogueTopicSeenColor)
 local GUI_Palette_TopicUnique = common.getColor(common.config.dialogueTopicUniqueColor)
 
@@ -132,47 +134,28 @@ local function updateTopicsList(e)
 	end
 end
 
---- Updates the dialog menu.
-local function update()
-	local function traverse(element)
-		local path = {}
-		local i = 0
-		local answerIndex = 0
+--- Add numbers to the dialog choices.
+--- @param e tes3uiEventData
+local function updateAnswerText(e)
+	local menuDialog = e.source
 
-		local function recursiveTraverse(node)
-			if node then
-				local children = node.children
-				if children then
-					if #children > 0 then
-						for _, child in pairs(children) do
-							recursiveTraverse(child)
-						end
-					end
-				end
-				if node.id == GUI_ID_MenuDialog_answer_block then
-					local oldText = node.text
-					node:registerAfter("mouseClick", updateTopicsList)
-					answerIndex = answerIndex + 1
-					if not string.match(oldText, "^%d+") then
-						node.text = string.format("%d. %s", answerIndex, oldText)
-					end
-				end
-				i = i + 1
-				path[i] = node.id .. " " .. node.text
-			end
-		end
-
-		recursiveTraverse(element)
-		return path
+	local scrollPane = menuDialog:findChild(GUI_ID_MenuDialog_scroll_pane)
+	if (not scrollPane) then
+		return
 	end
 
-	local menuDialog = tes3ui.findMenu(GUI_ID_MenuDialog)
-	if menuDialog then
-		local scroll_pane = menuDialog:findChild(GUI_ID_MenuDialog_scroll_pane)
-		if scroll_pane then
-			local pane_pane = scroll_pane:findChild(GUI_ID_PartScrollPane_pane)
-			if pane_pane then
-				traverse(pane_pane)
+	local answerCount = 0
+	for _, child in ipairs(scrollPane:getContentElement().children) do
+		if (child.id == GUI_ID_MenuDialog_answer_block) then
+			answerCount = answerCount + 1
+
+			local didBefore = child:getPropertyBool(GUI_PID_ChoiceNumbered)
+			if (not didBefore) then
+				child:setPropertyBool(GUI_PID_ChoiceNumbered, true)
+
+				child:registerAfter("mouseClick", updateTopicsList)
+
+				child.text = string.format("%d. %s", answerCount, child.text)
 			end
 		end
 	end
@@ -193,7 +176,7 @@ local function onDialogueMenuActivated(e)
 		updateTopicsList(preUpdateEventData)
 	end
 	e.element:registerAfter("preUpdate", firstPreUpdate)
-	e.element:registerAfter("update", update)
+	e.element:registerAfter("update", updateAnswerText)
 end
 event.register("uiActivated", onDialogueMenuActivated, { filter = "MenuDialog" })
 
