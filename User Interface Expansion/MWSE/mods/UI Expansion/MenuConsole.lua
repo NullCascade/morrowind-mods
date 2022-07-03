@@ -146,6 +146,22 @@ local function onSubmitCommand()
 	return false
 end
 
+--- @param e tes3uiEventData
+local function onMenuConsoleUpdated(e)
+	local menuConsole = e.source
+	if (menuConsole.visible) then
+		return
+	end
+
+	local consoleInput = e.source:findChild(GUI_ID_UIEXP_ConsoleInputBox)
+	local currentInput = tes3.worldController.menuController.inputController.textInputFocus
+	if (currentInput ~= consoleInput) then
+		return
+	end
+
+	tes3ui.acquireTextInput(nil)
+end
+
 --- Create our changes for MenuConsole.
 --- @param e uiActivatedEventData
 local function onMenuConsoleActivated(e)
@@ -244,6 +260,9 @@ local function onMenuConsoleActivated(e)
 	border:registerAfter("mouseClick", function()
 		tes3ui.acquireTextInput(input)
 	end)
+
+	-- Make it so hiding the menu hides the input bar.
+	menuConsole:registerAfter("update", onMenuConsoleUpdated)
 
 	menuConsole:updateLayout()
 	tes3ui.acquireTextInput(input)
