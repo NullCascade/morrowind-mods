@@ -41,14 +41,14 @@ local publicFacingObjectTypeNames = {
 
 local indentationLevel = 0
 
---- comment
---- @param parent tes3uiElement
---- @param name string
---- @param value any
---- @param clickCallback function?
---- @return tes3uiElement
---- @return tes3uiElement
---- @return tes3uiElement
+--- Helper function that creates a commonly designed information label.
+--- @param parent tes3uiElement The block to create the labels in.
+--- @param name string The name of the label.
+--- @param value any The value to display.
+--- @param clickCallback function? The callback, if any, to perform when the value label is clicked.
+--- @return tes3uiElement block The block created that contains the labels.
+--- @return tes3uiElement name The name label.
+--- @return tes3uiElement value The value label.
 local function createInfoLabel(parent, name, value, clickCallback)
 	local infoBlock = parent:createBlock({ id = "Info" })
 	infoBlock.autoHeight = true
@@ -69,27 +69,30 @@ local function createInfoLabel(parent, name, value, clickCallback)
 	return infoBlock, nameElement, valueElement
 end
 
-local function jsonExceptionValueToString(reason, value, state, defaultmessage)
+--- Exception handler for `json.encode`. Just converts the value to a stylized string.
+--- @param value any The value that raised an exception.
+--- @return string
+local function jsonExceptionValueToString(_, value, _, _)
 	return string.format([["%s"]], tostring(value))
 end
 
---- comment
---- @param object tes3object
+--- Returns a formatted string for an object that has both the object ID and its source mod.
+--- @param object tes3baseObject
 --- @return string
 local function getObjectIdWithSource(object)
 	return string.format("%s (%s)", object.id, object.sourceMod)
 end
 
---- comment
+--- Displays a formatted vector different than tes3vector3's default `tostring` method.
 --- @param vector tes3vector3
 --- @return string
 local function prettyVectorToString(vector)
 	return string.format("%.2f, %.2f, %.2f", vector.x, vector.y, vector.z)
 end
 
---- comment
---- @param sceneNode niNode
---- @return table
+--- Collects an array of all textures used in an niNode, sorted alphabetically (case-insensitive).
+--- @param sceneNode niNode The node to scan.
+--- @return string[] textures An array of all textures used.
 local function getAllTexturesUsed(sceneNode)
 	-- Go through and show any associated textures, using :lower() to ensure no weird duplicates
 	local usedTextures = {}
@@ -114,14 +117,16 @@ local function getAllTexturesUsed(sceneNode)
 	return texturesSorted
 end
 
---- comment
+--- Returns a version of str with a Data Files prefix removed.
 --- @param str string
 --- @return string
 local function getPathRemoveDataFilesPrefix(str)
-	return string.gsub(str, "^Data Files\\", "")
+	local match = string.gsub(str, "^Data Files\\", "")
+	return match
 end
 
---- comment
+--- Returns a string with a given prefix added, unless the string already starts with the given prefix.
+--- This can be used to ensure that a path always begins with a common root.
 --- @param prefix string
 --- @param str string
 --- @return string
@@ -132,16 +137,18 @@ local function conditionalAddPrefix(prefix, str)
 	return str
 end
 
---- comment
---- @param prefix string
---- @param path string
---- @return string
---- @return string
---- @return string
+--- Gets the file source. If it is in a BSA, return the path to the BSA.
+--- @param prefix string The optional prefix for the asset, e.g. "Data Files\\meshes".
+--- @param path string The path to the file.
+--- @return string?
+--- @return string?
+--- @return string?
 local function getFileSourceWithBSA(prefix, path)
+	--- @diagnostic disable-next-line: redefined-local
 	local source, path = tes3.getFileSource(conditionalAddPrefix(prefix, path))
 	local bsaFile = nil
 	if (source == "bsa") then
+		--- @cast path string
 		local archive = tes3.bsaLoader:findFile(path)
 		if (archive) then
 			bsaFile = archive.path:sub(12)
@@ -153,6 +160,9 @@ end
 --- @param reference tes3reference
 local function updateInformationPane(reference)
 	local menu = tes3ui.findMenu("MenuSelectionDetails")
+	if (not menu) then
+		return
+	end
 
 	-- Clear current data.
 	menu:destroyChildren()
@@ -192,12 +202,16 @@ local function updateInformationPane(reference)
 
 	-- Show used meshes/textures.
 	local meshSource, meshPath, meshBSAFile = getFileSourceWithBSA("meshes\\", baseObject.mesh)
-	createInfoLabel(scrollContents, i18n("label.mesh"), string.format("%s (%s)", getPathRemoveDataFilesPrefix(meshPath), meshBSAFile or meshSource))
-	for _, texture in ipairs(getAllTexturesUsed(reference.sceneNode)) do
-		indentationLevel = indentationLevel + 1
-		local textureSource, texturePath, bsaFile = getFileSourceWithBSA("textures\\", texture)
-		createInfoLabel(scrollContents, i18n("label.texture"), string.format("%s (%s)", getPathRemoveDataFilesPrefix(texturePath or texture), bsaFile or textureSource or i18n("unknown")))
-		indentationLevel = indentationLevel - 1
+	if (meshPath) then
+		createInfoLabel(scrollContents, i18n("label.mesh"),
+			string.format("%s (%s)", getPathRemoveDataFilesPrefix(meshPath), meshBSAFile or meshSource))
+		for _, texture in ipairs(getAllTexturesUsed(reference.sceneNode)) do
+			indentationLevel = indentationLevel + 1
+			local textureSource, texturePath, bsaFile = getFileSourceWithBSA("textures\\", texture)
+			local labelValue = string.format("%s (%s)", getPathRemoveDataFilesPrefix(texturePath or texture), bsaFile or textureSource or i18n("unknown"))
+			createInfoLabel(scrollContents, i18n("label.texture"), labelValue)
+			indentationLevel = indentationLevel - 1
+		end
 	end
 
 	-- Show icon.
@@ -212,8 +226,10 @@ local function updateInformationPane(reference)
 		createInfoLabel(scrollContents, i18n("label.owner"), getObjectIdWithSource(owner))
 		indentationLevel = indentationLevel + 1
 		if (owner.objectType == tes3.objectType.faction) then
+			--- @cast ownerReq number
 			createInfoLabel(scrollContents, i18n("label.rankRequired"), string.format("%s (%d)", owner:getRankName(ownerReq), ownerReq))
 		elseif (owner.objectType == tes3.objectType.npc) then
+			--- @cast ownerReq tes3globalVariable?
 			if (ownerReq) then
 				createInfoLabel(scrollContents, i18n("label.requiredGlobal"), getObjectIdWithSource(ownerReq))
 			end
