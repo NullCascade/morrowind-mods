@@ -215,9 +215,9 @@ local function updateInformationPane(reference)
 	end
 
 	-- Show icon.
-	if (baseObject.icon) then
+	if (baseObject.icon and baseObject.icon ~= "") then
 		local iconSource, iconPath, iconBSAFile = getFileSourceWithBSA("icons\\", baseObject.icon)
-		createInfoLabel(scrollContents, i18n("label.icon"), string.format("%s (%s)", getPathRemoveDataFilesPrefix(iconPath), iconBSAFile or iconSource))
+		createInfoLabel(scrollContents, i18n("label.icon"), string.format("%s (%s)", getPathRemoveDataFilesPrefix(iconPath or baseObject.icon), iconBSAFile or iconSource))
 	end
 
 	-- Ownership information
