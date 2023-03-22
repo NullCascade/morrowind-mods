@@ -1,0 +1,15 @@
+[package]
+name = "Book Pickup"
+description = " Enables picking up books by default, instead of opening them. This can be disabled by holding shift. The behavior can be inverted using the mod config menu."
+homepage = "https://www.nexusmods.com/morrowind/mods/46625"
+repository = "https://github.com/NullCascade/morrowind-mods/"
+authors = ["NullCascade", "Mark K. Marcell"]
+version = "1.2"
+
+[tools.mwse]
+lua-mod = "Book Pickup"
+load-order = 0
+wait-until-initialize = false
+
+[dependencies.mwse]
+buildnumber = 4000
