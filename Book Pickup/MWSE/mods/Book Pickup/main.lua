@@ -4,16 +4,7 @@
 
 --]]
 
-if (mwse.buildDate < 20190818) then
-	mwse.log("[Book Pickup] Error: MWSE version is out of date! Run MWSE-Updater.exe.")
-	return
-end
-
-local defaultConfig = {
-	pickupByDefault = true,
-	checkOwnership = false,
-}
-local config = mwse.loadConfig("Book Pickup", defaultConfig)
+local config = require("Book Pickup.config")
 
 local function onActivate(e)
 	if (e.activator ~= tes3.player) then
@@ -76,39 +67,12 @@ local function onActivate(e)
 	-- Delete the reference. Detach the itemData first.
 	reference.itemData = nil
 	reference:disable()
-	mwscript.setDelete({ reference = reference, delete = true })
+	reference:delete()
 
 	return false
 end
 event.register("activate", onActivate, { priority = 10 })
 
 
-local function registerModConfig()
-	local mcm = require("mcm.mcm")
-	if (mcm == nil) then
-		return
-	end
-
-	local template = mcm.createTemplate("Book Pickup")
-	template:saveOnClose("Book Pickup", config)
-
-	local page = template:createPage()
-	page:createOnOffButton{
-		label = "Pickup by default?",
-		variable = mcm.createTableVariable{
-			id = "pickupByDefault",
-			table = config
-		}
-	}
-
-	page:createOnOffButton{
-		label = "Disable picking owned?",
-		variable = mcm.createTableVariable{
-			id = "checkOwnership",
-			table = config
-		}
-	}
-
-	mcm.register(template)
-end
-event.register("modConfigReady", registerModConfig)
+-- Also run the MCM component.
+dofile("Book Pickup.mcm")
