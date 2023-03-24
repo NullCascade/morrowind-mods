@@ -5,7 +5,7 @@ local i18n = require("Book Pickup.i18n")
 local function registerModConfig()
 	local mcm = mwse.mcm
 
-	local template = mcm.createTemplate("Book Pickup")
+	local template = mcm.createTemplate(i18n("core.modName"))
 	template:saveOnClose("Book Pickup", config)
 
 	local page = template:createSideBarPage({ label = "foo" })
