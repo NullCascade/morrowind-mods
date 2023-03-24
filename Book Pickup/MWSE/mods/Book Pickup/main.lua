@@ -54,8 +54,8 @@ local function onActivate(e)
 	tes3.addItem({
 		reference = tes3.player,
 		item = item,
-		itemData = itemData,
-		count = itemData and itemData.count or 1,
+		itemData = reference.stackSize == 1 and itemData or nil,
+		count = reference.stackSize,
 	})
 
 	-- Remove invisibility
