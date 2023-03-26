@@ -1,0 +1,18 @@
+return {
+	["core.modName"] = "Consistent Enchanting",
+	["core.modDescription"] = "Consistent Enchanting v%s\n\nCreated by NullCascade.\n\nMouse over a feature for more info.",
+	["mcm.storeBaseObject.label"] = "Preserve base object?",
+	["mcm.storeBaseObject.description"] = "If enabled, the lowercased ID of the item used to make the newly enchanted item is stored in the new item's lua data. It can be accessed using the ncceEnchantedFrom field.\n\nThis allows other mods to access this data if it is available.\n\nIt is not advised that you disable this.",
+	["mcm.storeSoulUsed.label"] = "Track soul used?",
+	["mcm.storeSoulUsed.description"] = "If enabled, the lowercased ID of the soul used to make the newly enchanted item is stored in the new item's lua data. It can be accessed using the ncceEnchantedSoul field.\n\nThis allows other mods to access this data if it is available.\n\nIt is not advised that you disable this.",
+	["mcm.copy.condition.label"] = "Preserve condition?",
+	["mcm.copy.condition.description"] = "If enabled, the newly enchanted item's condition will match the item used to create it.",
+	["mcm.copy.script.label"] = "Preserve script?",
+	["mcm.copy.script.description"] = "If enabled, the newly enchanted item will use the same script as the item used to create it.",
+	["mcm.copy.scriptData.label"] = "Preserve script data?",
+	["mcm.copy.scriptData.description"] = "If enabled, all mwscript variable values will be copied to the newly created item.\n\nThis will do nothing if script preserving is disabled.",
+	["mcm.copy.luaData.label"] = "Preserve lua data?",
+	["mcm.copy.luaData.description"] = "If enabled, all lua data stored on the old item will be copied over to the newly enchanted item.",
+	["mcm.copy.luaTempData.label"] = "Preserve temporary lua data?",
+	["mcm.copy.luaTempData.description"] = "If enabled, all temporary lua data stored on the old item will be copied over to the newly enchanted item.",
+}
