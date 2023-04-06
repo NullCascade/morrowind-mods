@@ -47,6 +47,7 @@ local defaultConfig = {
 		magicSelect = true,
 		map = true,
 		mapPlugin = false,
+		name = true,
 		options = true,
 		quantity = true,
 		rest = true,
@@ -146,6 +147,9 @@ local function onInitialized()
 	end
 	if (config.components.mapPlugin) then
 		dofile("UI Expansion.MenuMapPlugin")
+	end
+	if (config.components.name) then
+		dofile("UI Expansion.MenuName")
 	end
 	if (config.components.options) then
 		dofile("UI Expansion.MenuOptions")
