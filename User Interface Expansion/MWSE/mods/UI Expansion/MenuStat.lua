@@ -164,10 +164,18 @@ local function onMenuStatClassTooltip(e)
 		imageContainer.autoWidth = true
 		imageContainer.autoHeight = true
 		imageContainer.paddingAllSides = 2
-		imageContainer:createImage({
+		local image = imageContainer:createImage({
 			id = "image",
 			path = classImage,
 		})
+
+		-- Rescale image for HD support.
+		local texture = tes3.loadSourceTexture(classImage:lower():gsub("^textures\\", ""))
+		if (texture.width > 256) then
+			image.scaleMode = true
+			image.width = 384
+			image.height = image.width * (texture.height / texture.width)
+		end
 
 		-- Move it before the description.
 		description.parent:reorderChildren(description, imageContainer, 1)
