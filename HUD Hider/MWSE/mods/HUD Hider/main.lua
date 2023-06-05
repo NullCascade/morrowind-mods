@@ -4,7 +4,7 @@
 
 --]]
 
-local GUIID_MenuMulti = nil
+local hudIsVisible = true
 
 local config = mwse.loadConfig("HUD Hider")
 config = config or {}
@@ -19,21 +19,66 @@ local function keybindTest(b, e)
 	return (b.keyCode == e.keyCode) and (b.isShiftDown == e.isShiftDown) and (b.isAltDown == e.isAltDown) and (b.isControlDown == e.isControlDown)
 end
 
+local previousShownState = true
+local function setCrosshairShown(show)
+	if (show and tes3.worldController.cursorOff) then
+		tes3.worldController.cursorOff = previousShownState
+		tes3.worldController.nodeCursor.appCulled = previousShownState
+	elseif (not show and not tes3.worldController.cursorOff) then
+		previousShownState = tes3.worldController.cursorOff
+		tes3.worldController.cursorOff = true
+		tes3.worldController.nodeCursor.appCulled = true
+	end
+end
+
+local function setHudHidden(hidden)
+	hudIsVisible = not hidden
+
+	-- All the code needed to actually toggle the HUD.
+	local menuMulti = tes3ui.findMenu("MenuMulti")
+	if (menuMulti) then
+		menuMulti.visible = hudIsVisible
+		menuMulti:updateLayout()
+	end
+
+	local tooltip = tes3ui.findHelpLayerMenu("HelpMenu")
+	if (tooltip) then
+		tooltip.visible = hudIsVisible
+		tooltip:updateLayout()
+	end
+
+	setCrosshairShown(hudIsVisible)
+end
+
 local function onKeyDown(e)
 	if (not keybindTest(config.toggleKey, e)) then
 		return
 	end
 
-	-- All the code needed to actually toggle the HUD.
-	local menuMulti = tes3ui.findMenu(GUIID_MenuMulti)
-	menuMulti.visible = not menuMulti.visible
+	setHudHidden(hudIsVisible)
 end
 event.register("keyDown", onKeyDown)
 
-local function onInitialized()
-	GUIID_MenuMulti = tes3ui.registerID("MenuMulti")
+--- @param e uiObjectTooltipEventData
+local function uiObjectTooltipCallback(e)
+	if (hudIsVisible) then
+		return
+	end
+
+	e.tooltip.visible = false
+	e.tooltip:updateLayout()
 end
-event.register("initialized", onInitialized, { doOnce = true })
+event.register(tes3.event.uiObjectTooltip, uiObjectTooltipCallback)
+
+--- @param e menuExitEventData
+local function menuExitCallback(e)
+	if (hudIsVisible) then
+		return
+	end
+
+	setHudHidden(true)
+end
+event.register(tes3.event.menuExit, menuExitCallback)
 
 local function registerModConfig()
 	local easyMCM = include("easyMCM.EasyMCM")

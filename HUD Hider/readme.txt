@@ -1,7 +1,7 @@
 =====================================================================================
-                                      HUD Hider                                      
-                                 Author: NullCascade                                 
-                                    Version 1.0.0                                    
+                                      HUD Hider
+                                 Author: NullCascade
+                                    Version 1.1.0
 =====================================================================================
 
  INDEX:
@@ -62,6 +62,9 @@
 
  1.0.0 [2019-05-02]:
     * Initial release.
+
+ 1.1.0 [2023-06-05]:
+    * The mod now hides tooltips and the crosshair as well.
 
 =====================================================================================
  INCOMPATIBILITIES & SAVED GAME WARNINGS:
