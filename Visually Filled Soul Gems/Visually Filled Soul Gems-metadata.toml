@@ -1,0 +1,15 @@
+[package]
+name = "Visually Filled Soul Gems"
+description = " This mod makes in-world soulgems that are filled appear as enchanted items."
+homepage = "https://www.nexusmods.com/morrowind/mods/46625"
+repository = "https://github.com/NullCascade/morrowind-mods/"
+authors = ["NullCascade"]
+version = "1.1"
+
+[tools.mwse]
+lua-mod = "Visually Filled Soul Gems"
+load-order = 0
+wait-until-initialize = false
+
+[dependencies.mwse]
+buildnumber = 3246
