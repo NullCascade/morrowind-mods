@@ -212,7 +212,7 @@ local function setAshLevelForActiveCells(level)
     local playerPos = tes3.player.position
     for _, cell in ipairs(tes3.getActiveCells()) do
         for ref in cell:iterateReferences() do
-            if (ref.sceneNode ~= nil and ref.disabled == false and getAshLevelForReference(ref) ~= level and playerPos:distance(ref.position) < 2048) then
+            if (ref.sceneNode ~= nil and ref.disabled == false and getAshLevelForReference(ref) ~= level and playerPos:distance(ref.position) < 6144) then
                 setAshLevelForReference(ref, level)
             end
         end
