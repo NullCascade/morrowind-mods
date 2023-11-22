@@ -8,4 +8,6 @@ extern "C" {
 namespace UIEXT {
 	int patchWorldMap(lua_State* L);
 	int setMapZoom(lua_State* L);
+	int centreOnPlayer(lua_State* L);
+	int getMapData(lua_State* L);
 }

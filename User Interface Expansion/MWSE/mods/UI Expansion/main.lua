@@ -34,7 +34,7 @@ local defaultConfig = {
 	keybindMapSwitch = { keyCode = tes3.scanCode.rightAlt, isShiftDown = false, isControlDown = false, isAltDown = true }, -- don't use a standard key to avoid conflicts with filters
 	dialogueTopicSeenColor = "journal_finished_quest_color",
 	dialogueTopicUniqueColor = "link_color",
-	mapConfig = { autoExpand = true, cellResolution = 9, minX = -142, maxX = 70, minY = -59, maxY = 29 },
+	mapConfig = { cellResolution = 9, minX = -160, maxX = 52, minY = -59, maxY = 35 },
 	components = {
 		barter = true,
 		console = true,
@@ -185,8 +185,8 @@ end
 event.register("initialized", onInitialized)
 
 -- Hook map changes.
-local extern = include("uiextension")
-if (extern and config.components.map) then
-	mwse.log("Map Config: %s", json.encode(common.config.mapConfig))
+local extern = include("uiexp_map_extension")
+if (extern and config.components.mapPlugin) then
+	mwse.log("UI Extension Map Config: %s", json.encode(common.config.mapConfig))
 	extern.hookMapOverrides(common.config.mapConfig)
 end

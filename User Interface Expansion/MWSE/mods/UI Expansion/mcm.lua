@@ -20,7 +20,7 @@ local function registerModConfig()
 			text = creditsText .. "\n\nThe settings in this tab will not take affect until the next restart.",
 		})
 
-		local components = { "barter", "console", "contents", "dialog", "inventory", "inventorySelect", "magic", "magicSelect", "map", "options", "quantity", "rest", "saveLoad", "serviceSpells", "spellmaking", "stat", "textInput", "training" }
+		local components = { "barter", "console", "contents", "dialog", "inventory", "inventorySelect", "magic", "magicSelect", "map", "mapPlugin", "options", "quantity", "rest", "saveLoad", "serviceSpells", "spellmaking", "stat", "textInput", "training" }
 		for _, k in ipairs(components) do
 			pageComponents:createOnOffButton({
 				label = common.i18n(string.format("mcm.component.%s.label", k)),
@@ -168,6 +168,36 @@ local function registerModConfig()
 				label = common.i18n("mcm.changeMapModeOnCellChange.label"),
 				description = common.i18n("mcm.changeMapModeOnCellChange.description"),
 				variable = mwse.mcm.createTableVariable({ id = "changeMapModeOnCellChange", table = common.config }),
+			})
+		end
+
+		-- Category: Map extension plugin
+		do
+			local category = pageFeatures:createCategory({ label = common.i18n("mcm.category.mapExtension") })
+
+			category:createSlider({
+				label = common.i18n("mcm.mapExtension.minX.label"),
+				variable = mwse.mcm.createTableVariable({ id = "minX", table = common.config.mapConfig }),
+				min = -250,
+				max = -28, 
+			})
+			category:createSlider({
+				label = common.i18n("mcm.mapExtension.minY.label"),
+				variable = mwse.mcm.createTableVariable({ id = "minY", table = common.config.mapConfig }),
+				min = -250,
+				max = -28, 
+			})
+			category:createSlider({
+				label = common.i18n("mcm.mapExtension.maxX.label"),
+				variable = mwse.mcm.createTableVariable({ id = "maxX", table = common.config.mapConfig }),
+				min = 28,
+				max = 250, 
+			})
+			category:createSlider({
+				label = common.i18n("mcm.mapExtension.maxY.label"),
+				variable = mwse.mcm.createTableVariable({ id = "maxY", table = common.config.mapConfig }),
+				min = 28,
+				max = 250, 
 			})
 		end
 
