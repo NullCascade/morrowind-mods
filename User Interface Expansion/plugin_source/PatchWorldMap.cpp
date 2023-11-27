@@ -28,7 +28,7 @@
 namespace UIEXT {
 	static lua_State* luaState = nullptr;
 
-	static bool updateMapBounds = false;
+	static bool autoMapBounds = false;
 	static int cellResolution = 9;
 	static int cellMinX = 0;
 	static int cellMaxX = 0;
@@ -84,112 +84,14 @@ namespace UIEXT {
 	}
 
 	//
-	// Loading from a save. This expects values of 512 and 9. It will stop loading if given other values.
-	//
-
-	struct MAPH {
-		union {
-			struct {
-				unsigned int mapResolution;
-				int cellPixelDimension;
-			} vanillaData;
-			struct {
-				short cellMinX;
-				short cellMaxX;
-				short cellMinY;
-				short cellMaxY;
-			} uiextData;
-		};
-	};
-	static_assert(sizeof(MAPH) == 0x8, "MAPH failed size validation");
-
-	bool convertMAPD = false;
-
-	bool __fastcall OnLoadMAPHChunk(TES3::GameFile* saveFile, DWORD _UNUSED_, MAPH* data, unsigned int dataSize) {
-		// Actually load our data.
-		if (!saveFile->readChunkData(data, dataSize)) {
-			return false;
-		}
-
-		// Check if the map is vanilla format.
-		if (data->vanillaData.mapResolution == 512 && data->vanillaData.cellPixelDimension == 9) {
-			convertMAPD = true;
-			return true;
-		}
-
-		// If our data differs, return invalid data so we don't load the map.
-		if (data->uiextData.cellMinX != cellMinX || data->uiextData.cellMaxX != cellMaxX ||
-			data->uiextData.cellMinY != cellMinY || data->uiextData.cellMaxY != cellMaxY) {
-			data->vanillaData.mapResolution = 0;
-			data->vanillaData.cellPixelDimension = 0;
-		}
-		// If it does match, let the system think the values are what it wants. They're thrown away.
-		else {
-			data->vanillaData.mapResolution = 512;
-			data->vanillaData.cellPixelDimension = 9;
-		}
-
-		convertMAPD = false;
-		return true;
-	}
-
-	bool __fastcall OnLoadMAPDChunk(TES3::GameFile* saveFile, DWORD _UNUSED_, char* data, unsigned int dataSize) {
-		auto mapTexture = TES3::DataHandler::get()->nonDynamicData->mapTexture;
-		auto pixelData = mapTexture->pixelData;
-		auto pixelBuffer = (NI::PixelRGB*)&pixelData->pixels[pixelData->offsets[0]];
-		auto pixelBufferSize = pixelData->offsets[1] - pixelData->offsets[0];
-		const size_t vanillaMapSize = 0xC0000, vanillaStride = 512 * sizeof(NI::PixelRGB);
-
-		if (!convertMAPD) {
-			// Read extended map image.
-			saveFile->readChunkData(pixelBuffer, sizeof(NI::PixelRGB) * mapWidth * mapHeight);
-		}
-		else if (saveFile->currentChunkHeader.size == vanillaMapSize) {
-			// Copy vanilla map image to correct location in the extended map.
-			auto buffer = std::make_unique<char[]>(vanillaMapSize);
-			saveFile->readChunkData(buffer.get(), vanillaMapSize);
-
-			int offsetX = (0 - cellMinX) * cellResolution - 256;
-			int offsetY = (cellMaxY - 0) * cellResolution - 256;
-			const char* from = buffer.get();
-
-			if (offsetX >= 0 && offsetY >= 0) {
-				for (int y = 0; y < 512; y++, from += vanillaStride) {
-					size_t pixelOffset = (y + offsetY) * mapWidth + offsetX;
-					if ((pixelOffset * sizeof(NI::PixelRGB) + vanillaStride) >= pixelBufferSize) {
-						break;
-					}
-					memcpy(&data[pixelOffset * sizeof(NI::PixelRGB)], from, vanillaStride);
-				}
-			}
-		}
-
-		return true;
-	}
-
-	//
-	// Saving to the file. This will write our custom resolution information to the save.
-	//
-
-	int __fastcall OnSaveMAPHChunk(TES3::GameFile* saveFile, DWORD _UNUSED_, DWORD tag, MAPH* data, unsigned int size) {
-		data->uiextData.cellMinX = cellMinX;
-		data->uiextData.cellMaxX = cellMaxX;
-		data->uiextData.cellMinY = cellMinY;
-		data->uiextData.cellMaxY = cellMaxY;
-
-		return saveFile->writeChunkData(tag, data, size);
-	}
-
-	int __fastcall OnSaveMAPDChunk(TES3::GameFile* saveFile, DWORD _UNUSED_, DWORD tag, void* data, unsigned int size) {
-		size_t realSize = sizeof(NI::PixelRGB) * mapWidth * mapHeight;
-		return saveFile->writeChunkData(tag, data, realSize);
-	}
-
-	//
 	// Draw cell location marker.
 	// 
 
 	void __fastcall OnDrawLocationMarker(TES3::Cell* cell) {
+		// Always update cell flags. This allows markers to be re-drawn later, even if they fail initially.
+		cell->cellFlags |= TES3::CellFlag::MarkerDrawn;
+		cell->vTable.base->setObjectModified(cell, true);
+
 		auto mapTexture = TES3::DataHandler::get()->nonDynamicData->mapTexture;
 		if (!mapTexture) {
 			return;
@@ -199,6 +101,7 @@ namespace UIEXT {
 		auto pixelBuffer = (NI::PixelRGB*)&pixelData->pixels[pixelData->offsets[0]];
 		auto pixelBufferSize = pixelData->offsets[1] - pixelData->offsets[0];
 
+		// Check drawable map bounds.
 		int gridX = cell->getGridX(), gridY = cell->getGridY();
 		if (gridX < cellMinX || gridX > cellMaxX || gridY < cellMinY || gridY > cellMaxY) {
 			return;
@@ -222,18 +125,193 @@ namespace UIEXT {
 				}
 			}
 		}
-
-		// Update flags.
 		pixelData->revisionID++;
-		cell->cellFlags |= TES3::CellFlag::MarkerDrawn;
-		cell->vTable.base->setObjectModified(cell, true);
+	}
+
+	//
+	// Save game map serialization.
+	//
+
+	struct MAPH {
+		int mapResolution;
+		int cellResolution;
+	};
+	static_assert(sizeof(MAPH) == 0x8, "MAPH failed size validation");
+
+	struct MAPE {
+		unsigned short version;
+		unsigned short cellResolution;
+		short cellMinX;
+		short cellMaxX;
+		short cellMinY;
+		short cellMaxY;
+	} extendedHeader;
+	static_assert(sizeof(MAPE) == 0xC, "MAPE failed size validation");
+
+	const unsigned int MAPE_ChunkTag = 'EPAM'; // "MAPE" tag, little endian
+	bool flagRedrawBaseMap = false;
+
+	//
+	// Loading from a save. The loader expects MAPH values of 512 and 9. It will stop loading if given other values.
+	//
+
+	bool __fastcall OnLoadMAPHChunk(TES3::GameFile* saveFile, DWORD _UNUSED_, MAPH* data, unsigned int dataSize) {
+		// Actually load our data.
+		if (!saveFile->readChunkData(data, dataSize)) {
+			return false;
+		}
+
+		// Redraw base map and cell markers by default, including any early out conditions.
+		flagRedrawBaseMap = true;
+
+		// Check if the map is vanilla format.
+		if (data->mapResolution == 512 && data->cellResolution == 9) {
+			extendedHeader.version = 0;
+			return true;
+		}
+		
+		// Check for extended format map.
+		if (data->mapResolution == -1) {
+			// Read extended map header.
+			const auto TES3_GameFile_fetchNextChunk = reinterpret_cast<bool(__thiscall*)(TES3::GameFile*)>(0x4B67F0);
+			if (!TES3_GameFile_fetchNextChunk(saveFile)) {
+				return false;
+			}
+
+			const auto TES3_GameFile_getChunkHeader = reinterpret_cast<unsigned int(__thiscall*)(TES3::GameFile*)>(0x4B67C0);
+			if (TES3_GameFile_getChunkHeader(saveFile) == MAPE_ChunkTag) {
+				if (!saveFile->readChunkData(&extendedHeader, sizeof(extendedHeader))) {
+					return false;
+				}
+
+				// Let the loader think the values are what it expects. This allows loading to continue.
+				data->mapResolution = 512;
+				data->cellResolution = 9;
+			}
+		}
+
+		return true;
+	}
+
+	bool __fastcall OnLoadMAPDChunk(TES3::GameFile* saveFile, DWORD _UNUSED_, char* data, unsigned int dataSize) {
+		auto mapTexture = TES3::DataHandler::get()->nonDynamicData->mapTexture;
+		auto pixelData = mapTexture->pixelData;
+		auto pixelBuffer = (NI::PixelRGB*)&pixelData->pixels[pixelData->offsets[0]];
+		auto pixelBufferSize = pixelData->offsets[1] - pixelData->offsets[0];
+
+		if (extendedHeader.version == 1) {
+			// Read saved extended map, which may not be the same dimensions as the current map.
+			int srcWidth = (extendedHeader.cellMaxX - extendedHeader.cellMinX + 1) * cellResolution;
+			int srcHeight = (extendedHeader.cellMaxY - extendedHeader.cellMinY + 1) * cellResolution;
+			size_t dataSize = saveFile->currentChunkHeader.size;
+
+			// Check saved data size. It may not match if cellResolution differs from the save game.
+			if (dataSize != sizeof(NI::PixelRGB) * srcWidth * srcHeight) {
+				// We cannot copy if the cell grid doesn't match.
+				return true;
+			}
+
+			// Read extended map image.
+			auto buffer = std::make_unique<char[]>(dataSize);
+			saveFile->readChunkData(buffer.get(), dataSize);
+
+			// Copy extended map image to correct location in the extended map texture.
+			int minX = std::max(cellMinX, int(extendedHeader.cellMinX)), maxX = std::min(cellMaxX, int(extendedHeader.cellMaxX));
+			int minY = std::max(cellMinY, int(extendedHeader.cellMinY)), maxY = std::min(cellMaxY, int(extendedHeader.cellMaxY));
+			int copyWidth = (maxX - minX + 1) * cellResolution, copyHeight = (maxY - minY + 1) * cellResolution;
+
+			size_t srcOffset = (extendedHeader.cellMaxY - maxY) * cellResolution * srcWidth + (minX - extendedHeader.cellMinX) * cellResolution;
+			size_t destOffset = (cellMaxY - maxY) * cellResolution * mapWidth + (minX - cellMinX) * cellResolution;
+			const char* srcPtr = reinterpret_cast<char*>(buffer.get()) + sizeof(NI::PixelRGB) * srcOffset;
+			char* destPtr = reinterpret_cast<char*>(pixelBuffer) + sizeof(NI::PixelRGB) * destOffset;
+
+			for (int y = 0; y < copyHeight; y++) {
+				memcpy(destPtr, srcPtr, sizeof(NI::PixelRGB) * copyWidth);
+				srcPtr += sizeof(NI::PixelRGB) * srcWidth;
+				destPtr += sizeof(NI::PixelRGB) * mapWidth;
+			}
+
+			flagRedrawBaseMap = false;
+		}
+		else {
+			// Don't load vanilla map image, but fill in base map and visited cell markers after loading.
+			flagRedrawBaseMap = true;
+		}
+
+		return true;
+	}
+
+	const auto TES3_Land_loadAndDrawBaseMap = reinterpret_cast<bool(__thiscall*)(TES3::Land*, unsigned char*)>(0x4CEAD0);
+	void OnLoadedUpdateMap() {
+		if (flagRedrawBaseMap) {
+			auto records = TES3::DataHandler::get()->nonDynamicData;
+			auto pixelData = records->mapTexture->pixelData;
+			auto pixelBuffer = &pixelData->pixels[pixelData->offsets[0]];
+
+			// Redraw entire base map after a saved map has been discarded, so that no cells carry over from the previous game.
+			for (auto cell : *records->cells) {
+				if (!cell->getIsInterior()) {
+					auto landscape = cell->variantData.exterior.landscape;
+					if (landscape) {
+						TES3_Land_loadAndDrawBaseMap(landscape, pixelBuffer);
+					}
+				}
+
+				// Redraw marked locations.
+				if (cell->cellFlags & TES3::CellFlag::MarkerDrawn) {
+					OnDrawLocationMarker(cell);
+				}
+			}
+		}
+	}
+
+	//
+	// Saving to the file. This will write our custom resolution information to the save.
+	//
+
+	int __fastcall OnSaveMAPHChunk(TES3::GameFile* saveFile, DWORD _UNUSED_, DWORD tag, MAPH* data, unsigned int size) {
+		// Save magic numbers to mark extended map.
+		data->cellResolution = -1;
+		data->mapResolution = -1;
+
+		saveFile->writeChunkData(tag, data, size);
+
+		// Save extra chunk with more data.
+		extendedHeader.version = 1;
+		extendedHeader.cellResolution = cellResolution;
+		extendedHeader.cellMinX = cellMinX;
+		extendedHeader.cellMaxX = cellMaxX;
+		extendedHeader.cellMinY = cellMinY;
+		extendedHeader.cellMaxY = cellMaxY;
+
+		saveFile->writeChunkData(MAPE_ChunkTag, &extendedHeader, sizeof(extendedHeader));
+		return 0;
+	}
+
+	int __fastcall OnSaveMAPDChunk(TES3::GameFile* saveFile, DWORD _UNUSED_, DWORD tag, char* data, unsigned int size) {
+		// Only save the part of the texture that contains cells.
+		int exactWidth = (cellMaxX - cellMinX + 1) * cellResolution;
+		int exactHeight = (cellMaxY - cellMinY + 1) * cellResolution;
+
+		size_t stride = sizeof(NI::PixelRGB) * mapWidth;
+		size_t dataSize = sizeof(NI::PixelRGB) * exactWidth * exactHeight;
+
+		// Write chunk header, followed by the map data line by line.
+		// This incremental style write requires a fixup of the form size afterwards.
+		struct { DWORD tag, size; } chunkHeader{ tag, dataSize };
+		const auto TES3_GameFile_writeRaw = reinterpret_cast<int(__thiscall*)(TES3::GameFile*, const void*, unsigned int)>(0x4B6CD0);
+
+		TES3_GameFile_writeRaw(saveFile, &chunkHeader, sizeof(chunkHeader));
+		for (int y = 0; y < exactHeight; y++, data += stride) {
+			TES3_GameFile_writeRaw(saveFile, data, sizeof(NI::PixelRGB) * exactWidth);
+		}
+		saveFile->bytesWritten += sizeof(chunkHeader) + dataSize;
+		return 0;
 	}
 
 	//
 	// Attempt to draw a cell when it is explored.
 	//
-
-	static std::unordered_map<DWORD, NI::PixelRGB> colorMap;
 
 	void __fastcall OnDrawCell(TES3::NonDynamicData* nonDynamicData, DWORD _UNUSED_, TES3::Cell* cell) {
 		if (cell->getIsInterior()) {
@@ -260,6 +338,11 @@ namespace UIEXT {
 		auto pixelBufferSize = pixelData->offsets[1] - pixelData->offsets[0];
 
 		int gridX = cell->getGridX(), gridY = cell->getGridY();
+		if (gridX < cellMinX || gridX > cellMaxX || gridY < cellMinY || gridY > cellMaxY) {
+			return;
+		}
+
+		// Copy pixels from the larger source render target to the map cell.
 		int offsetX = (gridX - cellMinX) * cellResolution;
 		int offsetY = (cellMaxY - gridY) * cellResolution;
 
@@ -291,10 +374,7 @@ namespace UIEXT {
 	//
 
 	struct WNAM {
-		struct block {
-			signed char data[9];
-		};
-		block data[9];
+		signed char height[9][9];
 	};
 	static_assert(sizeof(WNAM) == 0x51, "TES3::Land::WNAM failed size validation");
 
@@ -307,6 +387,7 @@ namespace UIEXT {
 			return;
 		}
 
+		// Draw base heightmap.
 		const int offsetX = (land->gridX - cellMinX) * cellResolution;
 		const int offsetY = (cellMaxY - land->gridY) * cellResolution;
 
@@ -321,7 +402,7 @@ namespace UIEXT {
 
 				size_t mappedX = 9 * x / cellResolution;
 				size_t mappedY = 9 * y / cellResolution;
-				float heightData = 16 * wnam->data[8 - mappedY].data[mappedX];
+				float heightData = 16 * wnam->height[8 - mappedY][mappedX];
 				float clippedData = heightData / 2048;
 				clippedData = std::max(-1.0f, std::min(clippedData, 1.0f));
 
@@ -355,6 +436,69 @@ namespace UIEXT {
 	}
 
 	//
+	// Draw base map on game startup.
+	//
+
+	struct BaseMapCacheEntry {
+		TES3::Land* land;
+		WNAM heightfield;
+
+		BaseMapCacheEntry(TES3::Land* _land, WNAM& _heightfield) : land(_land), heightfield(_heightfield) {}
+	};
+	std::vector<BaseMapCacheEntry> baseMapCache;
+	const size_t BaseMapCacheReservation = 16000;
+
+	void __fastcall OnStartupDrawBaseCell(TES3::Land* land, DWORD _UNUSED_, WNAM* wnam, NI::PixelRGB* pixelBuffer, unsigned int pixelBufferSize) {
+		// Cache heightmap data until all cells have loaded, so that the map dimensions can be determined before drawing.
+		if (baseMapCache.empty()) {
+			baseMapCache.reserve(BaseMapCacheReservation);
+
+			if (autoMapBounds) {
+				cellMinX = cellMaxX = cellMinY = cellMaxY = 0;
+			}
+		}
+
+		baseMapCache.emplace_back(land, *wnam);
+
+		// Adjust auto map bounds.
+		if (autoMapBounds) {
+			cellMinX = std::min(cellMinX, land->gridX);
+			cellMaxX = std::max(cellMaxX, land->gridX);
+			cellMinY = std::min(cellMinY, land->gridY);
+			cellMaxY = std::max(cellMaxY, land->gridY);
+		}
+	}
+
+	void OnInitializedUpdateMap() {
+		// MWSE initialized event handler.
+
+		if (autoMapBounds) {
+			// Clamp map bounds to something reasonable, to avoid allocating an oversized texture.
+			cellMinX = std::max(cellMinX, -300);
+			cellMaxX = std::min(cellMaxX, 300);
+			cellMinY = std::max(cellMinY, -300);
+			cellMaxY = std::min(cellMaxY, 300);
+
+			// Re-allocate map.
+			OnAllocateMapDefault(TES3::DataHandler::get()->nonDynamicData);
+		}
+
+		// Draw map.
+		auto pixelData = TES3::DataHandler::get()->nonDynamicData->mapTexture->pixelData;
+		auto pixelBuffer = (NI::PixelRGB*)&pixelData->pixels[pixelData->offsets[0]];
+		auto pixelBufferSize = pixelData->offsets[1] - pixelData->offsets[0];
+
+		for (auto& entry : baseMapCache) {
+			OnDrawBaseCell(entry.land, 0, &entry.heightfield, pixelBuffer, pixelBufferSize);
+
+		}
+
+		// Clean up 
+		baseMapCache.clear();
+		baseMapCache.shrink_to_fit();
+	}
+
+	//
 	// UI functions.
 	//
 
@@ -371,6 +515,16 @@ namespace UIEXT {
 	TES3::Vector3 lastExteriorPlayerPosition;
 	float lastPlayerRotation = 0.0f;
 
+	struct TES3MapControllerStub {
+		int unknown1[7];
+		float northMarkerRotationDegrees;
+		int unknown2[9];
+	};
+	float getMapControllerNorthMarkerOffset() {
+		TES3MapControllerStub* mapController = reinterpret_cast<TES3MapControllerStub*>(TES3::WorldController::get()->mapController);
+		return mapController->northMarkerRotationDegrees * 0.017453279f;
+	}
+
 	bool __cdecl OnUpdatePlayerPosition(TES3::UI::Element* mapMenu) {
 		// mapMenu may be either the main map and mini-map.
 
@@ -382,59 +536,60 @@ namespace UIEXT {
 			}
 		}
 
-        if (mapMenu == TES3::UI::findMenu(*ui_id_MenuMulti)) {
-            // Mini-map.
-            
-            // Update map marker rotation.
-            const auto player = TES3::WorldController::get()->getMobilePlayer();
-            float playerZRot = player->reference->orientation.z * -1;
-            auto localMarker = mapMenu->findChild(*ui_id_MenuMap_local_marker);
+		// Get player marker rotation, accounting for NorthMarker in interiors.
+		const auto player = TES3::WorldController::get()->getMobilePlayer();
+		float playerZRot = player->reference->orientation.z * -1;
+		playerZRot += getMapControllerNorthMarkerOffset();
 
-            TES3::Matrix33 rotationMatrix;
-            rotationMatrix.toRotationY(playerZRot);
+		if (mapMenu == TES3::UI::findMenu(*ui_id_MenuMulti)) {
+			// Mini-map.
+			auto localMarker = mapMenu->findChild(*ui_id_MenuMap_local_marker);
 
-            localMarker->sceneNode->setLocalRotationMatrix(&rotationMatrix);
-            localMarker->sceneNode->update();
-        }
-        else {
-            // Main map.
+			// Update map marker rotation.
+			TES3::Matrix33 rotationMatrix;
+			rotationMatrix.toRotationY(playerZRot);
 
-            // Get our local/world markers.
-            auto localMarker = mapMenu->findChild(*ui_id_MenuMap_local_marker);
-            auto worldMarker = mapMenu->findChild(*ui_id_MenuMap_world_marker);
-            auto worldMapPane = mapMenu->findChild(*ui_id_MenuMap_world_pane);
-            if (localMarker == nullptr || worldMarker == nullptr) {
-                return false;
-            }
+			localMarker->sceneNode->setLocalRotationMatrix(&rotationMatrix);
+			localMarker->sceneNode->update();
+		}
+		else {
+			// Main map.
 
-            // Update map marker rotation.
-            const auto player = TES3::WorldController::get()->getMobilePlayer();
-            float playerZRot = player->reference->orientation.z * -1;
-            if (lastPlayerRotation != playerZRot) {
-                TES3::Matrix33 rotationMatrix;
-                rotationMatrix.toRotationY(playerZRot);
+			// Get our local/world markers.
+			auto localMarker = mapMenu->findChild(*ui_id_MenuMap_local_marker);
+			auto worldMarker = mapMenu->findChild(*ui_id_MenuMap_world_marker);
+			auto worldMapPane = mapMenu->findChild(*ui_id_MenuMap_world_pane);
+			if (localMarker == nullptr || worldMarker == nullptr) {
+				return false;
+			}
 
-                localMarker->sceneNode->setLocalRotationMatrix(&rotationMatrix);
-                localMarker->sceneNode->update();
-                worldMarker->sceneNode->setLocalRotationMatrix(&rotationMatrix);
-                worldMarker->sceneNode->update();
+			// Update map marker rotation.
+			if (lastPlayerRotation != playerZRot) {
+				TES3::Matrix33 rotationMatrix;
+				rotationMatrix.toRotationY(playerZRot);
 
-                lastPlayerRotation = playerZRot;
-            }
+				localMarker->sceneNode->setLocalRotationMatrix(&rotationMatrix);
+				localMarker->sceneNode->update();
+				worldMarker->sceneNode->setLocalRotationMatrix(&rotationMatrix);
+				worldMarker->sceneNode->update();
 
-            // Update map marker position.
+				lastPlayerRotation = playerZRot;
+			}
+
+			// Update map marker position.
 			auto localMap = mapMenu->findChild(*ui_id_MenuMap_local_map);
 			auto worldMap = mapMenu->findChild(*ui_id_MenuMap_world_map);
 			auto playerPosition = player->reference->position;
 
 			if (localMap && localMap->visibleAtLastUpdate) {
-				auto localMapPos = playerPosition;
-
 				const auto TES3UI_MenuMap_calcLocalMapPos = reinterpret_cast<void(__cdecl*)(TES3::Vector3*, int)>(0x5ED190);
+				auto localMapPos = playerPosition;
 				TES3UI_MenuMap_calcLocalMapPos(&localMapPos, 512);
+
 				localMarker->positionX = localMapPos.x;
 				localMarker->positionY = localMapPos.y;
 				localMarker->flagPosChanged = true;
+				mapMenu->timingUpdate();
 			}
 			if (worldMap && worldMap->visibleAtLastUpdate) {
 				if (TES3::DataHandler::get()->currentInteriorCell == nullptr) {
@@ -448,9 +603,9 @@ namespace UIEXT {
 					}
 				}
 			}
-        }
+		}
 
-        return true;
+		return true;
 	}
 
 	TES3::Cell* __fastcall OnFindCellAtMouse(TES3::UI::Element* element, DWORD _UNUSED_, int mouseX, int mouseY) {
@@ -553,18 +708,26 @@ namespace UIEXT {
 		return 1;
 	}
 
+	int onInitialized(lua_State* L) {
+		OnInitializedUpdateMap();
+		return 0;
+	}
+
+	int onLoaded(lua_State* L) {
+		OnLoadedUpdateMap();
+		return 0;
+	}
+
 	// Initialize our patches based on a lua function, so it can be semi-easily disabled.
 	int patchWorldMap(lua_State* L) {
 		luaState = L;
-
-		//std::srand(std::time(nullptr));
 
 		// Load config from lua.
 		lua_settop(L, 1);
 		luaL_checktype(L, 1, LUA_TTABLE);
 
-		lua_getfield(L, 1, "autoExpand");
-		updateMapBounds = lua_toboolean(L, -1);
+		lua_getfield(L, 1, "autoMapBounds");
+		autoMapBounds = lua_toboolean(L, -1);
 		lua_pop(L, 1);
 
 		lua_getfield(L, 1, "cellResolution");
@@ -586,6 +749,11 @@ namespace UIEXT {
 		lua_getfield(L, 1, "maxY");
 		cellMaxY = luaL_checknumber(L, -1);
 		lua_pop(L, 1);
+
+		// If auto-calculating bounds, set a small initial size, so that the initial texture allocation isn't a big block of memory.
+		if (autoMapBounds) {
+			cellMinX = cellMaxX = cellMinY = cellMaxY = 0;
+		}
 
 		// Default map. We need to remove some code so we can do our own thing.
 		mwse::genCallEnforced(0x4BB5A0, 0x4C8070, reinterpret_cast<DWORD>(OnAllocateMapDefault));
@@ -617,8 +785,10 @@ namespace UIEXT {
 		mwse::genCallUnprotected(0x4C8560, reinterpret_cast<DWORD>(OnDrawLocationMarker));
 		mwse::genJumpUnprotected(0x4C8565, 0x4C864A);
 
-		// Draw base cells.
-		mwse::genCallEnforced(0x4CACE7, 0x4CE800, reinterpret_cast<DWORD>(OnDrawBaseCell));
+		// Draw base cells on startup. This caches cell data to be drawn later.
+		mwse::genCallEnforced(0x4CACE7, 0x4CE800, reinterpret_cast<DWORD>(OnStartupDrawBaseCell));
+
+		// Draw base cells on new game/load game.
 		mwse::genCallEnforced(0x4CEBB5, 0x4CE800, reinterpret_cast<DWORD>(OnDrawBaseCell));
 
 		// Update from player movement.
@@ -649,12 +819,22 @@ namespace UIEXT {
 	int getMapData(lua_State* L) {
 		lua_createtable(L, 0, 4);
 
+		lua_pushboolean(L, autoMapBounds);
+		lua_setfield(L, -2, "autoMapBounds");
 		lua_pushnumber(L, cellResolution);
 		lua_setfield(L, -2, "cellResolution");
 		lua_pushnumber(L, mapWidth);
 		lua_setfield(L, -2, "mapWidth");
 		lua_pushnumber(L, mapHeight);
 		lua_setfield(L, -2, "mapHeight");
+		lua_pushnumber(L, cellMinX);
+		lua_setfield(L, -2, "minX");
+		lua_pushnumber(L, cellMaxX);
+		lua_setfield(L, -2, "maxX");
+		lua_pushnumber(L, cellMinY);
+		lua_setfield(L, -2, "minY");
+		lua_pushnumber(L, cellMaxY);
+		lua_setfield(L, -2, "maxY");
 
 		return 1;
 	}

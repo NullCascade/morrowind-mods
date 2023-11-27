@@ -1,4 +1,5 @@
 local common = require("UI Expansion.common")
+local externMapPlugin = include("uiexp_map_extension")
 
 --- Setup MCM.
 local function registerModConfig()
@@ -172,32 +173,57 @@ local function registerModConfig()
 		end
 
 		-- Category: Map extension plugin
-		do
-			local category = pageFeatures:createCategory({ label = common.i18n("mcm.category.mapExtension") })
+		if externMapPlugin then
+			local category = pageFeatures:createCategory({
+				label = common.i18n("mcm.category.mapExtension"),
+				postCreate = function(self)
+					local mapData = externMapPlugin.getMapData()
 
+					local c = self.components[1]
+					c.elements.info.text = common.i18n("mcm.mapExtension.mapBounds.label", { mapData.minX, mapData.minY, mapData.maxX, mapData.maxY })
+					c = self.components[2]
+					c.elements.info.text = common.i18n("mcm.mapExtension.textureSize.label", { mapData.mapWidth, mapData.mapHeight })
+				end
+			})
+
+			category:createActiveInfo({
+				text = "",
+				description = common.i18n("mcm.mapExtension.mapBounds.description"),
+			})
+			category:createActiveInfo({
+				text = "",
+				description = common.i18n("mcm.mapExtension.textureSize.description"),
+			})
+
+			category:createOnOffButton({
+				label = common.i18n("mcm.mapExtension.autoMapBounds.label"),
+				description = common.i18n("mcm.mapExtension.autoMapBounds.description"),
+				variable = mwse.mcm.createTableVariable({ id = "autoMapBounds", table = common.config.mapConfig }),
+				restartRequired = true,
+			})
 			category:createSlider({
 				label = common.i18n("mcm.mapExtension.minX.label"),
 				variable = mwse.mcm.createTableVariable({ id = "minX", table = common.config.mapConfig }),
-				min = -250,
+				min = -300,
 				max = -28, 
 			})
 			category:createSlider({
 				label = common.i18n("mcm.mapExtension.minY.label"),
 				variable = mwse.mcm.createTableVariable({ id = "minY", table = common.config.mapConfig }),
-				min = -250,
+				min = -300,
 				max = -28, 
 			})
 			category:createSlider({
 				label = common.i18n("mcm.mapExtension.maxX.label"),
 				variable = mwse.mcm.createTableVariable({ id = "maxX", table = common.config.mapConfig }),
 				min = 28,
-				max = 250, 
+				max = 300, 
 			})
 			category:createSlider({
 				label = common.i18n("mcm.mapExtension.maxY.label"),
 				variable = mwse.mcm.createTableVariable({ id = "maxY", table = common.config.mapConfig }),
 				min = 28,
-				max = 250, 
+				max = 300, 
 			})
 		end
 

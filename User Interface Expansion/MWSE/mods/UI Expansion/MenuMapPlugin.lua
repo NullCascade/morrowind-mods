@@ -1,13 +1,35 @@
 local common = require("UI Expansion.common")
 
--- Hook map changes.
-local extern = include("uiexp_map_extension")
-if (extern == nil) then
+local currentZoom = 2.0
+local zoomBar = nil
+
+-- Check for plugin.
+local externMapPlugin = include("uiexp_map_extension")
+if (externMapPlugin == nil) then
 	return
 end
 
-local currentZoom = 2.0
-local zoomBar = nil
+-- Initialization code.
+do
+	-- Redraw map after all cells are loaded.
+	externMapPlugin.onInitialized()
+
+	-- Update cell bounds config.
+	local data = externMapPlugin.getMapData()
+	local mapConfig = common.config.mapConfig
+
+	mapConfig.minX = data.minX
+	mapConfig.minY = data.minY
+	mapConfig.maxX = data.maxX
+	mapConfig.maxY = data.maxY
+
+	mwse.saveConfig("UI Expansion", common.config)
+end
+
+-- Perform map adjustments after a save is loaded.
+event.register(tes3.event.loaded, externMapPlugin.onLoaded)
+
+
 
 local function updateNewControls()
 	local mapMenu = tes3ui.findMenu("MenuMap")
@@ -26,6 +48,21 @@ local function updateNewControls()
 	newSwitchButton.visible = true
 end
 
+local function setZoomBar(value)
+	zoomBar.widget.current = value
+	zoomBar:triggerEvent("PartScrollBar_changed")
+	zoomBar:getTopLevelMenu():updateLayout()
+end
+
+local function onMouseWheel(e)
+	local delta = e.data0
+	if (delta == 0) then
+		return
+	end
+
+	setZoomBar(math.clamp(zoomBar.widget.current + 10 * delta / math.abs(delta), 0, 300))
+end
+
 local function onMapMenuActivated(e)
 	local mapMenu = e.element
 
@@ -35,8 +72,16 @@ local function onMapMenuActivated(e)
 	newBottomBlock.absolutePosAlignX = 1.0
 	newBottomBlock.absolutePosAlignY = 1.0
 
-	-- The world map itself. Cache it here to show/hide the zoom bar based on this element's visibility.
+	-- The world map itself. Attach scrollwheel events.
 	local worldMap = mapMenu:findChild("MenuMap_world")
+	worldMap:registerAfter(tes3.uiEvent.mouseScrollUp, onMouseWheel)
+	worldMap:registerAfter(tes3.uiEvent.mouseScrollDown, onMouseWheel)
+
+	-- Small magnifying glass icon. Reset zoom on click.
+	zoomIcon = newBottomBlock:createImage{ path = "Icons\\ui_exp\\map_zoom.dds" }
+	zoomIcon:register(tes3.uiEvent.mouseClick, function()
+		setZoomBar(100)
+	end)
 
 	-- Create a horizontal bar that lets us zoom in/out.
 	zoomBar = newBottomBlock:createSlider{ current = (currentZoom - 1) * 100, max = 300, step = 1, jump = 10 }
@@ -45,25 +90,24 @@ local function onMapMenuActivated(e)
 	zoomBar.borderRight = 12
 	zoomBar:register("PartScrollBar_changed", function()
 		currentZoom = zoomBar:getPropertyInt("PartScrollBar_current") / 100 + 1.0
-		extern.setMapZoom(currentZoom)
+		externMapPlugin.setMapZoom(currentZoom)
 	end)
-	extern.setMapZoom(currentZoom)
+	externMapPlugin.setMapZoom(currentZoom)
 
 	-- Create a button to centre the map on the player.
-	local recentreButton = newBottomBlock:createButton{text = common.i18n("mapExtension.recentre")}
-	recentreButton:register("mouseClick", function()
-		extern.centreOnPlayer()
-	end)
+	local recentreButton = newBottomBlock:createButton{ text = common.i18n("mapExtension.recentre") }
+	recentreButton.borderTop = 6
+	recentreButton:register(tes3.uiEvent.mouseClick, externMapPlugin.centreOnPlayer)
 	
 	-- Find the old button so we can reuse it.
 	local oldButton = mapMenu:findChild("MenuMap_switch")
 	oldButton.visible = false
 
 	-- Create a new button in a new container, and map it to the old map switch button.
-	local newSwitchButton = newBottomBlock:createButton{ id = "UIEXP:MapSwitch" }
-	newSwitchButton.text = oldButton.text
-	newSwitchButton:register("mouseClick", function()
-		oldButton:triggerEvent("mouseClick")
+	local newSwitchButton = newBottomBlock:createButton{ id = "UIEXP:MapSwitch", text = oldButton.text }
+	newSwitchButton.borderTop = 6
+	newSwitchButton:register(tes3.uiEvent.mouseClick, function()
+		oldButton:triggerEvent(tes3.uiEvent.mouseClick)
 		updateNewControls()
 	end)
 end
@@ -74,19 +118,3 @@ local function onEnterMenuMode(e)
 	updateNewControls()
 end
 event.register(tes3.event.menuEnter, onEnterMenuMode)
-
-local function onMouseWheel(e)
-	if (not tes3ui.menuMode()) then return end
-	if (tes3.getTopMenu().name ~= "MenuMap") then return end
-
-	local delta = e.delta
-	if (delta == 0) then
-		return
-	end
-
-	zoomBar.widget.current = math.clamp(zoomBar.widget.current + 10 * delta / math.abs(delta), 0, 300)
-	zoomBar:triggerEvent("PartScrollBar_changed")
-	zoomBar:getTopLevelParent():updateLayout()
-	zoomBar:updateLayout()
-end
-event.register(tes3.event.mouseWheel, onMouseWheel)
