@@ -38,7 +38,12 @@ namespace UIEXT {
 	static unsigned int mapWidth = 0;
 	static unsigned int mapHeight = 0;
 
+	typedef unsigned char VisitedFlag;
+	static std::vector<VisitedFlag> visitedMapCells;
+
 	float zoomLevel = 1.0;
+
+	const NI::PixelRGB seaColor{ 24, 36, 33 };
 
 	unsigned long getNextHighestPowerOf2(unsigned long value) {
 		value--;
@@ -51,14 +56,25 @@ namespace UIEXT {
 		return value;
 	}
 
+	bool isPositionInMap(int gridX, int gridY) {
+		return !(gridX < cellMinX || gridX > cellMaxX || gridY < cellMinY || gridY > cellMaxY);
+	}
+
 	//
 	// When allocating space for our map, use the new size.
 	//
 
 	const auto TES3_NiPixelData_ctor = reinterpret_cast<void* (__thiscall*)(void*, unsigned int, unsigned int, void*, unsigned int)>(0x6D4FC0);
 	void* __fastcall OnCreateMapPixelData(void* pixelData, DWORD _UNUSUED_, unsigned int width, unsigned int height, void* format, unsigned int mipMapLevels) {
-		mapWidth = getNextHighestPowerOf2((cellMaxX - cellMinX + 1) * cellResolution);
-		mapHeight = getNextHighestPowerOf2((cellMaxY - cellMinY + 1) * cellResolution);
+		int cellWidth = cellMaxX - cellMinX + 1;
+		int cellHeight = cellMaxY - cellMinY + 1;
+
+		// Allocate visited cells data and set to unvisited.
+		visitedMapCells.resize(cellWidth * cellHeight, 0);
+
+		// Allocate map texture.
+		mapWidth = getNextHighestPowerOf2(cellWidth * cellResolution);
+		mapHeight = getNextHighestPowerOf2(cellHeight * cellResolution);
 		return TES3_NiPixelData_ctor(pixelData, mapWidth, mapHeight, format, mipMapLevels);
 	}
 
@@ -75,11 +91,9 @@ namespace UIEXT {
 		auto pixelData = nonDynamicData->mapTexture->pixelData;
 		size_t length = pixelData->widths[0] * pixelData->heights[0];
 		auto pixels = reinterpret_cast<NI::PixelRGB*>(&pixelData->pixels[pixelData->offsets[0]]);
+
 		for (size_t i = 0; i < length; i++) {
-			pixels->r = 25;
-			pixels->g = 36;
-			pixels->b = 33;
-			pixels++;
+			*pixels++ = seaColor;
 		}
 	}
 
@@ -98,12 +112,12 @@ namespace UIEXT {
 		}
 
 		auto pixelData = mapTexture->pixelData;
-		auto pixelBuffer = (NI::PixelRGB*)&pixelData->pixels[pixelData->offsets[0]];
+		auto pixelBuffer = reinterpret_cast<NI::PixelRGB*>(&pixelData->pixels[pixelData->offsets[0]]);
 		auto pixelBufferSize = pixelData->offsets[1] - pixelData->offsets[0];
 
 		// Check drawable map bounds.
 		int gridX = cell->getGridX(), gridY = cell->getGridY();
-		if (gridX < cellMinX || gridX > cellMaxX || gridY < cellMinY || gridY > cellMaxY) {
+		if (!isPositionInMap(gridX, gridY)) {
 			return;
 		}
 
@@ -148,12 +162,16 @@ namespace UIEXT {
 	} extendedHeader;
 	static_assert(sizeof(MAPE) == 0xC, "MAPE failed size validation");
 
-	const unsigned int MAPE_ChunkTag = 'EPAM'; // "MAPE" tag, little endian
+	const unsigned int MAPE_ChunkTag = 'EPAM'; // "MAPE", little endian
+	const unsigned int VSIT_ChunkTag = 'TISV'; // "VSIT", little endian
 	bool flagRedrawBaseMap = false;
 
 	//
 	// Loading from a save. The loader expects MAPH values of 512 and 9. It will stop loading if given other values.
 	//
+
+	const auto TES3_GameFile_fetchNextChunk = reinterpret_cast<bool(__thiscall*)(TES3::GameFile*)>(0x4B67F0);
+	const auto TES3_GameFile_getChunkHeader = reinterpret_cast<unsigned int(__thiscall*)(TES3::GameFile*)>(0x4B67C0);
 
 	bool __fastcall OnLoadMAPHChunk(TES3::GameFile* saveFile, DWORD _UNUSED_, MAPH* data, unsigned int dataSize) {
 		// Actually load our data.
@@ -163,6 +181,8 @@ namespace UIEXT {
 
 		// Redraw base map and cell markers by default, including any early out conditions.
 		flagRedrawBaseMap = true;
+		// Reset visited cell data.
+		std::fill(visitedMapCells.begin(), visitedMapCells.end(), 0);
 
 		// Check if the map is vanilla format.
 		if (data->mapResolution == 512 && data->cellResolution == 9) {
@@ -173,12 +193,10 @@ namespace UIEXT {
 		// Check for extended format map.
 		if (data->mapResolution == -1) {
 			// Read extended map header.
-			const auto TES3_GameFile_fetchNextChunk = reinterpret_cast<bool(__thiscall*)(TES3::GameFile*)>(0x4B67F0);
 			if (!TES3_GameFile_fetchNextChunk(saveFile)) {
 				return false;
 			}
 
-			const auto TES3_GameFile_getChunkHeader = reinterpret_cast<unsigned int(__thiscall*)(TES3::GameFile*)>(0x4B67C0);
 			if (TES3_GameFile_getChunkHeader(saveFile) == MAPE_ChunkTag) {
 				if (!saveFile->readChunkData(&extendedHeader, sizeof(extendedHeader))) {
 					return false;
@@ -196,7 +214,7 @@ namespace UIEXT {
 	bool __fastcall OnLoadMAPDChunk(TES3::GameFile* saveFile, DWORD _UNUSED_, char* data, unsigned int dataSize) {
 		auto mapTexture = TES3::DataHandler::get()->nonDynamicData->mapTexture;
 		auto pixelData = mapTexture->pixelData;
-		auto pixelBuffer = (NI::PixelRGB*)&pixelData->pixels[pixelData->offsets[0]];
+		auto pixelBuffer = reinterpret_cast<NI::PixelRGB*>(&pixelData->pixels[pixelData->offsets[0]]);
 		auto pixelBufferSize = pixelData->offsets[1] - pixelData->offsets[0];
 
 		if (extendedHeader.version == 1) {
@@ -231,10 +249,35 @@ namespace UIEXT {
 				destPtr += sizeof(NI::PixelRGB) * mapWidth;
 			}
 
+			// Visited cell data.
+			if (TES3_GameFile_fetchNextChunk(saveFile) && TES3_GameFile_getChunkHeader(saveFile) == VSIT_ChunkTag) {
+				// Read visited data.
+				size_t dataSize = saveFile->currentChunkHeader.size;
+				auto bufferVisited = std::make_unique<char[]>(dataSize);
+				saveFile->readChunkData(bufferVisited.get(), dataSize);
+
+				// Copy loaded visited cell data to correct location.
+				int srcWidth = extendedHeader.cellMaxX - extendedHeader.cellMinX + 1;
+				int srcHeight = extendedHeader.cellMaxY - extendedHeader.cellMinY + 1;
+				int destWidth = cellMaxX - cellMinX + 1;
+				int copyWidth = (maxX - minX + 1), copyHeight = (maxY - minY + 1);
+
+				size_t srcOffset = (extendedHeader.cellMaxY - maxY) * srcWidth + (minX - extendedHeader.cellMinX);
+				size_t destOffset = (cellMaxY - maxY) * destWidth + (minX - cellMinX);
+				const char* srcPtr = reinterpret_cast<char*>(bufferVisited.get()) + sizeof(VisitedFlag) * srcOffset;
+				char* destPtr = reinterpret_cast<char*>(visitedMapCells.data()) + sizeof(VisitedFlag) * destOffset;
+
+				for (int y = 0; y < copyHeight; y++) {
+					memcpy(destPtr, srcPtr, sizeof(VisitedFlag) * copyWidth);
+					srcPtr += sizeof(VisitedFlag) * srcWidth;
+					destPtr += sizeof(VisitedFlag) * destWidth;
+				}
+			}
+
 			flagRedrawBaseMap = false;
 		}
 		else {
-			// Don't load vanilla map image, but fill in base map and visited cell markers after loading.
+			// Don't load vanilla map image, but fill in base map and cell markers after loading.
 			flagRedrawBaseMap = true;
 		}
 
@@ -242,26 +285,145 @@ namespace UIEXT {
 	}
 
 	const auto TES3_Land_loadAndDrawBaseMap = reinterpret_cast<bool(__thiscall*)(TES3::Land*, unsigned char*)>(0x4CEAD0);
-	void OnLoadedUpdateMap() {
-		if (flagRedrawBaseMap) {
-			auto records = TES3::DataHandler::get()->nonDynamicData;
-			auto pixelData = records->mapTexture->pixelData;
-			auto pixelBuffer = &pixelData->pixels[pixelData->offsets[0]];
+	void RedrawBaseMapRect(int minX, int maxX, int minY, int maxY, bool clearMarkers) {
+		auto records = TES3::DataHandler::get()->nonDynamicData;
+		auto pixelData = records->mapTexture->pixelData;
+		auto pixelBuffer = &pixelData->pixels[pixelData->offsets[0]];
+		auto pixelBufferSize = pixelData->offsets[1] - pixelData->offsets[0];
 
-			// Redraw entire base map after a saved map has been discarded, so that no cells carry over from the previous game.
-			for (auto cell : *records->cells) {
-				if (!cell->getIsInterior()) {
-					auto landscape = cell->variantData.exterior.landscape;
-					if (landscape) {
-						TES3_Land_loadAndDrawBaseMap(landscape, pixelBuffer);
+		// The region bounds are inclusive.
+		// Ensure clear region is inside the texture and correctly sized.
+		minX = std::max(minX, cellMinX);
+		maxX = std::min(maxX, cellMaxX);
+		minY = std::max(minY, cellMinY);
+		maxY = std::min(maxY, cellMaxY);
+
+		if (minX > maxX || minY > maxY) {
+			return;
+		}
+
+		// Clear visited data for cells.
+		for (int vy = minY; vy <= maxY; vy++) {
+			for (int vx = minX; vx <= maxX; vx++) {
+				visitedMapCells.at((cellMaxY - vy) * (cellMaxX - cellMinX + 1) + (vx - cellMinX)) = 0;
+			}
+		}
+
+		// Clear all cells in bounds to sea, as the next part will only render cells with landscape records.
+		int offsetX = (minX - cellMinX) * cellResolution, offsetY = (cellMaxY - maxY) * cellResolution;
+		int clearWidth = (maxX - minX + 1) * cellResolution, clearHeight = (maxY - minY + 1) * cellResolution;
+		auto pixels = reinterpret_cast<NI::PixelRGB*>(pixelBuffer);
+
+		for (size_t y = 0; y < clearHeight; y++) {
+			size_t pixelOffset = (y + offsetY) * mapWidth + offsetX;
+
+			for (size_t x = 0; x < clearWidth; x++, pixelOffset++) {
+				if (pixelOffset * sizeof(NI::PixelRGB) < pixelBufferSize) {
+					pixels[pixelOffset] = seaColor;
+				}
+			}
+		}
+
+		// Redraw cells within bounds parameters.
+		for (auto cell : *records->cells) {
+			if (cell->getIsInterior()) {
+				continue;
+			}
+
+			int gridX = cell->variantData.exterior.gridX, gridY = cell->variantData.exterior.gridY;
+			if (gridX < minX || gridX > maxX || gridY < minY || gridY > maxY) {
+				continue;
+			}
+
+			auto landscape = cell->variantData.exterior.landscape;
+			if (landscape) {
+				// Redraw base land. This is not guaranteed to redraw the cell if data is missing.
+				TES3_Land_loadAndDrawBaseMap(landscape, pixelBuffer);
+			}
+
+			// Clear marked locations.
+			if (clearMarkers) {
+				cell->cellFlags &= ~TES3::CellFlag::MarkerDrawn;
+			}
+		}
+
+		// Signal map change to renderer.
+		pixelData->revisionID++;
+	}
+
+	void RedrawUnvisitedCells() {
+		auto records = TES3::DataHandler::get()->nonDynamicData;
+		auto pixelData = records->mapTexture->pixelData;
+		auto pixelBuffer = &pixelData->pixels[pixelData->offsets[0]];
+		auto pixelBufferSize = pixelData->offsets[1] - pixelData->offsets[0];
+
+		// Scan whole map for unvisited cells. This will catch cells that used to exist but are not present in the current masters.
+		for (int gridY = cellMinY; gridY <= cellMaxY; gridY++) {
+			for (int gridX = cellMinX; gridX <= cellMaxX; gridX++) {
+				// Unvisited cells only.
+				auto visited = visitedMapCells.at((cellMaxY - gridY) * (cellMaxX - cellMinX + 1) + (gridX - cellMinX));
+				if (visited) {
+					continue;
+				}
+
+				// Reset cell to sea. This clears cells which no longer have land data.
+				// Note that having landscape record does not mean there is always land data.
+				auto pixels = reinterpret_cast<NI::PixelRGB*>(pixelBuffer);
+				int offsetX = (gridX - cellMinX) * cellResolution;
+				int offsetY = (cellMaxY - gridY) * cellResolution;
+
+				for (size_t y = 0; y < cellResolution; y++) {
+					size_t pixelOffset = (y + offsetY) * mapWidth + offsetX;
+
+					for (size_t x = 0; x < cellResolution; x++, pixelOffset++) {
+						if (pixelOffset * sizeof(NI::PixelRGB) < pixelBufferSize) {
+							pixels[pixelOffset] = seaColor;
+						}
 					}
 				}
 
-				// Redraw marked locations.
-				if (cell->cellFlags & TES3::CellFlag::MarkerDrawn) {
-					OnDrawLocationMarker(cell);
+				auto cell = records->getCellByGrid(gridX, gridY);
+				if (cell) {
+					auto landscape = cell->variantData.exterior.landscape;
+					if (landscape) {
+						// Redraw base land. This is not guaranteed to redraw the cell if data is missing.
+						TES3_Land_loadAndDrawBaseMap(landscape, pixelBuffer);
+					}
+
+					// Recheck marked locations.
+					if (cell->cellFlags & TES3::CellFlag::MarkerDrawn) {
+						if (cell->name && landscape) {
+							// Redraw marker cell if it still likely to be a real location.
+							OnDrawLocationMarker(cell);
+						}
+						else {
+							// Clear marker flag if the land or location is no longer there.
+							cell->cellFlags &= ~TES3::CellFlag::MarkerDrawn;
+						}
+					}
 				}
 			}
+		}
+
+		// Signal map change to renderer.
+		pixelData->revisionID++;
+	}
+
+	void OnLoadedUpdateMap(bool isNewGame) {
+		auto records = TES3::DataHandler::get()->nonDynamicData;
+
+		if (isNewGame) {
+			// Reset visited cell data on new game.
+			std::fill(visitedMapCells.begin(), visitedMapCells.end(), 0);
+		}
+
+		if (flagRedrawBaseMap) {
+			// Redraw entire base map after a saved map has been discarded, so that no cells carry over from the previous game.
+			RedrawBaseMapRect(cellMinX, cellMaxX, cellMinY, cellMaxY, false);
+		}
+		else if (!records->allSavegameMastersMatchLoadOrder) {
+			// Redraw unvisited cells when any master is changed.
+			RedrawUnvisitedCells();
 		}
 	}
 
@@ -306,6 +468,10 @@ namespace UIEXT {
 			TES3_GameFile_writeRaw(saveFile, data, sizeof(NI::PixelRGB) * exactWidth);
 		}
 		saveFile->bytesWritten += sizeof(chunkHeader) + dataSize;
+
+		// Write visited map cell data.
+		saveFile->writeChunkData(VSIT_ChunkTag, visitedMapCells.data(), visitedMapCells.size() * sizeof(VisitedFlag));
+
 		return 0;
 	}
 
@@ -329,16 +495,16 @@ namespace UIEXT {
 		}
 
 		const auto worldController = TES3::WorldController::get();
-		const auto sourceBuffer = (NI::PixelRGBA*)&textureSource->pixelData->pixels[textureSource->pixelData->offsets[0]];
+		const auto sourceBuffer = reinterpret_cast<NI::PixelRGBA*>(&textureSource->pixelData->pixels[textureSource->pixelData->offsets[0]]);
 		const auto sourceWidth = worldController->mapRenderTarget.targetWidth;
 		const auto sourceDivision = float(worldController->mapRenderTarget.targetHeight) / float(cellResolution + 1);
 
 		auto pixelData = TES3::DataHandler::get()->nonDynamicData->mapTexture->pixelData;
-		auto pixelBuffer = (NI::PixelRGB*)&pixelData->pixels[pixelData->offsets[0]];
+		auto pixelBuffer = reinterpret_cast<NI::PixelRGB*>(&pixelData->pixels[pixelData->offsets[0]]);
 		auto pixelBufferSize = pixelData->offsets[1] - pixelData->offsets[0];
 
 		int gridX = cell->getGridX(), gridY = cell->getGridY();
-		if (gridX < cellMinX || gridX > cellMaxX || gridY < cellMinY || gridY > cellMaxY) {
+		if (!isPositionInMap(gridX, gridY)) {
 			return;
 		}
 
@@ -364,9 +530,16 @@ namespace UIEXT {
 		}
 		++pixelData->revisionID;
 
+		// Draw marker, or remove marker flag if the cell no longer has a name.
 		if (cell->name) {
 			OnDrawLocationMarker(cell);
 		}
+		else {
+			cell->cellFlags &= ~TES3::CellFlag::MarkerDrawn;
+		}
+
+		// Remember cell was visited.
+		visitedMapCells.at((cellMaxY - gridY) * (cellMaxX - cellMinX + 1) + (gridX - cellMinX)) = 1;
 	}
 
 	//
@@ -383,7 +556,7 @@ namespace UIEXT {
 			return;
 		}
 
-		if (land->gridX < cellMinX || land->gridX > cellMaxX || land->gridY < cellMinY || land->gridY > cellMaxY) {
+		if (!isPositionInMap(land->gridX, land->gridY)) {
 			return;
 		}
 
@@ -485,12 +658,11 @@ namespace UIEXT {
 
 		// Draw map.
 		auto pixelData = TES3::DataHandler::get()->nonDynamicData->mapTexture->pixelData;
-		auto pixelBuffer = (NI::PixelRGB*)&pixelData->pixels[pixelData->offsets[0]];
+		auto pixelBuffer = reinterpret_cast<NI::PixelRGB*>(&pixelData->pixels[pixelData->offsets[0]]);
 		auto pixelBufferSize = pixelData->offsets[1] - pixelData->offsets[0];
 
 		for (auto& entry : baseMapCache) {
 			OnDrawBaseCell(entry.land, 0, &entry.heightfield, pixelBuffer, pixelBufferSize);
-
 		}
 
 		// Clean up 
@@ -677,7 +849,7 @@ namespace UIEXT {
 		return 1;
 	}
 
-	int centreOnPlayer(lua_State* L) {
+	int centerOnPlayer(lua_State* L) {
 		auto menuMap = TES3::UI::findMenu(*ui_id_MenuMap);
 		auto worldMap = menuMap->findChild(*ui_id_MenuMap_world_pane);
 		if (worldMap == nullptr) {
@@ -708,13 +880,44 @@ namespace UIEXT {
 		return 1;
 	}
 
+	int redrawCellRect(lua_State* L) {
+		lua_settop(L, 1);
+		luaL_checktype(L, 1, LUA_TTABLE);
+
+		lua_getfield(L, 1, "minX");
+		int minX = luaL_checknumber(L, -1);
+		lua_pop(L, 1);
+
+		lua_getfield(L, 1, "maxX");
+		int maxX = luaL_checknumber(L, -1);
+		lua_pop(L, 1);
+
+		lua_getfield(L, 1, "minY");
+		int minY = luaL_checknumber(L, -1);
+		lua_pop(L, 1);
+
+		lua_getfield(L, 1, "maxY");
+		int maxY = luaL_checknumber(L, -1);
+		lua_pop(L, 1);
+
+		RedrawBaseMapRect(minX, maxX, minY, maxY, true);
+		return 0;
+	}
+
 	int onInitialized(lua_State* L) {
 		OnInitializedUpdateMap();
 		return 0;
 	}
 
 	int onLoaded(lua_State* L) {
-		OnLoadedUpdateMap();
+		lua_settop(L, 1);
+		luaL_checktype(L, 1, LUA_TTABLE);
+
+		lua_getfield(L, 1, "newGame");
+		bool isNewGame = lua_toboolean(L, -1);
+		lua_pop(L, 1);
+
+		OnLoadedUpdateMap(isNewGame);
 		return 0;
 	}
 
@@ -773,7 +976,7 @@ namespace UIEXT {
 		mwse::genCallEnforced(0x4BCCBC, 0x4B6BA0, reinterpret_cast<DWORD>(OnSaveMAPDChunk));
 		mwse::genCallEnforced(0x4BCCBC, 0x736A70, reinterpret_cast<DWORD>(OnSaveMAPDChunk)); // MCP
 
-		// Draw cells.
+		// Draw visited cells.
 		mwse::genCallEnforced(0x4E32FE, 0x4C81C0, reinterpret_cast<DWORD>(OnDrawCell));
 
 		// Draw cell location markers.

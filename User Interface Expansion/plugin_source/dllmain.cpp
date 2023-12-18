@@ -9,11 +9,12 @@ extern "C" {
 #include "PatchWorldMap.h"
 
 static const struct luaL_Reg functions[] = {
-	{ "centreOnPlayer", UIEXT::centreOnPlayer },
+	{ "centerOnPlayer", UIEXT::centerOnPlayer },
 	{ "getMapData", UIEXT::getMapData },
 	{ "hookMapOverrides", UIEXT::patchWorldMap },
 	{ "onInitialized", UIEXT::onInitialized },
 	{ "onLoaded", UIEXT::onLoaded },
+	{ "redrawCellRect", UIEXT::redrawCellRect },
 	{ "setMapZoom", UIEXT::setMapZoom },
 	{ NULL, NULL }
 };

@@ -225,6 +225,13 @@ local function registerModConfig()
 				min = 28,
 				max = 300, 
 			})
+			category:createButton({
+				buttonText = ". . .",
+				label = common.i18n("mcm.mapExtension.redrawRegion.label"),
+				description = common.i18n("mcm.mapExtension.redrawRegion.description"),
+				inGameOnly = true,
+				callback = function() common.createMapRedrawMenu() end,
+			})
 		end
 
 		-- Category: Rest & Wait Menu
