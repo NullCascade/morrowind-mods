@@ -208,16 +208,16 @@ local function registerModConfig()
 				max = -28, 
 			})
 			category:createSlider({
-				label = common.i18n("mcm.mapExtension.minY.label"),
-				variable = mwse.mcm.createTableVariable({ id = "minY", table = common.config.mapConfig }),
-				min = -300,
-				max = -28, 
-			})
-			category:createSlider({
 				label = common.i18n("mcm.mapExtension.maxX.label"),
 				variable = mwse.mcm.createTableVariable({ id = "maxX", table = common.config.mapConfig }),
 				min = 28,
 				max = 300, 
+			})
+			category:createSlider({
+				label = common.i18n("mcm.mapExtension.minY.label"),
+				variable = mwse.mcm.createTableVariable({ id = "minY", table = common.config.mapConfig }),
+				min = -300,
+				max = -28, 
 			})
 			category:createSlider({
 				label = common.i18n("mcm.mapExtension.maxY.label"),

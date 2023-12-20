@@ -6,6 +6,9 @@ local zoomBar = nil
 -- Check for plugin.
 local externMapPlugin = include("uiexp_map_extension")
 if (externMapPlugin == nil) then
+	local warningMsg = common.i18n("mapExtension.pluginNotFound")
+	mwse.log(warningMsg)
+	tes3.messageBox(warningMsg)
 	return
 end
 

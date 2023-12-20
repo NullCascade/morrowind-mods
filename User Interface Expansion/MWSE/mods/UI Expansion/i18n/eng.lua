@@ -30,6 +30,7 @@ return {
 	["inventory.stolenFromMerchant"] = "Stolen from this vendor.",
 	["inventory.takeAll"] = "Take All",
 	["inventory.takeFiltered"] = "Take Filtered",
+	["mapExtension.pluginNotFound"] = "[UI Expansion] MWSE/lib/uiexp_map_extension.dll\nis not found.\nYour mod manager may not install .dll files, and you will need to manually install it.",
 	["mapExtension.recenter"] = "Re-center",
 	["mapExtension.redraw.note"] = "Select map region to reset:",
 	["mapExtension.redraw.execute.buttonName"] = "Redraw",

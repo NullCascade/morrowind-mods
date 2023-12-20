@@ -797,6 +797,8 @@ namespace UIEXT {
 	// API functions.
 	//
 
+	float memoZoomCentreX = 0, memoZoomCentreY = 0;
+
 	int setMapZoom(lua_State* L) {
 		const auto previousZoom = zoomLevel;
 		zoomLevel = luaL_checknumber(L, 1);
@@ -828,18 +830,35 @@ namespace UIEXT {
 
 		// Fix up scroll offset to keep the centre point in place.
 		auto panel = menuMap->findChild(*ui_id_MenuMap_world_panel);
-		float ratio = zoomLevel / previousZoom;
 		int panelCentreX = panel->width / 2, panelCentreY = panel->height / 2;
-		panel->childOffsetX = -(int((-panel->childOffsetX + panelCentreX) * ratio) - panelCentreX);
-		panel->childOffsetY = int((panel->childOffsetY + panelCentreY) * ratio) - panelCentreY;
+		float zoomCentreX = (-panel->childOffsetX + panelCentreX) / previousZoom;
+		float zoomCentreY = (panel->childOffsetY + panelCentreY) / previousZoom;
+
+		// Record initial zoom point to avoid errors from rounding the childOffset every zoom step as the zoom level changes.
+		const float tolerance = 1.0f;
+		if (fabs(zoomCentreX - memoZoomCentreX) < tolerance && fabs(zoomCentreY - memoZoomCentreY) < tolerance) {
+			// Use the original centre point, avoiding cumulative rounding errors.
+			zoomCentreX = memoZoomCentreX;
+			zoomCentreY = memoZoomCentreY;
+		}
+		else {
+			// Remember this point as the original zoom centre.
+			memoZoomCentreX = zoomCentreX;
+			memoZoomCentreY = zoomCentreY;
+		}
+
+		panel->childOffsetX = -std::lround(zoomCentreX * zoomLevel - panelCentreX);
+		panel->childOffsetY = std::lround(zoomCentreY * zoomLevel - panelCentreY);
 		panel->timingUpdate();
 
 		// Update player world marker position.
 		auto worldMarker = menuMap->findChild(*ui_id_MenuMap_world_marker);
 
 		if (worldMarker) {
-			worldMarker->positionX = ((lastExteriorPlayerPosition.x / 8192) - cellMinX) * cellResolution * zoomLevel;
-			worldMarker->positionY = -(cellMaxY + 1 - (lastExteriorPlayerPosition.y / 8192)) * cellResolution * zoomLevel;
+			auto x = ((lastExteriorPlayerPosition.x / 8192) - cellMinX) * cellResolution * zoomLevel;
+			auto y = (cellMaxY + 1 - (lastExteriorPlayerPosition.y / 8192)) * cellResolution * zoomLevel;
+			worldMarker->positionX = std::lround(x);
+			worldMarker->positionY = -std::lround(y);
 			worldMarker->flagPosChanged = true;
 
 			menuMap->timingUpdate();
@@ -1014,6 +1033,18 @@ namespace UIEXT {
 		mwse::writeBytesUnprotected(0x5EF331, patchFindCellAtMouse, sizeof(patchFindCellAtMouse));
 		mwse::genJumpUnprotected(0x5EF331 + sizeof(patchFindCellAtMouse), 0x5EF3DA);
 		mwse::genCallEnforced(0x5EF3DC, 0x4C8680, reinterpret_cast<DWORD>(OnFindCellAtMouse));
+
+		// Remove boundary limits when dragging the map.
+		const BYTE patchRemoveDragLimitX[] = {
+			0x8B, 0xC3,		// mov eax, ebx
+			0xEB, 0x0C,		// jmp over limit code
+		};
+		const BYTE patchRemoveDragLimitY[] = {
+			0x8B, 0xC5,		// mov eax, ebp
+			0xEB, 0x0C,		// jmp over limit code
+		};
+		mwse::writeBytesUnprotected(0x5EE96F, patchRemoveDragLimitX, sizeof(patchRemoveDragLimitX));
+		mwse::writeBytesUnprotected(0x5EEAFF, patchRemoveDragLimitY, sizeof(patchRemoveDragLimitY));
 
 		lua_pushboolean(L, true);
 		return 1;

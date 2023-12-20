@@ -106,7 +106,7 @@ config.keybindMapSwitch = convertKeyBind(config.keybindMapSwitch)
 common.config = config
 
 -- Make sure we have the latest MWSE version.
-if (mwse.buildDate < 20211126) then
+if (mwse.buildDate < 20231218) then
 	event.register("loaded", function()
 		tes3.messageBox(common.i18n("core.updateRequired"))
 	end)
