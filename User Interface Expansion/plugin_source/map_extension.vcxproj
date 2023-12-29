@@ -74,7 +74,8 @@
       <AdditionalDependencies>lua51.lib;luajit.lib;MWSE.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /y "$(TargetDir)uiexp_map_extension.dll" "$(MorrowindDir)\Data Files\MWSE\lib\uiexp_map_extension.dll"</Command>
+      <Command>copy /y "$(TargetDir)uiexp_map_extension.dll" "$(ProjectDir)\..\MWSE\lib\uiexp_map_extension.dll"
+copy /y "$(TargetDir)uiexp_map_extension.dll" "$(MorrowindDir)\Data Files\MWSE\lib\uiexp_map_extension.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -97,7 +98,8 @@
       <AdditionalDependencies>lua51.lib;luajit.lib;MWSE.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /y "$(TargetDir)uiexp_map_extension.dll" "$(MorrowindDir)\Data Files\MWSE\lib\uiexp_map_extension.dll"</Command>
+      <Command>copy /y "$(TargetDir)uiexp_map_extension.dll" "$(ProjectDir)\..\MWSE\lib\uiexp_map_extension.dll"
+copy /y "$(TargetDir)uiexp_map_extension.dll" "$(MorrowindDir)\Data Files\MWSE\lib\uiexp_map_extension.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
