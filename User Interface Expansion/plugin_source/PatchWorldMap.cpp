@@ -341,9 +341,13 @@ namespace UIEXT {
 				TES3_Land_loadAndDrawBaseMap(landscape, pixelBuffer);
 			}
 
-			// Clear marked locations.
 			if (clearMarkers) {
+				// Clear marked locations.
 				cell->cellFlags &= ~TES3::CellFlag::MarkerDrawn;
+			}
+			else if (cell->cellFlags & TES3::CellFlag::MarkerDrawn) {
+				// Redraw marker.
+				OnDrawLocationMarker(cell);
 			}
 		}
 
