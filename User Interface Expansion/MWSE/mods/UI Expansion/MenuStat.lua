@@ -65,7 +65,15 @@ local function OnMenuStatTooltip(source, effectFilter, idProperty, fortifyEffect
 			icon.borderRight = 6
 
 			local magicInstance = activeEffect.instance
-			block:createLabel({ text = (magicInstance.item or magicInstance.source).name })
+
+			local labelText = ''
+			if magicInstance.item then
+				labelText = common.getDisplayName(magicInstance.item)
+			else
+				labelText = magicInstance.source.name
+			end 
+
+			block:createLabel({ text = labelText })
 			if (activeEffect.effectId == fortifyEffect) then
 				local magnitudeLabel = block:createLabel({ text = string.format("+%d", activeEffect.magnitude) })
 				magnitudeLabel.color = GUI_Palette_Positive
