@@ -91,7 +91,7 @@ function common.getDisplayName(item)
 		return item.name
 	end
 
-	local displayName = rationalNames.common.getDisplayName(item.id)
+	local displayName = rationalNames.common.getDisplayName(string.lower(item.id))
 	return displayName or item.name
 end
 
