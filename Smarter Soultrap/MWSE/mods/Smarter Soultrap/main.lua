@@ -12,7 +12,7 @@ local interop = require("Smarter Soultrap.interop")
 local rationalNames = include("RationalNames.interop")
 
 -- Get display name from Rational Names if it is enabled
-function getDisplayName(item)
+local function getDisplayName(item)
 	if rationalNames == nil then
 		return item.name
 	end
