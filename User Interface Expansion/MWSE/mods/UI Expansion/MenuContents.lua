@@ -112,9 +112,7 @@ local function onMenuContentsActivated(e)
 	contentsFilters:createElements(filterBlock)
 
 	-- Focus the filter search bar.
-	if (common.config.autoSelectInput == "Inventory") then
-		contentsFilters:focusSearchBar()
-	end
+	contentsFilters:focusSearchBar()
 
 	-- Create capacity fillbar for containers.
 	local container = contentsMenu:getPropertyObject("MenuContents_ObjectContainer") --- @type tes3actor
