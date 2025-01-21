@@ -83,7 +83,13 @@ local function updateTopicsList(e)
 		if e.info then
 			if e.actor then
 				if (e.info.firstHeardFrom == nil) then
-					if (textPane:findChild(GUI_ID_MenuDialog_answer_block) == nil) then
+					local el = textPane:findChild(GUI_ID_MenuDialog_answer_block)
+					if el then
+						if string.match(el.text,"[cC]ontinue%p*$") then
+							-- a standard continue choice for long text (e.g. LGNPC background), topic should be grayed /abot
+							e.info.firstHeardFrom = e.actor
+						end
+					else
 						e.info.firstHeardFrom = e.actor
 					end
 				end
