@@ -1,4 +1,5 @@
 local common = require("UI Expansion.common")
+local externMapPlugin = include("uiexp_map_extension")
 
 --- Setup MCM.
 local function registerModConfig()
@@ -20,7 +21,7 @@ local function registerModConfig()
 			text = creditsText .. "\n\nThe settings in this tab will not take affect until the next restart.",
 		})
 
-		local components = { "barter", "console", "contents", "dialog", "inventory", "inventorySelect", "magic", "magicSelect", "map", "options", "quantity", "rest", "saveLoad", "serviceSpells", "spellmaking", "stat", "textInput", "training" }
+		local components = { "barter", "console", "contents", "dialog", "inventory", "inventorySelect", "magic", "magicSelect", "map", "mapPlugin", "options", "quantity", "rest", "saveLoad", "serviceSpells", "spellmaking", "stat", "textInput", "training" }
 		for _, k in ipairs(components) do
 			pageComponents:createOnOffButton({
 				label = common.i18n(string.format("mcm.component.%s.label", k)),
@@ -168,6 +169,68 @@ local function registerModConfig()
 				label = common.i18n("mcm.changeMapModeOnCellChange.label"),
 				description = common.i18n("mcm.changeMapModeOnCellChange.description"),
 				variable = mwse.mcm.createTableVariable({ id = "changeMapModeOnCellChange", table = common.config }),
+			})
+		end
+
+		-- Category: Map extension plugin
+		if externMapPlugin then
+			local category = pageFeatures:createCategory({
+				label = common.i18n("mcm.category.mapExtension"),
+				postCreate = function(self)
+					local mapData = externMapPlugin.getMapData()
+
+					local c = self.components[1]
+					c.elements.info.text = common.i18n("mcm.mapExtension.mapBounds.label", { mapData.minX, mapData.minY, mapData.maxX, mapData.maxY })
+					c = self.components[2]
+					c.elements.info.text = common.i18n("mcm.mapExtension.textureSize.label", { mapData.mapWidth, mapData.mapHeight })
+				end
+			})
+
+			category:createActiveInfo({
+				text = "",
+				description = common.i18n("mcm.mapExtension.mapBounds.description"),
+			})
+			category:createActiveInfo({
+				text = "",
+				description = common.i18n("mcm.mapExtension.textureSize.description"),
+			})
+
+			category:createOnOffButton({
+				label = common.i18n("mcm.mapExtension.autoMapBounds.label"),
+				description = common.i18n("mcm.mapExtension.autoMapBounds.description"),
+				variable = mwse.mcm.createTableVariable({ id = "autoMapBounds", table = common.config.mapConfig }),
+				restartRequired = true,
+			})
+			category:createSlider({
+				label = common.i18n("mcm.mapExtension.minX.label"),
+				variable = mwse.mcm.createTableVariable({ id = "minX", table = common.config.mapConfig }),
+				min = -300,
+				max = -28, 
+			})
+			category:createSlider({
+				label = common.i18n("mcm.mapExtension.maxX.label"),
+				variable = mwse.mcm.createTableVariable({ id = "maxX", table = common.config.mapConfig }),
+				min = 28,
+				max = 300, 
+			})
+			category:createSlider({
+				label = common.i18n("mcm.mapExtension.minY.label"),
+				variable = mwse.mcm.createTableVariable({ id = "minY", table = common.config.mapConfig }),
+				min = -300,
+				max = -28, 
+			})
+			category:createSlider({
+				label = common.i18n("mcm.mapExtension.maxY.label"),
+				variable = mwse.mcm.createTableVariable({ id = "maxY", table = common.config.mapConfig }),
+				min = 28,
+				max = 300, 
+			})
+			category:createButton({
+				buttonText = ". . .",
+				label = common.i18n("mcm.mapExtension.redrawRegion.label"),
+				description = common.i18n("mcm.mapExtension.redrawRegion.description"),
+				inGameOnly = true,
+				callback = function() common.createMapRedrawMenu() end,
 			})
 		end
 

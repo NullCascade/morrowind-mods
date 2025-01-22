@@ -1,7 +1,7 @@
 =====================================================================================
                                 Consistent Enchanting
-                                 Author: NullCascade                                 
-                                    Version 1.1.1                                    
+                                 Author: NullCascade
+                                    Version 1.3.0
 =====================================================================================
 
  INDEX:
@@ -62,6 +62,12 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.3.0 [unpublished]:
+    * Modernized mod's structure. Added metadata file and localization support.
+
+ 1.2.0 [2022-03-05]:
+    * Blacklist enchanted books, until MWSE can create a patch that makes them not break the magic selection when they have item data.
 
  1.1.1 [2021-08-05]:
     * Fixed MCM setting for toggling soul preservation.

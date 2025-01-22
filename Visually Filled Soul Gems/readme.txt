@@ -1,7 +1,7 @@
 =====================================================================================
-                              Visually Filled Soul Gems                              
-                                 Author: NullCascade                                 
-                                    Version 1.0.0                                    
+                              Visually Filled Soul Gems
+                                 Author: NullCascade
+                                    Version 1.1.0
 =====================================================================================
 
  INDEX:
@@ -37,6 +37,8 @@
 
  Extract the archive into your Morrowind installation directory. The mod should
  contain the following files:
+    .\Data Files\MWSE\mods\Visually Filled Soul Gems\config.lua
+    .\Data Files\MWSE\mods\Visually Filled Soul Gems\interop.lua
     .\Data Files\MWSE\mods\Visually Filled Soul Gems\main.lua
 
 =====================================================================================
@@ -60,6 +62,11 @@
  1.0.0 [2019-05-06]:
     * Initial release.
 
+ 1.1.0 [2023-06-05]:
+    * Added mod config menu.
+    * Added 3rd party support. A 'SoulActive' node on soul gems will now be turned
+      on or off based on if the soul gem is filled.
+
 =====================================================================================
  INCOMPATIBILITIES & SAVED GAME WARNINGS:
 =====================================================================================
@@ -75,7 +82,7 @@
  Special thanks to Greatness7 for his help in progressing MWSE 2.1 and to DarkElfGuy
  for inspiring people to create and release mods for the yearly modathon.
 
- Copyright 2019 NullCascade
+ Copyright 2019, 2023 NullCascade
 
  Permission is hereby granted, free of charge, to any person obtaining a copy of
  this software and associated documentation files (the "Software"), to deal in the

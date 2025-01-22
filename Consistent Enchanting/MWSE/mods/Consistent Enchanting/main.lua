@@ -1,12 +1,4 @@
 
--- Make sure we have the latest MWSE version.
-if (mwse.buildDate < 20210708) then
-	event.register("loaded", function()
-		tes3.messageBox("[Consistent Enchanting] This mod requires a newer version of MWSE. Run MWSE-Update.exe.")
-	end)
-	return
-end
-
 local config = require("Consistent Enchanting.config")
 
 local cachedItemData = nil
@@ -69,12 +61,22 @@ end
 event.register("uiActivated", onMenuEnchantActivated, { filter = "MenuEnchantment" })
 
 local function onEnchantItem(e)
+	-- Blacklist books, because the game does weird things with them. Can revert after MWSE fixes this behavior.
+	if (e.baseObject.objectType == tes3.objectType.book) then
+		return
+	end
+
 	-- Was there a script? If so copy it over.
 	if (config.copy.script and e.baseObject.script) then
 		e.object.script = e.baseObject.script
 	end
 
-	local itemData = e.object.script and tes3.player.object.inventory:findItemStack(e.object).variables[1] or tes3.addItemData({ to = tes3.player, item = e.object })
+	local itemData = nil
+	if (e.object.script) then
+		itemData = tes3.player.object.inventory:findItemStack(e.object).variables[1]
+	else
+		itemData = tes3.addItemData({ to = tes3.player, item = e.object })
+	end
 
 	-- Copy over basic properties.
 	if (cachedItemData) then

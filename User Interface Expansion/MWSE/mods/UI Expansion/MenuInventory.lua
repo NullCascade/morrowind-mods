@@ -19,13 +19,11 @@ local inventoryFilters = common.createFilterInterface({
 
 common.createStandardInventoryFilters(inventoryFilters)
 
---- The current merchant we are bartering with.
-local currentMerchant = nil
-
 inventoryFilters:addFilter({
 	key = "tradable",
 	callback = function(e)
-		return currentMerchant and tes3.checkMerchantTradesItem({ reference = currentMerchant, item = e.item })
+		local serviceActor = tes3ui.getServiceActor()
+		return serviceActor and tes3.checkMerchantTradesItem({ reference = serviceActor, item = e.item })
 	end,
 	tooltip = {
 		text = common.i18n("filter.tradable.help.text"),
@@ -85,19 +83,8 @@ local function onMenuInventoryActivated(e)
 	-- Are we also showing the barter menu?
 	local barterMenu = tes3ui.findMenu(GUI_ID_MenuBarter)
 	inventoryFilters:setFilterHidden("tradable", (barterMenu == nil))
-	if (barterMenu) then
-		currentMerchant = tes3ui.getServiceActor()
-	else
-		currentMerchant = nil
-	end
 end
 event.register("uiActivated", onMenuInventoryActivated, { filter = "MenuInventory" })
-
---- Create our changes for MenuBarter.
-local function onMenuBarterActivated()
-	currentMerchant = tes3ui.getServiceActor()
-end
-event.register("uiActivated", onMenuBarterActivated, { filter = "MenuBarter" })
 
 --- Update filters when entering menu mode.
 local function onEnterMenuMode()

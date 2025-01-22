@@ -1,6 +1,6 @@
 local common = require("UI Expansion.common")
 
-common.version = 1.6
+common.version = 1.7
 
 -- Configuration table.
 local defaultConfig = {
@@ -34,7 +34,7 @@ local defaultConfig = {
 	keybindMapSwitch = { keyCode = tes3.scanCode.rightAlt, isShiftDown = false, isControlDown = false, isAltDown = true }, -- don't use a standard key to avoid conflicts with filters
 	dialogueTopicSeenColor = "journal_finished_quest_color",
 	dialogueTopicUniqueColor = "link_color",
-	mapConfig = { autoExpand = true, cellResolution = 9, minX = -142, maxX = 70, minY = -59, maxY = 29 },
+	mapConfig = { autoMapBounds = true, cellResolution = 9, minX = -28, maxX = 28, minY = -28, maxY = 28 },
 	components = {
 		barter = true,
 		console = true,
@@ -47,6 +47,7 @@ local defaultConfig = {
 		magicSelect = true,
 		map = true,
 		mapPlugin = false,
+		name = true,
 		options = true,
 		quantity = true,
 		rest = true,
@@ -105,7 +106,7 @@ config.keybindMapSwitch = convertKeyBind(config.keybindMapSwitch)
 common.config = config
 
 -- Make sure we have the latest MWSE version.
-if (mwse.buildDate < 20211126) then
+if (mwse.buildDate < 20231218) then
 	event.register("loaded", function()
 		tes3.messageBox(common.i18n("core.updateRequired"))
 	end)
@@ -147,6 +148,9 @@ local function onInitialized()
 	if (config.components.mapPlugin) then
 		dofile("UI Expansion.MenuMapPlugin")
 	end
+	if (config.components.name) then
+		dofile("UI Expansion.MenuName")
+	end
 	if (config.components.options) then
 		dofile("UI Expansion.MenuOptions")
 	end
@@ -178,11 +182,14 @@ local function onInitialized()
 		dofile("UI Expansion.textInput")
 	end
 end
-event.register("initialized", onInitialized)
+event.register(tes3.event.initialized, onInitialized)
 
 -- Hook map changes.
-local extern = include("uiextension")
-if (extern and config.components.map) then
-	mwse.log("Map Config: %s", json.encode(common.config.mapConfig))
-	extern.hookMapOverrides(common.config.mapConfig)
+local externMapPlugin = include("uiexp_map_extension")
+if (externMapPlugin and config.components.mapPlugin) then
+	-- Clear deprecated config data.
+	config.mapConfig.autoExpand = nil
+
+	-- Call into plugin.
+	externMapPlugin.hookMapOverrides(config.mapConfig)
 end

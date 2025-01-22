@@ -1,0 +1,15 @@
+[package]
+name = "Consistent Enchanting"
+description = "Carries over unique item information, such as condition and script data when enchanting items."
+homepage = "https://www.nexusmods.com/morrowind/mods/50029"
+repository = "https://github.com/NullCascade/morrowind-mods/"
+authors = ["NullCascade"]
+version = "1.3"
+
+[tools.mwse]
+lua-mod = "Consistent Enchanting"
+load-order = 0
+wait-until-initialize = false
+
+[dependencies.mwse]
+buildnumber = 3097

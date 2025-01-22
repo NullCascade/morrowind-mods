@@ -133,6 +133,15 @@ local function onMenuContentsActivated(e)
 end
 event.register("uiActivated", onMenuContentsActivated, { filter = "MenuContents" })
 
+----------------------------------------------------------------------------------------------------
+-- Inventory transfer.
+----------------------------------------------------------------------------------------------------
+
+-- @param menu tes3uiElement
+local function isPickpocketing(menu)
+	return menu:getPropertyInt("MenuContents_PickPocket") == 1
+end
+
 --- Called when any MenuContents item tile is clicked.
 --- @param e tes3uiEventData
 local function onContentTileClicked(e)
@@ -167,6 +176,11 @@ local function onInventoryTileClicked(e)
 		return
 	end
 
+	-- When pickpocketing, prevent moving items into an inventory.
+	if (isPickpocketing(contentsMenu)) then
+		return
+	end
+
 	-- If the player is holding the alt key, transfer the item directly.
 	local isAltDown = inputController:isKeyDown(tes3.scanCode.lAlt) or inputController:isKeyDown(tes3.scanCode.rAlt)
 	local isShiftDown = inputController:isKeyDown(tes3.scanCode.lShift) or inputController:isKeyDown(tes3.scanCode.rShift)
@@ -194,7 +208,7 @@ local function onInventoryTileClicked(e)
 
 		-- Trigger a crime if applicable.
 		if (not tes3.hasOwnershipAccess({ target = containerRef })) then
-			tes3.triggerCrime({ type = 5, victim = tes3.getOwner(containerRef), value = e.item.value * count })
+			tes3.triggerCrime({ type = tes3.crimeType.theft, victim = tes3.getOwner(containerRef), value = e.item.value * count })
 		end
 
 		return false
@@ -206,6 +220,13 @@ event.register("UIEX:InventoryTileClicked", onInventoryTileClicked)
 --- @param e uiExpansionInventoryTileClickedEventData
 --- @return boolean
 local function onContentsTileClicked(e)
+	local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
+
+	-- When pickpocketing, let the vanilla code do the pickpocket check.
+	if (isPickpocketing(contentsMenu)) then
+		return
+	end
+
 	-- If the player is holding the alt key, transfer the item directly.
 	local isAltDown = inputController:isKeyDown(tes3.scanCode.lAlt) or inputController:isKeyDown(tes3.scanCode.rAlt)
 	local isShiftDown = inputController:isKeyDown(tes3.scanCode.lShift) or inputController:isKeyDown(tes3.scanCode.rShift)
@@ -228,13 +249,12 @@ local function onContentsTileClicked(e)
 		end
 
 		-- Transfer over the item(s).
-		local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
 		local containerRef = contentsMenu:getPropertyObject("MenuContents_ObjectRefr")
 		tes3.transferItem({ from = containerRef, to = tes3.player, item = e.item, itemData = e.itemData, count = count })
 
 		-- Trigger a crime if applicable.
 		if (not tes3.hasOwnershipAccess({ target = containerRef })) then
-			tes3.triggerCrime({ type = 5, victim = tes3.getOwner(containerRef), value = e.item.value * count })
+			tes3.triggerCrime({ type = tes3.crimeType.theft, victim = tes3.getOwner(containerRef), value = e.item.value * count })
 		end
 
 		return false

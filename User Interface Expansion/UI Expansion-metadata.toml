@@ -1,0 +1,15 @@
+[package]
+name = "UI Expansion"
+description = "Expands UI functionality with searching, filtering, and more visual feedback."
+homepage = "https://www.nexusmods.com/morrowind/mods/46071"
+repository = "https://github.com/NullCascade/morrowind-mods/"
+authors = ["abot", "Daichix", "Fesswood", "Google Translate", "Greatness7", "Hrnchamd", "Jiopsi", "Monsterzeichner", "Morrowind Modding Community Discord", "Mort", "Necrolesian", "NullCascade", "Petethegoat", "R-Zero", "RedFurryDemon", "Remiros", "Wix"]
+version = "1.7.3"
+
+[tools.mwse]
+lua-mod = "UI Expansion"
+load-order = 0
+wait-until-initialize = false
+
+[dependencies.mwse]
+buildnumber = 3589

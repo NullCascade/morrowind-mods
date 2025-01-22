@@ -31,3 +31,4 @@ _ReSharper*/
 #Nuget packages folder
 packages/
 *.zip
+/User Interface Expansion/plugin_source/Paths.User.props

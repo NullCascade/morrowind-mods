@@ -1,7 +1,7 @@
 =====================================================================================
-                                     Book Pickup                                     
-                                 Author: NullCascade                                 
-                                    Version 1.1.0                                    
+                                     Book Pickup
+                                 Author: NullCascade
+                                    Version 1.2.0
 =====================================================================================
 
  INDEX:
@@ -60,6 +60,14 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.2.0 [2023-03-24]:
+    * Fixed issue where picking up stacks of books/scrolls would be truncated into
+      a single item.
+    * Added suppression to the anti-crime mechanic. Activating a book/scroll will
+      behave just like any other item with this feature enabled. This is disabled by
+      default can be toggled in the MCM, and was created by Mark K. Marcell.
+    * Added Russian localization by Mark K. Marcell.
 
  1.1.0 [2019-08-18]:
     * Improved support with scripted objects. Will correctly pick up books that

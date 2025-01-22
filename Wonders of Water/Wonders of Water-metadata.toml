@@ -1,0 +1,15 @@
+[package]
+name = "Wonders of Water"
+description = "Provides a customizable and more dynamic experience for MGE XE's water settings. Wave heights changes with water, underwater visibility depends on depth. Additionally, the depths may offer some protection to vampires."
+homepage = "https://www.nexusmods.com/morrowind/mods/????"
+repository = "https://github.com/NullCascade/morrowind-mods/"
+authors = ["NullCascade"]
+version = "1.0"
+
+[tools.mwse]
+lua-mod = "Wonders of Water"
+load-order = 0
+wait-until-initialize = false
+
+[dependencies.mwse]
+buildnumber = 3200
