@@ -81,7 +81,7 @@ function common.isTextInputActive()
 		return false
 	end
 
-	return focus.type == "textInput"
+	return focus.type == tes3.uiElementType.textInput
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -158,7 +158,7 @@ local function onKeyDownForScrollBar(e)
 		if (keyboardScrollBarParams.onUpdate) then
 			keyboardScrollBarParams.onUpdate()
 		end
-		currentKeyboardBoundScrollBar:triggerEvent("PartScrollBar_changed")
+		currentKeyboardBoundScrollBar:triggerEvent(tes3.uiEvent.partScrollBarChanged)
 	end
 end
 
@@ -182,7 +182,7 @@ local function onMouseWheelForScrollBar(e)
 		if (keyboardScrollBarParams.onUpdate) then
 			keyboardScrollBarParams.onUpdate()
 		end
-		currentKeyboardBoundScrollBar:triggerEvent("PartScrollBar_changed")
+		currentKeyboardBoundScrollBar:triggerEvent(tes3.uiEvent.partScrollBarChanged)
 	end
 end
 
@@ -193,8 +193,8 @@ function common.unbindScrollBarFromKeyboard()
 	end
 
 	-- Get rid of our key events.
-	event.unregister("keyDown", onKeyDownForScrollBar)
-	event.unregister("mouseWheel", onMouseWheelForScrollBar)
+	event.unregister(tes3.uiEvent.keyDown, onKeyDownForScrollBar)
+	event.unregister(tes3.uiEvent.mouseWheel, onMouseWheelForScrollBar)
 
 	-- Clean up any variables we're tracking.
 	currentKeyboardBoundScrollBar = nil
@@ -208,11 +208,11 @@ function common.bindScrollBarToKeyboard(params)
 	common.unbindScrollBarFromKeyboard()
 
 	-- When this element is destroyed, clean up.
-	params.element:registerBefore("destroy", common.unbindScrollBarFromKeyboard)
+	params.element:registerBefore(tes3.uiEvent.destroy, common.unbindScrollBarFromKeyboard)
 
 	-- Set up the events and variables we'll need later.
-	event.register("keyDown", onKeyDownForScrollBar)
-	event.register("mouseWheel", onMouseWheelForScrollBar)
+	event.register(tes3.uiEvent.keyDown, onKeyDownForScrollBar)
+	event.register(tes3.uiEvent.mouseWheel, onMouseWheelForScrollBar)
 	currentKeyboardBoundScrollBar = params.element
 	keyboardScrollBarParams = params
 	keyboardScrollBarNumberInput = 0
@@ -263,7 +263,7 @@ function common.createSearchBar(params)
 	local input = border:createTextInput({
 		id = params.id,
 		placeholderText = params.searchTextPlaceholder or common.i18n("filter.searchByName"),
-		placeholderTextColor = params.searchTextPlaceholderColor or tes3ui.getPalette("disabled_color"),
+		placeholderTextColor = params.searchTextPlaceholderColor or tes3ui.getPalette(tes3.palette.disabledColor),
 	})
 	input.borderLeft = 5
 	input.borderRight = 5 + 10
@@ -273,8 +273,8 @@ function common.createSearchBar(params)
 
 	-- Set up the events to control text input control.
 	input.consumeMouseEvents = false
-	input:registerAfter("keyEnter", onSearchBarPostKeyEnter)
-	input:registerBefore("keyPress", function(e)
+	input:registerAfter(tes3.uiEvent.keyEnter, onSearchBarPostKeyEnter)
+	input:registerBefore(tes3.uiEvent.keyPress, function(e)
 		local inputController = tes3.worldController.inputController
 
 		-- Allow Alt+A to clear the filter.
@@ -288,8 +288,8 @@ function common.createSearchBar(params)
 			end
 		end
 	end)
-	input:registerAfter("keyPress", function(e)
-		input.color = params.textColor or tes3ui.getPalette("normal_color")
+	input:registerAfter(tes3.uiEvent.keyPress, function(e)
+		input.color = params.textColor or tes3ui.getPalette(tes3.palette.normalColor)
 		if (params.onUpdate) then
 			params.onUpdate(e)
 		end
@@ -303,16 +303,16 @@ function common.createSearchBar(params)
 	icon.absolutePosAlignX = 1.0
 	icon.absolutePosAlignY = 0.5
 	icon.borderRight = 4
-	icon:registerAfter("mouseClick", function(e)
+	icon:registerAfter(tes3.uiEvent.mouseClick, function(e)
 		input.text = '' -- "Search by name..."
 	end)
-	icon:registerAfter("mouseClick", function(e)
-		input.color = params.textColor or tes3ui.getPalette("normal_color")
+	icon:registerAfter(tes3.uiEvent.mouseClick, function(e)
+		input.color = params.textColor or tes3ui.getPalette(tes3.palette.normalColor)
 		params.onUpdate(e)
 		input:updateLayout()
 	end)
 
-	border:registerAfter("mouseClick", function()
+	border:registerAfter(tes3.uiEvent.mouseClick, function()
 		tes3ui.acquireTextInput(input)
 	end)
 
@@ -340,7 +340,7 @@ end
 --- @field onFilterChanged function
 --- @field onSearchTextPreUpdate function
 --- @field searchTextColor number[]
---- @field searchTextPlaceholder tes3uiElement
+--- @field searchTextPlaceholder string
 --- @field searchTextPlaceholderColor number[]
 local uiExFilterFunction = {}
 local uiExFilterFunctionMT = { __index = uiExFilterFunction }
@@ -401,8 +401,9 @@ function uiExFilterFunction:setFiltersExact(params)
 	self.searchText = params.text
 	self.activeFilters = params.filters or {}
 
-	if (self.searchText == "") then
+	if (self.searchText == "" or self.searchTextPlaceholder and self.searchText == self.searchTextPlaceholder:lower() or self.searchText == common.i18n("filter.searchByName"):lower()) then
 		self.searchText = nil
+		self.searchBlock.input.text = ''
 	end
 
 	if (self.searchText and previousSearchText and string.startswith(self.searchText, previousSearchText)) then
@@ -446,7 +447,7 @@ function uiExFilterFunction:setFilterText(text)
 end
 
 --- Sets the current filter.
---- @param key string
+--- @param key string?
 function uiExFilterFunction:setFilter(key)
 	self:setFiltersExact({ text = self.searchText, filter = key })
 end
@@ -633,7 +634,7 @@ end
 function uiExFilterFunction:onClickFilter(filter)
 	if (#self.activeFilters == 1 and self.activeFilters[1] == filter.key) then
 		self:setFilter(nil)
-	elseif (tes3.worldController.inputController:isKeyDown(42)) then
+	elseif (tes3.worldController.inputController:isKeyDown(tes3.scanCode.lShift)) then
 		self:toggleFilter(filter.key)
 	else
 		self:setFilter(filter.key)
@@ -646,14 +647,14 @@ function uiExFilterFunction:onTooltip(filter)
 	local tooltip = tes3ui.createTooltipMenu()
 
 	local tooltipBlock = tooltip:createBlock({})
-	tooltipBlock.flowDirection = "top_to_bottom"
+	tooltipBlock.flowDirection = tes3.flowDirection.topToBottom
 	tooltipBlock.autoHeight = true
 	tooltipBlock.autoWidth = true
 
 	tooltipBlock:createLabel({ text = filter.tooltip.text })
 
 	if (common.config.showHelpText and filter.tooltip.helpText) then
-		local disabledPalette = tes3ui.getPalette("disabled_color")
+		local disabledPalette = tes3ui.getPalette(tes3.palette.disabledColor)
 		for _, text in pairs(string.split(filter.tooltip.helpText, "\n")) do
 			local helpText = tooltipBlock:createLabel({ text = text })
 			helpText.color = disabledPalette
@@ -678,10 +679,10 @@ function uiExFilterFunction:createFilterIcon(filter)
 	icon.imageScaleY = 0.6
 	icon.borderLeft = 2
 	icon.visible = not filter.hidden
-	icon:register("mouseClick", function()
+	icon:register(tes3.uiEvent.mouseClick, function()
 		self:onClickFilter(filter)
 	end)
-	icon:register("help", function()
+	icon:register(tes3.uiEvent.help, function()
 		self:onTooltip(filter)
 	end)
 	filter.iconElement = icon
@@ -700,10 +701,10 @@ function uiExFilterFunction:createFilterButton(filter)
 	button.borderBottom = 0
 	button.borderAllSides = 0
 	button.visible = not filter.hidden
-	button:register("mouseClick", function()
+	button:register(tes3.uiEvent.mouseClick, function()
 		self:onClickFilter(filter)
 	end)
-	button:register("help", function()
+	button:register(tes3.uiEvent.help, function()
 		self:onTooltip(filter)
 	end)
 	filter.buttonElement = button
@@ -746,7 +747,7 @@ function uiExFilterFunction:createElements(parent)
 		block.paddingRight = 3
 
 		self.iconFiltersBlock = block
-		block:registerBefore("destroy", function()
+		block:registerBefore(tes3.uiEvent.destroy, function()
 			self.iconFiltersBlock = nil
 		end)
 
@@ -768,7 +769,7 @@ function uiExFilterFunction:createElements(parent)
 		block.borderTop = 1
 
 		self.buttonFiltersBlock = block
-		block:registerBefore("destroy", function()
+		block:registerBefore(tes3.uiEvent.destroy, function()
 			self.buttonFiltersBlock = nil
 		end)
 
@@ -795,9 +796,9 @@ function common.createFilterInterface(params)
 
 	filterData.createSearchBar = params.createSearchBar
 	filterData.searchText = nil
-	filterData.searchTextColor = params.searchTextColor or tes3ui.getPalette("normal_color")
+	filterData.searchTextColor = params.searchTextColor or tes3ui.getPalette(tes3.palette.normalColor)
 	filterData.searchTextPlaceholder = params.searchTextPlaceholder or common.i18n("filter.searchByName")
-	filterData.searchTextPlaceholderColor = params.searchTextPlaceholderColor or tes3ui.getPalette("disabled_color")
+	filterData.searchTextPlaceholderColor = params.searchTextPlaceholderColor or tes3ui.getPalette(tes3.palette.disabledColor)
 
 	filterData.filters = {}
 	filterData.activeFilters = {}

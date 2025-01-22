@@ -64,6 +64,7 @@ local function registerModConfig()
 				label = common.i18n("mcm.useSearchBars.label"),
 				description = common.i18n("mcm.useSearchBars.description"),
 				variable = mwse.mcm.createTableVariable({ id = "useSearch", table = common.config }),
+				restartRequired = true,
 			})
 
 			-- Use effect text search?
@@ -92,6 +93,7 @@ local function registerModConfig()
 				label = common.i18n("mcm.filterButtons.label"),
 				description = common.i18n("mcm.filterButtons.description"),
 				variable = mwse.mcm.createTableVariable({ id = "useInventoryTextButtons", table = common.config }),
+				restartRequired = true,
 			})
 
 			-- Auto-selection
