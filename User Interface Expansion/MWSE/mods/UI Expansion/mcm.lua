@@ -101,6 +101,7 @@ local function registerModConfig()
 				options = {
 					{ label = common.i18n("mcm.autoSelectSearch.option.inventory"), value = "Inventory" },
 					{ label = common.i18n("mcm.autoSelectSearch.option.magic"), value = "Magic" },
+					{ label = common.i18n("mcm.autoSelectSearch.option.onlyContentsBarter"), value = "ContentsBarter" },
 					{ label = common.i18n("mcm.autoSelectSearch.option.none"), value = "None" },
 				},
 				variable = mwse.mcm.createTableVariable({ id = "autoSelectInput", table = common.config }),
