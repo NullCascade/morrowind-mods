@@ -56,14 +56,14 @@ local function registerModConfig()
 
 			-- Center-align icon bar
 			category:createOnOffButton({
-				label = common.i18n("mcm.iconBarCenterAlign"),
+				label = common.i18n("mcm.iconBarCenterAlign.label"),
 				description = common.i18n("mcm.iconBarCenterAlign.description"),
 				variable = mwse.mcm.createTableVariable({ id = "iconBarCenterAlign", table = common.config })
 			})
 
 			-- Icon bar location
 			category:createDropdown({
-				label = common.i18n("mcm.iconBarLocation"),
+				label = common.i18n("mcm.iconBarLocation.label"),
 				description = common.i18n("mcm.iconBarLocation.description"),
 				options = {
 					{ label = common.i18n("mcm.iconBarLocationOptions.1"), value = "Top" },
