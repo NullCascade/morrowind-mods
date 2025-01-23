@@ -50,7 +50,7 @@ local function onMenuBarterActivated(e)
 	end)
 
 	-- Focus the filter search bar.
-	if (common.config.autoSelectInput ~= "None") then
+	if (common.config.autoSelectInputAdditional) then
 		barterFilters:focusSearchBar()
 	end
 end

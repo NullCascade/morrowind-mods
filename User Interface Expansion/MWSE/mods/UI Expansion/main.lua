@@ -7,6 +7,7 @@ local defaultConfig = {
 	version = common.version,
 	showHelpText = true,
 	autoSelectInput = "Magic",
+	autoSelectInputAdditional = true,
 	alwaysClearFiltersOnOpen = true,
 	useSearch = true,
 	useSearchEffects = true,

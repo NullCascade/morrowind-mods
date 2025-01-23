@@ -101,10 +101,16 @@ local function registerModConfig()
 				options = {
 					{ label = common.i18n("mcm.autoSelectSearch.option.inventory"), value = "Inventory" },
 					{ label = common.i18n("mcm.autoSelectSearch.option.magic"), value = "Magic" },
-					{ label = common.i18n("mcm.autoSelectSearch.option.onlyContentsBarter"), value = "ContentsBarter" },
 					{ label = common.i18n("mcm.autoSelectSearch.option.none"), value = "None" },
 				},
 				variable = mwse.mcm.createTableVariable({ id = "autoSelectInput", table = common.config }),
+			})
+
+			-- Auto-selection for contents/barter
+			category:createOnOffButton({
+				label = common.i18n("mcm.autoSelectSearchAdditional.label"),
+				description = common.i18n("mcm.autoSelectSearchAdditional.description"),
+				variable = mwse.mcm.createTableVariable({ id = "autoSelectInputAdditional", table = common.config }),
 			})
 
 			-- Auto-equip spells

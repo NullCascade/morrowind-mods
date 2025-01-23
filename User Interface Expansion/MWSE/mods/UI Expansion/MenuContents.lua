@@ -112,7 +112,7 @@ local function onMenuContentsActivated(e)
 	contentsFilters:createElements(filterBlock)
 
 	-- Focus the filter search bar.
-	if (common.config.autoSelectInput ~= "None") then
+	if (common.config.autoSelectInputAdditional) then
 		contentsFilters:focusSearchBar()
 	end
 
