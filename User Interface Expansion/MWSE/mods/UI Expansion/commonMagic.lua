@@ -169,6 +169,7 @@ function commonMagic.createMagicFilterInterface(params)
 		createButtons = false,
 		useIcons = true,
 		useSearch = common.config.useSearch,
+		searchTextPlaceholder = common.i18n("filter.searchByNameOrEffect"),
 		onFilterChanged = function()
 			commonMagic.searchSpellsList(tes3ui.findMenu(params.menu))
 		end,
