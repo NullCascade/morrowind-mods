@@ -23,6 +23,61 @@ mwse.memory.writeBytes{ address = 0x4B50B4, bytes = push_256 }
 mwse.memory.writeBytes{ address = 0x4B522C, bytes = push_256 }
 mwse.memory.writeBytes{ address = 0x4B5161, bytes = push_256 }
 
+--- @type niNode
+local thirdPersonPlayer
+local prevRotation
+
+--- @param e saveEventData
+local function saveCallback(e)
+	thirdPersonPlayer = tes3.player.sceneNode
+	prevRotation = thirdPersonPlayer.rotation:copy()
+
+	local cam = tes3.getCamera()
+	local rotate = tes3matrix33.new()
+	rotate:toRotationZ(math.rad(120))
+	local facing = tes3matrix33.new()
+	facing:lookAt(cam.worldDirection, cam.worldUp)
+	facing = facing * rotate
+	local radFacing = facing:toEulerXYZ()
+	tes3.player.orientation = radFacing
+
+	thirdPersonPlayer.appCulled = false
+	thirdPersonPlayer.translation = cam.worldTransform.translation + (cam.worldDirection * 80) + (cam.worldRight * -60) + (cam.worldUp * -100)
+
+	--local zBuff = niZBufferProperty.new()
+	--zBuff.testFunction = ni.zBufferPropertyTestFunction.always
+	--thirdPersonPlayer:attachProperty(zBuff)
+	--thirdPersonPlayer:updateProperties()
+
+	local light = niPointLight.new()
+	light.translation = cam.worldTransform.translation
+	light.diffuse = niColor.new(0.8, 1, 0.4)
+	light.dimmer = 5
+	light.quadraticAttenuation = 2.619
+	light.constantAttenuation = 0.382
+	light:setRadius(25)
+	light:update()
+	thirdPersonPlayer:attachEffect(light)
+	thirdPersonPlayer:updateEffects()
+	thirdPersonPlayer:update()
+
+	if (not tes3.is3rdPerson()) then
+		tes3.worldController.armCamera.root.appCulled = true
+	end
+end
+event.register(tes3.event.save, saveCallback)
+
+--- @param e savedEventData
+local function savedCallback(e)
+	thirdPersonPlayer.rotation = prevRotation
+
+	if (not tes3.is3rdPerson()) then
+		thirdPersonPlayer.appCulled = true
+		tes3.worldController.armCamera.root.appCulled = false
+	end
+end
+event.register(tes3.event.saved, savedCallback)
+
 --- Gets a file-friendly name for a given save.
 --- @param saveName string
 --- @return string
