@@ -1,6 +1,6 @@
 return {
 	["core.modName"] = "UI Expansion",
-	["core.updateRequired"] = "UI Extensions requires the latest version of MWSE. Please run MWSE-Updater.exe.",
+	["core.updateRequired"] = "UI Expansion requires the latest version of MWSE. Please run MWSE-Updater.exe.",
 	["core.versionString"] = "v1.7.3",
 	["filter.apparel.buttonName"] = "Apparel",
 	["filter.apparel.helpDescription"] = "Filter to armor and clothing",
@@ -18,6 +18,7 @@ return {
 	["filter.other.help.helpText"] = "Click to filter to:\n- Books\n- Lights\n- Empty Soulgems\n- Misc. Items",
 	["filter.other.help.text"] = "Filter to other items",
 	["filter.searchByName"] = "Search by name...",
+	["filter.searchByNameOrEffect"] = "Search by name or effect...",
 	["filter.tools.buttonName"] = "Tools",
 	["filter.tools.help.helpText"] = "Click to filter to:\n- Apparatus\n- Lockpicks\n- Probes\n- Repair Tools\n- Filled Soulgems",
 	["filter.tools.help.text"] = "Filter to tools and filled soulgems",
