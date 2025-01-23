@@ -92,6 +92,9 @@ local function onEnterMenuMode()
 
 	if (common.config.alwaysClearFiltersOnOpen) then
 		inventoryFilters:clearFilter()
+	else
+		-- Make sure we actually update filters (if we've just left the barter window, for example)
+		inventoryFilters:setFiltersExact{ filters = inventoryFilters.activeFilters }
 	end
 
 	if (common.config.autoSelectInput == "Inventory") then
