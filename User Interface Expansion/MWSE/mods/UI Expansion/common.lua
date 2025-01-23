@@ -193,8 +193,8 @@ function common.unbindScrollBarFromKeyboard()
 	end
 
 	-- Get rid of our key events.
-	event.unregister(tes3.uiEvent.keyDown, onKeyDownForScrollBar)
-	event.unregister(tes3.uiEvent.mouseWheel, onMouseWheelForScrollBar)
+	event.unregister(tes3.event.keyDown, onKeyDownForScrollBar)
+	event.unregister(tes3.event.mouseWheel, onMouseWheelForScrollBar)
 
 	-- Clean up any variables we're tracking.
 	currentKeyboardBoundScrollBar = nil
@@ -211,8 +211,8 @@ function common.bindScrollBarToKeyboard(params)
 	params.element:registerBefore(tes3.uiEvent.destroy, common.unbindScrollBarFromKeyboard)
 
 	-- Set up the events and variables we'll need later.
-	event.register(tes3.uiEvent.keyDown, onKeyDownForScrollBar)
-	event.register(tes3.uiEvent.mouseWheel, onMouseWheelForScrollBar)
+	event.register(tes3.event.keyDown, onKeyDownForScrollBar)
+	event.register(tes3.event.mouseWheel, onMouseWheelForScrollBar)
 	currentKeyboardBoundScrollBar = params.element
 	keyboardScrollBarParams = params
 	keyboardScrollBarNumberInput = 0

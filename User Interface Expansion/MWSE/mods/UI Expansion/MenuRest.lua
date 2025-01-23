@@ -57,7 +57,7 @@ local function menuRestWait(e)
 			e.element:updateLayout()
 		end,
 		onSubmit = function()
-			(rest or wait):triggerEvent("mouseClick")
+			(rest or wait):triggerEvent(tes3.uiEvent.mouseClick)
 		end,
 	})
 
@@ -71,8 +71,8 @@ local function menuRestWait(e)
 
 	-- Show rest target hour.
 	if (common.config.displayRestTargetHour) then
-		e.element:registerAfter("update", updateDesiredHourText)
+		e.element:registerAfter(tes3.uiEvent.update, updateDesiredHourText)
 		updateDesiredHourText()
 	end
 end
-event.register("uiActivated", menuRestWait, { filter = "MenuRestWait" })
+event.register(tes3.event.uiActivated, menuRestWait, { filter = "MenuRestWait" })
