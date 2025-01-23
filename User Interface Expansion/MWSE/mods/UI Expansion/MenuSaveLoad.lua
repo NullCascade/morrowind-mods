@@ -13,6 +13,16 @@ local save_cancelButton_id = tes3ui.registerID("MenuSave_Cancelbutton")
 local save_showAll_id = tes3ui.registerID("UIEXP_MenuSave_ShowAll")
 local save_saveInput_id = tes3ui.registerID("UIEXP_MenuSave_SaveInput")
 
+-- Pump save images up to 256.
+local push_256 = { 0x68, 0x00, 0x01, 0x00, 0x00, 0x68, 0x00, 0x01, 0x00, 0x00 }
+-- push 256
+-- push 256
+mwse.memory.writeBytes{ address = 0x4B4FDA, bytes = push_256 }
+mwse.memory.writeBytes{ address = 0x4B504D, bytes = push_256 }
+mwse.memory.writeBytes{ address = 0x4B50B4, bytes = push_256 }
+mwse.memory.writeBytes{ address = 0x4B522C, bytes = push_256 }
+mwse.memory.writeBytes{ address = 0x4B5161, bytes = push_256 }
+
 --- Gets a file-friendly name for a given save.
 --- @param saveName string
 --- @return string
