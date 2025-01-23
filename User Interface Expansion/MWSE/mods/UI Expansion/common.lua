@@ -256,7 +256,6 @@ function common.createSearchBar(params)
 	border.autoWidth = true
 	border.autoHeight = true
 	border.widthProportional = 1.0
-	border.borderRight = 4
 	border.borderTop = 1
 	border.paddingAllSides = 1
 	border.visible = params.useSearch
@@ -697,8 +696,8 @@ end
 function uiExFilterFunction:createFilterButton(filter)
 	local button = self.buttonFiltersBlock:createButton({ id = string.format("UIEXP:FilterButton:%s", filter.key) })
 	button.text = filter.buttonText
-	button.borderLeft = 0
-	button.borderRight = 4
+	button.borderLeft = 4
+	button.borderRight = 0
 	button.borderTop = 0
 	button.borderBottom = 0
 	button.borderAllSides = 0
@@ -745,7 +744,7 @@ function uiExFilterFunction:createElements(parent)
 		local block = parent:createThinBorder({})
 		block.autoWidth = true
 		block.autoHeight = true
-		block.borderLeft = 0
+		block.borderLeft = 4
 		block.borderTop = 1
 		block.paddingTop = 2
 		block.paddingBottom = 3
