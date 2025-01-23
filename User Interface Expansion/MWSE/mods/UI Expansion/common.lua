@@ -257,6 +257,8 @@ function common.createSearchBar(params)
 	border.autoHeight = true
 	border.widthProportional = 1.0
 	border.borderRight = 4
+	border.borderTop = 1
+	border.paddingAllSides = 1
 	border.visible = params.useSearch
 
 	-- Create the search input itself.
@@ -267,7 +269,7 @@ function common.createSearchBar(params)
 	})
 	input.borderLeft = 5
 	input.borderRight = 5 + 10
-	input.borderTop = 2
+	input.borderTop = 0
 	input.borderBottom = 4
 	input.disabled = not params.useSearch
 
@@ -700,6 +702,8 @@ function uiExFilterFunction:createFilterButton(filter)
 	button.borderTop = 0
 	button.borderBottom = 0
 	button.borderAllSides = 0
+	button.paddingTop = 2
+	button.paddingBottom = 4
 	button.visible = not filter.hidden
 	button:register(tes3.uiEvent.mouseClick, function()
 		self:onClickFilter(filter)
@@ -717,6 +721,7 @@ function uiExFilterFunction:createElements(parent)
 	self.parentElement = parent
 
 	parent:destroyChildren()
+	parent.borderTop = 3
 
 	-- Always create searchbars, even if they're going to be hidden.
 	local searchBarParams = {
@@ -741,6 +746,7 @@ function uiExFilterFunction:createElements(parent)
 		block.autoWidth = true
 		block.autoHeight = true
 		block.borderLeft = 0
+		block.borderTop = 1
 		block.paddingTop = 2
 		block.paddingBottom = 3
 		block.paddingLeft = 2
