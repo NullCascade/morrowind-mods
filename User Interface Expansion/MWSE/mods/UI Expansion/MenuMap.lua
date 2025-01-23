@@ -11,10 +11,12 @@ local function changeCell(e)
 	local MenuMap_switch = MenuMap:findChild("MenuMap_switch")
 	if (MenuMap_switch == nil) then return end
 
-	if (e.previousCell.isInterior and not e.cell.isInterior and MenuMap_switch.text == tes3.findGMST(tes3.gmst.sWorld).value) then
-		MenuMap_switch:triggerEvent(tes3.uiEvent.mouseClick)
-	elseif (not e.previousCell.isInterior and e.cell.isInterior and MenuMap_switch.text == tes3.findGMST(tes3.gmst.sLocal).value) then
-		MenuMap_switch:triggerEvent(tes3.uiEvent.mouseClick)
+	if (e.previousCell == nil or e.previousCell.isInterior ~= e.cell.isInterior) then
+		if (not e.cell.isInterior and MenuMap_switch.text == tes3.findGMST(tes3.gmst.sWorld).value) then
+			MenuMap_switch:triggerEvent(tes3.uiEvent.mouseClick)
+		elseif (e.cell.isInterior and MenuMap_switch.text == tes3.findGMST(tes3.gmst.sLocal).value) then
+			MenuMap_switch:triggerEvent(tes3.uiEvent.mouseClick)
+		end
 	end
 end
 
