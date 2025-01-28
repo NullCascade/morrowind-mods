@@ -1,4 +1,5 @@
 local common = {}
+local rationalNames = include("RationalNames.interop")
 
 ----------------------------------------------------------------------------------------------------
 -- Generic helper functions.
@@ -82,6 +83,16 @@ function common.isTextInputActive()
 	end
 
 	return focus.type == tes3.uiElementType.textInput
+end
+
+--- Get display name from Rational Names if it is enabled
+function common.getDisplayName(item)
+	if rationalNames == nil then
+		return item.name
+	end
+
+	local displayName = rationalNames.common.getDisplayName(string.lower(item.id))
+	return displayName or item.name
 end
 
 ----------------------------------------------------------------------------------------------------

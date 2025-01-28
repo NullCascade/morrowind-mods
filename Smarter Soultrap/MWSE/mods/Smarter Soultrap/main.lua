@@ -8,6 +8,19 @@
 local config = require("Smarter Soultrap.config")
 local interop = require("Smarter Soultrap.interop")
 
+-- Setup Rational Names interop
+local rationalNames = include("RationalNames.interop")
+
+-- Get display name from Rational Names if it is enabled
+local function getDisplayName(item)
+	if rationalNames == nil then
+		return item.name
+	end
+
+	local displayName = rationalNames.common.getDisplayName(string.lower(item.id))
+	return displayName or item.name
+end
+
 -- Setup MCM.
 local function registerModConfig()
 	mwse.mcm.registerMCM(require("Smarter Soultrap.mcm"))
@@ -105,14 +118,19 @@ local function addSoul(caster, target, targetMobile)
 	if (displaced and checkLevelRequirement(caster, "displacement")) then
 		local message = nil
 		if (config.showDisplacementMessage) then
-			message = string.format("%s was displaced from %s", displaced.name, bestStack.object.name)
+			message = string.format("%s was displaced from %s", displaced.name, getDisplayName(bestStack.object))
 		end
 
 		-- Check for relocation.
 		if (checkLevelRequirement(caster, "relocation")) then
 			local replaced, replacedTo = addSoul(caster, displaced)
 			if (replaced) then
-				message = string.format("%s was relocated from %s to %s", displaced.name, bestStack.object.name, replacedTo.name)
+				message = string.format(
+					"%s was relocated from %s to %s",
+					displaced.name,
+					getDisplayName(bestStack.object),
+					getDisplayName(replacedTo)
+				)
 			end
 		end
 
