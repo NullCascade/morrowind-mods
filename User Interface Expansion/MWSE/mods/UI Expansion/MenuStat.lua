@@ -72,7 +72,9 @@ local function OnMenuStatTooltip(source, effectFilter, idProperty, fortifyEffect
 				magnitudeLabel.borderLeft = 2
 				magnitudeLabel.absolutePosAlignX = 1.0
 			else
-				local magnitudeLabel = block:createLabel({ text = string.format("-%d", activeEffect.magnitude) })
+				local resistance = 100 - activeEffect.effectInstance.resistedPercent
+				local actualMagnitude = math.round(activeEffect.magnitude * (resistance / 100))
+				local magnitudeLabel = block:createLabel({ text = string.format("-%d", actualMagnitude) })
 				magnitudeLabel.color = GUI_Palette_Negative
 				magnitudeLabel.borderLeft = 2
 				magnitudeLabel.absolutePosAlignX = 1.0
