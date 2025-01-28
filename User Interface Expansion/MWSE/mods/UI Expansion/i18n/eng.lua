@@ -46,6 +46,8 @@ return {
 	["mcm.autoSelectSearch.option.inventory"] = "Inventory",
 	["mcm.autoSelectSearch.option.magic"] = "Magic",
 	["mcm.autoSelectSearch.option.none"] = "None",
+	["mcm.autoSelectSearchAdditional.label"] = "Auto-select search bar in contents & barter menus?",
+	["mcm.autoSelectSearchAdditional.description"] = "This option is independent of the above. When enabled, opening containers and bartering will have their searchbar selected automatically.",
 	["mcm.autoSelectSpells.description"] = "When searching using the spells menu, the first result will be equipped by the player. This allows quick selection of spells by typing the first few letters of the spell's name.",
 	["mcm.autoSelectSpells.label"] = "Auto-select first result when searching spell list?",
 	["mcm.category.console"] = "Console",

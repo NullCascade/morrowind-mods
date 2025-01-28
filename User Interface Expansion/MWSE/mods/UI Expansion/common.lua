@@ -585,7 +585,7 @@ end
 
 --- Forces focus onto the search box.
 function uiExFilterFunction:focusSearchBar()
-	if (self.searchBlock) then
+	if (common.config.useSearch and self.searchBlock) then
 		tes3ui.acquireTextInput(self.searchBlock.input)
 	end
 end

@@ -108,6 +108,13 @@ local function registerModConfig()
 				variable = mwse.mcm.createTableVariable({ id = "autoSelectInput", table = common.config }),
 			})
 
+			-- Auto-selection for contents/barter
+			category:createOnOffButton({
+				label = common.i18n("mcm.autoSelectSearchAdditional.label"),
+				description = common.i18n("mcm.autoSelectSearchAdditional.description"),
+				variable = mwse.mcm.createTableVariable({ id = "autoSelectInputAdditional", table = common.config }),
+			})
+
 			-- Auto-equip spells
 			category:createOnOffButton({
 				label = common.i18n("mcm.autoSelectSpells.label"),
