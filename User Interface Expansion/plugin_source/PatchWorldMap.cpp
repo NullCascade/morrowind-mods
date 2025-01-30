@@ -1101,6 +1101,6 @@ namespace UIEXT {
 
 		// Remember cell was visited.
 		visitedMapCells.at((cellMaxY - gridY) * (cellMaxX - cellMinX + 1) + (gridX - cellMinX)) = 1;
-		return 1;
+		return 0;
 	}
 }
