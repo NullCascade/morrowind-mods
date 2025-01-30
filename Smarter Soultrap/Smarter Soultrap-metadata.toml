@@ -1,0 +1,15 @@
+[package]
+name = "Smarter Soultrap"
+description = "Allows soultrap to make more intelligent use of available soul gems, including soul displacement and relocation. Includes optional leveling requirements."
+homepage = "https://www.nexusmods.com/morrowind/mods/49121"
+repository = "https://github.com/NullCascade/morrowind-mods/"
+authors = ["NullCascade"]
+version = "1.0.2"
+
+[tools.mwse]
+lua-mod = "Smarter Soultrap"
+load-order = 0
+wait-until-initialize = false
+
+[dependencies.mwse]
+buildnumber = 4266

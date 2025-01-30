@@ -1,11 +1,12 @@
 local config = mwse.loadConfig("Smarter Soultrap", {
+	logLevel = "INFO",
 	displacement = true,
 	relocation = true,
-	leveling = false,
+	leveling = true,
 	levelingSkill = "mysticism",
 	levelRequirements = {
-		displacement = 25,
-		relocation = 50,
+		displacement = 50,
+		relocation = 75,
 	},
 	showSoultrapMessage = true,
 	showDisplacementMessage = true,

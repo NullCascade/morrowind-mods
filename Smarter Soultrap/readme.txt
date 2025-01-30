@@ -1,7 +1,7 @@
 =====================================================================================
                                    Smarter Soultrap                                  
                                  Authors: NullCascade                                
-                                    Version 1.0.1                                    
+                                    Version 1.0.2                                    
 =====================================================================================
 
  INDEX:
@@ -55,6 +55,11 @@
 =====================================================================================
  VERSION HISTORY
 =====================================================================================
+
+ 1.0.2 [2025-01-30]:
+    * Fixed incorrect soul gem filtering when responding to other mods.
+    * Rebalanced default configuration. Leveling is enabled by default, with higher
+      requirements (50 for displacement, 75 for relocation).
 
  1.0.1 [2021-01-03]:
     * Fixed issue where an emptied Azura's Star would cause the script to fail.

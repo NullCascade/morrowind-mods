@@ -7,6 +7,7 @@
 -- Grab our submodules.
 local config = require("Smarter Soultrap.config")
 local interop = require("Smarter Soultrap.interop")
+local log = require("Smarter Soultrap.log")
 
 -- Setup MCM.
 local function registerModConfig()
@@ -36,18 +37,19 @@ end
 
 --- @param caster tes3mobileActor
 --- @param target tes3creature
---- @param targetMobile tes3mobileActor
+--- @param targetMobile tes3mobileActor?
 local function addSoul(caster, target, targetMobile)
 	-- A displaced soul, if applicable.
 	local displaced = nil
 
 	-- Find the best soulgem to fill.
 	local targetSoulValue = target.soul
-	local bestStack, bestItemData
+	local bestStack, bestItemData = nil, nil
 	for _, stack in ipairs(availableSoulGemStacks) do
 		-- We need to reimplement the filterSoulGemTarget event.
-		local filterSoulGemTarget = event.trigger("filterSoulGemTarget", { soulGem = stack.object, actor = target, mobile = targetMobile, reference = targetMobile and targetMobile.reference })
-		if (not filterSoulGemTarget.filter) then
+		local filterSoulGemTarget = event.trigger(tes3.event.filterSoulGemTarget, { soulGem = stack.object, actor = target, mobile = targetMobile, reference = targetMobile and targetMobile.reference })
+		if (table.get(filterSoulGemTarget, "filter", true)) then
+			log:trace("Processing soul gem stack for object '%s'", stack.object)
 			-- Does the soul fit in this gem?
 			if (targetSoulValue <= stack.object.soulGemCapacity) then
 				local emptyCount = stack.count - (stack.variables and #stack.variables or 0)
@@ -77,8 +79,9 @@ local function addSoul(caster, target, targetMobile)
 					end
 				end
 			end
+		else
+			log:trace("Skipping soul gem stack for object '%s': Event filtered it out.", stack.object)
 		end
-
 	end
 
 	-- Did we find a valid thing to fill?
@@ -86,6 +89,7 @@ local function addSoul(caster, target, targetMobile)
 	if (bestStack) then
 		-- Are we replacing something?
 		if (bestItemData) then
+			log:trace("Best stack identified, with existing itemData: '%s'", bestStack.object)
 			displaced = bestItemData.soul
 			bestItemData.charge = 0 -- Hacky workaround...
 			bestItemData.soul = target
@@ -94,11 +98,18 @@ local function addSoul(caster, target, targetMobile)
 			-- We have to make a new itemdata.
 			local itemData = tes3.addItemData({ to = caster, item = bestStack.object })
 			if (itemData) then
+				log:trace("Best stack identified, created new itemData: '%s'", bestStack.object)
 				itemData.charge = 0 -- Hacky workaround...
 				itemData.soul = target
 				success = true
+			else
+				log:error("Best stack identified, but could not create new itemData: '%s'", bestStack.object)
 			end
 		end
+	end
+
+	if (displaced) then
+		log:trace("Soul displaced: %s", displaced)
 	end
 
 	-- Do we have a displaced soul we can relocate?
@@ -112,7 +123,10 @@ local function addSoul(caster, target, targetMobile)
 		if (checkLevelRequirement(caster, "relocation")) then
 			local replaced, replacedTo = addSoul(caster, displaced)
 			if (replaced) then
+				log:trace("Relocated displaced soul '%s'", displaced)
 				message = string.format("%s was relocated from %s to %s", displaced.name, bestStack.object.name, replacedTo.name)
+			else
+				log:trace("Could not relocate displaced soul '%s'", displaced)
 			end
 		end
 
@@ -128,6 +142,7 @@ end
 --- @param caster tes3mobileActor
 --- @param target tes3mobileActor
 local function doSoulTrapFill(caster, target)
+	log:trace("doSoulTrapFill(\"%s\", \"%s\")", caster.reference, target.reference)
 	-- Run through our caster's inventory and collect available soulgem stacks.
 	availableSoulGemStacks = {}
 	for _, stack in pairs(caster.reference.object.inventory) do
@@ -138,13 +153,17 @@ local function doSoulTrapFill(caster, target)
 
 	-- No soul gems? Bail.
 	if (#availableSoulGemStacks == 0) then
+		log:trace("No soul gems available.")
 		return false
 	end
 	-- We want to sort our results so smallest soulgems are latest.
 	table.sort(availableSoulGemStacks, function(a, b) return a.object.soulGemCapacity > b.object.soulGemCapacity end)
+	log:trace("Found %d soul gems to consider.", #availableSoulGemStacks)
 
 	-- We have all of the data we need... now do some work.
-	if (not addSoul(caster, target.reference.object, target)) then
+	local success, soulGem = addSoul(caster, target.reference.object, target)
+	if (not success) then
+		log:trace("Could not add soul.")
 		return false
 	end
 
@@ -153,6 +172,7 @@ local function doSoulTrapFill(caster, target)
 		tes3.messageBox(tes3.findGMST(tes3.gmst.sSoultrapSuccess).value)
 	end
 
+	log:trace("Successful soul trap.")
 	return true
 end
 
@@ -175,4 +195,4 @@ interop.checkLevelRequirement = checkLevelRequirement
 ]]
 assert(mwse.memory.writeNoOperation({ address = 0x4633C4, length = 0xA }))
 assert(mwse.memory.writeFunctionCall({ address = 0x4633CE, previousCall = 0x49AC30, call = doSoulTrapFill, signature = { this = "tes3mobileObject", arguments = { "tes3mobileObject" }, returns = "bool" } }))
-mwse.log("[Smarter Soultrap] Initialized.")
+log:info("[Smarter Soultrap] Initialized.")
