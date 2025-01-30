@@ -126,6 +126,9 @@ end
 event.register(tes3.event.menuEnter, onMenuMode)
 event.register(tes3.event.menuExit, onMenuMode)
 
+-- On load, make sure controls are not visible in case the map is pinned.
+event.register(tes3.event.loaded, function() updateNewControls(false) end)
+
 -- Map region redraw code used by MCM.
 
 local mapRedrawData = {}
