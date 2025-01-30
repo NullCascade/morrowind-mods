@@ -57,22 +57,22 @@ local function menuRestWait(e)
 			e.element:updateLayout()
 		end,
 		onSubmit = function()
-			(rest or wait):triggerEvent("mouseClick")
+			(rest or wait):triggerEvent(tes3.uiEvent.mouseClick)
 		end,
 	})
 
 	-- Show day of week.
 	if (common.config.displayWeekday) then
-		-- +3 offset, since the 16th of Last Seed (starting day) should be Thurdas.
-		local day = common.i18n(string.format("restWait.weekDay.%d", (tes3.worldController.daysPassed.value + 3) % 7 + 1))
+		-- +4 offset, since the 16th of Last Seed (starting day) should be Fredas.
+		local day = common.i18n(string.format("restWait.weekDay.%d", (tes3.worldController.daysPassed.value + 4) % 7 + 1))
 		local userFriendlyTimestampElement = e.element.children[2].children[1]
 		userFriendlyTimestampElement.text = day .. ", " .. userFriendlyTimestampElement.text
 	end
 
 	-- Show rest target hour.
 	if (common.config.displayRestTargetHour) then
-		e.element:registerAfter("update", updateDesiredHourText)
+		e.element:registerAfter(tes3.uiEvent.update, updateDesiredHourText)
 		updateDesiredHourText()
 	end
 end
-event.register("uiActivated", menuRestWait, { filter = "MenuRestWait" })
+event.register(tes3.event.uiActivated, menuRestWait, { filter = "MenuRestWait" })

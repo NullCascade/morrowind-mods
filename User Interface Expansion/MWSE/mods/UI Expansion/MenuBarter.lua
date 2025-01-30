@@ -50,6 +50,8 @@ local function onMenuBarterActivated(e)
 	end)
 
 	-- Focus the filter search bar.
-	barterFilters:focusSearchBar()
+	if (common.config.autoSelectInputAdditional) then
+		barterFilters:focusSearchBar()
+	end
 end
 event.register("uiActivated", onMenuBarterActivated, { filter = "MenuBarter" })

@@ -64,6 +64,7 @@ local function registerModConfig()
 				label = common.i18n("mcm.useSearchBars.label"),
 				description = common.i18n("mcm.useSearchBars.description"),
 				variable = mwse.mcm.createTableVariable({ id = "useSearch", table = common.config }),
+				restartRequired = true,
 			})
 
 			-- Use effect text search?
@@ -92,6 +93,7 @@ local function registerModConfig()
 				label = common.i18n("mcm.filterButtons.label"),
 				description = common.i18n("mcm.filterButtons.description"),
 				variable = mwse.mcm.createTableVariable({ id = "useInventoryTextButtons", table = common.config }),
+				restartRequired = true,
 			})
 
 			-- Auto-selection
@@ -104,6 +106,13 @@ local function registerModConfig()
 					{ label = common.i18n("mcm.autoSelectSearch.option.none"), value = "None" },
 				},
 				variable = mwse.mcm.createTableVariable({ id = "autoSelectInput", table = common.config }),
+			})
+
+			-- Auto-selection for contents/barter
+			category:createOnOffButton({
+				label = common.i18n("mcm.autoSelectSearchAdditional.label"),
+				description = common.i18n("mcm.autoSelectSearchAdditional.description"),
+				variable = mwse.mcm.createTableVariable({ id = "autoSelectInputAdditional", table = common.config }),
 			})
 
 			-- Auto-equip spells

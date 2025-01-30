@@ -33,8 +33,8 @@ end
 event.register(tes3.event.loaded, externMapPlugin.onLoaded)
 
 
-
-local function updateNewControls()
+--- @param menuMode boolean
+local function updateNewControls(menuMode)
 	local mapMenu = tes3ui.findMenu("MenuMap")
 	if not mapMenu then return end
 	
@@ -49,6 +49,8 @@ local function updateNewControls()
 
 	newSwitchButton.text = oldButton.text
 	newSwitchButton.visible = true
+
+	controls.visible = menuMode
 end
 
 local function setZoomBar(value)
@@ -116,11 +118,16 @@ local function onMapMenuActivated(e)
 end
 event.register(tes3.event.uiActivated, onMapMenuActivated, { filter = "MenuMap" })
 
-local function onEnterMenuMode(e)
+--- @param e menuEnterEventData|menuExitEventData
+local function onMenuMode(e)
 	-- Update controls to reflect local map/world map state.
-	updateNewControls()
+	updateNewControls(e.menuMode)
 end
-event.register(tes3.event.menuEnter, onEnterMenuMode)
+event.register(tes3.event.menuEnter, onMenuMode)
+event.register(tes3.event.menuExit, onMenuMode)
+
+-- On load, make sure controls are not visible in case the map is pinned.
+event.register(tes3.event.loaded, function() updateNewControls(false) end)
 
 -- Map region redraw code used by MCM.
 

@@ -128,6 +128,7 @@ local ingredientFilterNoIcons = common.createFilterInterface({
 	createButtons = false,
 	useIcons = false,
 	useSearch = common.config.useSearch,
+	searchTextPlaceholder = common.i18n("filter.searchByNameOrEffect"),
 	onFilterChanged = updateIngredientSelectTiles,
 })
 

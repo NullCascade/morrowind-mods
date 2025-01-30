@@ -2,9 +2,9 @@ local GUI_ID_HelpMenu = tes3ui.registerID("HelpMenu")
 local GUI_ID_MenuStat_faction_layout = tes3ui.registerID("MenuStat_faction_layout")
 local GUI_ID_PartScrollPane_pane = tes3ui.registerID("PartScrollPane_pane")
 
-local GUI_Palette_Disabled = tes3ui.getPalette("disabled_color")
-local GUI_Palette_Negative = tes3ui.getPalette("negative_color")
-local GUI_Palette_Positive = tes3ui.getPalette("positive_color")
+local GUI_Palette_Disabled = tes3ui.getPalette(tes3.palette.disabledColor)
+local GUI_Palette_Negative = tes3ui.getPalette(tes3.palette.negativeColor)
+local GUI_Palette_Positive = tes3ui.getPalette(tes3.palette.positiveColor)
 
 local common = require("UI Expansion.common")
 
@@ -29,7 +29,7 @@ local function OnMenuStatTooltip(source, effectFilter, idProperty, fortifyEffect
 	end
 
 	local adjustmentsBlock = tooltip:createBlock({})
-	adjustmentsBlock.flowDirection = "top_to_bottom"
+	adjustmentsBlock.flowDirection = tes3.flowDirection.topToBottom
 	adjustmentsBlock.autoHeight = true
 	adjustmentsBlock.autoWidth = true
 	adjustmentsBlock.widthProportional = 1.0
@@ -53,7 +53,7 @@ local function OnMenuStatTooltip(source, effectFilter, idProperty, fortifyEffect
 		local effect = tes3.getMagicEffect(activeEffect.effectId)
 		if (effect[effectFilter] and activeEffect.attributeId == attribute) then
 			local block = adjustmentsBlock:createBlock()
-			block.flowDirection = "left_to_right"
+			block.flowDirection = tes3.flowDirection.leftToRight
 			block.widthProportional = 1.0
 			block.autoWidth = true
 			block.autoHeight = true
@@ -72,7 +72,9 @@ local function OnMenuStatTooltip(source, effectFilter, idProperty, fortifyEffect
 				magnitudeLabel.borderLeft = 2
 				magnitudeLabel.absolutePosAlignX = 1.0
 			else
-				local magnitudeLabel = block:createLabel({ text = string.format("-%d", activeEffect.magnitude) })
+				local resistance = 100 - activeEffect.effectInstance.resistedPercent
+				local actualMagnitude = math.round(activeEffect.magnitude * (resistance / 100))
+				local magnitudeLabel = block:createLabel({ text = string.format("-%d", actualMagnitude) })
 				magnitudeLabel.color = GUI_Palette_Negative
 				magnitudeLabel.borderLeft = 2
 				magnitudeLabel.absolutePosAlignX = 1.0
@@ -122,7 +124,7 @@ local function onMenuStatFactionTooltip(e)
 	-- Create a new tooltip block.
 	local tooltip = tes3ui.findHelpLayerMenu(GUI_ID_HelpMenu)
 	local adjustmentsBlock = tooltip:createBlock({})
-	adjustmentsBlock.flowDirection = "top_to_bottom"
+	adjustmentsBlock.flowDirection = tes3.flowDirection.topToBottom
 	adjustmentsBlock.autoHeight = true
 	adjustmentsBlock.autoWidth = true
 	adjustmentsBlock.widthProportional = 1.0
@@ -195,25 +197,29 @@ local function onMenuStatActivated(e)
 	local classLayout = e.element:findChild("MenuStat_class_layout")
 	if (classLayout) then
 		local label = classLayout:findChild("MenuStat_class_name")
-		label:registerAfter("help", onMenuStatClassTooltip)
+		label:registerAfter(tes3.uiEvent.help, onMenuStatClassTooltip)
 		local class = classLayout:findChild("MenuStat_class")
-		class:registerAfter("help", onMenuStatClassTooltip)
+		class:registerAfter(tes3.uiEvent.help, onMenuStatClassTooltip)
 	end
 
 	-- Add tooltips to attributes.
 	local idParts = { "agility", "endurance", "intellegence", "luck", "personality", "speed", "strength", "willpower" }
 	for _, idPart in pairs(idParts) do
 		local MenuStat_attribute_layout = e.element:findChild(string.format("MenuStat_attribute_layout_%s", idPart))
-		MenuStat_attribute_layout:registerAfter("help", onMenuStatAttributeTooltip)
+		MenuStat_attribute_layout:registerAfter(tes3.uiEvent.help, onMenuStatAttributeTooltip)
 
 		-- Prevent children from using their own events.
 		local children = MenuStat_attribute_layout.children
 		for _, child in pairs(children) do
 			child.consumeMouseEvents = false
 		end
+
+		-- But make an exception for the reputation and bounty lines.
+		e.element:findChild("MenuStat_reputation_name").consumeMouseEvents = true
+		e.element:findChild("MenuStat_Bounty_name").consumeMouseEvents = true
 	end
 end
-event.register("uiActivated", onMenuStatActivated, { filter = "MenuStat" })
+event.register(tes3.event.uiActivated, onMenuStatActivated, { filter = "MenuStat" })
 
 local attributeTooltipElements = {
 	[tes3ui.registerID("MenuStat_misc_layout")] = true,
@@ -228,7 +234,7 @@ local function onStatsMenuRefreshed(e)
 	for _, element in pairs(scrollPaneChildren) do
 		if (attributeTooltipElements[element.id]) then
 			-- Show enhanced statistics tooltips on attributes/skills.
-			element:registerAfter("help", onMenuStatSkillTooltip)
+			element:registerAfter(tes3.uiEvent.help, onMenuStatSkillTooltip)
 
 			local children = element.children
 			for _, child in pairs(children) do
@@ -236,7 +242,7 @@ local function onStatsMenuRefreshed(e)
 			end
 		elseif (element.id == GUI_ID_MenuStat_faction_layout) then
 			-- Show increased faction information.
-			element:registerAfter("help", onMenuStatFactionTooltip)
+			element:registerAfter(tes3.uiEvent.help, onMenuStatFactionTooltip)
 
 			local children = element.children
 			for _, child in pairs(children) do
@@ -245,4 +251,4 @@ local function onStatsMenuRefreshed(e)
 		end
 	end
 end
-event.register("uiRefreshed", onStatsMenuRefreshed, { filter = "MenuStat_scroll_pane" })
+event.register(tes3.event.uiRefreshed, onStatsMenuRefreshed, { filter = "MenuStat_scroll_pane" })
