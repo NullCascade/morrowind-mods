@@ -53,6 +53,27 @@ local function registerModConfig()
 				description = common.i18n("mcm.ratioDisplay.description"),
 				variable = mwse.mcm.createTableVariable({ id = "displayRatio", table = common.config }),
 			})
+
+			-- Center-align icon bar
+			category:createOnOffButton({
+				label = common.i18n("mcm.iconBarCenterAlign.label"),
+				description = common.i18n("mcm.iconBarCenterAlign.description"),
+				variable = mwse.mcm.createTableVariable({ id = "iconBarCenterAlign", table = common.config })
+			})
+
+			-- Icon bar location
+			category:createDropdown({
+				label = common.i18n("mcm.iconBarLocation.label"),
+				description = common.i18n("mcm.iconBarLocation.description"),
+				options = {
+					{ label = common.i18n("mcm.iconBarLocationOptions.1"), value = "Top" },
+					{ label = common.i18n("mcm.iconBarLocationOptions.2"), value = "Below item name" },
+					{ label = common.i18n("mcm.iconBarLocationOptions.3"), value = "Above enchantments" },
+					{ label = common.i18n("mcm.iconBarLocationOptions.4"), value = "Above flavor text" },
+					{ label = common.i18n("mcm.iconBarLocationOptions.5"), value = "Bottom" },
+				},
+				variable = mwse.mcm.createTableVariable({ id = "iconBarLocation", table = common.config }),
+			})
 		end
 
 		-- Category: Search & Filtering
