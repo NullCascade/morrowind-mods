@@ -13,4 +13,5 @@ namespace UIEXT {
 	int centerOnPlayer(lua_State* L);
 	int redrawCellRect(lua_State* L);
 	int getMapData(lua_State* L);
+	int tryDrawMapLabel(lua_State* L);
 }

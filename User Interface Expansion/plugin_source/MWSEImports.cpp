@@ -5,6 +5,8 @@
 #include <TES3GameFile.h>
 #include <TES3Vectors.h>
 #include <TES3UIElement.h>
+#include <TES3WorldController.h>
+#include <TES3MobileActor.h>
 
 #include <NIAVObject.h>
 #include <MemAccess.h>
@@ -45,6 +47,19 @@ namespace TES3 {
 		return TES3_Cell_getExteriorGridY(this);
 	}
 
+	WorldController* WorldController::get() {
+		return *reinterpret_cast<TES3::WorldController**>(0x7C67DC);
+	}
+
+	const auto TES3_WorldController_getMobilePlayer = reinterpret_cast<MobilePlayer * (__thiscall*)(WorldController*)>(0x40FF20);
+	MobilePlayer* WorldController::getMobilePlayer() {
+		return TES3_WorldController_getMobilePlayer(this);
+	}
+
+	const auto TES3_MobileActor_getCell = reinterpret_cast<Cell * (__thiscall*)(const MobileActor*)>(0x521630);
+	Cell* MobileActor::getCell() const {
+		return TES3_MobileActor_getCell(this);
+	}
 
 	Vector3::Vector3() : x(0.0f), y(0.0f), z(0.0f) {
 	}

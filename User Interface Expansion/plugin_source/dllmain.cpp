@@ -16,6 +16,7 @@ static const struct luaL_Reg functions[] = {
 	{ "onLoaded", UIEXT::onLoaded },
 	{ "redrawCellRect", UIEXT::redrawCellRect },
 	{ "setMapZoom", UIEXT::setMapZoom },
+	{ "tryDrawMapLabel", UIEXT::tryDrawMapLabel},
 	{ NULL, NULL }
 };
 

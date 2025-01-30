@@ -1076,4 +1076,31 @@ namespace UIEXT {
 
 		return 1;
 	}
+
+	int tryDrawMapLabel(lua_State* L) {
+
+		TES3::MobilePlayer* player = TES3::WorldController::get()->getMobilePlayer();
+		TES3::Cell* cell = player->getCell();
+
+		if (cell->getIsInterior()) {
+			return 0;
+		}
+
+		int gridX = cell->getGridX(), gridY = cell->getGridY();
+		if (!isPositionInMap(gridX, gridY)) {
+			return 0;
+		}
+
+		// Draw marker, or remove marker flag if the cell no longer has a name.
+		if (cell->name) {
+			OnDrawLocationMarker(cell);
+		}
+		else {
+			cell->cellFlags &= ~TES3::CellFlag::MarkerDrawn;
+		}
+
+		// Remember cell was visited.
+		visitedMapCells.at((cellMaxY - gridY) * (cellMaxX - cellMinX + 1) + (gridX - cellMinX)) = 1;
+		return 0;
+	}
 }
