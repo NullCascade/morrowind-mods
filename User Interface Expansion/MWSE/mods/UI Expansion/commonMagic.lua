@@ -142,6 +142,10 @@ function commonMagic.searchSpellsList(magicMenu)
 	if (magicMenu.name == "MenuMagic" and common.allFilters.magic.searchText and common.config.selectSpellsOnSearch and firstSearchResult) then
 		firstSearchResult:triggerEvent("mouseClick")
 	end
+
+	magicMenu:updateLayout()
+	spellsList:updateLayout()
+	spellsList.widget:contentsChanged()
 end
 
 --- Determines if an array of effects contains an effect with the given school.
