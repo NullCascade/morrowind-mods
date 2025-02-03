@@ -67,7 +67,6 @@ local defaultConfig = {
 		MenuServiceTraining = true,
 		MenuSpellmaking = true,
 		MenuStat = true,
-		textInput = true,
 		tooltip = true,
 	},
 	iconBarLocation = "Bottom",
@@ -160,6 +159,7 @@ config.keybindMapSwitch = convertKeyBind(config.keybindMapSwitch)
 -- Clear deprecated config data.
 --- @diagnostic disable
 config.version = nil
+config.components.textInput = nil
 config.mapConfig.autoExpand = nil
 --- @diagnostic enable
 
