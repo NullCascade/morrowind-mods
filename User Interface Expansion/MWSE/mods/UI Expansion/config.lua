@@ -1,10 +1,21 @@
 
+local log = require("UI Expansion.log")
+
 --- @class uiexpansion.config
 --- @field logLevel string
+--- @field components table<string, boolean>
+--- @field mapConfig uiexpansion.config.mapConfig
+
+--- @class uiexpansion.config.mapConfig
+--- @field autoMapBounds boolean
+--- @field cellResolution number
+--- @field minX number
+--- @field maxX number
+--- @field minY number
+--- @field maxY number
 
 --- @type uiexpansion.config
 local defaultConfig = {
-	version = 1.7,
 	showHelpText = true,
 	autoSelectInput = "Magic",
 	autoSelectInputAdditional = true,
@@ -37,36 +48,75 @@ local defaultConfig = {
 	dialogueTopicUniqueColor = "link_color",
 	mapConfig = { autoMapBounds = true, cellResolution = 9, minX = -28, maxX = 28, minY = -28, maxY = 28 },
 	components = {
-		barter = true,
-		console = true,
-		contents = true,
-		dialog = true,
-		inventory = true,
-		inventorySelect = true,
-		journal = false,
-		magic = true,
-		magicSelect = true,
-		map = true,
-		mapPlugin = true,
-		name = true,
-		options = true,
-		quantity = true,
-		rest = true,
-		saveLoad = true,
-		serviceSpells = true,
-		spellmaking = true,
-		stat = true,
+		MenuBarter = true,
+		MenuConsole = true,
+		MenuContents = true,
+		MenuDialog = true,
+		MenuInventory = true,
+		MenuInventorySelect = true,
+		MenuMagic = true,
+		MenuMagicSelect = true,
+		MenuMap = true,
+		MenuMapPlugin = true,
+		MenuName = true,
+		MenuOptions = true,
+		MenuQuantity = true,
+		MenuRest = true,
+		MenuSaveLoad = true,
+		MenuServiceSpells = true,
+		MenuServiceTraining = true,
+		MenuSpellmaking = true,
+		MenuStat = true,
 		textInput = true,
 		tooltip = true,
-		training = true,
 	},
 	iconBarLocation = "Bottom",
 	iconBarCenterAlign = false,
 	logLevel = "INFO",
 }
 
---- @type musec.config
+--- @type uiexpansion.config
 local config = mwse.loadConfig("UI Expansion", defaultConfig) or defaultConfig--- Convert keybinds from previous to new version.
+
+-- 
+-- Convert over previous component IDs.
+-- 
+
+local oldComponentsMap = {
+	barter = "MenuBarter",
+	console = "MenuConsole",
+	contents = "MenuContents",
+	dialog = "MenuDialog",
+	inventory = "MenuInventory",
+	inventorySelect = "MenuInventorySelect",
+	magic = "MenuMagic",
+	magicSelect = "MenuMagicSelect",
+	map = "MenuMap",
+	mapPlugin = "MenuMapPlugin",
+	name = "MenuName",
+	options = "MenuOptions",
+	quantity = "MenuQuantity",
+	rest = "MenuRest",
+	saveLoad = "MenuSaveLoad",
+	serviceSpells = "MenuServiceSpells",
+	spellmaking = "MenuSpellmaking",
+	stat = "MenuStat",
+	textInput = "textInput",
+	tooltip = "tooltip",
+	training = "MenuServiceTraining",
+}
+for old, new in pairs(oldComponentsMap) do
+	if config.components[old] ~= nil then
+		if (config.components[new] == nil) then
+			config.components[new] = config.components[old]
+		end
+		config.components[old] = nil
+	end
+end
+
+-- 
+-- Convert keybinds
+-- 
 
 --- @param keyArray number[]
 --- @return table
@@ -106,5 +156,13 @@ end
 config.keybindTakeAll = convertKeyBind(config.keybindTakeAll)
 config.keybindShowAdditionalInfo = convertKeyBind(config.keybindShowAdditionalInfo)
 config.keybindMapSwitch = convertKeyBind(config.keybindMapSwitch)
+
+-- Clear deprecated config data.
+--- @diagnostic disable
+config.version = nil
+config.mapConfig.autoExpand = nil
+--- @diagnostic enable
+
+log:debug("Config loaded: %s", json.encode(config, { indent = true }))
 
 return config

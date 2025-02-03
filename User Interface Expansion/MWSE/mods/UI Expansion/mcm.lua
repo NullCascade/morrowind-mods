@@ -260,7 +260,7 @@ local function registerModConfig()
 				label = common.i18n("mcm.mapExtension.redrawRegion.label"),
 				description = common.i18n("mcm.mapExtension.redrawRegion.description"),
 				inGameOnly = true,
-				callback = function() common.createMapRedrawMenu() end,
+				callback = common.createMapRedrawMenu,
 			})
 		end
 
