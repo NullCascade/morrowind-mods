@@ -1,4 +1,4 @@
-local common = require("UI Expansion.common")
+local common = require("UI Expansion.lib.common")
 local externMapPlugin = include("uiexp_map_extension")
 
 --- Setup MCM.
