@@ -1,4 +1,4 @@
-local common = require("UI Expansion.common")
+local common = require("UI Expansion.lib.common")
 
 --- Update the map type on cell change.
 --- @param e cellChangedEventData

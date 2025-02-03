@@ -4,7 +4,7 @@ local GUI_ID_MenuConsole_scroll_pane = tes3ui.registerID("MenuConsole_scroll_pan
 
 local GUI_ID_UIEXP_ConsoleInputBox = tes3ui.registerID("UIEXP:ConsoleInputBox")
 
-local common = require("UI Expansion.common")
+local common = require("UI Expansion.lib.common")
 local config = common.config
 
 local luaMode = false

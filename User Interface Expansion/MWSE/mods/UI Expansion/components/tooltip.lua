@@ -10,7 +10,7 @@ local GUI_ID_TooltipReach = tes3ui.registerID("UIEXP_Tooltip_Reach")
 local GUI_ID_TooltipWeightClass = tes3ui.registerID("UIEXP_Tooltip_WeightClass")
 local GUI_ID_TooltipStolenLabel = tes3ui.registerID("UIEXP_Tooltip_StolenLabel")
 
-local common = require("UI Expansion.common")
+local common = require("UI Expansion.lib.common")
 
 local enchantmentType = {
 	tes3.findGMST(tes3.gmst.sItemCastOnce).value,

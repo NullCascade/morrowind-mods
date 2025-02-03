@@ -5,7 +5,7 @@ local GUI_ID_MenuContents_buttonContainer = tes3ui.registerID("Buttons")
 local GUI_ID_MenuContents_takeallbutton = tes3ui.registerID("MenuContents_takeallbutton")
 local contents_capacity_id = tes3ui.registerID("UIEXP_MenuContents_capacity")
 
-local common = require("UI Expansion.common")
+local common = require("UI Expansion.lib.common")
 
 --- @type tes3inputController
 local inputController = tes3.worldController.inputController

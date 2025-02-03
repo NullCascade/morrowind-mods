@@ -1,4 +1,4 @@
-local common = require("UI Expansion.common")
+local common = require("UI Expansion.lib.common")
 
 --- Calculates the hour and the AM/PM state for a given 24-hour number.
 --- @param hour number

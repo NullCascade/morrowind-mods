@@ -1,6 +1,6 @@
 local GUI_ID_MenuBarter_bucket = tes3ui.registerID("MenuBarter_bucket")
 
-local common = require("UI Expansion.common")
+local common = require("UI Expansion.lib.common")
 
 ----------------------------------------------------------------------------------------------------
 -- Barter: Searching and filtering.

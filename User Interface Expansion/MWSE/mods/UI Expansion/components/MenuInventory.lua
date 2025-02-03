@@ -1,7 +1,7 @@
 local GUI_ID_MenuBarter = tes3ui.registerID("MenuBarter")
 local GUI_ID_MenuInventory_button_layout = tes3ui.registerID("MenuInventory_button_layout")
 
-local common = require("UI Expansion.common")
+local common = require("UI Expansion.lib.common")
 
 ----------------------------------------------------------------------------------------------------
 -- Inventory: Searching and filtering.

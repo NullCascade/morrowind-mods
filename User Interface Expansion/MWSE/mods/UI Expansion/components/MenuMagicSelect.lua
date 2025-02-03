@@ -1,6 +1,6 @@
 
-local common = require("UI Expansion.common")
-local commonMagic = require("UI Expansion.commonMagic")
+local common = require("UI Expansion.lib.common")
+local commonMagic = require("UI Expansion.lib.commonMagic")
 
 local magicFilters = commonMagic.createMagicFilterInterface({
 	name = "magicSelect",

@@ -1,4 +1,4 @@
-local common = require("UI Expansion.common")
+local common = require("UI Expansion.lib.common")
 local lastTarget
 
 local id_serviceList = tes3ui.registerID("MenuServiceTraining_ServiceList")

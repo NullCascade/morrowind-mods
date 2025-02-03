@@ -1,4 +1,4 @@
-local common = require("UI Expansion.common")
+local common = require("UI Expansion.lib.common")
 
 local currentZoom = 2.0
 local zoomBar = nil

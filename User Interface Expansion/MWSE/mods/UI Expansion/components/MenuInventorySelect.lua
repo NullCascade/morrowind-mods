@@ -4,7 +4,7 @@ local GUI_ID_MenuInventorySelect_item_brick = tes3ui.registerID("MenuInventorySe
 local GUI_ID_MenuInventorySelect_prompt = tes3ui.registerID("MenuInventorySelect_prompt")
 local GUI_ID_MenuInventorySelect_scrollpane = tes3ui.registerID("MenuInventorySelect_scrollpane")
 
-local common = require("UI Expansion.common")
+local common = require("UI Expansion.lib.common")
 
 ----------------------------------------------------------------------------------------------------
 -- Generic filter cases

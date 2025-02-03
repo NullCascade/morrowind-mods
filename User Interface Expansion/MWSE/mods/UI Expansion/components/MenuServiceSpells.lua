@@ -1,5 +1,5 @@
 
-local common = require("UI Expansion.common")
+local common = require("UI Expansion.lib.common")
 
 --- Fills out a known effects table, given a spell list.
 --- @param knownEffects table<number, boolean>

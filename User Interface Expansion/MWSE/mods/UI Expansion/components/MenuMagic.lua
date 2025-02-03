@@ -2,8 +2,8 @@
 local GUI_ID_MenuMagic = tes3ui.registerID("MenuMagic")
 local GUI_ID_MagicMenu_spells_list = tes3ui.registerID("MagicMenu_spells_list")
 
-local common = require("UI Expansion.common")
-local commonMagic = require("UI Expansion.commonMagic")
+local common = require("UI Expansion.lib.common")
+local commonMagic = require("UI Expansion.lib.commonMagic")
 
 ----------------------------------------------------------------------------------------------------
 -- Spell List: Filtering and Searching

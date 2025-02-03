@@ -6,7 +6,7 @@ local GUI_Palette_Disabled = tes3ui.getPalette(tes3.palette.disabledColor)
 local GUI_Palette_Negative = tes3ui.getPalette(tes3.palette.negativeColor)
 local GUI_Palette_Positive = tes3ui.getPalette(tes3.palette.positiveColor)
 
-local common = require("UI Expansion.common")
+local common = require("UI Expansion.lib.common")
 
 ----------------------------------------------------------------------------------------------------
 -- Stats Menu: Display active modifiers.

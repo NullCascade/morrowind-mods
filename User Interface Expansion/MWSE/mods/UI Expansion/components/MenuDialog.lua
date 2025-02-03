@@ -1,4 +1,4 @@
-local common = require("UI Expansion.common")
+local common = require("UI Expansion.lib.common")
 
 local GUI_ID_MenuDialog = tes3ui.registerID("MenuDialog")
 local GUI_ID_MenuDialog_a_topic = tes3ui.registerID("MenuDialog_a_topic")
