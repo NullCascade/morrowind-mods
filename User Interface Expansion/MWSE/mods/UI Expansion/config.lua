@@ -5,6 +5,8 @@ local log = require("UI Expansion.log")
 --- @field logLevel string
 --- @field components table<string, boolean>
 --- @field mapConfig uiexpansion.config.mapConfig
+--- @field consoleHistoryLimit number The maximum number of previous entries remembered by the console.
+--- @field previousConsoleEntries uiexpansion.config.consoleEntry[]
 
 --- @class uiexpansion.config.mapConfig
 --- @field autoMapBounds boolean
@@ -13,6 +15,10 @@ local log = require("UI Expansion.log")
 --- @field maxX number
 --- @field minY number
 --- @field maxY number
+
+--- @class uiexpansion.config.consoleEntry
+--- @field lua boolean
+--- @field text string
 
 --- @type uiexpansion.config
 local defaultConfig = {

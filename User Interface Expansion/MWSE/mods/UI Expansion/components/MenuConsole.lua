@@ -4,10 +4,10 @@ local GUI_ID_MenuConsole_scroll_pane = tes3ui.registerID("MenuConsole_scroll_pan
 
 local GUI_ID_UIEXP_ConsoleInputBox = tes3ui.registerID("UIEXP:ConsoleInputBox")
 
+local mwseUICommon = require("mwse.common.ui")
 local common = require("UI Expansion.lib.common")
 local config = common.config
 
-local luaMode = false
 local currentHistoryIndex = 1
 local previousConsoleEntries = config.previousConsoleEntries
 if (previousConsoleEntries == nil) then
@@ -15,16 +15,6 @@ if (previousConsoleEntries == nil) then
 end
 
 local sandbox = {}
-
---- Updates the script button for lua/mwscript mode.
---- @param button tes3uiElement
-local function updateScriptButton(button)
-	if (luaMode) then
-		button.text = "lua"
-	else
-		button.text = "mwscript"
-	end
-end
 
 --- Clear the console's output.
 local function clearConsole()
@@ -54,16 +44,17 @@ end
 
 --- Invoked when the command box is submitted.
 local function onSubmitCommand()
-	local menuConsole = tes3ui.findMenu(GUI_ID_MenuConsole)
+	local menuConsole = assert(tes3ui.findMenu(GUI_ID_MenuConsole))
 	local inputBox = menuConsole:findChild(GUI_ID_UIEXP_ConsoleInputBox)
 	local text = inputBox.text
 	inputBox.text = ""
 
+	local context = debug.log(menuConsole:findChild("UIEXP:ConsoleModeButton").widget.value)
+	local luaMode = (context == "lua")
 	if (luaMode) then
 		tes3ui.logToConsole(text, true)
 	end
 
-	local context = (luaMode and "lua" or "mwscript")
 	local e = event.trigger("UIEXP:consoleCommand", { command = text, context = context }, { filter = context })
 	if (e) then
 		text = e.command
@@ -128,7 +119,7 @@ local function onSubmitCommand()
 			table.insert(previousConsoleEntries, { text = text, lua = luaMode })
 
 			-- Save a selection of the history.
-			local savedEntries = {}
+			local savedEntries = {} --- @type uiexpansion.config.consoleEntry[]
 			local previousConsoleEntriesCount = #previousConsoleEntries
 			for i = math.max(1, previousConsoleEntriesCount - config.consoleHistoryLimit), previousConsoleEntriesCount do
 				table.insert(savedEntries, previousConsoleEntries[i])
@@ -144,6 +135,49 @@ local function onSubmitCommand()
 
 	-- Make sure the original execution doesn't happen.
 	return false
+end
+
+--- @param e tes3uiEventData
+local function onConsoleTextKeyDownBefore(e)
+	local element = e.source
+	local keyPressed = mwseUICommon.eventCallbackHelper.getKeyPressed(e)
+	local menu = element:getTopLevelMenu()
+	local key = e.data0
+
+	if (key == 1) then
+		-- Pressing up goes to the previous entry in the history.
+		currentHistoryIndex = currentHistoryIndex - 1
+		if (currentHistoryIndex < 1) then
+			currentHistoryIndex = #previousConsoleEntries
+		end
+
+		-- Add caret to allow immediate editing.
+		local entry = previousConsoleEntries[currentHistoryIndex]
+		element.text = entry.text .. "|"
+
+		menu:findChild("UIEXP:ConsoleModeButton").widget.value = entry.lua and "lua" or "mwscript"
+		menu:updateLayout()
+		return false
+	elseif (key == 2) then
+		-- Pressing down goes to the next entry in the history.
+		currentHistoryIndex = currentHistoryIndex + 1
+		if (currentHistoryIndex > #previousConsoleEntries) then
+			currentHistoryIndex = 1
+		end
+
+		-- Add caret to allow immediate editing.
+		local entry = previousConsoleEntries[currentHistoryIndex]
+		element.text = entry.text .. "|"
+
+		menu:findChild("UIEXP:ConsoleModeButton").widget.value = entry.lua and "lua" or "mwscript"
+		menu:updateLayout()
+		return false
+	elseif (key == 9) then
+		-- Pressing tab toggles the script type.
+		menu:findChild("UIEXP:ConsoleModeButton").widget:next()
+		menu:updateLayout()
+		return false
+	end
 end
 
 --- @param e tes3uiEventData
@@ -186,86 +220,32 @@ local function onMenuConsoleActivated(e)
 	inputBlock.borderTop = 4
 	inputBlock.childAlignY = 0.5
 
-	-- Create an input frame.
-	local border = inputBlock:createThinBorder{}
-	border.autoWidth = true
-	border.autoHeight = true
-	border.widthProportional = 1.0
-
 	-- Create the command input.
-	local input = border:createTextInput{ id = "UIEXP:ConsoleInputBox" }
-	input.borderLeft = 5
-	input.borderRight = 5
-	input.borderTop = 2
-	input.borderBottom = 4
-	input.font = 1
-	input.widget.lengthLimit = nil
-	input.widget.eraseOnFirstKey = true
+	local input = inputBlock:createTextInput({ id = "UIEXP:ConsoleInputBox", createBorder = true, autoFocus = true })
 	input:registerBefore("keyEnter", onSubmitCommand)
+	input:registerBefore("keyPress", onConsoleTextKeyDownBefore)
 
 	-- Create toggle button.
-	local scriptToggleButton = inputBlock:createButton{ text = "mwscript" }
+	local scriptToggleButton = inputBlock:createCycleButton({
+		id = "UIEXP:ConsoleModeButton",
+		options = {
+			{ text = "mwscript", value = "mwscript" },
+			{ text = "lua", value = "lua" },
+		},
+		index = 1,
+	})
 	scriptToggleButton.borderAllSides = 0
 	scriptToggleButton.borderLeft = 4
 	scriptToggleButton.minWidth = 90
 	scriptToggleButton.width = 90
-	scriptToggleButton:registerAfter("mouseClick", function()
-		luaMode = not luaMode
-		updateScriptButton(scriptToggleButton)
-		menuConsole:updateLayout()
-	end)
 	local toggleText = scriptToggleButton.children[1]
 	toggleText.wrapText = true
 	toggleText.justifyText = "center"
-
-	input:registerBefore("keyPress", function(e)
-		local key = e.data0
-
-		if (key == 9) then
-			-- Prevent alt-tabbing from creating spacing.
-			return
-		elseif (key == -0x7FFFFFFD) then
-			-- Pressing up goes to the previous entry in the history.
-			currentHistoryIndex = currentHistoryIndex - 1
-			if (currentHistoryIndex < 1) then
-				currentHistoryIndex = #previousConsoleEntries
-			end
-
-			-- Add caret to allow immediate editing.
-			input.text = previousConsoleEntries[currentHistoryIndex].text .. "|"
-			luaMode = previousConsoleEntries[currentHistoryIndex].lua
-
-			updateScriptButton(scriptToggleButton)
-			menuConsole:updateLayout()
-			return
-		elseif (key == -0x7FFFFFFC) then
-			-- Pressing down goes to the next entry in the history.
-			currentHistoryIndex = currentHistoryIndex + 1
-			if (currentHistoryIndex > #previousConsoleEntries) then
-				currentHistoryIndex = 1
-			end
-
-			-- Add caret to allow immediate editing.
-			input.text = previousConsoleEntries[currentHistoryIndex].text .. "|"
-			luaMode = previousConsoleEntries[currentHistoryIndex].lua
-
-			updateScriptButton(scriptToggleButton)
-			menuConsole:updateLayout()
-			return
-		end
-	end)
-
-	-- Make it so clicking on the border focuses the input box.
-	input.consumeMouseEvents = false
-	border:registerAfter("mouseClick", function()
-		tes3ui.acquireTextInput(input)
-	end)
 
 	-- Make it so hiding the menu hides the input bar.
 	menuConsole:registerAfter("update", onMenuConsoleUpdated)
 
 	menuConsole:updateLayout()
-	tes3ui.acquireTextInput(input)
 end
 event.register("uiActivated", onMenuConsoleActivated, { filter = "MenuConsole" })
 

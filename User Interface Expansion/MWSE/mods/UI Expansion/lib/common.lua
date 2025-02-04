@@ -254,24 +254,13 @@ end
 --- @param params uiExpansion.common.createSearchBar.params
 --- @return table
 function common.createSearchBar(params)
-	local border = params.parent:createThinBorder()
-	border.autoWidth = true
-	border.autoHeight = true
-	border.widthProportional = 1.0
-	border.borderTop = 1
-	border.paddingAllSides = 1
-	border.visible = params.useSearch
-
 	-- Create the search input itself.
-	local input = border:createTextInput({
+	local input = params.parent:createTextInput({
 		id = params.id,
 		placeholderText = params.searchTextPlaceholder or common.i18n("filter.searchByName"),
-		placeholderTextColor = params.searchTextPlaceholderColor or tes3ui.getPalette(tes3.palette.disabledColor),
+		createBorder = true,
 	})
-	input.borderLeft = 5
-	input.borderRight = 5 + 10
-	input.borderTop = 0
-	input.borderBottom = 4
+	input.visible = params.useSearch
 	input.disabled = not params.useSearch
 
 	-- Set up the events to control text input control.
@@ -299,34 +288,13 @@ function common.createSearchBar(params)
 		input:updateLayout()
 	end)
 
-	-- search clear icon added
-	local icon = border:createImage({ id = "UIEXP:SearchClearIcon", path = "icons/ui_exp/filter_reset.dds" })
-	icon.imageScaleX = 0.5
-	icon.imageScaleY = 0.5
-	icon.absolutePosAlignX = 1.0
-	icon.absolutePosAlignY = 0.5
-	icon.borderRight = 4
-	icon:registerAfter(tes3.uiEvent.mouseClick, function(e)
-		input.text = '' -- "Search by name..."
-	end)
-	icon:registerAfter(tes3.uiEvent.mouseClick, function(e)
-		input.color = params.textColor or tes3ui.getPalette(tes3.palette.normalColor)
-		params.onUpdate(e)
-		input:updateLayout()
-	end)
-
-	border:registerAfter(tes3.uiEvent.mouseClick, function()
-		tes3ui.acquireTextInput(input)
-	end)
-
 	params.input = input
 	params.border = border
 	params.icon = icon
-	border:setLuaData("params", params)
 	input:setLuaData("params", params)
-	icon:setLuaData("params", params)
+	input.parent:setLuaData("params", params)
 
-	return { border = border, input = input }
+	return { border = input.parent, input = input }
 end
 
 ----------------------------------------------------------------------------------------------------
