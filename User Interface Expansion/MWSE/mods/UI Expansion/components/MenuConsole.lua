@@ -4,7 +4,6 @@ local GUI_ID_MenuConsole_scroll_pane = tes3ui.registerID("MenuConsole_scroll_pan
 
 local GUI_ID_UIEXP_ConsoleInputBox = tes3ui.registerID("UIEXP:ConsoleInputBox")
 
-local mwseUICommon = require("mwse.common.ui")
 local common = require("UI Expansion.lib.common")
 local config = common.config
 
@@ -174,7 +173,7 @@ local function onConsoleTextKeyDownBefore(e)
 		menu:updateLayout()
 		return false
 	elseif (tes3.isKeyEqual({ actual = keyData, expected = keyBindChangeScriptMode })) then
-		-- Pressing tab toggles the script type.
+		-- Pressing ctrl+tab toggles the script type.
 		menu:findChild("UIEXP:ConsoleModeButton").widget:next()
 		menu:updateLayout()
 		return false
@@ -225,6 +224,7 @@ local function onMenuConsoleActivated(e)
 	local input = inputBlock:createTextInput({ id = "UIEXP:ConsoleInputBox", createBorder = true, autoFocus = true })
 	input:registerBefore("keyEnter", onSubmitCommand)
 	input:registerBefore("keyPress", onConsoleTextKeyDownBefore)
+	input.wrapText = true
 
 	-- Create toggle button.
 	local scriptToggleButton = inputBlock:createCycleButton({
@@ -235,10 +235,11 @@ local function onMenuConsoleActivated(e)
 		},
 		index = 1,
 	})
-	scriptToggleButton.borderAllSides = 0
-	scriptToggleButton.borderLeft = 4
+	scriptToggleButton.heightProportional = 1.0
 	scriptToggleButton.minWidth = 90
 	scriptToggleButton.width = 90
+
+	-- Make the text centered in the button so it doesn't look weird when the mode changes.
 	local toggleText = scriptToggleButton.children[1]
 	toggleText.wrapText = true
 	toggleText.justifyText = "center"
