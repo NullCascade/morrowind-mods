@@ -48,7 +48,7 @@ local function onSubmitCommand()
 	local text = inputBox.text
 	inputBox.text = ""
 
-	local context = debug.log(menuConsole:findChild("UIEXP:ConsoleModeButton").widget.value)
+	local context = menuConsole:findChild("UIEXP:ConsoleModeButton").widget.value
 	local luaMode = (context == "lua")
 	if (luaMode) then
 		tes3ui.logToConsole(text, true)

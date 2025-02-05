@@ -117,14 +117,12 @@ function commonMagic.searchSpellsList(magicMenu)
 
 	-- Get magic menu.
 	if (not magicMenu) then
-		debug.log("test")
 		return
 	end
 
 	-- Get spells list.
 	local spellsList = magicMenu:findChild(GUI_ID_MagicMenu_spells_list)
 	if (not spellsList) then
-		debug.log("test")
 		return
 	end
 
