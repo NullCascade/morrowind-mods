@@ -37,4 +37,4 @@ local function onMenuMagicActivated(e)
 	commonMagic.addSpellIcons(spellsList, "Spells", "MagicMenu_spell_names", true)
 	commonMagic.addSpellIcons(spellsList, "Items", "MagicMenu_item_names", false)
 end
-event.register("uiActivated", onMenuMagicActivated, { filter = "MenuMagicSelect" })
+event.register(tes3.event.uiActivated, onMenuMagicActivated, { filter = "MenuMagicSelect" })

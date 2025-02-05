@@ -24,4 +24,4 @@ local function menuQuantity(e)
 		end)
 	end
 end
-event.register("uiActivated", menuQuantity, { filter = "MenuQuantity" })
+event.register(tes3.event.uiActivated, menuQuantity, { filter = "MenuQuantity" })

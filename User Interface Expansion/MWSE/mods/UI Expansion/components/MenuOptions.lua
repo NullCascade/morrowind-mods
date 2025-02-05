@@ -33,4 +33,4 @@ local function onCreatedMenuOptions(e)
 
 	mainMenu:updateLayout()
 end
-event.register("uiActivated", onCreatedMenuOptions, { filter = "MenuOptions" })
+event.register(tes3.event.uiActivated, onCreatedMenuOptions, { filter = "MenuOptions" })

@@ -67,7 +67,7 @@ local function onFilterContentsMenu(e)
 	e.effects = e.item.enchantment and e.item.enchantment.effects
 	e.filter = contentsFilters:triggerFilter(e)
 end
-event.register("filterContentsMenu", onFilterContentsMenu)
+event.register(tes3.event.filterContentsMenu, onFilterContentsMenu)
 
 --- Recalculates the inventory's weight and updates the GUI.
 local function calculateCapacity()
@@ -92,7 +92,7 @@ local function onMenuContentsActivated(e)
 	end
 
 	-- Register a key event for take all and container closing.
-	event.register("keyDown", onKeyInput)
+	event.register(tes3.event.keyDown, onKeyInput)
 	e.element:registerBefore("destroy", function()
 		event.unregister("keyDown", onKeyInput)
 	end)
@@ -133,7 +133,7 @@ local function onMenuContentsActivated(e)
 	end
 
 end
-event.register("uiActivated", onMenuContentsActivated, { filter = "MenuContents" })
+event.register(tes3.event.uiActivated, onMenuContentsActivated, { filter = "MenuContents" })
 
 ----------------------------------------------------------------------------------------------------
 -- Inventory transfer.
@@ -167,7 +167,7 @@ end
 local function onContentTileUpdated(e)
 	e.element:registerBefore("mouseClick", onContentTileClicked)
 end
-event.register("itemTileUpdated", onContentTileUpdated, { filter = "MenuContents" })
+event.register(tes3.event.itemTileUpdated, onContentTileUpdated, { filter = "MenuContents" })
 
 --- Enable alt-clicking inventory items to transfer it to the contents menu.
 --- @param e uiExpansionInventoryTileClickedEventData

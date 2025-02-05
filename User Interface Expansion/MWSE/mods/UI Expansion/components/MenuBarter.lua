@@ -25,7 +25,7 @@ local function onFilterBarterMenu(e)
 	e.effects = e.item.enchantment and e.item.enchantment.effects
 	e.filter = barterFilters:triggerFilter(e)
 end
-event.register("filterBarterMenu", onFilterBarterMenu)
+event.register(tes3.event.filterBarterMenu, onFilterBarterMenu)
 
 --- Create our changes for MenuBarter.
 --- @param e uiActivatedEventData
@@ -54,4 +54,4 @@ local function onMenuBarterActivated(e)
 		barterFilters:focusSearchBar()
 	end
 end
-event.register("uiActivated", onMenuBarterActivated, { filter = "MenuBarter" })
+event.register(tes3.event.uiActivated, onMenuBarterActivated, { filter = "MenuBarter" })

@@ -249,6 +249,6 @@ local function onMenuConsoleActivated(e)
 
 	menuConsole:updateLayout()
 end
-event.register("uiActivated", onMenuConsoleActivated, { filter = "MenuConsole" })
+event.register(tes3.event.uiActivated, onMenuConsoleActivated, { filter = "MenuConsole" })
 
 sandboxInit()

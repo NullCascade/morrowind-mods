@@ -103,7 +103,7 @@ local function onMenuMagicActivated(e)
 	-- Listen for future pre-updates to refresh spell icons.
 	e.element:registerAfter("preUpdate", updateMagicMenu)
 end
-event.register("uiActivated", onMenuMagicActivated, { filter = "MenuMagic" })
+event.register(tes3.event.uiActivated, onMenuMagicActivated, { filter = "MenuMagic" })
 
 --- Update filters when entering menu mode.
 local function onEnterMenuMode()
@@ -115,10 +115,10 @@ local function onEnterMenuMode()
 		magicFilters:focusSearchBar()
 	end
 end
-event.register("menuEnter", onEnterMenuMode, { filter = "MenuInventory" })
-event.register("menuEnter", onEnterMenuMode, { filter = "MenuMagic" })
-event.register("menuEnter", onEnterMenuMode, { filter = "MenuMap" })
-event.register("menuEnter", onEnterMenuMode, { filter = "MenuStat" })
+event.register(tes3.event.menuEnter, onEnterMenuMode, { filter = "MenuInventory" })
+event.register(tes3.event.menuEnter, onEnterMenuMode, { filter = "MenuMagic" })
+event.register(tes3.event.menuEnter, onEnterMenuMode, { filter = "MenuMap" })
+event.register(tes3.event.menuEnter, onEnterMenuMode, { filter = "MenuStat" })
 
 --
 -- Update power used colors on cast/when recharged.
@@ -151,7 +151,7 @@ local function onSpellCasted(e)
 		end
 	end
 end
-event.register("spellCasted", onSpellCasted)
+event.register(tes3.event.spellCasted, onSpellCasted)
 
 --- Restores power color when it is recharged.
 --- @param e powerRechargedEventData
@@ -163,4 +163,4 @@ local function onPowerRecharged(e)
 		end
 	end
 end
-event.register("powerRecharged", onPowerRecharged)
+event.register(tes3.event.powerRecharged, onPowerRecharged)

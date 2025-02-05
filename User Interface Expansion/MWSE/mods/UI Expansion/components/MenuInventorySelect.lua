@@ -222,7 +222,7 @@ local function onFilterInventorySelect(e)
 		end
 	end
 end
-event.register("filterInventorySelect", onFilterInventorySelect)
+event.register(tes3.event.filterInventorySelect, onFilterInventorySelect)
 
 local inventorySelectTypeFilterMap = {
 	["alembic"] = genericFilterNoIcons,
@@ -262,4 +262,4 @@ local function onMenuInventorySelectActivated(e)
 	currentFilter:createElements(filterBlock)
 	currentFilter:focusSearchBar()
 end
-event.register("uiActivated", onMenuInventorySelectActivated, { filter = "MenuInventorySelect" })
+event.register(tes3.event.uiActivated, onMenuInventorySelectActivated, { filter = "MenuInventorySelect" })

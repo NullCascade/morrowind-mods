@@ -41,7 +41,7 @@ local function onFilterInventory(e)
 	e.effects = e.item.enchantment and e.item.enchantment.effects
 	e.filter = inventoryFilters:triggerFilter(e)
 end
-event.register("filterInventory", onFilterInventory)
+event.register(tes3.event.filterInventory, onFilterInventory)
 
 --- Called when any MenuInventory item tile is clicked.
 --- @param e tes3uiEventData
@@ -67,7 +67,7 @@ end
 local function onInventoryTileUpdated(e)
 	e.element:registerBefore("mouseClick", onInventoryTileClicked)
 end
-event.register("itemTileUpdated", onInventoryTileUpdated, { filter = "MenuInventory" })
+event.register(tes3.event.itemTileUpdated, onInventoryTileUpdated, { filter = "MenuInventory" })
 
 --- Create our changes for MenuInventory.
 --- @param e uiActivatedEventData
@@ -84,7 +84,7 @@ local function onMenuInventoryActivated(e)
 	local barterMenu = tes3ui.findMenu(GUI_ID_MenuBarter)
 	inventoryFilters:setFilterHidden("tradable", (barterMenu == nil))
 end
-event.register("uiActivated", onMenuInventoryActivated, { filter = "MenuInventory" })
+event.register(tes3.event.uiActivated, onMenuInventoryActivated, { filter = "MenuInventory" })
 
 --- Update filters when entering menu mode.
 local function onEnterMenuMode()
@@ -101,8 +101,8 @@ local function onEnterMenuMode()
 		inventoryFilters:focusSearchBar()
 	end
 end
-event.register("menuEnter", onEnterMenuMode, { filter = "MenuContents" })
-event.register("menuEnter", onEnterMenuMode, { filter = "MenuInventory" })
-event.register("menuEnter", onEnterMenuMode, { filter = "MenuMagic" })
-event.register("menuEnter", onEnterMenuMode, { filter = "MenuMap" })
-event.register("menuEnter", onEnterMenuMode, { filter = "MenuStat" })
+event.register(tes3.event.menuEnter, onEnterMenuMode, { filter = "MenuContents" })
+event.register(tes3.event.menuEnter, onEnterMenuMode, { filter = "MenuInventory" })
+event.register(tes3.event.menuEnter, onEnterMenuMode, { filter = "MenuMagic" })
+event.register(tes3.event.menuEnter, onEnterMenuMode, { filter = "MenuMap" })
+event.register(tes3.event.menuEnter, onEnterMenuMode, { filter = "MenuStat" })

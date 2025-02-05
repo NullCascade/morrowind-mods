@@ -46,4 +46,4 @@ local function onUIActivated(e)
 
 	e.element:updateLayout()
 end
-event.register("uiActivated", onUIActivated, { filter = "MenuSpellmaking" })
+event.register(tes3.event.uiActivated, onUIActivated, { filter = "MenuSpellmaking" })

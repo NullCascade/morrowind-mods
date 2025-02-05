@@ -497,8 +497,8 @@ local function extraTooltipLate(e)
 end
 
 -- Register our events, one early, and one late.
-event.register("uiObjectTooltip", extraTooltipEarly, { priority = 100 })
-event.register("uiObjectTooltip", extraTooltipLate, { priority = -100 })
+event.register(tes3.event.uiObjectTooltip, extraTooltipEarly, { priority = 100 })
+event.register(tes3.event.uiObjectTooltip, extraTooltipLate, { priority = -100 })
 
 --- Displays a stolen indicator when bartering with a merchant you've stolen from.
 --- @param e itemTileUpdatedEventData
@@ -520,7 +520,7 @@ local function onItemTileUpdated(e)
 		end
 	end
 end
-event.register("itemTileUpdated", onItemTileUpdated, { filter = "MenuInventory" })
+event.register(tes3.event.itemTileUpdated, onItemTileUpdated, { filter = "MenuInventory" })
 
 --- Improve layout of spell tooltip.
 --- @param e uiSpellTooltipEventData
@@ -584,5 +584,5 @@ local function extraSpellTooltipLate(e)
 		end
 	end
 end
-event.register("uiSpellTooltip", extraSpellTooltipEarly, { priority = 100 })
-event.register("uiSpellTooltip", extraSpellTooltipLate, { priority = -100 })
+event.register(tes3.event.uiSpellTooltip, extraSpellTooltipEarly, { priority = 100 })
+event.register(tes3.event.uiSpellTooltip, extraSpellTooltipLate, { priority = -100 })

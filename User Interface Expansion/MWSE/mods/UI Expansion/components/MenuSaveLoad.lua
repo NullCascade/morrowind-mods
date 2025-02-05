@@ -301,7 +301,7 @@ local function menuLoad(e)
 		filterGameFiles(scroll)
 	end
 end
-event.register("uiActivated", menuLoad, { filter = "MenuLoad" })
+event.register(tes3.event.uiActivated, menuLoad, { filter = "MenuLoad" })
 
 --- Create our changes for MenuSave.
 --- @param e uiActivatedEventData
@@ -401,4 +401,4 @@ local function menuSave(e)
 		filterGameFiles(scroll)
 	end
 end
-event.register("uiActivated", menuSave, { filter = "MenuSave" })
+event.register(tes3.event.uiActivated, menuSave, { filter = "MenuSave" })

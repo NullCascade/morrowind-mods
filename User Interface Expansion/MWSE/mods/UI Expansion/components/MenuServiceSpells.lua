@@ -137,4 +137,4 @@ local function onUIActivated(e)
 	-- Finish up.
 	menu:updateLayout()
 end
-event.register("uiActivated", onUIActivated, { filter = "MenuServiceSpells" })
+event.register(tes3.event.uiActivated, onUIActivated, { filter = "MenuServiceSpells" })

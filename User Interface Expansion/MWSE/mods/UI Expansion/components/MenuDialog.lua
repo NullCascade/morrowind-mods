@@ -59,7 +59,7 @@ local function checkForAnswerHotkey(e)
 		answer:triggerEvent("mouseClick")
 	end
 end
-event.register("keyDown", checkForAnswerHotkey)
+event.register(tes3.event.keyDown, checkForAnswerHotkey)
 
 --- Updates colors on topic lists, and registers to let us know when they are needed.
 --- @param e tes3uiEventData
@@ -184,7 +184,7 @@ local function onDialogueMenuActivated(e)
 	e.element:registerAfter("preUpdate", firstPreUpdate)
 	e.element:registerAfter("update", updateAnswerText)
 end
-event.register("uiActivated", onDialogueMenuActivated, { filter = "MenuDialog" })
+event.register(tes3.event.uiActivated, onDialogueMenuActivated, { filter = "MenuDialog" })
 
 local function displayPlayerChoices()
 	if (not common.config.displayPlayerDialogueChoices) then
@@ -214,4 +214,4 @@ local function displayPlayerChoices()
 		end
 	end
 end
-event.register("postInfoResponse", displayPlayerChoices)
+event.register(tes3.event.postInfoResponse, displayPlayerChoices)

@@ -12,4 +12,4 @@ local function onMenuNameActivated(e)
 		tes3ui.acquireTextInput(input)
 	end)
 end
-event.register("uiActivated", onMenuNameActivated, { filter = "MenuName" })
+event.register(tes3.event.uiActivated, onMenuNameActivated, { filter = "MenuName" })

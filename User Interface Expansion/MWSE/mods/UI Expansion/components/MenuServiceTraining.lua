@@ -27,7 +27,7 @@ local function menuTraining(e)
 	local menu = tes3ui.findMenu("MenuDialog")
 	menu.visible = false
 end
-event.register("uiActivated", menuTraining, { filter = "MenuServiceTraining" })
+event.register(tes3.event.uiActivated, menuTraining, { filter = "MenuServiceTraining" })
 
 --- Gets the expertise level string for a skill value.
 --- @param skill number
@@ -287,4 +287,4 @@ local function onTraining(e)
 		modifyWindow(e.element)
 	end
 end
-event.register("uiActivated", onTraining, { filter = "MenuServiceTraining" })
+event.register(tes3.event.uiActivated, onTraining, { filter = "MenuServiceTraining" })
