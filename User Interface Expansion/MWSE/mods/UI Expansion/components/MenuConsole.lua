@@ -140,11 +140,12 @@ end
 --- @param e tes3uiEventData
 local function onConsoleTextKeyDownBefore(e)
 	local element = e.source
-	local keyPressed = mwseUICommon.eventCallbackHelper.getKeyPressed(e)
 	local menu = element:getTopLevelMenu()
-	local key = e.data0
 
-	if (key == 1) then
+	local keyData = assert(e.keyData)
+	local keyBindChangeScriptMode = { keyCode = tes3.keyboardCode.tab, isAltDown = false, isShiftDown = false, isControlDown = true, isSuperDown = false }
+
+	if (keyData.keyCode == tes3.keyboardCode.up) then
 		-- Pressing up goes to the previous entry in the history.
 		currentHistoryIndex = currentHistoryIndex - 1
 		if (currentHistoryIndex < 1) then
@@ -158,7 +159,7 @@ local function onConsoleTextKeyDownBefore(e)
 		menu:findChild("UIEXP:ConsoleModeButton").widget.value = entry.lua and "lua" or "mwscript"
 		menu:updateLayout()
 		return false
-	elseif (key == 2) then
+	elseif (keyData.keyCode == tes3.keyboardCode.down) then
 		-- Pressing down goes to the next entry in the history.
 		currentHistoryIndex = currentHistoryIndex + 1
 		if (currentHistoryIndex > #previousConsoleEntries) then
@@ -172,7 +173,7 @@ local function onConsoleTextKeyDownBefore(e)
 		menu:findChild("UIEXP:ConsoleModeButton").widget.value = entry.lua and "lua" or "mwscript"
 		menu:updateLayout()
 		return false
-	elseif (key == 9) then
+	elseif (tes3.isKeyEqual({ actual = keyData, expected = keyBindChangeScriptMode })) then
 		-- Pressing tab toggles the script type.
 		menu:findChild("UIEXP:ConsoleModeButton").widget:next()
 		menu:updateLayout()
