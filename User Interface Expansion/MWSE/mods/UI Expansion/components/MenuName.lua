@@ -8,7 +8,7 @@ local function onMenuNameActivated(e)
 	local border = input.parent
 
 	input.consumeMouseEvents = false
-	border:registerAfter("mouseClick", function()
+	border:registerAfter(tes3.uiEvent.mouseClick, function()
 		tes3ui.acquireTextInput(input)
 	end)
 end

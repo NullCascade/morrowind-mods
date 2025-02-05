@@ -22,7 +22,7 @@ local function onKeyInput()
 	if (contentsMenu and common.complexKeybindTest(common.config.keybindTakeAll)) then
 		local takeAllButton = contentsMenu:findChild(GUI_ID_MenuContents_takeallbutton)
 		if takeAllButton then
-			takeAllButton:triggerEvent("mouseClick")
+			takeAllButton:triggerEvent(tes3.uiEvent.mouseClick)
 			return false
 		end
 	end
@@ -106,8 +106,8 @@ local function onMenuContentsActivated(e)
 
 	-- Register a key event for take all and container closing.
 	event.register(tes3.event.keyDown, onKeyInput)
-	e.element:registerBefore("destroy", function()
-		event.unregister("keyDown", onKeyInput)
+	e.element:registerBefore(tes3.uiEvent.destroy, function()
+		event.unregister(tes3.event.keyDown, onKeyInput)
 	end)
 
 	-- Add a new block in the right place.
@@ -139,10 +139,10 @@ local function onMenuContentsActivated(e)
 		capacityBar.borderAllSides = 4
 		buttonBlock:reorderChildren(0, -1, 1)
 
-		contentsMenu:registerBefore("update", calculateCapacity)
+		contentsMenu:registerBefore(tes3.uiEvent.update, calculateCapacity)
 
 		-- Necessary as otherwise the fillbar is hidden for some reason.
-		contentsMenu:triggerEvent("update")
+		contentsMenu:triggerEvent(tes3.uiEvent.update)
 	end
 
 end
@@ -178,7 +178,7 @@ end
 --- Claim mouse click events on item tiles.
 --- @param e itemTileUpdatedEventData
 local function onContentTileUpdated(e)
-	e.element:registerBefore("mouseClick", onContentTileClicked)
+	e.element:registerBefore(tes3.uiEvent.mouseClick, onContentTileClicked)
 end
 event.register(tes3.event.itemTileUpdated, onContentTileUpdated, { filter = "MenuContents" })
 

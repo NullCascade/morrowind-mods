@@ -33,8 +33,8 @@ local function onUIActivated(e)
 		effectBlock.childAlignY = 0.5
 		effectBlock.borderBottom = 2
 		effectBlock:setPropertyObject(effectProperty, effect)
-		effectBlock:register("mouseClick", MenuSpellmaking_Effect_Click)
-		effectBlock:register("help", MenuSpellmaking_Effect_Help)
+		effectBlock:register(tes3.uiEvent.mouseClick, MenuSpellmaking_Effect_Click)
+		effectBlock:register(tes3.uiEvent.help, MenuSpellmaking_Effect_Help)
 
 		local icon = effectBlock:createImage({ id = MenuSpellmaking_EffectIcon, path = string.format("icons\\%s", effect.icon) })
 		icon:setPropertyObject(effectProperty, effect)

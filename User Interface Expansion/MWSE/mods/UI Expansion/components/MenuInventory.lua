@@ -77,7 +77,7 @@ end
 --- Claim mouse click events on item tiles.
 --- @param e itemTileUpdatedEventData
 local function onInventoryTileUpdated(e)
-	e.element:registerBefore("mouseClick", onInventoryTileClicked)
+	e.element:registerBefore(tes3.uiEvent.mouseClick, onInventoryTileClicked)
 end
 event.register(tes3.event.itemTileUpdated, onInventoryTileUpdated, { filter = "MenuInventory" })
 

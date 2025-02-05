@@ -16,7 +16,7 @@ local function onAfterTrainTimer()
 		tes3.player:activate(lastTarget)
 		local menu = tes3ui.findMenu("MenuDialog")
 		local trainbtn = menu:findChild("MenuDialog_service_training")
-		trainbtn:triggerEvent("mouseClick")
+		trainbtn:triggerEvent(tes3.uiEvent.mouseClick)
 	end
 end
 
@@ -88,11 +88,11 @@ function ImageButton.create(parent, imagePath, w, h)
 	im.height = h
 	im.scaleMode = true
 
-	im:register("mouseOver", ImageButton.over)
-	im:register("mouseLeave", ImageButton.leave)
-	im:register("mouseDown", ImageButton.press)
-	im:register("mouseRelease", ImageButton.release)
-	im:register("mouseClick", ImageButton.release)
+	im:register(tes3.uiEvent.mouseOver, ImageButton.over)
+	im:register(tes3.uiEvent.mouseLeave, ImageButton.leave)
+	im:register(tes3.uiEvent.mouseDown, ImageButton.press)
+	im:register(tes3.uiEvent.mouseRelease, ImageButton.release)
+	im:register(tes3.uiEvent.mouseClick, ImageButton.release)
 
 	return background
 end
@@ -136,7 +136,7 @@ local function createTrainSkillElement(parent, id, data)
 	local button = ImageButton.create(border, string.format("icons/ui_exp/skillbg_%s.dds",
 	                                                        tes3.specializationName[data.skill.specialization]), 128, 128)
 	button:setPropertyInt("UIEXP_ListIndex", data.forward)
-	button:register("mouseClick", onClickTrainSkill)
+	button:register(tes3.uiEvent.mouseClick, onClickTrainSkill)
 	local skillIcon = border:createImage{ path = skillIconPath }
 	skillIcon.consumeMouseEvents = false
 	skillIcon.absolutePosAlignX = 0.5
@@ -160,7 +160,7 @@ local function createTrainSkillElement(parent, id, data)
 	temp.absolutePosAlignX = 0.5
 	-- Stretch goal:
 	--[[
-	temp:register("help", function()
+	temp:register(tes3.uiEvent.help, function()
 		local tip = tes3ui.createTooltipMenu()
 		tip:createLabel{text = "skill tooltip"}
 	end)
@@ -274,7 +274,7 @@ local function modifyWindow(menu)
 
 	local button_cancel = button_block:createButton{ id = id_cancel, text = tes3.findGMST("sDone").value }
 	button_cancel.layoutOriginFractionX = 1.0
-	button_cancel:register("mouseClick", onCancel)
+	button_cancel:register(tes3.uiEvent.mouseClick, onCancel)
 
 	-- Final setup
 	menu:getTopLevelMenu():updateLayout()

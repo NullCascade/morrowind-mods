@@ -135,11 +135,11 @@ local function SetActive(listBoxElement, selected)
 		if (listKids[i].widget) then
 			listKids[i].widget.state = 1 -- Normal
 			-- Trigger leave to encourage the element to change color properly.
-			listKids[i]:triggerEvent("mouseLeave")
+			listKids[i]:triggerEvent(tes3.uiEvent.mouseLeave)
 
 			if (type(selected) == "string" and listKids[i].text == selected) then
 				listKids[i].widget.state = 4
-				listKids[i]:triggerEvent("mouseLeave")
+				listKids[i]:triggerEvent(tes3.uiEvent.mouseLeave)
 				foundStringMatch = true
 			end
 		end
@@ -177,7 +177,7 @@ local function MakeCharacterList(scrollElement, characterSelectElement)
 
 	for k, _ in pairs(characters) do
 		local select = characterSelectElement:createTextSelect({ text = k })
-		select:register("mouseClick", function()
+		select:register(tes3.uiEvent.mouseClick, function()
 			filterGameFiles(scrollElement, k)
 			SetActive(characterSelectElement, select)
 		end)
@@ -199,7 +199,7 @@ local function SetSaveGameEventHandlers(scrollElement, characterSelectElement)
 		-- Save game button will not have a game save property.
 		if (save) then
 			-- Add an event so we can delete saves.
-			scrollKids[i]:register("mouseClick", function()
+			scrollKids[i]:register(tes3.uiEvent.mouseClick, function()
 				local inputController = tes3.worldController.inputController
 				if (inputController:isShiftDown()) then
 					tes3.messageBox({
@@ -227,7 +227,7 @@ local function SetSaveGameEventHandlers(scrollElement, characterSelectElement)
 				end
 			end)
 			-- Edit tooltip.
-			scrollKids[i]:register("help", function(e)
+			scrollKids[i]:register(tes3.uiEvent.help, function(e)
 				e.source:forwardEvent(e)
 				local tip = tes3ui.findHelpLayerMenu("HelpMenu")
 				if (tip) then
@@ -246,7 +246,7 @@ local function SetSaveGameEventHandlers(scrollElement, characterSelectElement)
 	if (characterSelectElement) then
 		characterSelectElement:getContentElement():destroyChildren()
 		local allChars = characterSelectElement:createTextSelect({ text = common.i18n("saveLoad.allCharacters") })
-		allChars:register("mouseClick", function()
+		allChars:register(tes3.uiEvent.mouseClick, function()
 			filterGameFiles(scrollElement)
 			SetActive(characterSelectElement, allChars)
 		end)
@@ -337,7 +337,7 @@ local function menuSave(e)
 		oldSaveButton:destroy()
 		-- Reuse the existing save button ID.
 		local saveButton = buttonPanel:createButton({ id = save_saveButton_id, text = common.i18n("saveLoad.save") })
-		saveButton:register("mouseClick", function()
+		saveButton:register(tes3.uiEvent.mouseClick, function()
 			TrySave(saveInput.text)
 		end)
 		saveButton.borderAllSides = 0
@@ -345,7 +345,7 @@ local function menuSave(e)
 		saveButton.borderRight = 4
 
 		-- Now we can register events on the input
-		saveInput:register("keyPress", function(x)
+		saveInput:register(tes3.uiEvent.keyPress, function(x)
 			x.source:forwardEvent(x)
 			if (not CanSave(saveInput.text)) then
 				saveButton.disabled = true
@@ -355,20 +355,20 @@ local function menuSave(e)
 				saveButton.widget.state = 1 -- Normal
 			end
 		end)
-		saveInput:register("keyEnter", function()
+		saveInput:register(tes3.uiEvent.keyEnter, function()
 			TrySave(saveInput.text)
 		end)
-		saveInput:register("mouseClick", function()
+		saveInput:register(tes3.uiEvent.mouseClick, function()
 			saveInput.text = saveInput.text .. "|"
 			tes3ui.acquireTextInput(saveInput)
 		end)
-		inputBlock:register("mouseClick", function()
+		inputBlock:register(tes3.uiEvent.mouseClick, function()
 			saveInput.text = saveInput.text .. "|"
 			tes3ui.acquireTextInput(saveInput)
 		end)
 
 		local showAll = buttonPanel:createButton({ id = save_showAll_id, text = common.i18n("saveLoad.allCharacters") })
-		showAll:register("mouseClick", function()
+		showAll:register(tes3.uiEvent.mouseClick, function()
 			if (showAll.text == common.i18n("saveLoad.allCharacters")) then
 				filterGameFiles(scroll)
 				showAll.text = common.i18n("saveLoad.currentCharacter")

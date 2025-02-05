@@ -30,11 +30,11 @@ function commonMagic.addSpellIcons(spellsList, guiIdPrefix, namesBlockId, isSpel
 			local icon = iconsColumn:createImage({ path = string.format("icons\\%s", spell.effects[1].object.icon) })
 			icon.borderTop = 2
 			icon:setPropertyObject("MagicMenu_Spell", spell)
-			icon:register("mouseClick", function()
-				nameElement:triggerEvent("mouseClick")
+			icon:register(tes3.uiEvent.mouseClick, function()
+				nameElement:triggerEvent(tes3.uiEvent.mouseClick)
 			end)
-			icon:register("help", function()
-				nameElement:triggerEvent("help")
+			icon:register(tes3.uiEvent.help, function()
+				nameElement:triggerEvent(tes3.uiEvent.help)
 			end)
 			icon.visible = nameElement.visible
 		end
@@ -44,11 +44,11 @@ function commonMagic.addSpellIcons(spellsList, guiIdPrefix, namesBlockId, isSpel
 			local icon = iconsColumn:createImage({ path = string.format("icons\\%s", object.enchantment.effects[1].object.icon)  })
 			icon.borderTop = 2
 			icon:setPropertyObject("MagicMenu_object", object)
-			icon:register("mouseClick", function()
-				nameElement:triggerEvent("mouseClick")
+			icon:register(tes3.uiEvent.mouseClick, function()
+				nameElement:triggerEvent(tes3.uiEvent.mouseClick)
 			end)
-			icon:register("help", function()
-				nameElement:triggerEvent("help")
+			icon:register(tes3.uiEvent.help, function()
+				nameElement:triggerEvent(tes3.uiEvent.help)
 			end)
 			icon.visible = nameElement.visible
 		end
@@ -140,7 +140,7 @@ function commonMagic.searchSpellsList(magicMenu)
 	                      (not hasMatchingSpells and hasMatchingPowers and hasMatchingItems))
 
 	if (magicMenu.name == "MenuMagic" and common.allFilters.magic.searchText and common.config.selectSpellsOnSearch and firstSearchResult) then
-		firstSearchResult:triggerEvent("mouseClick")
+		firstSearchResult:triggerEvent(tes3.uiEvent.mouseClick)
 	end
 
 	magicMenu:updateLayout()

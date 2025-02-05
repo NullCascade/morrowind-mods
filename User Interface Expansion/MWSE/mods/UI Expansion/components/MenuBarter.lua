@@ -57,7 +57,7 @@ local function onMenuBarterActivated(e)
 	end
 
 	-- Hide it again when this UI goes away.
-	buttonBlock:registerBefore("destroy", function()
+	buttonBlock:registerBefore(tes3.uiEvent.destroy, function()
 		common.allFilters.inventory:setFilterHidden("tradable", true)
 	end)
 

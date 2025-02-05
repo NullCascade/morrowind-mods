@@ -101,7 +101,7 @@ local function onMenuMagicActivated(e)
 	commonMagic.addSpellIcons(spellsList, "Spells", "MagicMenu_spell_names", true)
 
 	-- Listen for future pre-updates to refresh spell icons.
-	e.element:registerAfter("preUpdate", updateMagicMenu)
+	e.element:registerAfter(tes3.uiEvent.preUpdate, updateMagicMenu)
 end
 event.register(tes3.event.uiActivated, onMenuMagicActivated, { filter = "MenuMagic" })
 

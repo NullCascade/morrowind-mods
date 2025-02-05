@@ -93,11 +93,11 @@ local function onSubmitCommand()
 		else
 			-- Any of the togglestats reporting outputs will destroy the text input,
 			-- which is recreated on the next key input, so send one.
-			menuConsole:triggerEvent("keyEnter")
+			menuConsole:triggerEvent(tes3.uiEvent.keyEnter)
 
 			local vanillaInputText = menuConsole:findChild(GUI_ID_MenuConsole_text_input)
 			vanillaInputText.text = text
-			menuConsole:triggerEvent("keyEnter")
+			menuConsole:triggerEvent(tes3.uiEvent.keyEnter)
 		end
 	end
 
@@ -222,8 +222,8 @@ local function onMenuConsoleActivated(e)
 
 	-- Create the command input.
 	local input = inputBlock:createTextInput({ id = "UIEXP:ConsoleInputBox", createBorder = true, autoFocus = true })
-	input:registerBefore("keyEnter", onSubmitCommand)
-	input:registerBefore("keyPress", onConsoleTextKeyDownBefore)
+	input:registerBefore(tes3.uiEvent.keyEnter, onSubmitCommand)
+	input:registerBefore(tes3.uiEvent.keyPress, onConsoleTextKeyDownBefore)
 	input.wrapText = true
 
 	-- Create toggle button.
@@ -245,7 +245,7 @@ local function onMenuConsoleActivated(e)
 	toggleText.justifyText = "center"
 
 	-- Make it so hiding the menu hides the input bar.
-	menuConsole:registerAfter("update", onMenuConsoleUpdated)
+	menuConsole:registerAfter(tes3.uiEvent.update, onMenuConsoleUpdated)
 
 	menuConsole:updateLayout()
 end

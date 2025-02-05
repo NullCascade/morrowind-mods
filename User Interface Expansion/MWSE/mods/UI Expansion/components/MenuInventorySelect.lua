@@ -261,7 +261,7 @@ local function onMenuInventorySelectActivated(e)
 	inventorySelectPane:reorderChildren(1, -1, 1)
 
 	-- Don't carry the filter over between sessions.
-	filterBlock:registerBefore("destroy", function()
+	filterBlock:registerBefore(tes3.uiEvent.destroy, function()
 		currentFilter = nil
 	end)
 

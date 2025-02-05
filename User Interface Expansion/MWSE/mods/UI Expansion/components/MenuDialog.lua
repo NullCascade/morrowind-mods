@@ -56,7 +56,7 @@ local function checkForAnswerHotkey(e)
 
 	local answer = answers[key]
 	if answer then
-		answer:triggerEvent("mouseClick")
+		answer:triggerEvent(tes3.uiEvent.mouseClick)
 	end
 end
 event.register(tes3.event.keyDown, checkForAnswerHotkey)
@@ -66,6 +66,7 @@ event.register(tes3.event.keyDown, checkForAnswerHotkey)
 local function updateTopicsList(e)
 	-- If the function lacks context to the dialogue menu, look it up.
 	local menuDialogue = tes3ui.findMenu(GUI_ID_MenuDialog)
+	if (not menuDialogue) then return end
 	local textPane = menuDialogue:findChild(GUI_ID_MenuDialog_scroll_pane):findChild(GUI_ID_PartScrollPane_pane)
 	local topicsPane = menuDialogue:findChild(GUI_ID_MenuDialog_topics_pane):findChild(GUI_ID_PartScrollPane_pane)
 
@@ -100,7 +101,7 @@ local function updateTopicsList(e)
 	-- Catch events from hyperlinks.
 	for _, element in pairs(textPane.children) do
 		if (element.id == GUI_ID_MenuDialog_hyper) then
-			element:registerAfter("mouseClick", updateTopicsList)
+			element:registerAfter(tes3.uiEvent.mouseClick, updateTopicsList)
 		end
 	end
 
@@ -128,14 +129,14 @@ local function updateTopicsList(e)
 			else
 				element.widget.state = 1
 			end
-			element:triggerEvent("mouseLeave")
+			element:triggerEvent(tes3.uiEvent.mouseLeave)
 
 			-- Store objects on the element for quick reference later.
 			element:setPropertyObject("MenuDialog_UIEXP_info", info)
 			element:setPropertyObject("MenuDialog_UIEXP_actor", actor)
 
 			-- Register an event so that we update when any topic is clicked.
-			element:registerAfter("mouseClick", updateTopicsList)
+			element:registerAfter(tes3.uiEvent.mouseClick, updateTopicsList)
 		end
 	end
 end
@@ -159,7 +160,7 @@ local function updateAnswerText(e)
 			if (not didBefore) then
 				child:setPropertyBool(GUI_PID_ChoiceNumbered, true)
 
-				child:registerAfter("mouseClick", updateTopicsList)
+				child:registerAfter(tes3.uiEvent.mouseClick, updateTopicsList)
 
 				child.text = string.format("%d. %s", answerCount, child.text)
 			end
@@ -178,11 +179,11 @@ local function onDialogueMenuActivated(e)
 	-- Set the pre-update event to update the topic list.
 	-- We only want this event to fire once. We'll manually track changes above to be more efficient.
 	local function firstPreUpdate(preUpdateEventData)
-		assert(e.element:unregisterAfter("preUpdate", firstPreUpdate))
+		assert(e.element:unregisterAfter(tes3.uiEvent.preUpdate, firstPreUpdate))
 		updateTopicsList(preUpdateEventData)
 	end
-	e.element:registerAfter("preUpdate", firstPreUpdate)
-	e.element:registerAfter("update", updateAnswerText)
+	e.element:registerAfter(tes3.uiEvent.preUpdate, firstPreUpdate)
+	e.element:registerAfter(tes3.uiEvent.update, updateAnswerText)
 end
 event.register(tes3.event.uiActivated, onDialogueMenuActivated, { filter = "MenuDialog" })
 
@@ -203,7 +204,7 @@ local function displayPlayerChoices()
 
 	for _, child in pairs(block.parent.children) do
 		if child.name == "MenuDialog_answer_block" then
-			child:registerBefore("mouseClick", function(e)
+			child:registerBefore(tes3.uiEvent.mouseClick, function(e)
 				tes3.messageBox(child.text)
 
 				-- Find our newly created element and recolor it.

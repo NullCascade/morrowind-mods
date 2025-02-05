@@ -11,7 +11,7 @@ local function menuQuantity(e)
 	common.bindScrollBarToKeyboard({
 		element = scrollBar,
 		onSubmit = function()
-			submitButton:triggerEvent("mouseClick")
+			submitButton:triggerEvent(tes3.uiEvent.mouseClick)
 		end,
 	})
 
@@ -19,8 +19,8 @@ local function menuQuantity(e)
 	-- sent to the contents menu.
 	local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
 	if (contentsMenu) then
-		submitButton:registerAfter("mouseClick", function()
-			contentsMenu:triggerEvent("update")
+		submitButton:registerAfter(tes3.uiEvent.mouseClick, function()
+			contentsMenu:triggerEvent(tes3.uiEvent.update)
 		end)
 	end
 end
