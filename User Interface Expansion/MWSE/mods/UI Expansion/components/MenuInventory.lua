@@ -37,9 +37,21 @@ inventoryFilters:addFilter({
 --- Allow our filters to hide tiles in the inventory menu.
 --- @param e filterInventoryEventData
 local function onFilterInventory(e)
-	e.text = e.item.name
-	e.effects = e.item.enchantment and e.item.enchantment.effects
-	e.filter = inventoryFilters:triggerFilter(e)
+	if (e.filter ~= nil) then return end
+
+	--- @type uiexpansion.filterFunction.triggerFilterParams
+	local filterData = {
+		tile = e.tile,
+		item = e.item,
+		itemData = e.itemData,
+		text = e.item.name,
+		effects = e.item.enchantment and e.item.enchantment.effects,
+	}
+
+	local result = inventoryFilters:triggerFilter(filterData)
+	if (result ~= nil) then
+		e.filter = result
+	end
 end
 event.register(tes3.event.filterInventory, onFilterInventory)
 

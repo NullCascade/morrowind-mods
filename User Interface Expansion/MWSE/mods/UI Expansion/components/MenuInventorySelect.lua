@@ -214,11 +214,20 @@ local currentFilter = nil
 --- Filters out items in the inventory select window, based on our active filter.
 --- @param e filterInventorySelectEventData
 local function onFilterInventorySelect(e)
+	if (not currentFilter) then return end
+
 	if (currentFilter) then
-		e.text = e.item.name
-		e.effects = e.item.enchantment and e.item.enchantment.effects
-		if (not currentFilter:triggerFilter(e)) then
-			e.filter = false
+		--- @type uiexpansion.filterFunction.triggerFilterParams
+		local filterData = {
+			item = e.item,
+			itemData = e.itemData,
+			text = e.item.name,
+			effects = e.item.enchantment and e.item.enchantment.effects,
+		}
+	
+		local result = currentFilter:triggerFilter(filterData)
+		if (result ~= nil) then
+			e.filter = result
 		end
 	end
 end

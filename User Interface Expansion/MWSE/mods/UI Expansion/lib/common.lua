@@ -51,6 +51,7 @@ end
 --- @return number
 function common.getIngredientEffectAttributeId(ingredient, index)
 	local magicEffect = tes3.getMagicEffect(ingredient.effects[index])
+	if (magicEffect == nil) then return -1 end
 	if (magicEffect.targetsAttributes) then
 		return ingredient.effectAttributeIds[index]
 	else
@@ -65,6 +66,7 @@ end
 --- @return number
 function common.getIngredientEffectSkillId(ingredient, index)
 	local magicEffect = tes3.getMagicEffect(ingredient.effects[index])
+	if (magicEffect == nil) then return -1 end
 	if (magicEffect.targetsSkills) then
 		return ingredient.effectSkillIds[index]
 	else
@@ -99,6 +101,10 @@ local keyboardScrollBarNumberInput = nil
 local function onKeyDownForScrollBar(e)
 	-- Don't do anything if we have an input focused.
 	if (common.isTextInputActive()) then
+		return
+	end
+
+	if (keyboardScrollBarParams == nil or currentKeyboardBoundScrollBar == nil) then
 		return
 	end
 
@@ -167,6 +173,10 @@ end
 --- Mouse wheel handling for scroll bars.
 --- @param e mouseWheelEventData
 local function onMouseWheelForScrollBar(e)
+	if (currentKeyboardBoundScrollBar == nil or keyboardScrollBarParams == nil) then
+		return
+	end
+
 	local widget = currentKeyboardBoundScrollBar.widget
 	local previousValue = widget.current
 	local newValue
@@ -308,11 +318,12 @@ end
 --- @field createSearchBar boolean
 --- @field filters table
 --- @field filtersOrdered table
---- @field onFilterChanged function
---- @field onSearchTextPreUpdate function
+--- @field onFilterChanged function?
+--- @field onSearchTextPreUpdate function?
 --- @field searchTextColor number[]
 --- @field searchTextPlaceholder string
 --- @field searchTextPlaceholderColor number[]
+--- @field extraData table?
 local uiExFilterFunction = {}
 local uiExFilterFunctionMT = { __index = uiExFilterFunction }
 
@@ -441,15 +452,22 @@ function uiExFilterFunction:clearFilter()
 	self:setFiltersExact()
 end
 
+--- @class uiexpansion.filterFunction.triggerFilterParams
+--- @field tile tes3inventoryTile? Not available for inventory selection.
+--- @field item tes3item|tes3misc|tes3clothing|tes3armor|tes3weapon
+--- @field itemData tes3itemData?
+--- @field text string
+--- @field effects tes3effect[]|nil
+
 --- Provides a filter with information and allows it to return if the filter allows the given information.
---- @param params table
+--- @param params uiexpansion.filterFunction.triggerFilterParams
 --- @return boolean
 function uiExFilterFunction:triggerFilter(params)
 	return self:checkText(params) and self:checkFilters(params)
 end
 
 --- Checks to see if either the given text or the given effects match a search.
---- @param params table
+--- @param params uiexpansion.filterFunction.triggerFilterParams
 --- @return boolean
 function uiExFilterFunction:checkText(params)
 	local searchText = self.searchText
@@ -488,14 +506,21 @@ function uiExFilterFunction:checkText(params)
 		-- Rebundle ingredient effects.
 		local effects = params.effects or {}
 		if (item and item.objectType == tes3.objectType.ingredient) then
+			--- @cast item tes3ingredient
 			for index, effectId in ipairs(item.effects) do
 				if (effectId >= 0) then
 					local object = tes3.getMagicEffect(effectId)
 					effects[index] = {
 						id = effectId,
 						object = object,
-						attribute = item.effectAttributeIds[index],
-						skill = item.effectSkillIds[index],
+						attribute = item.effectAttributeIds[index] --[[@type tes3.attribute]],
+						skill = item.effectSkillIds[index] --[[@type tes3.skill]],
+						cost = 0,
+						duration = 0,
+						min = 0,
+						max = 0,
+						radius = 0,
+						rangeType = 0,
 					}
 				end
 			end
@@ -535,7 +560,7 @@ function uiExFilterFunction:checkText(params)
 end
 
 --- Checks to see if any active filters (i.e. type buttons) reject our search.
---- @param params table
+--- @param params uiexpansion.filterFunction.triggerFilterParams
 --- @return boolean
 function uiExFilterFunction:checkFilters(params)
 	if (#self.filtersOrdered == 0) then

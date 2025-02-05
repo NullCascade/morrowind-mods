@@ -15,11 +15,11 @@ local inputController = tes3.worldController.inputController
 ----------------------------------------------------------------------------------------------------
 
 --- Allow "take all" keybinding.
---- @return boolean
+--- @return boolean?
 local function onKeyInput()
 	-- Ctrl+Space (default) takes all.
-	if (common.complexKeybindTest(common.config.keybindTakeAll)) then
-		local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
+	local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
+	if (contentsMenu and common.complexKeybindTest(common.config.keybindTakeAll)) then
 		local takeAllButton = contentsMenu:findChild(GUI_ID_MenuContents_takeallbutton)
 		if takeAllButton then
 			takeAllButton:triggerEvent("mouseClick")
@@ -63,15 +63,28 @@ common.createStandardInventoryFilters(contentsFilters)
 --- Allow our filters to hide tiles in the contents menu.
 --- @param e filterContentsMenuEventData
 local function onFilterContentsMenu(e)
-	e.text = e.item.name
-	e.effects = e.item.enchantment and e.item.enchantment.effects
-	e.filter = contentsFilters:triggerFilter(e)
+	if (e.filter ~= nil) then return end
+
+	--- @type uiexpansion.filterFunction.triggerFilterParams
+	local filterData = {
+		tile = e.tile,
+		item = e.item,
+		itemData = e.itemData,
+		text = e.item.name,
+		effects = e.item.enchantment and e.item.enchantment.effects,
+	}
+
+	local result = contentsFilters:triggerFilter(filterData)
+	if (result ~= nil) then
+		e.filter = result
+	end
 end
 event.register(tes3.event.filterContentsMenu, onFilterContentsMenu)
 
 --- Recalculates the inventory's weight and updates the GUI.
 local function calculateCapacity()
 	local menu = tes3ui.findMenu(GUI_ID_MenuContents)
+	if (not menu) then return end
 	local maxCapacity = menu:getPropertyFloat("MenuContents_containerweight")
 	local container = menu:getPropertyObject("MenuContents_ObjectContainer")
 
@@ -171,12 +184,10 @@ event.register(tes3.event.itemTileUpdated, onContentTileUpdated, { filter = "Men
 
 --- Enable alt-clicking inventory items to transfer it to the contents menu.
 --- @param e uiExpansionInventoryTileClickedEventData
---- @return boolean
+--- @return boolean?
 local function onInventoryTileClicked(e)
 	local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
-	if (contentsMenu == nil) then
-		return
-	end
+	if (not contentsMenu) then return end
 
 	-- When pickpocketing, prevent moving items into an inventory.
 	if (isPickpocketing(contentsMenu)) then
@@ -220,9 +231,10 @@ event.register("UIEX:InventoryTileClicked", onInventoryTileClicked)
 
 --- Enable alt-clicking contents items to transfer it to the inventory menu.
 --- @param e uiExpansionInventoryTileClickedEventData
---- @return boolean
+--- @return boolean?
 local function onContentsTileClicked(e)
 	local contentsMenu = tes3ui.findMenu(GUI_ID_MenuContents)
+	if (not contentsMenu) then return end
 
 	-- When pickpocketing, let the vanilla code do the pickpocket check.
 	if (isPickpocketing(contentsMenu)) then
