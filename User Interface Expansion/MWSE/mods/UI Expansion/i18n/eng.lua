@@ -98,6 +98,8 @@ return {
 	["mcm.component.MenuStat.label"] = "Enable stat menu component?",
 	["mcm.component.MenuServiceTraining.description"] = "Features:\n- The menu has been replaced by a more graphically-focused alternative.\n- The level that a trainer can train you to is shown.",
 	["mcm.component.MenuServiceTraining.label"] = "Enable training menu component?",
+	["mcm.component.tooltip.description"] = "Features:\n- Cleans up alignment of elements to make tooltips more consistent.\n- Stolen goods are marked when bartering with someone that you have stolen from.\n- Value and weight data has been made more compact and detailed, including showing a weight:value ratio.\n- Soul gems show their capacity, and how full they are.\n- Lights show their remaining time.\n- Increased details, including weapon speed and reach.\n- Powers show how much longer the player must wait to use them.",
+	["mcm.component.tooltip.label"] = "Enable tooltip component?",
 	["mcm.consoleHistoryLimit.description"] = "This is the number of console commands that will persist between relaunches of the game. More console commands can be navigated to using the up and down arrow keys, but only this number will be saved between sessions.",
 	["mcm.consoleHistoryLimit.label"] = "Maximum number of console commands to remember",
 	["mcm.credits"] = "Credits:",

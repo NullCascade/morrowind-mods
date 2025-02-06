@@ -104,7 +104,7 @@ local config = mwse.loadConfig("UI Expansion", defaultConfig) or defaultConfig--
 -- Convert over previous component IDs.
 -- 
 
-local oldComponentsMap = {
+local renamedComponentsMap = {
 	barter = "MenuBarter",
 	console = "MenuConsole",
 	contents = "MenuContents",
@@ -123,11 +123,9 @@ local oldComponentsMap = {
 	serviceSpells = "MenuServiceSpells",
 	spellmaking = "MenuSpellmaking",
 	stat = "MenuStat",
-	textInput = "textInput",
-	tooltip = "tooltip",
 	training = "MenuServiceTraining",
 }
-for old, new in pairs(oldComponentsMap) do
+for old, new in pairs(renamedComponentsMap) do
 	if config.components[old] ~= nil then
 		if (config.components[new] == nil) then
 			config.components[new] = config.components[old]
