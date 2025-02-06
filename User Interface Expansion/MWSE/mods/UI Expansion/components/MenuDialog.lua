@@ -1,32 +1,76 @@
+local config = require("UI Expansion.config")
 local common = require("UI Expansion.lib.common")
+local log = require("UI Expansion.log")
 
-local GUI_ID_MenuDialog = tes3ui.registerID("MenuDialog")
-local GUI_ID_MenuDialog_a_topic = tes3ui.registerID("MenuDialog_a_topic")
-local GUI_ID_MenuDialog_answer_block = tes3ui.registerID("MenuDialog_answer_block")
-local GUI_ID_MenuDialog_hyper = tes3ui.registerID("MenuDialog_hyper")
-local GUI_ID_MenuDialog_scroll_pane = tes3ui.registerID("MenuDialog_scroll_pane")
-local GUI_ID_MenuDialog_topics_pane = tes3ui.registerID("MenuDialog_topics_pane")
+local MenuDialog = {}
+local internal = {}
 
-local GUI_ID_PartScrollPane_pane = tes3ui.registerID("PartScrollPane_pane")
+--
+-- Internal module
+--
 
-local GUI_PID_ChoiceNumbered = tes3ui.registerProperty("UIEx:ChoiceRegistered")
+--- Called after an MenuDialog_answer_block element is clicked.
+--- @param e tes3uiEventData
+function internal.onAnswerClicked(e)
+	tes3.messageBox(e.source.text)
 
-local GUI_Palette_TopicSeen = common.getColor(common.config.dialogueTopicSeenColor)
-local GUI_Palette_TopicUnique = common.getColor(common.config.dialogueTopicUniqueColor)
+	-- Find our newly created element and recolor it.
+	local dialogueElements = e.source.parent.parent.children
+	local createdElement = dialogueElements[#dialogueElements]
+	createdElement.color = tes3ui.getPalette(tes3.palette.journalFinishedQuestOverColor)
+end
 
-----------------------------------------------------------------------------------------------------
--- Dialogue: Adds colorization to show what topics provide new and unique responses.
-----------------------------------------------------------------------------------------------------
+--- If enabled, hooks into answers so that when they are clicked, it adds them to the dialogue.
+function internal.displayPlayerDialogueChoices()
+	if (not config.displayPlayerDialogueChoices) then return end
+
+	local menu = MenuDialog.get()
+	if (not menu) then return end
+
+	local firstAnswer = menu:findChild("MenuDialog_answer_block")
+	if (not firstAnswer) then return end
+
+	for _, child in ipairs(firstAnswer.parent.children) do
+		if (child.name == "MenuDialog_answer_block") then
+			child:registerBefore(tes3.uiEvent.mouseClick, internal.onAnswerClicked)
+		end
+	end
+end
+
+--- Add numbers to the dialog choices.
+function internal.updateAnswerText()
+	log:trace("internal.updateAnswerText()")
+	local menuDialog = MenuDialog.get()
+	if (not menuDialog) then return end
+
+	local firstAnswer = menuDialog:findChild("MenuDialog_answer_block")
+	if (not firstAnswer) then
+		log:trace("No answer blocks available.")
+		return
+	end
+
+	local answerCount = 0
+	for _, child in ipairs(firstAnswer.parent.children) do
+		if (child.name == "MenuDialog_answer_block") then
+			log:trace("Found answer block: %s", child.text)
+			answerCount = answerCount + 1
+
+			local didBefore = child:getLuaData("UIExpansion:ChoiceNumbered")
+			if (not didBefore) then
+				child:setLuaData("UIExpansion:ChoiceNumbered", true)
+				child:setLuaData("UIExpansion:KeyIndex", answerCount)
+				child.text = string.format("%d. %s", answerCount, child.text)
+			end
+		end
+	end
+end
 
 --- Check to see if the player has used a number key to select a response.
 --- @param e keyDownEventData
-local function checkForAnswerHotkey(e)
+function internal.checkForAnswerHotkey(e)
 	-- Make sure we're in the dialogue menu.
-	local topMenu = tes3.getTopMenu()
-	if not topMenu then
-		return
-	end
-	if not (topMenu.id == GUI_ID_MenuDialog) then
+	local menuDialog = tes3.getTopMenu()
+	if not menuDialog or menuDialog.name ~= "MenuDialog" then
 		return
 	end
 
@@ -35,184 +79,130 @@ local function checkForAnswerHotkey(e)
 		return
 	end
 
+	-- Translate the key into a number.
 	local key = tes3.scanCodeToNumber[e.keyCode]
 	if not key then
 		return
 	end
 
 	-- Do we have any answers?
-	local firstAnswer = topMenu:findChild("MenuDialog_answer_block")
+	local firstAnswer = menuDialog:findChild("MenuDialog_answer_block")
 	if not firstAnswer then
 		return
 	end
 
-	-- Get a lsit of answers.
-	local answers = {}
+	-- Look for a child with a matching key and pretend we clicked it.
 	for _, child in ipairs(firstAnswer.parent.children) do
-		if (child.id == firstAnswer.id) then
-			table.insert(answers, child)
-		end
-	end
-
-	local answer = answers[key]
-	if answer then
-		answer:triggerEvent(tes3.uiEvent.mouseClick)
-	end
-end
-event.register(tes3.event.keyDown, checkForAnswerHotkey)
-
---- Updates colors on topic lists, and registers to let us know when they are needed.
---- @param e tes3uiEventData
-local function updateTopicsList(e)
-	-- If the function lacks context to the dialogue menu, look it up.
-	local menuDialogue = tes3ui.findMenu(GUI_ID_MenuDialog)
-	if (not menuDialogue) then return end
-	local textPane = menuDialogue:findChild(GUI_ID_MenuDialog_scroll_pane):findChild(GUI_ID_PartScrollPane_pane)
-	local topicsPane = menuDialogue:findChild(GUI_ID_MenuDialog_topics_pane):findChild(GUI_ID_PartScrollPane_pane)
-
-	e.info = e.source:getPropertyObject("MenuDialog_UIEXP_info")
-	e.actor = e.source:getPropertyObject("MenuDialog_UIEXP_actor")
-
-	-- Forward along click events to trigger dialogue as usual.
-	if (e.source) then
-		-- Were we forced out of dialogue?
-		if (tes3ui.findMenu(GUI_ID_MenuDialog) == nil) then
+		if (child:getLuaData("UIExpansion:KeyIndex") == key) then
+			child:triggerEvent(tes3.uiEvent.mouseClick)
 			return
 		end
-
-		-- Make sure that the node heard from field is always used.
-		if e.info then
-			if e.actor then
-				if (e.info.firstHeardFrom == nil) then
-					local el = textPane:findChild(GUI_ID_MenuDialog_answer_block)
-					if el then
-						if string.match(el.text,"[cC]ontinue%p*$") then
-							-- a standard continue choice for long text (e.g. LGNPC background), topic should be grayed /abot
-							e.info.firstHeardFrom = e.actor
-						end
-					else
-						e.info.firstHeardFrom = e.actor
-					end
-				end
-			end
-		end
 	end
+end
 
-	-- Catch events from hyperlinks.
-	for _, element in pairs(textPane.children) do
-		if (element.id == GUI_ID_MenuDialog_hyper) then
-			element:registerAfter(tes3.uiEvent.mouseClick, updateTopicsList)
-		end
+--- Colors an individual topic textSelect element.
+--- @param element tes3uiElement
+function internal.updateTopic(element)
+	-- Get the info associated with this topic.
+	local menuDialog = element:getTopLevelMenu()
+	local widget = element.widget --- @type tes3uiTextSelect
+	local mobile = menuDialog:getPropertyObject("PartHyperText_actor") --- @type tes3mobileNPC|tes3mobileCreature
+	local dialogue = element:getPropertyObject("PartHyperText_dialog") --- @type tes3dialogue
+	local info = dialogue:getInfo({ actor = mobile })
+	local actor = mobile.reference.baseObject
+
+	-- Update color scheme on the topic.
+	if (info.firstHeardFrom) then
+		widget.idleDisabled = common.getColor(common.config.dialogueTopicSeenColor)
+		widget.state = tes3.uiState.disabled
+	elseif (info.actor == actor) then
+		-- Topic has actor-unique dialogue, set new state.
+		widget.idleActive = common.getColor(common.config.dialogueTopicUniqueColor)
+		widget.state = tes3.uiState.active
+	else
+		widget.state = tes3.uiState.normal
 	end
+end
 
-	-- Get the actor that we're talking with.
-	local mobileActor = menuDialogue:getPropertyObject("PartHyperText_actor") --- @type tes3mobileActor
-	local actor = mobileActor.reference.object.baseObject --- @type tes3actor
+--- Loops through all dialogue topics, and colors them.
+function internal.updateTopics()
+	local menuDialog = MenuDialog.get()
+	if (not menuDialog) then return end
 
 	-- Go through and update all the topics.
-	for _, element in pairs(topicsPane.children) do
+	local topicsPane = menuDialog:findChild("MenuDialog_a_topic").parent
+	for _, element in ipairs(topicsPane.children) do
 		-- We only care about topics in this list.
-		if (element.id == GUI_ID_MenuDialog_a_topic) then
-			element.widget.idleDisabled = GUI_Palette_TopicSeen
-
-			-- Get the info associated with this topic.
-			local dialogue = element:getPropertyObject("PartHyperText_dialog") --- @type tes3dialogue
-			local info = element:getPropertyObject("") or dialogue:getInfo({ actor = mobileActor })
-
-			-- Update color scheme on the topic.
-			if (info == nil or info.firstHeardFrom) then
-				element.widget.state = 2
-			elseif (info.actor == actor) then
-				-- Topic has actor-unique dialogue, set new state.
-				element.widget.state = 4
-				element.widget.idleActive = GUI_Palette_TopicUnique
-			else
-				element.widget.state = 1
-			end
-			element:triggerEvent(tes3.uiEvent.mouseLeave)
-
-			-- Store objects on the element for quick reference later.
-			element:setPropertyObject("MenuDialog_UIEXP_info", info)
-			element:setPropertyObject("MenuDialog_UIEXP_actor", actor)
-
-			-- Register an event so that we update when any topic is clicked.
-			element:registerAfter(tes3.uiEvent.mouseClick, updateTopicsList)
+		if (element.name == "MenuDialog_a_topic") then
+			internal.updateTopic(element)
 		end
 	end
 end
 
---- Add numbers to the dialog choices.
---- @param e tes3uiEventData
-local function updateAnswerText(e)
-	local menuDialog = e.source
-
-	local scrollPane = menuDialog:findChild(GUI_ID_MenuDialog_scroll_pane)
-	if (not scrollPane) then
-		return
-	end
-
-	local answerCount = 0
-	for _, child in ipairs(scrollPane:getContentElement().children) do
-		if (child.id == GUI_ID_MenuDialog_answer_block) then
-			answerCount = answerCount + 1
-
-			local didBefore = child:getPropertyBool(GUI_PID_ChoiceNumbered)
-			if (not didBefore) then
-				child:setPropertyBool(GUI_PID_ChoiceNumbered, true)
-
-				child:registerAfter(tes3.uiEvent.mouseClick, updateTopicsList)
-
-				child.text = string.format("%d. %s", answerCount, child.text)
-			end
-		end
-	end
+--- Called when the topics list is recreated.
+function internal.onTopicsListUpdated()
+	-- Because variables can invalidate the list on the first frame of dialogue, we want to delay this by one frame.
+	timer.frame.delayOneFrame(internal.updateTopics)
 end
 
---- Create our changes for MenuDialog.
---- @param e uiActivatedEventData
-local function onDialogueMenuActivated(e)
-	-- We only care if this is the node time it was activated.
-	if (not e.newlyCreated) then
-		return
+--- This event fires immediately after a dialogue response is processed. We use it to make sure that the firstHeardFrom
+--- field is properly assigned. We also use it to show player dialogue choices.
+--- @param e postInfoResponseEventData
+function internal.onPostInfoResponse(e)
+	local menuDialog = MenuDialog.get()
+	if (not menuDialog) then return end
+
+	-- Update the last clicked dialogue info to force the last heard from field.
+	if (e.info.firstHeardFrom == nil) then
+		local mobile = menuDialog:getPropertyObject("PartHyperText_actor") --- @type tes3mobileNPC|tes3mobileCreature
+		e.info.firstHeardFrom = mobile.reference.baseObject
+		e.info.modified = true
 	end
 
-	-- Set the pre-update event to update the topic list.
-	-- We only want this event to fire once. We'll manually track changes above to be more efficient.
-	local function firstPreUpdate(preUpdateEventData)
-		assert(e.element:unregisterAfter(tes3.uiEvent.preUpdate, firstPreUpdate))
-		updateTopicsList(preUpdateEventData)
-	end
-	e.element:registerAfter(tes3.uiEvent.preUpdate, firstPreUpdate)
-	e.element:registerAfter(tes3.uiEvent.update, updateAnswerText)
+	-- We also use this time to update answer text to add callbacks/numbering.
+	internal.updateAnswerText()
+
+	-- If it was a choice, display it.
+	internal.displayPlayerDialogueChoices()
 end
-event.register(tes3.event.uiActivated, onDialogueMenuActivated, { filter = "MenuDialog" })
 
-local function displayPlayerChoices()
-	if (not common.config.displayPlayerDialogueChoices) then
-		return
-	end
 
-	local menu = tes3ui.findMenu("MenuDialog")
-	if not menu then
-		return
-	end
+--
+-- Public module
+--
 
-	local block = menu:findChild("MenuDialog_answer_block")
-	if not block then
-		return
-	end
-
-	for _, child in pairs(block.parent.children) do
-		if child.name == "MenuDialog_answer_block" then
-			child:registerBefore(tes3.uiEvent.mouseClick, function(e)
-				tes3.messageBox(child.text)
-
-				-- Find our newly created element and recolor it.
-				local dialogueElements = block.parent.children
-				local createdElement = dialogueElements[#dialogueElements]
-				createdElement.color = tes3ui.getPalette("journal_finished_quest_over_color")
-			end)
-		end
-	end
+--- Gets the dialogue menu.
+--- @return tes3uiElement?
+function MenuDialog.get()
+	return tes3ui.findMenu("MenuDialog")
 end
-event.register(tes3.event.postInfoResponse, displayPlayerChoices)
+
+--- Determines if this component is active.
+--- @type boolean
+internal.hooked = false
+
+--- Enables this component.
+function MenuDialog.hook()
+	if (internal.hooked) then return end
+
+	-- Set up events.
+	event.register(tes3.event.keyDown, internal.checkForAnswerHotkey)
+	event.register(tes3.event.postInfoResponse, internal.onPostInfoResponse)
+	event.register(tes3.event.topicsListUpdated, internal.onTopicsListUpdated)
+
+	internal.hooked = true
+end
+
+--- Disables this component.
+function MenuDialog.unhook()
+	if (not internal.hooked) then return end
+
+	-- Clean up events.
+	event.unregister(tes3.event.keyDown, internal.checkForAnswerHotkey)
+	event.unregister(tes3.event.postInfoResponse, internal.onPostInfoResponse)
+	event.unregister(tes3.event.topicsListUpdated, internal.onTopicsListUpdated)
+
+	internal.hooked = false
+end
+
+return MenuDialog

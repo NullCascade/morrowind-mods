@@ -42,6 +42,7 @@ function common.getColor(color)
 	elseif (colorType == "string") then
 		return tes3ui.getPalette(color)
 	end
+	return { 1.0, 0.0, 0.0 }
 end
 
 --- Perhaps now-useless function to safely get the attribute at a given index. This should no longer be needed due to a

@@ -10,6 +10,9 @@ local log = require("UI Expansion.log")
 --- @field autoSelectInputAdditional boolean This option is independent of `autoSelectInput`. When enabled, opening containers and bartering will have their searchbar selected automatically.
 --- @field components table<string, boolean> The enabled state of each module of the mod.
 --- @field consoleHistoryLimit number The maximum number of previous entries remembered by the console.
+--- @field dialogueTopicSeenColor string|table The color used for topics that have already been seen.
+--- @field dialogueTopicUniqueColor string|table The color used for topics that are unique.
+--- @field displayPlayerDialogueChoices boolean When enabled, the player's dialogue choices will be printed to the window.
 --- @field logLevel mwseLoggerLogLevel How spammy the logs from this mod will be.
 --- @field mapConfig uiexpansion.config.mapConfig Subtable of config for the map.
 --- @field previousConsoleEntries uiexpansion.config.consoleEntry[]|nil An array of previously used console entries for remembering history.
@@ -185,6 +188,7 @@ config.components.textInput = nil
 config.mapConfig.autoExpand = nil
 --- @diagnostic enable
 
+log:setLogLevel(config.logLevel)
 log:debug("Config loaded: %s", json.encode(config, { indent = true }))
 
 return config

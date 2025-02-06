@@ -15,6 +15,8 @@
 - Console menu:
 	- Ctrl+Tab toggles the script mode.
 	- Long script input will now wrap instead of overflowing.
+- Dialogue menu:
+	- Topics that rely on thing slike access to the Random variable are more reliable on the first opening of the menu.
 - Removed textInput module. This is now handled by MWSE directly.
 - Improved the way that search focusing behavior.
 - Rewrote many aspects of the codebase to make use of newer MWSE functionality.

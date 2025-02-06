@@ -1,9 +1,12 @@
 local config = require("UI Expansion.config")
+local log = require("UI Expansion.log")
 
 local function onInitialized()
 	for id, enabled in pairs(config.components) do
-		if (enabled and lfs.fileexists(string.format("Data Files\\MWSE\\mods\\UI Expansion\\components\\%s.lua", id))) then
-			dofile(string.format("UI Expansion.components.%s", id))
+		log:trace("Running component: %s", id)
+		local module = include(string.format("UI Expansion.components.%s", id))
+		if (enabled and type(module) == "table") then
+			module.hook()
 		end
 	end
 end
