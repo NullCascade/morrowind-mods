@@ -39,20 +39,17 @@ end
 
 --- Add numbers to the dialog choices.
 function internal.updateAnswerText()
-	log:trace("internal.updateAnswerText()")
 	local menuDialog = MenuDialog.get()
 	if (not menuDialog) then return end
 
 	local firstAnswer = menuDialog:findChild("MenuDialog_answer_block")
 	if (not firstAnswer) then
-		log:trace("No answer blocks available.")
 		return
 	end
 
 	local answerCount = 0
 	for _, child in ipairs(firstAnswer.parent.children) do
 		if (child.name == "MenuDialog_answer_block") then
-			log:trace("Found answer block: %s", child.text)
 			answerCount = answerCount + 1
 
 			local didBefore = child:getLuaData("UIExpansion:ChoiceNumbered")
