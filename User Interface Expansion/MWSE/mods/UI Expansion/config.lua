@@ -185,6 +185,7 @@ config.keybindMapSwitch = convertKeyBind(config.keybindMapSwitch)
 -- Clear deprecated config data.
 config.version = nil
 config.components.textInput = nil
+config.components.journal = nil
 config.mapConfig.autoExpand = nil
 --- @diagnostic enable
 

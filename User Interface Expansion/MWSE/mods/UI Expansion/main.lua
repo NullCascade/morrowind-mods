@@ -14,7 +14,7 @@ event.register(tes3.event.initialized, onInitialized)
 
 -- Hook map changes.
 local externMapPlugin = include("uiexp_map_extension")
-if (externMapPlugin and config.components.mapPlugin) then
+if (externMapPlugin and config.components.MenuMapPlugin) then
 	externMapPlugin.hookMapOverrides(config.mapConfig)
 end
 

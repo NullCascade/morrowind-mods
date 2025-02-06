@@ -21,11 +21,11 @@ local function registerModConfig()
 			text = creditsText .. "\n\nThe settings in this tab will not take affect until the next restart.",
 		})
 
-		local components = { "barter", "console", "contents", "dialog", "inventory", "inventorySelect", "magic", "magicSelect", "map", "mapPlugin", "options", "quantity", "rest", "saveLoad", "serviceSpells", "spellmaking", "stat", "textInput", "training" }
+		local components = table.keys(common.config.components)
 		for _, k in ipairs(components) do
 			pageComponents:createOnOffButton({
-				label = common.i18n(string.format("mcm.component.%s.label", k)),
-				description = common.i18n(string.format("mcm.component.%s.description", k)),
+				label = common.i18n(string.format("mcm.component.%s.label", k)) or k,
+				description = common.i18n(string.format("mcm.component.%s.description", k)) or k,
 				variable = mwse.mcm.createTableVariable({ id = k, table = common.config.components }),
 			})
 		end
@@ -324,4 +324,4 @@ local function registerModConfig()
 	-- Finish up.
 	template:register()
 end
-event.register("modConfigReady", registerModConfig)
+event.register(tes3.event.modConfigReady, registerModConfig)
