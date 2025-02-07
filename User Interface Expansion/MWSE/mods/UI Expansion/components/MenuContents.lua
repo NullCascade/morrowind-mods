@@ -74,9 +74,8 @@ local function onFilterContentsMenu(e)
 		effects = e.item.enchantment and e.item.enchantment.effects,
 	}
 
-	local result = contentsFilters:triggerFilter(filterData)
-	if (result ~= nil) then
-		e.filter = result
+	if (contentsFilters:triggerFilter(filterData) == false) then
+		e.filter = false
 	end
 end
 event.register(tes3.event.filterContentsMenu, onFilterContentsMenu)

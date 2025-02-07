@@ -32,9 +32,8 @@ local function onFilterBarterMenu(e)
 		effects = e.item.enchantment and e.item.enchantment.effects,
 	}
 
-	local result = barterFilters:triggerFilter(filterData)
-	if (result ~= nil) then
-		e.filter = result
+	if (internal.barterFilters:triggerFilter(filterData) == false) then
+		e.filter = false
 	end
 end
 event.register(tes3.event.filterBarterMenu, onFilterBarterMenu)

@@ -48,9 +48,8 @@ local function onFilterInventory(e)
 		effects = e.item.enchantment and e.item.enchantment.effects,
 	}
 
-	local result = inventoryFilters:triggerFilter(filterData)
-	if (result ~= nil) then
-		e.filter = result
+	if (inventoryFilters:triggerFilter(filterData) == false) then
+		e.filter = false
 	end
 end
 event.register(tes3.event.filterInventory, onFilterInventory)

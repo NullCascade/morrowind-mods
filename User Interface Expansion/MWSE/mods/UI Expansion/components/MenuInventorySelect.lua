@@ -215,20 +215,18 @@ local currentFilter = nil
 --- @param e filterInventorySelectEventData
 local function onFilterInventorySelect(e)
 	if (not currentFilter) then return end
+	if (e.filter ~= nil) then return end
 
-	if (currentFilter) then
-		--- @type uiexpansion.filterFunction.triggerFilterParams
-		local filterData = {
-			item = e.item,
-			itemData = e.itemData,
-			text = e.item.name,
-			effects = e.item.enchantment and e.item.enchantment.effects,
-		}
-	
-		local result = currentFilter:triggerFilter(filterData)
-		if (result ~= nil) then
-			e.filter = result
-		end
+	--- @type uiexpansion.filterFunction.triggerFilterParams
+	local filterData = {
+		item = e.item,
+		itemData = e.itemData,
+		text = e.item.name,
+		effects = e.item.enchantment and e.item.enchantment.effects,
+	}
+
+	if (currentFilter:triggerFilter(filterData) == false) then
+		e.filter = false
 	end
 end
 event.register(tes3.event.filterInventorySelect, onFilterInventorySelect)
