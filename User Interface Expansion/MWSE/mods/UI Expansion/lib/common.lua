@@ -277,26 +277,10 @@ function common.createSearchBar(params)
 	-- Set up the events to control text input control.
 	input.consumeMouseEvents = false
 	input:registerAfter(tes3.uiEvent.keyEnter, onSearchBarPostKeyEnter)
-	input:registerBefore(tes3.uiEvent.keyPress, function(e)
-		local inputController = tes3.worldController.inputController
-
-		-- Allow Alt+A to clear the filter.
-		if (inputController:isKeyDown(tes3.scanCode.a) and inputController:isAltDown()) then
-			input.text = ''
-		end
-
-		if (params.onPreUpdate) then
-			if (params.onPreUpdate() == false) then
-				return
-			end
-		end
-	end)
-	input:registerAfter(tes3.uiEvent.keyPress, function(e)
-		input.color = params.textColor or tes3ui.getPalette(tes3.palette.normalColor)
+	input:registerAfter(tes3.uiEvent.textUpdated, function(e)
 		if (params.onUpdate) then
 			params.onUpdate(e)
 		end
-		input:updateLayout()
 	end)
 
 	params.input = input
