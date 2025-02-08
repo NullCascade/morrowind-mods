@@ -707,8 +707,8 @@ function uiExFilterFunction:createElements(parent)
 		parent = parent,
 		id = "UIEXP:FiltersearchBlock",
 		textColor = self.searchTextColor,
-		placeholderText = self.searchTextPlaceholder,
-		placeholderTextColor = self.searchTextPlaceholderColor,
+		searchTextPlaceholder = self.searchTextPlaceholder,
+		searchTextPlaceholderColor = self.searchTextPlaceholderColor,
 		useSearch = self.useSearch,
 		onUpdate = function(e)
 			self:setFilterText(string.lower(e.source.text))
