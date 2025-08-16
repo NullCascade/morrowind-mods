@@ -320,9 +320,7 @@ end
 --
 
 function interop.addProfileToCell(cellName, profileName)
-	local definition = interop.cellData.definitions[cellName]
-	interop.cellData.definitions[cellName] = definition or {}
-
+	local definition = table.getset(interop.cellData.definitions, cellName, {})
 	if (not table.find(definition, profileName)) then
 		table.insert(definition, profileName)
 	end
