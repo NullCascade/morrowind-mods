@@ -278,7 +278,7 @@ local function updateInformationPane(reference)
 	-- Show lua data.
 	local luaData = reference.data
 	if (luaData and not table.empty(luaData, true)) then
-		createInfoLabel(scrollContents, i18n("label.luaData"), "[click to copy]", function()
+		createInfoLabel(scrollContents, i18n("label.luaData"), i18n("clickToCopy"), function()
 			local serialized = string.format("Lua data for %s:\n%s", reference, json.encode(luaData, { indent = true, exception = jsonExceptionValueToString }))
 			mwse.log(serialized)
 			os.setClipboardText(serialized)
@@ -289,7 +289,7 @@ local function updateInformationPane(reference)
 	-- Show temp lua data.
 	local luaTempData = reference.tempData
 	if (luaTempData and not table.empty(luaTempData, true)) then
-		createInfoLabel(scrollContents, i18n("label.tempLuaData"), i18n("[click to copy]"), function()
+		createInfoLabel(scrollContents, i18n("label.tempLuaData"), i18n("clickToCopy"), function()
 			local serialized = string.format("Temporary lua data for %s:\n%s", reference, json.encode(luaTempData, { indent = true, exception = jsonExceptionValueToString }))
 			mwse.log(serialized)
 			os.setClipboardText(serialized)
