@@ -852,7 +852,7 @@ buildRootEntries = function()
 		return tes3.game.worldRoot
 	end)
 	tryAdd("UI Root", function()
-		return tes3.worldController.menuController.mainRoot
+		return tes3.worldController.menuController.mainRoot.sceneNode
 	end)
 	tryAdd("Player", function()
 		return tes3.player and tes3.player.sceneNode
