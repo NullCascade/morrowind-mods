@@ -835,6 +835,8 @@ local function updateDetail(node)
 	menu:updateLayout()
 end
 
+local lastTarget = nil
+
 buildRootEntries = function()
 	local entries = {}
 
@@ -856,6 +858,10 @@ buildRootEntries = function()
 	end)
 	tryAdd("Player", function()
 		return tes3.player and tes3.player.sceneNode
+	end)
+	lastTarget = tes3.getPlayerTarget() or lastTarget
+	tryAdd("Target", function()
+		return lastTarget and lastTarget:isValid() and lastTarget.sceneNode
 	end)
 
 	state.rootEntries = entries
@@ -973,6 +979,7 @@ refreshTree = function()
 	if (treeScroll) then
 		treeScroll:contentsChanged()
 		treeScroll.element:updateLayout()
+		menu:updateLayout()
 		if selectedElement then
 			treeScroll:scrollIntoView(selectedElement)
 		end
