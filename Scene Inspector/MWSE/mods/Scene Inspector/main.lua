@@ -389,7 +389,12 @@ local function selectNodeInCurrentRoot(node)
 	return true
 end
 
-local function raySelectAtCursor()
+--- @param e mouseButtonDownEventData
+local function raySelectAtCursor(e)
+	if e.button ~= 0 then
+		return
+	end
+
 	if not tes3.menuMode() then
 		return
 	end
