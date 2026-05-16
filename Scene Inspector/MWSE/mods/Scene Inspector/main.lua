@@ -23,6 +23,7 @@ local focusTreeObject
 local serializeNode
 local collectPropertyList
 local collectControllerChain
+local collectEffectList
 local collectExtraDataChain
 
 local function leaveInspectorMenuMode()
@@ -125,6 +126,14 @@ local function collectTreeChildren(node)
 		})
 	end
 
+	for _, child in ipairs(collectEffectList(safeIndex(node, "effectList"))) do
+		table.insert(results, {
+			index = #results + 1,
+			kind = "effect",
+			node = child,
+		})
+	end
+
 	for _, child in ipairs(collectChildren(node)) do
 		table.insert(results, {
 			index = child.index,
@@ -170,6 +179,27 @@ collectControllerChain = function(head, limit)
 		seen[key] = true
 		table.insert(results, current)
 		current = safeIndex(current, "nextController")
+		remaining = remaining - 1
+	end
+	return results
+end
+
+collectEffectList = function(head, limit)
+	local results = {}
+	local current = head
+	local seen = {}
+	local remaining = limit or 64
+	while current and remaining > 0 do
+		local key = tostring(current)
+		if seen[key] then
+			break
+		end
+		seen[key] = true
+		local effect = safeIndex(current, "data")
+		if effect then
+			table.insert(results, effect)
+		end
+		current = safeIndex(current, "next")
 		remaining = remaining - 1
 	end
 	return results
@@ -532,7 +562,7 @@ local function serializeSelectedLineage(selectedPath)
 		return nil
 	end
 
-	if selectedPath:find("/controller:") or selectedPath:find("/property:") then
+	if selectedPath:find("/controller:") or selectedPath:find("/property:") or selectedPath:find("/effect:") then
 		return serializeNode(selectedNode, selectedPath, "selected", nil)
 	end
 

@@ -122,6 +122,27 @@ local function collectPropertyList(head, limit)
 	return results
 end
 
+local function collectEffectList(head, limit)
+	local results = {}
+	local current = head
+	local seen = {}
+	local remaining = limit or 64
+	while current and remaining > 0 do
+		local key = tostring(current)
+		if seen[key] then
+			break
+		end
+		seen[key] = true
+		local effect = safeIndex(current, "data")
+		if effect then
+			table.insert(results, effect)
+		end
+		current = safeIndex(current, "next")
+		remaining = remaining - 1
+	end
+	return results
+end
+
 local formatters = {
 	boolean = function(value)
 		if value == nil then
@@ -180,7 +201,7 @@ types.definitions = {
 		color = color(0.55, 0.7, 0.85),
 		fields = {
 			{ key = "children", label = "Children", format = "list" },
-			{ key = "effectList", label = "Effect List", format = "object" },
+			{ key = "effectList", label = "Effect List", render = "effectLinks" },
 		},
 	},
 	niAVObject = {
@@ -210,6 +231,11 @@ types.definitions = {
 	niGeometry = {
 		label = "NiGeometry",
 		color = color(0.66, 0.45, 0.9),
+		fields = {},
+	},
+	niDynamicEffect = {
+		label = "NiDynamicEffect",
+		color = color(0.95, 0.82, 0.25),
 		fields = {},
 	},
 	niTimeController = {
@@ -265,6 +291,8 @@ function types.getSections(object)
 				local value = safeIndex(object, field.key)
 				if field.render == "propertyLinks" then
 					value = collectPropertyList(value)
+				elseif field.render == "effectLinks" then
+					value = collectEffectList(value)
 				end
 				table.insert(rows, {
 					label = field.label or field.key,
@@ -358,6 +386,22 @@ function types.renderDetailPane(pane, object, helpers)
 
 				addLinkListRow(pane, row.label, items, function(property)
 					focusObject(property)
+				end)
+			elseif field.render == "effectLinks" then
+				if type(addLinkListRow) ~= "function" or type(focusObject) ~= "function" then
+					error("Scene Inspector types.lua requires addLinkListRow and focusObject helpers for effect links.")
+				end
+
+				local items = {}
+				for _, effect in ipairs(row.rawValue or {}) do
+					table.insert(items, {
+						text = getRTTIName(effect),
+						value = effect,
+					})
+				end
+
+				addLinkListRow(pane, row.label, items, function(effect)
+					focusObject(effect)
 				end)
 			else
 				addValueRow(pane, row.label, row.value)
