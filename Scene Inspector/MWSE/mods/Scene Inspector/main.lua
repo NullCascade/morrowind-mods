@@ -1,5 +1,7 @@
 local modName = "Scene Inspector"
 local dumpPath = "Data Files\\MWSE\\tmp\\scene_dump.json"
+local sceneTypes = require("Scene Inspector.types")
+local rttiAccentColor = { 0.55, 0.7, 0.85 }
 
 local state = {
 	expanded = {},
@@ -41,47 +43,6 @@ local function safeCall(fn, ...)
 	end
 	local ok, result = pcall(fn, ...)
 	return ok and result or nil
-end
-
-local function formatNumber(value)
-	if type(value) ~= "number" then
-		return tostring(value)
-	end
-	if value == math.floor(value) then
-		return tostring(value)
-	end
-	return string.format("%.4f", value):gsub("0+$", ""):gsub("%.$", "")
-end
-
-local function formatVector3(value)
-	if not value then
-		return "nil"
-	end
-	local x = safeIndex(value, "x")
-	local y = safeIndex(value, "y")
-	local z = safeIndex(value, "z")
-	if x ~= nil and y ~= nil and z ~= nil then
-		return string.format("(%s, %s, %s)", formatNumber(x), formatNumber(y), formatNumber(z))
-	end
-	return tostring(value)
-end
-
-local function formatRotation(value)
-	if not value then
-		return "nil"
-	end
-	local ok, text = pcall(tostring, value)
-	return ok and text or "<rotation>"
-end
-
-local function formatTransform(value)
-	if not value then
-		return "nil"
-	end
-	local translation = formatVector3(safeIndex(value, "translation"))
-	local scale = formatNumber(safeIndex(value, "scale"))
-	local rotation = formatRotation(safeIndex(value, "rotation"))
-	return string.format("translation=%s\nscale=%s\nrotation=%s", translation, scale, rotation)
 end
 
 local function getRTTIName(object)
@@ -646,10 +607,10 @@ local function addValueRow(parent, label, value)
 	row.widthProportional = 1.0
 	row.autoHeight = true
 	row.flowDirection = "left_to_right"
-	row.borderBottom = 3
 
 	local key = row:createLabel({ text = label .. ":" })
 	key.minWidth = 150
+	key.borderLeft = 8
 	key.color = tes3ui.getPalette("header_color")
 
 	local text = value
@@ -667,10 +628,9 @@ end
 
 local function addSectionHeader(parent, text)
 	local header = parent:createLabel({ text = text })
-	header.borderTop = 12
-	header.borderBottom = 6
-	header.color = tes3ui.getPalette("header_color")
+	header.color = rttiAccentColor
 	header.wrapText = true
+	return header
 end
 
 local function updateRootLabel()
@@ -739,98 +699,10 @@ local function updateDetail(node)
 		return
 	end
 
-	addSectionHeader(pane, "Identity")
-	addValueRow(pane, "Type", getRTTIName(node))
-	addValueRow(pane, "Name", safeIndex(node, "name") or "<unnamed>")
-	addValueRow(pane, "Pointer", tostring(node))
-	addValueRow(pane, "Ref Count", safeIndex(node, "refCount"))
-	addValueRow(pane, "Flags", safeIndex(node, "flags"))
-	addValueRow(pane, "App Culled", safeIndex(node, "appCulled"))
-	addValueRow(pane, "Parent", formatObjectName(safeIndex(node, "parent")))
-
-	local reference = safeCall(safeIndex(node, "getGameReference"), node)
-	addValueRow(pane, "Game Reference", formatReference(reference))
-
-	addSectionHeader(pane, "Transforms")
-	addValueRow(pane, "Translation", formatVector3(safeIndex(node, "translation")))
-	addValueRow(pane, "Scale", formatNumber(safeIndex(node, "scale")))
-	addValueRow(pane, "Rotation", formatRotation(safeIndex(node, "rotation")))
-	addValueRow(pane, "World Transform", formatTransform(safeIndex(node, "worldTransform")))
-	addValueRow(pane, "World Bound Origin", formatVector3(safeIndex(node, "worldBoundOrigin")))
-	addValueRow(pane, "World Bound Radius", formatNumber(safeIndex(node, "worldBoundRadius")))
-
-	local childEntries = collectChildren(node)
-	addSectionHeader(pane, "Hierarchy")
-	addValueRow(pane, "Child Count", #childEntries)
-
-	local rtti = safeIndex(node, "RTTI") or safeIndex(node, "runTimeTypeInformation")
-	local lineage = {}
-	lineage = collectRTTILineage(node)
-	addValueRow(pane, "RTTI Lineage", table.concat(lineage, " <- "))
-
-	addSectionHeader(pane, "Properties")
-	local properties = collectPropertyList(safeIndex(node, "properties"))
-	addValueRow(pane, "Property Count", #properties)
-	if #properties == 0 then
-		addValueRow(pane, "Property List", "None")
-	else
-		for index, property in ipairs(properties) do
-			addValueRow(
-				pane,
-				string.format("Property %d", index),
-				string.format(
-					"%s | name=%s | flags=%s | pointer=%s",
-					tostring(safeIndex(property, "type") or "<unknown>"),
-					safeIndex(property, "name") or "<unnamed>",
-					tostring(safeIndex(property, "propertyFlags") or "nil"),
-					tostring(property)
-				)
-			)
-		end
-	end
-
-	addSectionHeader(pane, "Controllers")
-	local controllers = collectControllerChain(safeIndex(node, "controller"))
-	addValueRow(pane, "Controller Count", #controllers)
-	if #controllers == 0 then
-		addValueRow(pane, "Controller List", "None")
-	else
-		for index, controller in ipairs(controllers) do
-			addValueRow(
-				pane,
-				string.format("Controller %d", index),
-				string.format(
-					"%s | active=%s | frequency=%s | phase=%s | target=%s",
-					getRTTIName(controller),
-					tostring(safeIndex(controller, "active")),
-					tostring(safeIndex(controller, "frequency")),
-					tostring(safeIndex(controller, "phase")),
-					tostring(safeIndex(controller, "target"))
-				)
-			)
-		end
-	end
-
-	addSectionHeader(pane, "Extra Data")
-	local extraDataList = collectExtraDataChain(safeIndex(node, "extraData"))
-	addValueRow(pane, "Extra Data Count", #extraDataList)
-	if #extraDataList == 0 then
-		addValueRow(pane, "Extra Data List", "None")
-	else
-		for index, extraData in ipairs(extraDataList) do
-			addValueRow(
-				pane,
-				string.format("Extra Data %d", index),
-				string.format(
-					"%s | name=%s | data=%s | pointer=%s",
-					getRTTIName(extraData),
-					safeIndex(extraData, "name") or "<unnamed>",
-					tostring(safeIndex(extraData, "genericData") or "nil"),
-					tostring(extraData)
-				)
-			)
-		end
-	end
+	sceneTypes.renderDetailPane(pane, node, {
+		addSectionHeader = addSectionHeader,
+		addValueRow = addValueRow,
+	})
 
 	menu:updateLayout()
 end
@@ -938,7 +810,7 @@ refreshTree = function()
 		end
 
 		local typeLabel = line:createLabel({ text = string.format("[%s]", getRTTIName(node)) })
-		typeLabel.color = { 0.55, 0.7, 0.85 }
+		typeLabel.color = rttiAccentColor
 		typeLabel.autoWidth = true
 		typeLabel.borderRight = 6
 		if #children > 0 then
@@ -1015,7 +887,7 @@ local function createInspector()
 	menu.minHeight = 640
 	menu.flowDirection = "top_to_bottom"
 	menu:loadMenuPosition()
-	menu:register("destroy", leaveInspectorMenuMode)
+	menu:registerBefore("destroy", leaveInspectorMenuMode)
 	menu:register("update", updateDumpButtonLabel)
 
 	local controlsTop = menu:createBlock({})
