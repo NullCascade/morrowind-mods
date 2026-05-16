@@ -2,11 +2,14 @@ local modName = "Scene Inspector"
 local dumpPath = "Data Files\\MWSE\\tmp\\scene_dump.json"
 local sceneTypes = require("Scene Inspector.types")
 local rttiAccentColor = { 0.55, 0.7, 0.85 }
+local sectionHeaderColor = tes3ui.getPalette(tes3.palette.bigHeaderColor)
 
 local state = {
 	expanded = {},
 	nodeMap = {},
+	treeWidgets = {},
 	selectedPath = nil,
+	selectedWidget = nil,
 	rootIndex = 1,
 	rootEntries = {},
 	dumpButtonMinWidth = nil,
@@ -16,7 +19,11 @@ local ids = {}
 local getNodeCaption
 local buildRootEntries
 local refreshTree
+local focusTreeObject
 local serializeNode
+local collectPropertyList
+local collectControllerChain
+local collectExtraDataChain
 
 local function leaveInspectorMenuMode()
 	local menu = tes3ui.findMenu(ids.menu)
@@ -99,7 +106,37 @@ local function collectChildren(node)
 	return results
 end
 
-local function collectPropertyList(head, limit)
+local function collectTreeChildren(node)
+	local results = {}
+
+	for _, child in ipairs(collectControllerChain(safeIndex(node, "controller"))) do
+		table.insert(results, {
+			index = #results + 1,
+			kind = "controller",
+			node = child,
+		})
+	end
+
+	for _, child in ipairs(collectPropertyList(safeIndex(node, "properties"))) do
+		table.insert(results, {
+			index = #results + 1,
+			kind = "property",
+			node = child,
+		})
+	end
+
+	for _, child in ipairs(collectChildren(node)) do
+		table.insert(results, {
+			index = child.index,
+			kind = "child",
+			node = child.node,
+		})
+	end
+
+	return results
+end
+
+collectPropertyList = function(head, limit)
 	local results = {}
 	local current = head
 	local seen = {}
@@ -120,7 +157,7 @@ local function collectPropertyList(head, limit)
 	return results
 end
 
-local function collectControllerChain(head, limit)
+collectControllerChain = function(head, limit)
 	local results = {}
 	local current = head
 	local seen = {}
@@ -138,7 +175,7 @@ local function collectControllerChain(head, limit)
 	return results
 end
 
-local function collectExtraDataChain(head, limit)
+collectExtraDataChain = function(head, limit)
 	local results = {}
 	local current = head
 	local seen = {}
@@ -184,6 +221,86 @@ local function notifyMenuContentsChanged(menu)
 	menu:updateLayout()
 end
 
+local function setTreeSelectionWidget(widget, selected)
+	if not widget then
+		return
+	end
+
+	if selected then
+		widget.state = tes3.uiState.active
+		widget.idleActive = { 0.85, 0.78, 0.38 }
+		widget.idleDisabled = { 0.85, 0.78, 0.38 }
+	else
+		widget.state = tes3.uiState.normal
+		widget.idleActive = tes3ui.getPalette(tes3.palette.normalColor)
+		widget.idleDisabled = tes3ui.getPalette(tes3.palette.normalColor)
+	end
+end
+
+--- @param parent tes3uiElement
+local function addLinkLabel(parent, text)
+	local label = parent:createTextSelect({ text = text })
+	label.widget.idle = tes3ui.getPalette(tes3.palette.linkColor)
+	label.widget.over = tes3ui.getPalette(tes3.palette.linkOverColor)
+	label.widget.pressed = tes3ui.getPalette(tes3.palette.linkPressedColor)
+	return label
+end
+
+local function addLinkRow(parent, label, text, onClick)
+	local row = parent:createBlock({})
+	row.widthProportional = 1.0
+	row.autoHeight = true
+	row.flowDirection = "left_to_right"
+	row.borderBottom = 3
+
+	local key = row:createLabel({ text = label .. ":" })
+	key.minWidth = 150
+	key.borderLeft = 8
+	key.color = tes3ui.getPalette("header_color")
+
+	local link = addLinkLabel(row, text)
+	link.widthProportional = 1.0
+	link.autoHeight = true
+	link:register("mouseClick", function()
+		onClick()
+	end)
+end
+
+local function addLinkListRow(parent, label, items, onClick)
+	local row = parent:createBlock({})
+	row.widthProportional = 1.0
+	row.autoHeight = true
+	row.flowDirection = "left_to_right"
+	row.borderBottom = 3
+
+	local key = row:createLabel({ text = label .. ":" })
+	key.minWidth = 150
+	key.borderLeft = 8
+	key.color = tes3ui.getPalette("header_color")
+
+	local valueBlock = row:createBlock({})
+	valueBlock.widthProportional = 1.0
+	valueBlock.autoHeight = true
+	valueBlock.flowDirection = "left_to_right"
+
+	if #items == 0 then
+		local none = valueBlock:createLabel({ text = "None" })
+		none.color = { 0.85, 0.85, 0.85 }
+		return
+	end
+
+	for index, item in ipairs(items) do
+		if index > 1 then
+			valueBlock:createLabel({ text = ", " })
+		end
+
+		local link = addLinkLabel(valueBlock, item.text)
+		link:register("mouseClick", function()
+			onClick(item.value)
+		end)
+	end
+end
+
 local function isShiftDown()
 	return tes3.worldController.inputController:isShiftDown()
 end
@@ -219,6 +336,10 @@ local function getDumpButtonTexts()
 		"Dump Visible",
 		"Dump All",
 	}
+end
+
+local function formatTreePath(parentPath, childEntry)
+	return string.format("%s/%s:%d:%s", parentPath, childEntry.kind, childEntry.index, tostring(childEntry.node))
 end
 
 local function collectRTTILineage(node)
@@ -283,7 +404,7 @@ local function shouldIncludeChildren(path, dumpMode)
 end
 
 local function getSlotIndexFromPath(path)
-	local slotIndex = path:match("/(%d+):[^/]+$")
+	local slotIndex = path:match("/child:(%d+):[^/]+$")
 	if slotIndex then
 		return tonumber(slotIndex)
 	end
@@ -306,9 +427,9 @@ local function getNodeChainToRoot(node, root)
 end
 
 local function getChildPath(parentPath, parentNode, childNode)
-	for _, childEntry in ipairs(collectChildren(parentNode)) do
+	for _, childEntry in ipairs(collectTreeChildren(parentNode)) do
 		if childEntry.node == childNode or tostring(childEntry.node) == tostring(childNode) then
-			return string.format("%s/%d:%s", parentPath, childEntry.index, tostring(childNode))
+			return formatTreePath(parentPath, childEntry)
 		end
 	end
 	return nil
@@ -406,11 +527,20 @@ local function raySelectAtCursor(e)
 end
 
 local function serializeSelectedLineage(selectedPath)
+	local selectedNode = state.nodeMap[selectedPath]
+	if not selectedNode then
+		return nil
+	end
+
+	if selectedPath:find("/controller:") or selectedPath:find("/property:") then
+		return serializeNode(selectedNode, selectedPath, "selected", nil)
+	end
+
 	local ancestryPaths = {}
 	local currentPath = selectedPath
 	while currentPath do
 		table.insert(ancestryPaths, 1, currentPath)
-		currentPath = currentPath:match("^(.*)/%d+:[^/]+$")
+		currentPath = currentPath:match("^(.*)/child:%d+:[^/]+$")
 	end
 
 	local function buildNode(index)
@@ -436,7 +566,7 @@ end
 
 serializeNode = function(node, path, dumpMode, slotIndex)
 	local reference = safeCall(safeIndex(node, "getGameReference"), node)
-	local childEntries = collectChildren(node)
+	local childEntries = collectTreeChildren(node)
 	local serializedChildren = {}
 
 	if shouldIncludeChildren(path, dumpMode) then
@@ -445,9 +575,9 @@ serializeNode = function(node, path, dumpMode, slotIndex)
 				serializedChildren,
 				serializeNode(
 					childEntry.node,
-					string.format("%s/%d:%s", path, childEntry.index, tostring(childEntry.node)),
+					formatTreePath(path, childEntry),
 					dumpMode,
-					childEntry.index
+					childEntry.kind == "child" and childEntry.index or nil
 				)
 			)
 		end
@@ -583,9 +713,7 @@ end
 
 getNodeCaption = function(node, slotIndex)
 	local name = formatObjectName(node)
-	local pieces = {
-		name,
-	}
+	local pieces = { name }
 
 	local reference = safeCall(safeIndex(node, "getGameReference"), node)
 	if reference then
@@ -593,10 +721,6 @@ getNodeCaption = function(node, slotIndex)
 		if objectId then
 			table.insert(pieces, string.format("{%s}", objectId))
 		end
-	end
-
-	if slotIndex then
-		table.insert(pieces, string.format("#%d", slotIndex))
 	end
 
 	return table.concat(pieces, " ")
@@ -628,7 +752,7 @@ end
 
 local function addSectionHeader(parent, text)
 	local header = parent:createLabel({ text = text })
-	header.color = rttiAccentColor
+	header.color = sectionHeaderColor
 	header.wrapText = true
 	return header
 end
@@ -702,9 +826,76 @@ local function updateDetail(node)
 	sceneTypes.renderDetailPane(pane, node, {
 		addSectionHeader = addSectionHeader,
 		addValueRow = addValueRow,
+		addLinkRow = addLinkRow,
+		addLinkListRow = addLinkListRow,
+		focusObject = focusTreeObject,
 	})
 
 	menu:updateLayout()
+end
+
+local function selectTreePath(path)
+	local previousPath = state.selectedPath
+	if previousPath == path and state.selectedWidget then
+		updateDetail(state.nodeMap[path])
+		return
+	end
+
+	local previousWidget = state.treeWidgets[previousPath]
+	if previousWidget then
+		setTreeSelectionWidget(previousWidget, false)
+	end
+
+	state.selectedPath = path
+	state.selectedWidget = state.treeWidgets[path]
+
+	setTreeSelectionWidget(state.selectedWidget, true)
+
+	updateDetail(state.nodeMap[path])
+
+	local menu = tes3ui.findMenu(ids.menu)
+	if menu then
+		menu:updateLayout()
+	end
+end
+
+local function findTreePathForObject(parentPath, parentNode, targetNode)
+	if not parentPath or not parentNode or not targetNode then
+		return nil
+	end
+
+	for _, childEntry in ipairs(collectTreeChildren(parentNode)) do
+		if childEntry.node == targetNode or tostring(childEntry.node) == tostring(targetNode) then
+			return formatTreePath(parentPath, childEntry)
+		end
+	end
+
+	return nil
+end
+
+focusTreeObject = function(targetNode)
+	if not targetNode then
+		return false
+	end
+
+	local currentPath = state.selectedPath
+	local currentNode = currentPath and state.nodeMap[currentPath]
+	if currentPath and currentNode then
+		local childPath = findTreePathForObject(currentPath, currentNode, targetNode)
+		if childPath then
+			state.expanded[currentPath] = true
+			state.selectedPath = childPath
+			refreshTree()
+			return true
+		end
+	end
+
+	if selectNodeInCurrentRoot(targetNode) then
+		refreshTree()
+		return true
+	end
+
+	return false
 end
 
 local lastTarget = nil
@@ -759,6 +950,8 @@ refreshTree = function()
 	pane.widthProportional = 1.0
 	pane.autoHeight = true
 	state.nodeMap = {}
+	state.treeWidgets = {}
+	state.selectedWidget = nil
 
 	local entry = state.rootEntries[state.rootIndex]
 	if not entry then
@@ -791,7 +984,7 @@ refreshTree = function()
 		line.paddingLeft = depth * 16
 		line.borderBottom = 2
 
-		local children = collectChildren(node)
+		local children = collectTreeChildren(node)
 		local function toggleExpanded()
 			if #children == 0 then
 				return
@@ -810,7 +1003,7 @@ refreshTree = function()
 		end
 
 		local typeLabel = line:createLabel({ text = string.format("[%s]", getRTTIName(node)) })
-		typeLabel.color = rttiAccentColor
+		typeLabel.color = sceneTypes.getColor(node) or rttiAccentColor
 		typeLabel.autoWidth = true
 		typeLabel.borderRight = 6
 		if #children > 0 then
@@ -820,24 +1013,23 @@ refreshTree = function()
 		local select = line:createTextSelect({ text = getNodeCaption(node, slotIndex) })
 		select.widthProportional = 1.0
 		select.autoHeight = true
+		state.treeWidgets[path] = select.widget
 		if state.selectedPath == path then
 			selectedElement = select
-			select.widget.state = 2
-			select.widget.idleActive = { 0.85, 0.78, 0.38 }
-			select.widget.idleDisabled = { 0.85, 0.78, 0.38 }
+			state.selectedWidget = select.widget
+			setTreeSelectionWidget(select.widget, true)
 		end
 		select:register("mouseClick", function()
-			state.selectedPath = path
-			refreshTree()
+			selectTreePath(path)
 		end)
 
 		if #children > 0 and state.expanded[path] == true then
 			for _, childEntry in ipairs(children) do
 				renderNode(
 					childEntry.node,
-					string.format("%s/%d:%s", path, childEntry.index, tostring(childEntry.node)),
+					formatTreePath(path, childEntry),
 					depth + 1,
-					childEntry.index
+					childEntry.kind == "child" and childEntry.index or nil
 				)
 			end
 		end

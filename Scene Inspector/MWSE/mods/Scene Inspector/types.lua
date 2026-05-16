@@ -101,6 +101,27 @@ local function formatListSummary(value)
 	return string.format("%d entries", count)
 end
 
+local function collectPropertyList(head, limit)
+	local results = {}
+	local current = head
+	local seen = {}
+	local remaining = limit or 64
+	while current and remaining > 0 do
+		local key = tostring(current)
+		if seen[key] then
+			break
+		end
+		seen[key] = true
+		local property = safeIndex(current, "data")
+		if property then
+			table.insert(results, property)
+		end
+		current = safeIndex(current, "next")
+		remaining = remaining - 1
+	end
+	return results
+end
+
 local formatters = {
 	boolean = function(value)
 		if value == nil then
@@ -135,6 +156,10 @@ local function normalizeTypeName(typeName)
 	return (typeName:sub(1, 1):lower() .. typeName:sub(2))
 end
 
+local function color(r, g, b)
+	return { r, g, b }
+end
+
 types.definitions = {
 	niObject = {
 		label = "NiObject",
@@ -146,46 +171,51 @@ types.definitions = {
 		label = "NiObjectNET",
 		fields = {
 			{ key = "name", label = "Name", format = "text" },
-			{ key = "controller", label = "Controller", format = "object" },
+			{ key = "controller", label = "Controller", render = "controllerLink" },
 			{ key = "extraData", label = "Extra Data", format = "object" },
-		},
-	},
-	niAVObject = {
-		label = "NiAVObject",
-		fields = {
-			{ key = "alphaProperty", label = "Alpha Property", format = "object" },
-			{ key = "appCulled", label = "App Culled", format = "boolean" },
-			{ key = "flags", label = "Flags", format = "number" },
-			{ key = "fogProperty", label = "Fog Property", format = "object" },
-			{ key = "materialProperty", label = "Material Property", format = "object" },
-			{ key = "parent", label = "Parent", format = "object" },
-			{ key = "properties", label = "Properties", format = "object" },
-			{ key = "rotation", label = "Rotation", format = "rotation" },
-			{ key = "scale", label = "Scale", format = "number" },
-			{ key = "stencilProperty", label = "Stencil Property", format = "object" },
-			{ key = "texturingProperty", label = "Texturing Property", format = "object" },
-			{ key = "translation", label = "Translation", format = "vector3" },
-			{ key = "velocity", label = "Velocity", format = "vector3" },
-			{ key = "vertexColorProperty", label = "Vertex Color Property", format = "object" },
-			{ key = "worldBoundOrigin", label = "World Bound Origin", format = "vector3" },
-			{ key = "worldBoundRadius", label = "World Bound Radius", format = "number" },
-			{ key = "worldTransform", label = "World Transform", format = "transform" },
-			{ key = "zBufferProperty", label = "Z Buffer Property", format = "object" },
 		},
 	},
 	niNode = {
 		label = "NiNode",
+		color = color(0.55, 0.7, 0.85),
 		fields = {
 			{ key = "children", label = "Children", format = "list" },
 			{ key = "effectList", label = "Effect List", format = "object" },
 		},
 	},
+	niAVObject = {
+		label = "NiAVObject",
+		fields = {
+			{ key = "appCulled", label = "App Culled", format = "boolean" },
+			{ key = "flags", label = "Flags", format = "number" },
+			{ key = "parent", label = "Parent", format = "object" },
+			{ key = "properties", label = "Properties", render = "propertyLinks" },
+			{ key = "rotation", label = "Rotation", format = "rotation" },
+			{ key = "scale", label = "Scale", format = "number" },
+			{ key = "translation", label = "Translation", format = "vector3" },
+			{ key = "velocity", label = "Velocity", format = "vector3" },
+			{ key = "worldBoundOrigin", label = "World Bound Origin", format = "vector3" },
+			{ key = "worldBoundRadius", label = "World Bound Radius", format = "number" },
+			{ key = "worldTransform", label = "World Transform", format = "transform" },
+		},
+	},
 	niProperty = {
 		label = "NiProperty",
+		color = color(0.35, 0.8, 0.45),
 		fields = {
 			{ key = "propertyFlags", label = "Property Flags", format = "number" },
 			{ key = "type", label = "Type", format = "value" },
 		},
+	},
+	niGeometry = {
+		label = "NiGeometry",
+		color = color(0.66, 0.45, 0.9),
+		fields = {},
+	},
+	niTimeController = {
+		label = "NiTimeController",
+		color = color(0.9, 0.3, 0.3),
+		fields = {},
 	},
 }
 
@@ -233,9 +263,14 @@ function types.getSections(object)
 			local rows = {}
 			for _, field in ipairs(definition.fields) do
 				local value = safeIndex(object, field.key)
+				if field.render == "propertyLinks" then
+					value = collectPropertyList(value)
+				end
 				table.insert(rows, {
 					label = field.label or field.key,
 					value = formatFieldValue(field, value),
+					rawValue = value,
+					field = field,
 				})
 			end
 
@@ -251,10 +286,24 @@ function types.getSections(object)
 	return sections
 end
 
+function types.getColor(object)
+	for _, typeName in ipairs(buildLineage(object)) do
+		local definition = types.definitions[normalizeTypeName(typeName)]
+		if definition and definition.color then
+			return definition.color
+		end
+	end
+
+	return nil
+end
+
 function types.renderDetailPane(pane, object, helpers)
 	helpers = helpers or {}
 	local addSectionHeader = helpers.addSectionHeader
 	local addValueRow = helpers.addValueRow
+	local addLinkRow = helpers.addLinkRow
+	local addLinkListRow = helpers.addLinkListRow
+	local focusObject = helpers.focusObject
 
 	if type(addSectionHeader) ~= "function" or type(addValueRow) ~= "function" then
 		error("Scene Inspector types.lua requires addSectionHeader and addValueRow helpers.")
@@ -269,11 +318,50 @@ function types.renderDetailPane(pane, object, helpers)
 
 	for i, section in ipairs(sections) do
 		local header = addSectionHeader(pane, section.label)
-		if i > 1 then
-			header.borderTop = 4
-		end
 		for _, row in ipairs(section.rows) do
-			addValueRow(pane, row.label, row.value)
+			local field = row.field or {}
+			if field.render == "controllerLink" then
+				if type(addLinkRow) ~= "function" or type(focusObject) ~= "function" then
+					error("Scene Inspector types.lua requires addLinkRow and focusObject helpers for controller links.")
+				end
+
+				local controller = row.rawValue
+				if controller then
+					local controllerName = safeIndex(controller, "name")
+					if controllerName == nil or controllerName == "" then
+						controllerName = "<unnamed>"
+					end
+
+					addLinkRow(
+						pane,
+						row.label,
+						string.format("%s (%s)", controllerName, getRTTIName(controller)),
+						function()
+							focusObject(controller)
+						end
+					)
+				else
+					addValueRow(pane, row.label, "None")
+				end
+			elseif field.render == "propertyLinks" then
+				if type(addLinkListRow) ~= "function" or type(focusObject) ~= "function" then
+					error("Scene Inspector types.lua requires addLinkListRow and focusObject helpers for property links.")
+				end
+
+				local items = {}
+				for _, property in ipairs(row.rawValue or {}) do
+					table.insert(items, {
+						text = getRTTIName(property),
+						value = property,
+					})
+				end
+
+				addLinkListRow(pane, row.label, items, function(property)
+					focusObject(property)
+				end)
+			else
+				addValueRow(pane, row.label, row.value)
+			end
 		end
 	end
 end
