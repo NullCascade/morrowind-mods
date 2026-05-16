@@ -918,17 +918,18 @@ local function createInspector()
 	local content = menu:createBlock({})
 	content.widthProportional = 1.0
 	content.heightProportional = 1.0
-	content.flowDirection = "top_to_bottom"
+	content.autoHeight = true
+	content.autoWidth = true
+	content.flowDirection = "left_to_right"
 
 	local treePane = content:createVerticalScrollPane({ id = ids.treePane })
-	treePane.widthProportional = 1.0
-	treePane.heightProportional = (0.6)*2
+	treePane.widthProportional = (3/7)*2
+	treePane.heightProportional = 1.0
 	treePane.paddingAllSides = 4
-	treePane.borderBottom = 6
 
 	local detailPane = content:createVerticalScrollPane({ id = ids.detailPane })
-	detailPane.widthProportional = 1.0
-	detailPane.heightProportional = (0.4)*2
+	detailPane.widthProportional = (4/7)*2
+	detailPane.heightProportional = 1.0
 	detailPane.paddingAllSides = 4
 
 	local controlsBottom = menu:createBlock({})
