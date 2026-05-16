@@ -37,6 +37,10 @@ local function leaveInspectorMenuMode()
 	tes3ui.leaveMenuMode()
 end
 
+--- @generic T
+--- @param value T
+--- @param key string
+--- @return any
 local function safeIndex(value, key)
 	local ok, result = pcall(function()
 		return value[key]
@@ -45,6 +49,9 @@ local function safeIndex(value, key)
 	return result
 end
 
+--- @param fn function|nil
+--- @vararg any
+--- @return any
 local function safeCall(fn, ...)
 	if type(fn) ~= "function" then
 		return nil
@@ -53,12 +60,16 @@ local function safeCall(fn, ...)
 	return ok and result or nil
 end
 
+--- @param object niObject
+--- @return string
 local function getRTTIName(object)
 	local rtti = safeIndex(object, "RTTI") or safeIndex(object, "runTimeTypeInformation")
 	local name = safeIndex(rtti, "name")
 	return name or "<unknown>"
 end
 
+--- @param object niObject
+--- @return string
 local function formatObjectName(object)
 	local name = safeIndex(object, "name")
 	if name and name ~= "" then
@@ -67,6 +78,8 @@ local function formatObjectName(object)
 	return "<unnamed>"
 end
 
+--- @param reference tes3reference
+--- @return string
 local function formatReference(reference)
 	if not reference then
 		return "nil"
@@ -85,6 +98,8 @@ local function formatReference(reference)
 	return label
 end
 
+--- @param value nil|boolean|number|string|table|userdata
+--- @return nil|boolean|number|string
 local function formatValue(value)
 	local valueType = type(value)
 	if value == nil or valueType == "number" or valueType == "boolean" or valueType == "string" then
@@ -93,6 +108,8 @@ local function formatValue(value)
 	return tostring(value)
 end
 
+--- @param node niNode
+--- @return table[]
 local function collectChildren(node)
 	local results = {}
 	local children = safeIndex(node, "children") or {}
@@ -107,6 +124,8 @@ local function collectChildren(node)
 	return results
 end
 
+--- @param node niObject
+--- @return table[]
 local function collectTreeChildren(node)
 	local results = {}
 
@@ -134,7 +153,7 @@ local function collectTreeChildren(node)
 		})
 	end
 
-	for _, child in ipairs(collectChildren(node)) do
+	for _, child in ipairs(collectChildren(node --[[@as niNode]])) do
 		table.insert(results, {
 			index = child.index,
 			kind = "child",
@@ -145,6 +164,9 @@ local function collectTreeChildren(node)
 	return results
 end
 
+--- @param head niProperty|nil
+--- @param limit? integer
+--- @return niProperty[]
 collectPropertyList = function(head, limit)
 	local results = {}
 	local current = head
@@ -166,6 +188,9 @@ collectPropertyList = function(head, limit)
 	return results
 end
 
+--- @param head niTimeController|nil
+--- @param limit? integer
+--- @return niTimeController[]
 collectControllerChain = function(head, limit)
 	local results = {}
 	local current = head
@@ -184,6 +209,9 @@ collectControllerChain = function(head, limit)
 	return results
 end
 
+--- @param head niDynamicEffect|nil
+--- @param limit? integer
+--- @return niDynamicEffect[]
 collectEffectList = function(head, limit)
 	local results = {}
 	local current = head
@@ -205,6 +233,9 @@ collectEffectList = function(head, limit)
 	return results
 end
 
+--- @param head niObject|table|nil
+--- @param limit? integer
+--- @return niObject[]
 collectExtraDataChain = function(head, limit)
 	local results = {}
 	local current = head
@@ -223,10 +254,13 @@ collectExtraDataChain = function(head, limit)
 	return results
 end
 
+--- @return { label: string, node: any }|nil
 local function getCurrentRootEntry()
 	return state.rootEntries[state.rootIndex]
 end
 
+--- @param menu tes3uiElement|nil
+--- @return boolean
 local function isCursorInsideMenu(menu)
 	if not menu then return false end
 	local cursor = tes3.getCursorPosition()
@@ -237,6 +271,7 @@ local function isCursorInsideMenu(menu)
 	return cursor.x >= left and cursor.x <= right and cursor.y >= bottom and cursor.y <= top
 end
 
+--- @param menu tes3uiElement
 local function notifyMenuContentsChanged(menu)
 	local treeScroll = menu:findChild(ids.treePane)
 	if treeScroll and treeScroll.widget then
@@ -251,6 +286,8 @@ local function notifyMenuContentsChanged(menu)
 	menu:updateLayout()
 end
 
+--- @param widget tes3uiTextSelect
+--- @param selected boolean
 local function setTreeSelectionWidget(widget, selected)
 	if not widget then
 		return
@@ -268,6 +305,8 @@ local function setTreeSelectionWidget(widget, selected)
 end
 
 --- @param parent tes3uiElement
+--- @param text string
+--- @return tes3uiElement
 local function addLinkLabel(parent, text)
 	local label = parent:createTextSelect({ text = text })
 	label.widget.idle = tes3ui.getPalette(tes3.palette.linkColor)
@@ -276,6 +315,11 @@ local function addLinkLabel(parent, text)
 	return label
 end
 
+--- @param parent tes3uiElement
+--- @param label string
+--- @param text string
+--- @param onClick fun()
+--- @return tes3uiElement
 local function addLinkRow(parent, label, text, onClick)
 	local row = parent:createBlock({})
 	row.widthProportional = 1.0
@@ -294,8 +338,15 @@ local function addLinkRow(parent, label, text, onClick)
 	link:register("mouseClick", function()
 		onClick()
 	end)
+
+	return row
 end
 
+--- @param parent tes3uiElement
+--- @param label string
+--- @param items { text: string, value: niObject }[]
+--- @param onClick fun(value: niObject)
+--- @return tes3uiElement?
 local function addLinkListRow(parent, label, items, onClick)
 	local row = parent:createBlock({})
 	row.widthProportional = 1.0
@@ -331,14 +382,17 @@ local function addLinkListRow(parent, label, items, onClick)
 	end
 end
 
+--- @return boolean
 local function isShiftDown()
 	return tes3.worldController.inputController:isShiftDown()
 end
 
+--- @return boolean
 local function isAltDown()
 	return tes3.worldController.inputController:isAltDown()
 end
 
+--- @return '"selected"'|'"visible"'|'"all"'
 local function getDumpMode()
 	if isShiftDown() then
 		return "all"
@@ -349,6 +403,7 @@ local function getDumpMode()
 	return "selected"
 end
 
+--- @return string
 local function getDumpButtonText()
 	local mode = getDumpMode()
 	if mode == "all" then
@@ -360,6 +415,7 @@ local function getDumpButtonText()
 	return "Dump Selected"
 end
 
+--- @return string[]
 local function getDumpButtonTexts()
 	return {
 		"Dump Selected",
@@ -368,10 +424,15 @@ local function getDumpButtonTexts()
 	}
 end
 
+--- @param parentPath string
+--- @param childEntry { kind: string, index: integer, node: niObject }
+--- @return string
 local function formatTreePath(parentPath, childEntry)
 	return string.format("%s/%s:%d:%s", parentPath, childEntry.kind, childEntry.index, tostring(childEntry.node))
 end
 
+--- @param node niObject
+--- @return string[]
 local function collectRTTILineage(node)
 	local rtti = safeIndex(node, "RTTI") or safeIndex(node, "runTimeTypeInformation")
 	local lineage = {}
@@ -384,6 +445,8 @@ local function collectRTTILineage(node)
 	return lineage
 end
 
+--- @param node niObject
+--- @return table[]
 local function serializeProperties(node)
 	local serialized = {}
 	for _, property in ipairs(collectPropertyList(safeIndex(node, "properties"))) do
@@ -398,6 +461,8 @@ local function serializeProperties(node)
 	return serialized
 end
 
+--- @param node niObjectNET
+--- @return table[]
 local function serializeControllers(node)
 	local serialized = {}
 	for _, controller in ipairs(collectControllerChain(safeIndex(node, "controller"))) do
@@ -413,6 +478,8 @@ local function serializeControllers(node)
 	return serialized
 end
 
+--- @param node niObjectNET
+--- @return table[]
 local function serializeExtraData(node)
 	local serialized = {}
 	for _, extraData in ipairs(collectExtraDataChain(safeIndex(node, "extraData"))) do
@@ -426,6 +493,9 @@ local function serializeExtraData(node)
 	return serialized
 end
 
+--- @param path string
+--- @param dumpMode string
+--- @return boolean
 local function shouldIncludeChildren(path, dumpMode)
 	if dumpMode == "all" then
 		return true
@@ -433,6 +503,8 @@ local function shouldIncludeChildren(path, dumpMode)
 	return state.expanded[path] == true
 end
 
+--- @param path string
+--- @return integer|nil
 local function getSlotIndexFromPath(path)
 	local slotIndex = path:match("/child:(%d+):[^/]+$")
 	if slotIndex then
@@ -441,6 +513,9 @@ local function getSlotIndexFromPath(path)
 	return nil
 end
 
+--- @param node niObject
+--- @param root niObject
+--- @return niObject[]|nil
 local function getNodeChainToRoot(node, root)
 	local chain = {}
 	local current = node
@@ -456,6 +531,10 @@ local function getNodeChainToRoot(node, root)
 	return nil
 end
 
+--- @param parentPath string
+--- @param parentNode niObject
+--- @param childNode niObject
+--- @return string|nil
 local function getChildPath(parentPath, parentNode, childNode)
 	for _, childEntry in ipairs(collectTreeChildren(parentNode)) do
 		if childEntry.node == childNode or tostring(childEntry.node) == tostring(childNode) then
@@ -465,6 +544,8 @@ local function getChildPath(parentPath, parentNode, childNode)
 	return nil
 end
 
+--- @param node niObject
+--- @return boolean
 local function selectNodeInCurrentRoot(node)
 	local entry = getCurrentRootEntry()
 	if not entry or not entry.node or not node then
@@ -556,6 +637,8 @@ local function raySelectAtCursor(e)
 	end
 end
 
+--- @param selectedPath string
+--- @return table|nil
 local function serializeSelectedLineage(selectedPath)
 	local selectedNode = state.nodeMap[selectedPath]
 	if not selectedNode then
@@ -594,6 +677,11 @@ local function serializeSelectedLineage(selectedPath)
 	return buildNode(1)
 end
 
+--- @param node niObject
+--- @param path string
+--- @param dumpMode string
+--- @param slotIndex integer|nil
+--- @return table
 serializeNode = function(node, path, dumpMode, slotIndex)
 	local reference = safeCall(safeIndex(node, "getGameReference"), node)
 	local childEntries = collectTreeChildren(node)
@@ -642,8 +730,8 @@ serializeNode = function(node, path, dumpMode, slotIndex)
 		gameReference = formatReference(reference),
 		childCount = #childEntries,
 		properties = serializeProperties(node),
-		controllers = serializeControllers(node),
-		extraData = serializeExtraData(node),
+		controllers = serializeControllers(node --[[@as niObjectNET]]),
+		extraData = serializeExtraData(node --[[@as niObjectNET]]),
 		children = serializedChildren,
 	}
 end
@@ -679,6 +767,8 @@ local function handleDumpModifierChange()
 	updateDumpButtonLabel()
 end
 
+--- @param menu tes3uiElement
+--- @param button tes3uiElement
 local function initializeDumpButtonWidth(menu, button)
 	local originalText = button.text
 	local maxWidth = button.width or 0
@@ -741,6 +831,9 @@ local function dumpSceneGraph()
 	tes3.messageBox("Scene Inspector: wrote %s scene graph data to %s.", dumpMode, dumpPath)
 end
 
+--- @param node niObject
+--- @param slotIndex integer|nil
+--- @return string
 getNodeCaption = function(node, slotIndex)
 	local name = formatObjectName(node)
 	local pieces = { name }
@@ -756,6 +849,10 @@ getNodeCaption = function(node, slotIndex)
 	return table.concat(pieces, " ")
 end
 
+--- @param parent tes3uiElement
+--- @param label string
+--- @param value string|number|boolean|nil
+--- @return tes3uiElement
 local function addValueRow(parent, label, value)
 	local row = parent:createBlock({})
 	row.widthProportional = 1.0
@@ -778,8 +875,13 @@ local function addValueRow(parent, label, value)
 	valueLabel.wrapText = true
 	valueLabel.widthProportional = 1.0
 	valueLabel.color = { 0.85, 0.85, 0.85 }
+
+	return row
 end
 
+--- @param parent tes3uiElement
+--- @param text string
+--- @return tes3uiElement
 local function addSectionHeader(parent, text)
 	local header = parent:createLabel({ text = text })
 	header.color = sectionHeaderColor
@@ -835,6 +937,7 @@ local function updateRootLabel()
 	end
 end
 
+--- @param node niObject?
 local function updateDetail(node)
 	local menu = tes3ui.findMenu(ids.menu)
 	if not menu then
@@ -864,6 +967,7 @@ local function updateDetail(node)
 	menu:updateLayout()
 end
 
+--- @param path string
 local function selectTreePath(path)
 	local previousPath = state.selectedPath
 	if previousPath == path and state.selectedWidget then
@@ -889,6 +993,10 @@ local function selectTreePath(path)
 	end
 end
 
+--- @param parentPath string|nil
+--- @param parentNode niObject
+--- @param targetNode niObject
+--- @return string|nil
 local function findTreePathForObject(parentPath, parentNode, targetNode)
 	if not parentPath or not parentNode or not targetNode then
 		return nil
@@ -903,6 +1011,8 @@ local function findTreePathForObject(parentPath, parentNode, targetNode)
 	return nil
 end
 
+--- @param targetNode niObject
+--- @return boolean
 focusTreeObject = function(targetNode)
 	if not targetNode then
 		return false
@@ -1085,6 +1195,7 @@ refreshTree = function()
 	menu:updateLayout()
 end
 
+--- @param delta integer
 local function stepRoot(delta)
 	buildRootEntries()
 	if #state.rootEntries == 0 then
@@ -1194,7 +1305,6 @@ local function toggleInspector()
 	refreshTree()
 end
 
---- @param e keyEventData
 local function init()
 	ids.menu = tes3ui.registerID("SceneInspector:Menu")
 	ids.rootLabel = tes3ui.registerID("SceneInspector:RootLabel")
@@ -1214,6 +1324,7 @@ end
 
 local modConfig = {}
 
+--- @param container tes3uiElement
 function modConfig.onCreate(container)
 	local pane = container:createThinBorder({})
 	pane.widthProportional = 1.0

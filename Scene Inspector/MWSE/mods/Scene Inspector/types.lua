@@ -1,5 +1,20 @@
 local types = {}
 
+---@class SceneInspectorLinkItem
+---@field text string
+---@field value niObject
+
+---@class SceneInspectorDetailHelpers
+---@field addSectionHeader fun(parent: tes3uiElement, text: string): tes3uiElement|nil
+---@field addValueRow fun(parent: tes3uiElement, label: string, value: string|number|boolean|nil): tes3uiElement|nil
+---@field addLinkRow fun(parent: tes3uiElement, label: string, text: string, onClick: fun()): tes3uiElement|nil
+---@field addLinkListRow fun(parent: tes3uiElement, label: string, items: SceneInspectorLinkItem[], onClick: fun(value: niObject)): tes3uiElement|nil
+---@field focusObject fun(targetNode: niObject): boolean|nil
+
+--- @generic T
+--- @param value T
+--- @param key string|integer
+--- @return any
 local function safeIndex(value, key)
 	local ok, result = pcall(function()
 		return value[key]
@@ -10,12 +25,16 @@ local function safeIndex(value, key)
 	return result
 end
 
+--- @param object niObject
+--- @return string
 local function getRTTIName(object)
 	local rtti = safeIndex(object, "RTTI") or safeIndex(object, "runTimeTypeInformation")
 	local name = safeIndex(rtti, "name")
 	return name or "<unknown>"
 end
 
+--- @param value nil|boolean|number|string|table|userdata
+--- @return string
 local function formatNumber(value)
 	if type(value) ~= "number" then
 		return tostring(value)
@@ -25,9 +44,12 @@ local function formatNumber(value)
 		return tostring(value)
 	end
 
-	return string.format("%.4f", value):gsub("0+$", ""):gsub("%.$", "")
+	local result = string.format("%.4f", value):gsub("0+$", ""):gsub("%.$", "")
+	return result
 end
 
+--- @param value tes3vector3|table|nil
+--- @return string
 local function formatVector3(value)
 	if not value then
 		return "nil"
@@ -43,6 +65,8 @@ local function formatVector3(value)
 	return tostring(value)
 end
 
+--- @param value tes3vector4|table|nil
+--- @return string
 local function formatVector4(value)
 	if not value then
 		return "nil"
@@ -59,6 +83,8 @@ local function formatVector4(value)
 	return tostring(value)
 end
 
+--- @param value table|userdata|nil
+--- @return string
 local function formatRotation(value)
 	if not value then
 		return "nil"
@@ -68,6 +94,8 @@ local function formatRotation(value)
 	return ok and text or "<rotation>"
 end
 
+--- @param value tes3transform|table|userdata|nil
+--- @return string
 local function formatTransform(value)
 	if not value then
 		return "nil"
@@ -79,6 +107,8 @@ local function formatTransform(value)
 	return string.format("translation=%s\nscale=%s\nrotation=%s", translation, scale, rotation)
 end
 
+--- @param value niColor|niColorA|table|userdata|nil
+--- @return string
 local function formatColor(value)
 	if not value then
 		return "nil"
@@ -99,6 +129,8 @@ local function formatColor(value)
 	return tostring(value)
 end
 
+--- @param value nil|boolean|number|string|table|userdata
+--- @return nil|boolean|number|string
 local function formatValue(value)
 	local valueType = type(value)
 	if value == nil or valueType == "number" or valueType == "boolean" or valueType == "string" then
@@ -108,6 +140,9 @@ local function formatValue(value)
 	return tostring(value)
 end
 
+--- @param head niProperty|nil
+--- @param limit? integer
+--- @return niProperty[]
 local function collectPropertyList(head, limit)
 	local results = {}
 	local current = head
@@ -129,6 +164,9 @@ local function collectPropertyList(head, limit)
 	return results
 end
 
+--- @param head niDynamicEffect|nil
+--- @param limit? integer
+--- @return niDynamicEffect[]
 local function collectEffectList(head, limit)
 	local results = {}
 	local current = head
@@ -150,6 +188,9 @@ local function collectEffectList(head, limit)
 	return results
 end
 
+--- @param head niObject|table|nil
+--- @param limit? integer
+--- @return niObject[]
 local function collectObjectList(head, limit)
 	local results = {}
 	if type(head) ~= "table" then
@@ -191,6 +232,8 @@ local function collectObjectList(head, limit)
 	return results
 end
 
+--- @param value niObject|nil
+--- @return string
 local function formatObjectSummary(value)
 	if not value then
 		return "nil"
@@ -205,6 +248,8 @@ local function formatObjectSummary(value)
 	return string.format("%s (%s)", name, rtti)
 end
 
+--- @param value table|nil
+--- @return string
 local function formatListSummary(value)
 	if type(value) ~= "table" then
 		return formatValue(value)
@@ -220,6 +265,8 @@ local function formatListSummary(value)
 	return string.format("%d entries", count)
 end
 
+--- @param value table|nil
+--- @return string
 local function formatObjectListSummary(value)
 	return formatListSummary(value)
 end
@@ -249,10 +296,14 @@ local formatters = {
 	vector4 = formatVector4,
 }
 
+--- @param typeName string
+--- @return string
 local function typeLabel(typeName)
 	return (typeName:gsub("^ni", "Ni", 1))
 end
 
+--- @param typeName string
+--- @return string|nil
 local function normalizeTypeName(typeName)
 	if type(typeName) ~= "string" then
 		return nil
@@ -261,6 +312,10 @@ local function normalizeTypeName(typeName)
 	return (typeName:sub(1, 1):lower() .. typeName:sub(2))
 end
 
+--- @param r number
+--- @param g number
+--- @param b number
+--- @return number[]
 local function color(r, g, b)
 	return { r, g, b }
 end
@@ -712,6 +767,8 @@ types.definitions = {
 	},
 }
 
+--- @param object niObject
+--- @return string[]
 local function buildLineage(object)
 	local lineage = {}
 	local seen = {}
@@ -733,6 +790,9 @@ local function buildLineage(object)
 	return lineage
 end
 
+--- @param field { format?: string|fun(value:any, field:table):any }
+--- @param value nil|boolean|number|string|table|userdata
+--- @return nil|boolean|number|string
 local function formatFieldValue(field, value)
 	local formatter = field.format
 	if type(formatter) == "function" then
@@ -740,13 +800,17 @@ local function formatFieldValue(field, value)
 	end
 
 	local handler = formatters[formatter or "value"] or formatters.value
-	return handler(value, field)
+	return handler(value)
 end
 
+--- @param object niObject
+--- @return string[]
 function types.getLineage(object)
 	return buildLineage(object)
 end
 
+--- @param object niObject
+--- @return table[]
 function types.getSections(object)
 	local sections = {}
 
@@ -789,6 +853,8 @@ function types.getSections(object)
 	return sections
 end
 
+--- @param object niObject
+--- @return number[]|nil
 function types.getColor(object)
 	for _, typeName in ipairs(buildLineage(object)) do
 		local definition = types.definitions[normalizeTypeName(typeName)]
@@ -800,6 +866,9 @@ function types.getColor(object)
 	return nil
 end
 
+--- @param pane tes3uiElement
+--- @param object niObject
+--- @param helpers SceneInspectorDetailHelpers|nil
 function types.renderDetailPane(pane, object, helpers)
 	helpers = helpers or {}
 	local addSectionHeader = helpers.addSectionHeader
