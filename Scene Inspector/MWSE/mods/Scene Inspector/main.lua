@@ -4,17 +4,6 @@ local sceneTypes = require("Scene Inspector.types")
 local rttiAccentColor = { 0.55, 0.7, 0.85 }
 local sectionHeaderColor = tes3ui.getPalette(tes3.palette.bigHeaderColor)
 
-local state = {
-	expanded = {},
-	nodeMap = {},
-	treeWidgets = {},
-	selectedPath = nil,
-	selectedWidget = nil,
-	rootIndex = 1,
-	rootEntries = {},
-	dumpButtonMinWidth = nil,
-}
-
 local ids = {}
 local getNodeCaption
 local buildRootEntries
@@ -25,11 +14,121 @@ local collectPropertyList
 local collectControllerChain
 local collectEffectList
 local collectExtraDataChain
+local showObjectPopup
 local showTexturingPropertyMapPopup
 local closeTexturingPropertyMapPopup
 
+--- @return table
+local function createMainState()
+	return {
+		expanded = {},
+		nodeMap = {},
+		treeWidgets = {},
+		selectedPath = nil,
+		selectedWidget = nil,
+		rootIndex = 1,
+		rootEntries = {},
+		dumpButtonMinWidth = nil,
+		lastTarget = nil,
+		openPopups = {},
+	}
+end
+
+--- @param map SceneInspectorTexturingPropertyMap
+--- @param title string|nil
+--- @return table
+local function createTexturingPropertyMapState(map, title)
+	return {
+		map = map,
+		title = title,
+		openPopups = {},
+	}
+end
+
+--- @param object niObject|table|userdata
+--- @param title string|nil
+--- @return table
+local function createObjectPopupState(object, title)
+	return {
+		object = object,
+		title = title,
+		openPopups = {},
+	}
+end
+
+--- @param element tes3uiElement|nil
+--- @return table|nil
+local function getState(element)
+	if not element then
+		return nil
+	end
+
+	local menu = element:getTopLevelMenu() or element
+	if not menu then
+		return nil
+	end
+
+	return menu:getLuaData("SceneInspector:State")
+end
+
+--- @param menu tes3uiElement
+--- @param state table
+--- @return table
+local function setState(menu, state)
+	menu:setLuaData("SceneInspector:State", state)
+	return state
+end
+
+--- @param menu tes3uiElement|nil
+local function closeTrackedPopups(menu)
+	if not menu then
+		return
+	end
+
+	local state = getState(menu)
+	if not state or not state.openPopups then
+		return
+	end
+
+	for index = #state.openPopups, 1, -1 do
+		local popup = state.openPopups[index]
+		if popup then
+			popup:destroy()
+		end
+		state.openPopups[index] = nil
+	end
+end
+
+--- @param parentMenu tes3uiElement|nil
+--- @param popup tes3uiElement
+local function trackPopup(parentMenu, popup)
+	if not parentMenu then
+		return
+	end
+
+	local parentState = getState(parentMenu)
+	if not parentState or not parentState.openPopups then
+		return
+	end
+
+	table.insert(parentState.openPopups, popup)
+	popup:registerBefore("destroy", function()
+		closeTrackedPopups(popup)
+
+		if not parentState.openPopups then
+			return
+		end
+
+		for index = #parentState.openPopups, 1, -1 do
+			if parentState.openPopups[index] == popup then
+				table.remove(parentState.openPopups, index)
+			end
+		end
+	end)
+end
+
 local function leaveInspectorMenuMode()
-	closeTexturingPropertyMapPopup()
+	closeTrackedPopups(tes3ui.findMenu(ids.menu))
 
 	local menu = tes3ui.findMenu(ids.menu)
 	if not menu then
@@ -258,8 +357,14 @@ collectExtraDataChain = function(head, limit)
 	return results
 end
 
+--- @param menu tes3uiElement
 --- @return { label: string, node: any }|nil
-local function getCurrentRootEntry()
+local function getCurrentRootEntry(menu)
+	local state = getState(menu)
+	if not state then
+		return nil
+	end
+
 	return state.rootEntries[state.rootIndex]
 end
 
@@ -292,10 +397,7 @@ end
 
 --- @return nil
 closeTexturingPropertyMapPopup = function()
-	local popup = tes3ui.findMenu(ids.mapPopup)
-	if popup then
-		popup:destroy()
-	end
+	closeTrackedPopups(tes3ui.findMenu(ids.menu))
 end
 
 --- @param widget tes3uiTextSelect
@@ -505,10 +607,11 @@ local function serializeExtraData(node)
 	return serialized
 end
 
+--- @param state table
 --- @param path string
 --- @param dumpMode string
 --- @return boolean
-local function shouldIncludeChildren(path, dumpMode)
+local function shouldIncludeChildren(state, path, dumpMode)
 	if dumpMode == "all" then
 		return true
 	end
@@ -556,10 +659,16 @@ local function getChildPath(parentPath, parentNode, childNode)
 	return nil
 end
 
+--- @param menu tes3uiElement
 --- @param node niObject
 --- @return boolean
-local function selectNodeInCurrentRoot(node)
-	local entry = getCurrentRootEntry()
+local function selectNodeInCurrentRoot(menu, node)
+	local state = getState(menu)
+	if not state then
+		return false
+	end
+
+	local entry = getCurrentRootEntry(menu)
 	if not entry or not entry.node or not node then
 		return false
 	end
@@ -609,8 +718,8 @@ local function raySelectAtCursor(e)
 		return
 	end
 
-	buildRootEntries()
-	local entry = getCurrentRootEntry()
+	buildRootEntries(menu)
+	local entry = getCurrentRootEntry(menu)
 	if not entry or not entry.node then
 		return
 	end
@@ -631,12 +740,12 @@ local function raySelectAtCursor(e)
 		return
 	end
 
-	local selected = selectNodeInCurrentRoot(hit.object)
+	local selected = selectNodeInCurrentRoot(menu, hit.object)
 	if not selected then
 		local hitReference = hit.reference
 		local sceneNode = hitReference and hitReference.sceneNode
 		if sceneNode then
-			selected = selectNodeInCurrentRoot(sceneNode)
+			selected = selectNodeInCurrentRoot(menu, sceneNode)
 		end
 	end
 
@@ -649,16 +758,17 @@ local function raySelectAtCursor(e)
 	end
 end
 
+--- @param state table
 --- @param selectedPath string
 --- @return table|nil
-local function serializeSelectedLineage(selectedPath)
+local function serializeSelectedLineage(state, selectedPath)
 	local selectedNode = state.nodeMap[selectedPath]
 	if not selectedNode then
 		return nil
 	end
 
 	if selectedPath:find("/controller:") or selectedPath:find("/property:") or selectedPath:find("/effect:") then
-		return serializeNode(selectedNode, selectedPath, "selected", nil)
+		return serializeNode(state, selectedNode, selectedPath, "selected", nil)
 	end
 
 	local ancestryPaths = {}
@@ -675,7 +785,7 @@ local function serializeSelectedLineage(selectedPath)
 			return nil
 		end
 
-		local serialized = serializeNode(node, path, "selected", getSlotIndexFromPath(path))
+		local serialized = serializeNode(state, node, path, "selected", getSlotIndexFromPath(path))
 		if index < #ancestryPaths then
 			serialized.children = { buildNode(index + 1) }
 			serialized.childCount = 1
@@ -689,21 +799,23 @@ local function serializeSelectedLineage(selectedPath)
 	return buildNode(1)
 end
 
+--- @param state table
 --- @param node niObject
 --- @param path string
 --- @param dumpMode string
 --- @param slotIndex integer|nil
 --- @return table
-serializeNode = function(node, path, dumpMode, slotIndex)
+serializeNode = function(state, node, path, dumpMode, slotIndex)
 	local reference = safeCall(safeIndex(node, "getGameReference"), node)
 	local childEntries = collectTreeChildren(node)
 	local serializedChildren = {}
 
-	if shouldIncludeChildren(path, dumpMode) then
+	if shouldIncludeChildren(state, path, dumpMode) then
 		for _, childEntry in ipairs(childEntries) do
 			table.insert(
 				serializedChildren,
 				serializeNode(
+					state,
 					childEntry.node,
 					formatTreePath(path, childEntry),
 					dumpMode,
@@ -754,6 +866,11 @@ local function updateDumpButtonLabel()
 		return
 	end
 
+	local state = getState(menu)
+	if not state then
+		return
+	end
+
 	local button = menu:findChild(ids.dumpButton)
 	if not button then
 		return
@@ -782,6 +899,11 @@ end
 --- @param menu tes3uiElement
 --- @param button tes3uiElement
 local function initializeDumpButtonWidth(menu, button)
+	local state = getState(menu)
+	if not state then
+		return
+	end
+
 	local originalText = button.text
 	local maxWidth = button.width or 0
 
@@ -798,8 +920,18 @@ local function initializeDumpButtonWidth(menu, button)
 end
 
 local function dumpSceneGraph()
-	buildRootEntries()
-	local entry = getCurrentRootEntry()
+	local menu = tes3ui.findMenu(ids.menu)
+	if not menu then
+		return
+	end
+
+	local state = getState(menu)
+	if not state then
+		return
+	end
+
+	buildRootEntries(menu)
+	local entry = getCurrentRootEntry(menu)
 	if not entry or not entry.node then
 		tes3.messageBox("Scene Inspector: no root is available to dump.")
 		return
@@ -819,8 +951,8 @@ local function dumpSceneGraph()
 		selectedPath = state.selectedPath,
 		dumpPath = dumpPath,
 		tree = dumpMode == "selected"
-			and serializeSelectedLineage(state.selectedPath)
-			or serializeNode(entry.node, entry.label, dumpMode, nil),
+			and serializeSelectedLineage(state, state.selectedPath)
+			or serializeNode(state, entry.node, entry.label, dumpMode, nil),
 	}
 
 	local encoded = json.encode(payload)
@@ -901,6 +1033,72 @@ local function addSectionHeader(parent, text)
 	return header
 end
 
+--- @param parentMenu tes3uiElement|nil
+--- @param object niObject|table|userdata
+--- @param title string|nil
+--- @return nil
+local function openObjectPopup(parentMenu, object, title)
+	if not parentMenu or not object then
+		return
+	end
+
+	local popup = tes3ui.createMenu({ id = ids.mapPopup, dragFrame = true, loadable = false })
+	setState(popup, createObjectPopupState(object, title))
+	trackPopup(parentMenu, popup)
+	popup.text = title or "Object"
+	popup.minWidth = 460
+	popup.minHeight = 260
+	popup.width = popup.minWidth
+	popup.height = popup.minHeight
+	popup.flowDirection = "top_to_bottom"
+
+	local label = popup:createLabel({ text = title or "Object" })
+	label.widthProportional = 1.0
+	label.color = tes3ui.getPalette("header_color")
+	label.borderBottom = 8
+
+	local content = popup:createVerticalScrollPane({})
+	content.widthProportional = 1.0
+	content.heightProportional = 1.0
+	content.borderBottom = 8
+
+	local pane = content:getContentElement()
+	pane.widthProportional = 1.0
+	pane.autoHeight = true
+	pane.flowDirection = "top_to_bottom"
+
+	sceneTypes.renderDetailPane(pane, object, {
+		addValueRow = addValueRow,
+		addSectionHeader = addSectionHeader,
+		addLinkRow = addLinkRow,
+		focusObject = focusTreeObject,
+		showObjectPopup = function(target, childTitle)
+			openObjectPopup(popup, target, childTitle)
+		end,
+	})
+
+	local footer = popup:createBlock({})
+	footer.widthProportional = 1.0
+	footer.autoHeight = true
+	footer.flowDirection = "left_to_right"
+	footer.childAlignX = 1.0
+
+	local closeButton = footer:createButton({ text = "Close" })
+	closeButton:register("mouseClick", function()
+		popup:destroy()
+	end)
+
+	popup:updateLayout()
+	content:updateLayout()
+end
+
+--- @param object niObject|table|userdata
+--- @param title string|nil
+--- @return nil
+showObjectPopup = function(object, title)
+	openObjectPopup(tes3ui.findMenu(ids.menu), object, title)
+end
+
 --- @param map SceneInspectorTexturingPropertyMap
 --- @param title string|nil
 --- @return nil
@@ -909,9 +1107,14 @@ showTexturingPropertyMapPopup = function(map, title)
 		return
 	end
 
-	closeTexturingPropertyMapPopup()
+	local menu = tes3ui.findMenu(ids.menu)
+	if not menu then
+		return
+	end
 
 	local popup = tes3ui.createMenu({ id = ids.mapPopup, dragFrame = true, loadable = false })
+	setState(popup, createTexturingPropertyMapState(map, title))
+	trackPopup(menu, popup)
 	popup.text = title or "Texture Map"
 	popup.minWidth = 460
 	popup.minHeight = 260
@@ -938,8 +1141,10 @@ showTexturingPropertyMapPopup = function(map, title)
 		addValueRow = addValueRow,
 		addLinkRow = addLinkRow,
 		focusObject = focusTreeObject,
+		showObjectPopup = function(target, childTitle)
+			openObjectPopup(popup, target, childTitle)
+		end,
 	})
-	content.widget:contentsChanged()
 
 	local footer = popup:createBlock({})
 	footer.widthProportional = 1.0
@@ -959,6 +1164,11 @@ end
 local function updateRootLabel()
 	local menu = tes3ui.findMenu(ids.menu)
 	if not menu then
+		return
+	end
+
+	local state = getState(menu)
+	if not state then
 		return
 	end
 
@@ -1037,6 +1247,16 @@ end
 
 --- @param path string
 local function selectTreePath(path)
+	local menu = tes3ui.findMenu(ids.menu)
+	if not menu then
+		return
+	end
+
+	local state = getState(menu)
+	if not state then
+		return
+	end
+
 	local previousPath = state.selectedPath
 	if previousPath == path and state.selectedWidget then
 		updateDetail(state.nodeMap[path])
@@ -1086,6 +1306,16 @@ focusTreeObject = function(targetNode)
 		return false
 	end
 
+	local menu = tes3ui.findMenu(ids.menu)
+	if not menu then
+		return false
+	end
+
+	local state = getState(menu)
+	if not state then
+		return false
+	end
+
 	local currentPath = state.selectedPath
 	local currentNode = currentPath and state.nodeMap[currentPath]
 	if currentPath and currentNode then
@@ -1098,7 +1328,7 @@ focusTreeObject = function(targetNode)
 		end
 	end
 
-	if selectNodeInCurrentRoot(targetNode) then
+	if selectNodeInCurrentRoot(menu, targetNode) then
 		refreshTree()
 		return true
 	end
@@ -1106,9 +1336,12 @@ focusTreeObject = function(targetNode)
 	return false
 end
 
-local lastTarget = nil
+buildRootEntries = function(menu)
+	local state = getState(menu)
+	if not state then
+		return
+	end
 
-buildRootEntries = function()
 	local entries = {}
 
 	local function tryAdd(label, resolver)
@@ -1130,9 +1363,9 @@ buildRootEntries = function()
 	tryAdd("Player", function()
 		return tes3.player and tes3.player.sceneNode
 	end)
-	lastTarget = tes3.getPlayerTarget() or lastTarget
+	state.lastTarget = tes3.getPlayerTarget() or state.lastTarget
 	tryAdd("Target", function()
-		return lastTarget and lastTarget:isValid() and lastTarget.sceneNode
+		return state.lastTarget and state.lastTarget:isValid() and state.lastTarget.sceneNode
 	end)
 
 	state.rootEntries = entries
@@ -1149,7 +1382,12 @@ refreshTree = function()
 		return
 	end
 
-	buildRootEntries()
+	local state = getState(menu)
+	if not state then
+		return
+	end
+
+	buildRootEntries(menu)
 	updateRootLabel()
 
 	local pane = menu:findChild(ids.treePane):getContentElement()
@@ -1265,7 +1503,17 @@ end
 
 --- @param delta integer
 local function stepRoot(delta)
-	buildRootEntries()
+	local menu = tes3ui.findMenu(ids.menu)
+	if not menu then
+		return
+	end
+
+	local state = getState(menu)
+	if not state then
+		return
+	end
+
+	buildRootEntries(menu)
 	if #state.rootEntries == 0 then
 		tes3.messageBox("Scene Inspector: no scene roots are available right now.")
 		return
@@ -1283,6 +1531,7 @@ end
 
 local function createInspector()
 	local menu = tes3ui.createMenu({ id = ids.menu, dragFrame = true, loadable = true })
+	setState(menu, createMainState())
 	menu.text = modName
 	menu.minWidth = 780
 	menu.minHeight = 640

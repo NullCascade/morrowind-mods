@@ -18,6 +18,7 @@ local types = {}
 ---@field addLinkRow nil|fun(parent: tes3uiElement, label: string, text: string, onClick: fun()): tes3uiElement|nil
 ---@field addLinkListRow nil|fun(parent: tes3uiElement, label: string, items: SceneInspectorLinkItem[], onClick: fun(value: SceneInspectorLinkValue)): tes3uiElement|nil
 ---@field showMapPopup nil|fun(map: SceneInspectorTexturingPropertyMap, title: string|nil): nil
+---@field showObjectPopup nil|fun(targetNode: niObject|table|userdata, title: string|nil): nil
 ---@field focusObject nil|fun(targetNode: niObject): boolean|nil
 
 --- @generic T
@@ -34,7 +35,7 @@ local function safeIndex(value, key)
 	return result
 end
 
---- @param object niObject
+--- @param object niObject|table|userdata
 --- @return string
 local function getRTTIName(object)
 	local rtti = safeIndex(object, "RTTI") or safeIndex(object, "runTimeTypeInformation")
@@ -241,7 +242,7 @@ local function collectObjectList(head, limit)
 	return results
 end
 
---- @param value niObject|nil
+--- @param value niObject|table|userdata|nil
 --- @return string
 local function formatObjectSummary(value)
 	if not value then
@@ -948,6 +949,7 @@ function types.renderDetailPane(pane, object, helpers)
 	local addLinkRow = helpers.addLinkRow
 	local addLinkListRow = helpers.addLinkListRow
 	local showMapPopup = helpers.showMapPopup
+	local showObjectPopup = helpers.showObjectPopup
 	local focusObject = helpers.focusObject
 
 	if type(addSectionHeader) ~= "function" or type(addValueRow) ~= "function" then
@@ -1016,8 +1018,8 @@ function types.renderDetailPane(pane, object, helpers)
 					focusObject(effect)
 				end)
 			elseif field.render == "objectLinks" then
-				if type(addLinkListRow) ~= "function" or type(focusObject) ~= "function" then
-					error("Scene Inspector types.lua requires addLinkListRow and focusObject helpers for object links.")
+				if type(addLinkListRow) ~= "function" then
+					error("Scene Inspector types.lua requires addLinkListRow helper for object links.")
 				end
 
 				local items = {}
@@ -1029,24 +1031,32 @@ function types.renderDetailPane(pane, object, helpers)
 				end
 
 				addLinkListRow(pane, row.label, items, function(objectValue)
-					focusObject(objectValue)
+					if type(showObjectPopup) == "function" then
+						showObjectPopup(objectValue, row.label)
+					elseif type(focusObject) == "function" then
+						focusObject(objectValue)
+					end
 				end)
 			elseif field.render == "mapLink" then
-				if type(addLinkRow) ~= "function" or type(showMapPopup) ~= "function" then
-					error("Scene Inspector types.lua requires addLinkRow and showMapPopup helpers for map links.")
+				if type(addLinkRow) ~= "function" then
+					error("Scene Inspector types.lua requires addLinkRow helper for map links.")
 				end
 
 				local map = row.rawValue
 				if map then
-					addLinkRow(pane, row.label, formatTexturingPropertyMapSummary(map), function()
-						showMapPopup(map, row.label)
-					end)
+					if type(showMapPopup) == "function" then
+						addLinkRow(pane, row.label, formatTexturingPropertyMapSummary(map), function()
+							showMapPopup(map, row.label)
+						end)
+					else
+						addValueRow(pane, row.label, formatTexturingPropertyMapSummary(map))
+					end
 				else
 					addValueRow(pane, row.label, "None")
 				end
 			elseif field.render == "mapLinks" then
-				if type(addLinkListRow) ~= "function" or type(showMapPopup) ~= "function" then
-					error("Scene Inspector types.lua requires addLinkListRow and showMapPopup helpers for map links.")
+				if type(addLinkListRow) ~= "function" then
+					error("Scene Inspector types.lua requires addLinkListRow helper for map links.")
 				end
 
 				local items = {}
@@ -1058,18 +1068,28 @@ function types.renderDetailPane(pane, object, helpers)
 				end
 
 				addLinkListRow(pane, row.label, items, function(map)
-					showMapPopup(map, row.label)
+					if type(showMapPopup) == "function" then
+						showMapPopup(map, row.label)
+					end
 				end)
 			elseif field.format == "object" then
-				if type(addLinkRow) ~= "function" or type(focusObject) ~= "function" then
-					error("Scene Inspector types.lua requires addLinkRow and focusObject helpers for object links.")
+				if type(addLinkRow) ~= "function" then
+					error("Scene Inspector types.lua requires addLinkRow helper for object links.")
 				end
 
 				local objectValue = row.rawValue
 				if objectValue then
-					addLinkRow(pane, row.label, formatObjectSummary(objectValue), function()
-						focusObject(objectValue)
-					end)
+					if type(showObjectPopup) == "function" then
+						addLinkRow(pane, row.label, formatObjectSummary(objectValue), function()
+							showObjectPopup(objectValue, row.label)
+						end)
+					elseif type(focusObject) == "function" then
+						addLinkRow(pane, row.label, formatObjectSummary(objectValue), function()
+							focusObject(objectValue)
+						end)
+					else
+						addValueRow(pane, row.label, formatObjectSummary(objectValue))
+					end
 				else
 					addValueRow(pane, row.label, "None")
 				end
@@ -1089,16 +1109,25 @@ function types.renderTexturingPropertyMapPane(pane, map, helpers)
 	local addValueRow = helpers.addValueRow
 	local addLinkRow = helpers.addLinkRow
 	local focusObject = helpers.focusObject
+	local showObjectPopup = helpers.showObjectPopup
 
 	if type(addValueRow) ~= "function" then
 		error("Scene Inspector types.lua requires addValueRow helper for texturing property maps.")
 	end
 
 	local texture = safeIndex(map, "texture")
-	if texture and type(addLinkRow) == "function" and type(focusObject) == "function" then
-		addLinkRow(pane, "Texture", formatObjectSummary(texture), function()
-			focusObject(texture)
-		end)
+	if texture and type(addLinkRow) == "function" then
+		if type(showObjectPopup) == "function" then
+			addLinkRow(pane, "Texture", formatObjectSummary(texture), function()
+				showObjectPopup(texture, "Texture")
+			end)
+		elseif type(focusObject) == "function" then
+			addLinkRow(pane, "Texture", formatObjectSummary(texture), function()
+				focusObject(texture)
+			end)
+		else
+			addValueRow(pane, "Texture", formatObjectSummary(texture))
+		end
 	else
 		addValueRow(pane, "Texture", texture and formatObjectSummary(texture) or "None")
 	end
