@@ -2,14 +2,23 @@ local types = {}
 
 ---@class SceneInspectorLinkItem
 ---@field text string
----@field value niObject
+---@field value SceneInspectorLinkValue
+
+---@alias SceneInspectorLinkValue niObject|SceneInspectorTexturingPropertyMap
+
+---@class SceneInspectorTexturingPropertyMap
+---@field texture niRenderedTexture|niSourceTexture|niTexture|nil
+---@field clampMode ni.texturingPropertyClampMode|nil
+---@field filterMode ni.texturingPropertyFilterMode|nil
+---@field texCoordSet integer|nil
 
 ---@class SceneInspectorDetailHelpers
----@field addSectionHeader fun(parent: tes3uiElement, text: string): tes3uiElement|nil
----@field addValueRow fun(parent: tes3uiElement, label: string, value: string|number|boolean|nil): tes3uiElement|nil
----@field addLinkRow fun(parent: tes3uiElement, label: string, text: string, onClick: fun()): tes3uiElement|nil
----@field addLinkListRow fun(parent: tes3uiElement, label: string, items: SceneInspectorLinkItem[], onClick: fun(value: niObject)): tes3uiElement|nil
----@field focusObject fun(targetNode: niObject): boolean|nil
+---@field addSectionHeader nil|fun(parent: tes3uiElement, text: string): tes3uiElement|nil
+---@field addValueRow nil|fun(parent: tes3uiElement, label: string, value: string|number|boolean|nil): tes3uiElement|nil
+---@field addLinkRow nil|fun(parent: tes3uiElement, label: string, text: string, onClick: fun()): tes3uiElement|nil
+---@field addLinkListRow nil|fun(parent: tes3uiElement, label: string, items: SceneInspectorLinkItem[], onClick: fun(value: SceneInspectorLinkValue)): tes3uiElement|nil
+---@field showMapPopup nil|fun(map: SceneInspectorTexturingPropertyMap, title: string|nil): nil
+---@field focusObject nil|fun(targetNode: niObject): boolean|nil
 
 --- @generic T
 --- @param value T
@@ -248,6 +257,21 @@ local function formatObjectSummary(value)
 	return string.format("%s (%s)", name, rtti)
 end
 
+--- @param value SceneInspectorTexturingPropertyMap|nil
+--- @return string
+local function formatTexturingPropertyMapSummary(value)
+	if not value then
+		return "None"
+	end
+
+	local texture = safeIndex(value, "texture")
+	local textureSummary = texture and formatObjectSummary(texture) or "None"
+	local clampMode = formatValue(safeIndex(value, "clampMode")) or "nil"
+	local filterMode = formatValue(safeIndex(value, "filterMode")) or "nil"
+	local texCoordSet = formatValue(safeIndex(value, "texCoordSet")) or "nil"
+	return string.format("%s, clamp=%s, filter=%s, set=%s", textureSummary, clampMode, filterMode, texCoordSet)
+end
+
 --- @param value table|nil
 --- @return string
 local function formatListSummary(value)
@@ -269,6 +293,50 @@ end
 --- @return string
 local function formatObjectListSummary(value)
 	return formatListSummary(value)
+end
+
+--- @param head SceneInspectorTexturingPropertyMap[]|table|nil
+--- @param limit? integer
+--- @return SceneInspectorTexturingPropertyMap[]
+local function collectMapList(head, limit)
+	local results = {}
+	if type(head) ~= "table" then
+		return results
+	end
+
+	local linked = safeIndex(head, "next") ~= nil or safeIndex(head, "data") ~= nil
+	if linked then
+		local current = head
+		local seen = {}
+		local remaining = limit or 64
+		while current and remaining > 0 do
+			local key = tostring(current)
+			if seen[key] then
+				break
+			end
+			seen[key] = true
+			local map = safeIndex(current, "data") or current
+			if map then
+				table.insert(results, map)
+			end
+			current = safeIndex(current, "next")
+			remaining = remaining - 1
+		end
+		return results
+	end
+
+	local remaining = limit or 64
+	for key, entry in pairs(head) do
+		if remaining <= 0 then
+			break
+		end
+		if type(key) == "number" and entry ~= nil then
+			table.insert(results, entry)
+			remaining = remaining - 1
+		end
+	end
+
+	return results
 end
 
 local formatters = {
@@ -408,15 +476,15 @@ types.definitions = {
 		label = "NiTexturingProperty",
 		fields = {
 			{ key = "applyMode", label = "Apply Mode", format = "value" },
-			{ key = "baseMap", label = "Base Map", format = "object" },
-			{ key = "bumpMap", label = "Bump Map", format = "object" },
+			{ key = "baseMap", label = "Base Map", render = "mapLink" },
+			{ key = "bumpMap", label = "Bump Map", render = "mapLink" },
 			{ key = "canAddDecal", label = "Can Add Decal", format = "boolean" },
-			{ key = "darkMap", label = "Dark Map", format = "object" },
+			{ key = "darkMap", label = "Dark Map", render = "mapLink" },
 			{ key = "decalCount", label = "Decal Count", format = "number" },
-			{ key = "detailMap", label = "Detail Map", format = "object" },
-			{ key = "glossMap", label = "Gloss Map", format = "object" },
-			{ key = "glowMap", label = "Glow Map", format = "object" },
-			{ key = "maps", label = "Maps", format = "list" },
+			{ key = "detailMap", label = "Detail Map", render = "mapLink" },
+			{ key = "glossMap", label = "Gloss Map", render = "mapLink" },
+			{ key = "glowMap", label = "Glow Map", render = "mapLink" },
+			{ key = "maps", label = "Maps", render = "mapLinks" },
 		},
 	},
 	niVertexColorProperty = {
@@ -826,11 +894,15 @@ function types.getSections(object)
 					value = collectEffectList(value)
 				elseif field.render == "objectLinks" then
 					value = collectObjectList(value)
+				elseif field.render == "mapLinks" then
+					value = collectMapList(value)
 				end
 
 				local displayValue = formatFieldValue(field, value)
-				if field.render == "propertyLinks" or field.render == "effectLinks" or field.render == "objectLinks" then
+				if field.render == "propertyLinks" or field.render == "effectLinks" or field.render == "objectLinks" or field.render == "mapLinks" then
 					displayValue = formatListSummary(value)
+				elseif field.render == "mapLink" then
+					displayValue = formatTexturingPropertyMapSummary(value)
 				end
 
 				table.insert(rows, {
@@ -875,6 +947,7 @@ function types.renderDetailPane(pane, object, helpers)
 	local addValueRow = helpers.addValueRow
 	local addLinkRow = helpers.addLinkRow
 	local addLinkListRow = helpers.addLinkListRow
+	local showMapPopup = helpers.showMapPopup
 	local focusObject = helpers.focusObject
 
 	if type(addSectionHeader) ~= "function" or type(addValueRow) ~= "function" then
@@ -958,6 +1031,35 @@ function types.renderDetailPane(pane, object, helpers)
 				addLinkListRow(pane, row.label, items, function(objectValue)
 					focusObject(objectValue)
 				end)
+			elseif field.render == "mapLink" then
+				if type(addLinkRow) ~= "function" or type(showMapPopup) ~= "function" then
+					error("Scene Inspector types.lua requires addLinkRow and showMapPopup helpers for map links.")
+				end
+
+				local map = row.rawValue
+				if map then
+					addLinkRow(pane, row.label, formatTexturingPropertyMapSummary(map), function()
+						showMapPopup(map, row.label)
+					end)
+				else
+					addValueRow(pane, row.label, "None")
+				end
+			elseif field.render == "mapLinks" then
+				if type(addLinkListRow) ~= "function" or type(showMapPopup) ~= "function" then
+					error("Scene Inspector types.lua requires addLinkListRow and showMapPopup helpers for map links.")
+				end
+
+				local items = {}
+				for _, map in ipairs(row.rawValue or {}) do
+					table.insert(items, {
+						text = formatTexturingPropertyMapSummary(map),
+						value = map,
+					})
+				end
+
+				addLinkListRow(pane, row.label, items, function(map)
+					showMapPopup(map, row.label)
+				end)
 			elseif field.format == "object" then
 				if type(addLinkRow) ~= "function" or type(focusObject) ~= "function" then
 					error("Scene Inspector types.lua requires addLinkRow and focusObject helpers for object links.")
@@ -976,6 +1078,34 @@ function types.renderDetailPane(pane, object, helpers)
 			end
 		end
 	end
+end
+
+--- @param pane tes3uiElement
+--- @param map SceneInspectorTexturingPropertyMap
+--- @param helpers SceneInspectorDetailHelpers|nil
+--- @return nil
+function types.renderTexturingPropertyMapPane(pane, map, helpers)
+	helpers = helpers or {}
+	local addValueRow = helpers.addValueRow
+	local addLinkRow = helpers.addLinkRow
+	local focusObject = helpers.focusObject
+
+	if type(addValueRow) ~= "function" then
+		error("Scene Inspector types.lua requires addValueRow helper for texturing property maps.")
+	end
+
+	local texture = safeIndex(map, "texture")
+	if texture and type(addLinkRow) == "function" and type(focusObject) == "function" then
+		addLinkRow(pane, "Texture", formatObjectSummary(texture), function()
+			focusObject(texture)
+		end)
+	else
+		addValueRow(pane, "Texture", texture and formatObjectSummary(texture) or "None")
+	end
+
+	addValueRow(pane, "Clamp Mode", formatValue(safeIndex(map, "clampMode")) or "nil")
+	addValueRow(pane, "Filter Mode", formatValue(safeIndex(map, "filterMode")) or "nil")
+	addValueRow(pane, "Tex Coord Set", formatValue(safeIndex(map, "texCoordSet")) or "nil")
 end
 
 return types

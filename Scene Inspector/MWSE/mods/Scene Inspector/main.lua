@@ -25,8 +25,12 @@ local collectPropertyList
 local collectControllerChain
 local collectEffectList
 local collectExtraDataChain
+local showTexturingPropertyMapPopup
+local closeTexturingPropertyMapPopup
 
 local function leaveInspectorMenuMode()
+	closeTexturingPropertyMapPopup()
+
 	local menu = tes3ui.findMenu(ids.menu)
 	if not menu then
 		return
@@ -286,6 +290,14 @@ local function notifyMenuContentsChanged(menu)
 	menu:updateLayout()
 end
 
+--- @return nil
+closeTexturingPropertyMapPopup = function()
+	local popup = tes3ui.findMenu(ids.mapPopup)
+	if popup then
+		popup:destroy()
+	end
+end
+
 --- @param widget tes3uiTextSelect
 --- @param selected boolean
 local function setTreeSelectionWidget(widget, selected)
@@ -344,8 +356,8 @@ end
 
 --- @param parent tes3uiElement
 --- @param label string
---- @param items { text: string, value: niObject }[]
---- @param onClick fun(value: niObject)
+--- @param items SceneInspectorLinkItem[]
+--- @param onClick fun(value: SceneInspectorLinkValue)
 --- @return tes3uiElement?
 local function addLinkListRow(parent, label, items, onClick)
 	local row = parent:createBlock({})
@@ -889,6 +901,61 @@ local function addSectionHeader(parent, text)
 	return header
 end
 
+--- @param map SceneInspectorTexturingPropertyMap
+--- @param title string|nil
+--- @return nil
+showTexturingPropertyMapPopup = function(map, title)
+	if not map then
+		return
+	end
+
+	closeTexturingPropertyMapPopup()
+
+	local popup = tes3ui.createMenu({ id = ids.mapPopup, dragFrame = true, loadable = false })
+	popup.text = title or "Texture Map"
+	popup.minWidth = 460
+	popup.minHeight = 260
+	popup.width = popup.minWidth
+	popup.height = popup.minHeight
+	popup.flowDirection = "top_to_bottom"
+
+	local label = popup:createLabel({ text = title or "Texture Map" })
+	label.widthProportional = 1.0
+	label.color = tes3ui.getPalette("header_color")
+	label.borderBottom = 8
+
+	local content = popup:createVerticalScrollPane({})
+	content.widthProportional = 1.0
+	content.heightProportional = 1.0
+	content.borderBottom = 8
+
+	local pane = content:getContentElement()
+	pane.widthProportional = 1.0
+	pane.autoHeight = true
+	pane.flowDirection = "top_to_bottom"
+
+	sceneTypes.renderTexturingPropertyMapPane(pane, map, {
+		addValueRow = addValueRow,
+		addLinkRow = addLinkRow,
+		focusObject = focusTreeObject,
+	})
+	content.widget:contentsChanged()
+
+	local footer = popup:createBlock({})
+	footer.widthProportional = 1.0
+	footer.autoHeight = true
+	footer.flowDirection = "left_to_right"
+	footer.childAlignX = 1.0
+
+	local closeButton = footer:createButton({ text = "Close" })
+	closeButton:register("mouseClick", function()
+		popup:destroy()
+	end)
+
+	popup:updateLayout()
+	content:updateLayout()
+end
+
 local function updateRootLabel()
 	local menu = tes3ui.findMenu(ids.menu)
 	if not menu then
@@ -961,6 +1028,7 @@ local function updateDetail(node)
 		addValueRow = addValueRow,
 		addLinkRow = addLinkRow,
 		addLinkListRow = addLinkListRow,
+		showMapPopup = showTexturingPropertyMapPopup,
 		focusObject = focusTreeObject,
 	})
 
@@ -1313,6 +1381,7 @@ local function init()
 	ids.treePane = tes3ui.registerID("SceneInspector:TreePane")
 	ids.detailPane = tes3ui.registerID("SceneInspector:DetailPane")
 	ids.dumpButton = tes3ui.registerID("SceneInspector:DumpButton")
+	ids.mapPopup = tes3ui.registerID("SceneInspector:MapPopup")
 
 	event.register(tes3.event.keyDown, toggleInspector, { filter = tes3.scanCode.F3 })
 	event.register(tes3.event.key, handleDumpModifierChange, { filter = tes3.scanCode.leftShift })
