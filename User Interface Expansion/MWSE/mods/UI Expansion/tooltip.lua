@@ -295,6 +295,7 @@ local function replaceAlchemyTooltip(tooltip, alchemy)
 end
 
 local useMCPSoulgemValueRebalance = tes3.hasCodePatchFeature(tes3.codePatchFeature.soulgemValueRebalance)
+local buyingGameConfig = include('buyingGame.config')
 
 --- Early pass at updating tooltip information.
 --- @param e uiObjectTooltipEventData
@@ -392,7 +393,8 @@ local function extraTooltipEarly(e)
 
 			-- Value/Weight Ratio
 			local ratioBlock
-			if common.config.displayRatio and e.object.weight > 0 then
+			if common.config.displayRatio and e.object.weight > 0 and
+			(buyingGameConfig == nil or tes3.mobilePlayer.mercantile.current >= buyingGameConfig.knowsPrice ) then
 				local ratio = math.round(objectValue) / e.object.weight
 				ratioBlock = container:createBlock({ id = GUI_ID_TooltipIconRatioBlock })
 				ratioBlock.autoWidth = true
